@@ -11,6 +11,7 @@ Captures: `captures/match-2026-09-26/` z1 (13,188 rows) + z2 (16,511 rows).
 - Game P2P 27→0 (detector `GAMEPLAY_PPS_MIN..MAX`, `MatchAutomationEngine.kt:312`). The 54B burst is the game's own dying tick: uniform ~54B, 45 in ~1.1s field traces, threshold `PATH_A_MIN_BURST=6` (`MatchAutomationEngine.kt:36-43,98-101`).
 - Game↔Konami DTLS (parsed records, all type 23 appdata, ver `fefd`=DTLS1.2, epoch 0001): e.g. S1 z1 `1790386487485 t 208B` / `1790386487970 r 190B`, then silence 750ms before cliff. Last 8 pre-stall are all `t=23`, zero `t=21` alert / `t=22` handshake / `t=20` CCS. Both phones stop DTLS to *different* servers same second (S2 z1 `34.38.190.21:30905`, z2 `35.233.88.176:32741`; S3 z1 `104.199.46.171:30222`, z2 `35.240.102.10:31406`). No server kill command on the wire.
 - During 21s: zero game DTLS, only DNS `8.8.8.8:53`, TCP 443 (`54.187.87.37`, `32.184.206.158`, `44.255.249.99`, `108.156.x.x`), QUIC `8.8.8.8:443` (z2), len-30 `:5521` probes. STUN keepalives continue (`02:34:49.412 STUN[T7:Signal]`). Internet works, game stops. Screenshot `z2/.../shot_0006_OTHER.jpg` = black + eFootball logo (loading).
+- S3 finals are asymmetric and small (COORDINATION §1): z1 server→phone DTLS payload 61 B (IP 102) at −1.83 s unanswered; z2 phone→server UDP payload 76 B (IP 104, DTLS 63) at −1.84 s unanswered, within ~20 ms — session-level abort/order exchange, not timeout. S1–S2 end on completed normal exchanges instead. Clean-match contrast: supervisor lives ~50 s past full-time with 1 Hz 208 B polls (8× unanswered) — stalls show no logout ritual, torn down from above.
 
 **Game strings giving this trigger meaning (libUE4.so file offsets):**
 
@@ -45,6 +46,7 @@ Do NOT tune jitter/pipeline first: radio clumps 60–177ms + 60–90ms pipeline 
 - PeerLink timers: keepalive `TunnelEngine.kt:327 100ms`, native `peerlink_backend.cpp:52-54 1s/0.5s/0.75s`; diag thresholds log-only `447-452`; sleeps `100ms×20 (disabled)`, `50ms` retry, TURN-resolver `10s` DNS-only. Nothing pauses 45–78s symmetrically. `DISCONNECT_CONFIRM_MS=135000` / `SUSTAINED_ZERO_PPS_MS=90000` are detectors (`resolveSustainedDisconnect 1160-1199`: log+vibrate only).
 - Screenshots/capture cost: bursts AFTER 54B all 3 stalls; 0 captures 02:31–33 etc.; PRIME 470 polls 0 errors.
 - Wrong-IP leak as cause: 16 probes land 45–78s AFTER stalls, never during healthy play → symptom. TX-guard unarmed (`TunnelAgeMs=-1` bridge) is downstream bug, not cause.
+- P2P-gap starvation as cause: DEAD per COORDINATION §2 — clean match survived 43/77 × ≥2.5 s gaps (max 3.9 s); `MATCH_STOP_*` not fed by delivery gaps.
 - Blocked Konami traffic: `RelayBlocked=BypassBlocked=TurnRelayBlocked=TurnIps=0`; DTLS/DNS/QUIC untouched.
 - VPN detection in native: `tun0` 0, `VpnService` 0, `magisk`/`emulator`/`qemu`/`RootBeer` 0; only `isDeviceRooted` x1 + SafetyNet x2 (stock UE4). No VPN-specific checks found. Java dex has no game netcode (only Firebase heartbeat).
 - Server heartbeat transport: TCP 443 ACKs (576/40) + QUIC + DNS continue through stalls; DTLS appdata stops with no alert — transport alive, app quit.
