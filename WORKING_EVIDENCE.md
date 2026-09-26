@@ -35,3 +35,11 @@
 - Hunt list: `agones`/`nabeshin`/`sdk.gameserver` 0 hits (dynamic via NTL/GateInfo). `reflexive_address`/`reflexive_port`/`PEER_REFLEXIVE`/`RP_REFLEXIVE_ADDRESS` present. `is_cheat_user` + `is_cheat` JSON fields + `OnlineModeTaskCheckCheat.cpp` + `CmdGetTurnServerList` (TURN via API — explains 0 `turn.konami.com` hits). `DETECT_NAT_ABORTED`, `E_TURN_QUOTA_ERROR`, `FREE_TURN_PORT_ERROR/ABORTED`, `MATCH_STOP_COUNT_*` x27 (L1-L5, BURST, SELF/BUF, MCACTIVE). `FakeKeepAlive` warning. `5521` 0 hits (dynamic mesh port).
 - Captures: `turn.konami.com` arrives live inside DTLS 256B server→phone records (cert), not via DNS/binary. `GateInfo.php` POST plaintext to `35.174.175.11:80`. TCP inbound not byte-captured (v1 scope) so GateInfo response unseen.
 - Ghidra 12.1.4 (543MB, SHA ddac49… verified) + Corretto 21 installed. Headless `FindKillRule.py` (14 targets: xrefs + decompile callers) running on libUE4.so.
+
+
+## Platform collectors + solution branch (cont.)
+- GetMyIpAddress.GetIpAddressList() enumerates ALL NetworkInterfaces: game CAN see tun0 (10.0.0.2) + wlan0/ap0 + rmnet. No Java callers (JNI from native). Whether native filters interface names needs Ghidra caller list: open.
+- Detector constants (ours): GAMEPLAY_PPS_MIN=24 MAX=27 (MatchAutomationEngine.kt:75-76), ZERO_PPS_THRESHOLD=1 (:104), GAMEPLAY_ARM_SAMPLES=15 (:107).
+- GateInfo baseline both phones identical: POST ntl.service.konami.net /ntl/api/GateInfo.php titleCode PES2022 locale US version 6.0.1 apiLevel 4, z1 1790386119275 z2 1790386131554. Response not captured (no inbound TCP).
+- Solution branch Peerlink-app@test/no-stun-fabrication (bec0ef9): toggle + RULE 1b + STUN-drop fix + HONEST_MODE_NOTES.md protocol. Independent review: gating correct, ports over-broad noted, one default-true change (unknown-profile passthrough, intended per KDoc).
+- PeerLink logs contain zero NTL/punch/alloc lines (game-internal); T7 STUN keepalives continue through all stalls; TURN-IP lookup failed 02:24 both phones (own resolver), TurnIps=0 all match.
