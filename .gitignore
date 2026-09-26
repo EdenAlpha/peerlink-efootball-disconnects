@@ -1,0 +1,11 @@
+﻿# eFootball binary (KONAMI property, do not redistribute)
+efootball-apk/*.xapk
+efootball-apk/*.apk
+efootball-apk/xapk_out/
+efootball-apk/native/
+efootball-apk/dlpage.html
+efootball-apk/apkcombo.html
+efootball-apk/jadx-cli/
+efootball-apk/*.jar
+efootball-apk/*.zip
+efootball-apk/efootball-11.0.1-full.apk
