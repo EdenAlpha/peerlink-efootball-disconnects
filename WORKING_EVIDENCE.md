@@ -43,3 +43,9 @@
 - GateInfo baseline both phones identical: POST ntl.service.konami.net /ntl/api/GateInfo.php titleCode PES2022 locale US version 6.0.1 apiLevel 4, z1 1790386119275 z2 1790386131554. Response not captured (no inbound TCP).
 - Solution branch Peerlink-app@test/no-stun-fabrication (bec0ef9): toggle + RULE 1b + STUN-drop fix + HONEST_MODE_NOTES.md protocol. Independent review: gating correct, ports over-broad noted, one default-true change (unknown-profile passthrough, intended per KDoc).
 - PeerLink logs contain zero NTL/punch/alloc lines (game-internal); T7 STUN keepalives continue through all stalls; TURN-IP lookup failed 02:24 both phones (own resolver), TurnIps=0 all match.
+
+## Hotspot/WifiManager/root/interface sweep (cont.)
+- Hotspot/tether/softap/AP detection: NONE in native (HotSpot* hits are UE4 UI, tether hits all PhysX cloth FP, ap0/p2p0/softap/TETHERING 0, SSID/BSSID 0). wlan0/rmnet0 single hits sit inside UE4 Slate/UI string runs (SExpanderArrow/SListView, MenuDropdown/VirtualKeyboard): packing coincidence, not network code.
+- GetWifiManager: RSSI/signal tracking (calcRssi, s_rate, s_wifiInfo, NetworkCallback, getConnectionInfo). No SSID/BSSID reads. Signal quality, not hotspot gating.
+- GetTrafficStats: byte counters only.
+- TURN cert anomaly: server delivers turn.konami.com cert inside DTLS 256B records with validity 2019-07-26 to 2021-... (expired 5y before 2026 capture) yet sessions establish and run 8+ min. Expiry not the immediate killer; noted for Ghidra (cert validation path).
