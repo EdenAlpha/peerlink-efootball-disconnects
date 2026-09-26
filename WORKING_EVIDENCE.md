@@ -25,3 +25,13 @@
 - Exact values for `TurnReconnectWaitTimeMs`, `NTL_PEER_KEEPALIVE_COUNT`, `MATCH_STOP_COUNT_*`, `MatchAbortTimerCoefficient` + code path for `E_TURN_ALLOCATION_MISSMATCH` (direct ADRP+ADD xref not found with Rd-matched scan; likely enum-indexed table, needs Ghidra).
 - TURN address delivery via NTL API (TLS, can't see cleartext; need runtime hook or NTL response MITM).
 - No VERDICT yet. Next: Ghidra headless on libUE4.so for the 4 xrefs above, or runtime test (disable STUN fabrication, use real STUN, see if stalls stop).
+
+## Deep-internals update (APK dissected, CAPTURE_AUTOPSY §6-7 hunt)
+
+- jadx 1.5.6 decompile of base APK done (9,679 classes, 129 errors — obfuscation, normal). Game netcode is native, not Java.
+- apktool 2.12.0 decode done. Manifest: `compileSdk 36`, INTERNET/ACCESS_NETWORK_STATE/WIFI/WAKE_LOCK etc.
+- `Reachability.smali` (`PESAM_Reachability`): checks only WIFI(1)/CELLULAR(0)/ETHERNET(3) transports, never VPN(4). On PeerLink VPN the active network reports `ACTIVENETWORK:UNKNOWN`. No explicit VPN ban — VPN is UNKNOWN to the game.
+- `GetRooting.smali`: `isDeviceRooted()` via `Runtime.exec("su")`. No Java caller (called from native via JNI — class string in libUE4.so). Root check live; `tun0`/`ppp0`/vpn: zero hits in all smali + native.
+- Hunt list: `agones`/`nabeshin`/`sdk.gameserver` 0 hits (dynamic via NTL/GateInfo). `reflexive_address`/`reflexive_port`/`PEER_REFLEXIVE`/`RP_REFLEXIVE_ADDRESS` present. `is_cheat_user` + `is_cheat` JSON fields + `OnlineModeTaskCheckCheat.cpp` + `CmdGetTurnServerList` (TURN via API — explains 0 `turn.konami.com` hits). `DETECT_NAT_ABORTED`, `E_TURN_QUOTA_ERROR`, `FREE_TURN_PORT_ERROR/ABORTED`, `MATCH_STOP_COUNT_*` x27 (L1-L5, BURST, SELF/BUF, MCACTIVE). `FakeKeepAlive` warning. `5521` 0 hits (dynamic mesh port).
+- Captures: `turn.konami.com` arrives live inside DTLS 256B server→phone records (cert), not via DNS/binary. `GateInfo.php` POST plaintext to `35.174.175.11:80`. TCP inbound not byte-captured (v1 scope) so GateInfo response unseen.
+- Ghidra 12.1.4 (543MB, SHA ddac49… verified) + Corretto 21 installed. Headless `FindKillRule.py` (14 targets: xrefs + decompile callers) running on libUE4.so.
