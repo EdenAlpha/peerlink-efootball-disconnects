@@ -1,0 +1,1255 @@
+package com.peerlink.app.service
+
+import android.content.Context
+import android.net.wifi.WifiManager
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
+import android.widget.Toast
+import com.peerlink.app.core.AppState
+import com.peerlink.app.core.MatchPhase
+import com.peerlink.app.core.MatchTracker
+import com.peerlink.app.godmode.PrimeClient
+import com.peerlink.app.tunnel.NativeBackendStats
+import com.peerlink.app.tunnel.PassthroughRecorder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.Inet4Address
+import java.net.NetworkInterface
+import java.util.Collections
+import kotlin.math.roundToInt
+
+/**
+ * F32 eFootball match automation — capture-trigger state machine.
+ *
+ * Two validated full-time signatures (both from real FT-tapped captures):
+ *
+ *  PATH A — 54B tail. The game's dying tick stream shrinks its payload to a
+ *  uniform ~54 bytes (never seen anywhere else across whole captures: goals,
+ *  half-time, replays and transient dips — lowest observed dip 17pps — all
+ *  ride 89-243B payloads) roughly 1s before the PPS cliff. The goodbye is a
+ *  burst, not a stray: field traces show 45 len-54 packets exchanged in
+ *  ~1.1s (20+ per direction), while mid-game strays are 1-2 packets. Only a
+ *  burst (>= PATH_A_MIN_BURST in one 1Hz poll) opens the 4fps capture; lone
+ *  54Bs are logged and ignored, and they no longer disarm Path B. We then
+ *  expect the game feed to reach ~0pps within 3s (the cliff is 27->0 in
+ *  ~2-3s, never a gradual slope). Confirmed cliff -> keep capturing at most
+ *  20 more seconds while score reading runs (the stats board appears only
+ *  after the result menu, so the tail must outlive it); a verified score
+ *  stops capture early. No cliff within 3s -> pause capture for up to 1.5s; if the feed
+ *  reaches ~0pps inside that window (delayed cliff), capture resumes and all
+ *  frames feed the reader; otherwise the 54B was noise and the burst ends.
+ *
+ *  PATH B — deep PPS drop without any 54B. A game feed under 9pps sustained
+ *  (real gameplay never came close: floor was 17pps for 1-2.5s blips) is a
+ *  strong end signal on its own. Capture immediately for at most 10s. Any
+ *  54B packets that appear during a Path-B burst are ignored: the burst is
+ *  already running on stronger evidence and mixing trigger semantics only
+ *  invites state-machine confusion.
+ *
+ * Both paths share: the 5-minute gate after T0 (a real match is at least
+ * that long), mandatory locked H/A roles, the 4fps producer / single-OCR
+ * consumer pipeline with capacity-1 frame dropping, two agreeing frames
+ * before a candidate is real, eFootball-foreground checks, and full-time
+ * screen text ("full time" / "match ended" / "final result") for auto
+ * commits. The manual FT tap remains the human override with the fake-FT
+ * forfeit; every tap is now logged.
+ *
+ * Hot-path work is intentionally tiny: one delta calculation per native
+ * stats poll plus two integer compares; screen capture/OCR exists only in
+ * the short post-whistle bursts.
+ */
+object MatchAutomationEngine : MatchControlChannel.Listener {
+    private const val EFOOTBALL_PACKAGE = PeerLinkVpnService.EFOOTBALL_PACKAGE
+
+    private const val SIDE_PROMPT_PACKET_THRESHOLD = 200L
+    private const val GAMEPLAY_PPS_MIN = 24
+    private const val GAMEPLAY_PPS_MAX = 27
+
+    /** Path B trigger: sustained game feed below this is a deep collapse. */
+    private const val PATH_B_TRIGGER_PPS = 9
+    /** Path B budget: capture at most this long unless the score verifies. */
+    private const val PATH_B_MAX_MS = 10_000L
+
+    /** Path A: expect the ~0pps cliff within this window after first 54B. */
+    private const val ZERO_PPS_CONFIRM_MS = 3_000L
+    /** Path A pause: wait this long for a delayed cliff before giving up. */
+    private const val PAUSE_WINDOW_MS = 1_500L
+    /** Path A tail budget after a confirmed cliff. The stats board only
+     *  appears once the user navigates past the result menu, so the tail
+     *  must outlive the menu or the auto-commit never sees the board. */
+    private const val PATH_A_TAIL_MS = 20_000L
+
+    /** Field capture 2026-09-22: a pause menu collapses the armed feed to
+     *  0pps for ~56s and then resumes; real full time never resumes. The
+     *  sustained haptic fallback must outlast the longest observed pause
+     *  yet fire while the stats board is still on screen. */
+    private const val SUSTAINED_ZERO_PPS_MS = 90_000L
+
+    /** A real goodbye burst sends 20+ len-54 packets per 1 Hz poll (45 in
+     *  ~1.1s in field traces); a stray mid-game 54B shows up as 1-2. Below
+     *  this the packet is noted but must not open a capture burst. */
+    private const val PATH_A_MIN_BURST = 6
+
+    /** A poll at or below this reads as the cliff (game feed dead). */
+    private const val ZERO_PPS_THRESHOLD = 1
+
+    private const val AUTO_CAPTURE_DELAY_MS = 0L
+    private const val GAMEPLAY_ARM_SAMPLES = 15
+    private const val CAPTURE_INTERVAL_MS = 250L        // 4 fps
+    private const val DISCONNECT_CONFIRM_MS = 135_000L
+    private const val REMATCH_MIN_GAP_MS = 20_000L
+
+    private enum class PpsDirection { OUTBOUND, INBOUND }
+    private enum class Topology { HOTSPOT_OWNER, WIFI_CLIENT, UNKNOWN }
+
+    /** Capture burst mode, driven by which end signal opened it. */
+    private enum class CaptureMode {
+        /** 54B seen; waiting up to 3s for the 0pps cliff. */
+        PATH_A_WATCH,
+        /** 54B seen, cliff confirmed; tail burst (<=20s). */
+        PATH_A_TAIL,
+        /** 54B seen, no cliff in 3s; capture paused, watching <=1.5s. */
+        PATH_A_PAUSE,
+        /** Deep PPS collapse without 54B (<=10s); any 54B inside is ignored. */
+        PATH_B,
+    }
+
+    private val lock = Any()
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val main = Handler(Looper.getMainLooper())
+
+    @Volatile private var appContext: Context? = null
+    @Volatile private var started = false
+
+    private var lastStats: NativeBackendStats? = null
+    private var lastStatsAtMs = 0L
+    private var stunSeen = false
+
+    // ── Semi-automatic H/A suggestion state ──────────────────────────────
+    // Rule: room creator is always Home. Each phone timestamps its first
+    // Konami matchmaking STUN burst (wall clock), the times cross over the
+    // control channel, and SideSuggestion decides. Advisory only: the card
+    // is shown, the human taps (or holds to flip); nothing locks alone.
+    private var localFirstStunMs = 0L
+    private var peerFirstStunMs = 0L
+    private var lastStunCountSeen = 0L
+    private var lastStunChangeAtMs = 0L
+    private var suggestionSwapped = false
+    private var pendingSuggestionConfirm = false
+
+    /** A new burst after this quiet gap = a new room's matchmaking call. */
+    private const val STUN_BURST_QUIET_MS = 10_000L
+    private var sideSelectionStarted = false
+
+    private var ppsDirection: PpsDirection? = null
+    private var gameplayT0Ms = 0L
+    private var gameplayBandHits = 0
+    private var captureArmed = false
+    private var currentPps = 0
+
+    private var lastSmallGamePackets = 0L
+    private var smallPacketSeenThisMatch = false
+
+    private var localSide: MatchControlChannel.Side? = null
+    private var localSideConfirmed = false
+    private var peerSide: MatchControlChannel.Side? = null
+    private var peerSideConfirmed = false
+    private var rolesLocked = false
+
+    private var captureJob: Job? = null
+    private var sessionGeneration = 0L
+    private var captureGeneration = 0L
+    private val manualCaptureBusy = java.util.concurrent.atomic.AtomicBoolean(false)
+    private var lastAutoCandidate: PrimeScreenScoreDetector.Score? = null
+    private var autoCandidateHits = 0
+
+    /** Path-A sequencing, all in elapsedRealtime ms. */
+    private var captureMode: CaptureMode? = null
+    private var modeStartedAtMs = 0L
+    private var pathBTriggerSinceMs = 0L
+    private var pathBCooldownUntilMs = 0L
+
+    /** 0pps episode of the armed game feed (pause vs full time not yet told
+     *  apart at the packet layer; see SUSTAINED_ZERO_PPS_MS). */
+    private var zeroPpsSinceMs = 0L
+    private var zeroPpsTailFired = false
+    private var sustainedZeroBuzzed = false
+
+    private var lowFlowSinceMs = 0L
+    private var disconnectResolved = false
+
+    private var scoreConfirmed = false
+    private var scoreConfirmedAtMs = 0L
+    private var rematchNormalSinceMs = 0L
+    private var rematchNormalSamples = 0
+
+    fun start(context: Context) {
+        synchronized(lock) {
+            appContext = context.applicationContext
+            started = true
+            resetSessionLocked()
+        }
+        MatchControlChannel.start(this)
+        MatchMarkerOverlay.setWaiting()
+        MatchMarkerOverlay.show(context)
+        ScoreCaptureDump.init(context)
+        AppState.appendLog("[MATCH-AUTO] Started: capture only after first 24-27pps T0, ${GAMEPLAY_ARM_SAMPLES}s kickoff, and H/A lock")
+    }
+
+    fun stop() {
+        val job = synchronized(lock) {
+            started = false
+            appContext = null
+            captureJob.also { captureJob = null }
+        }
+        job?.cancel()
+        MatchControlChannel.stop()
+    }
+
+    /** Called once per native backend stats poll (normally ~1 Hz). */
+    fun onNativeStats(stats: NativeBackendStats) {
+        if (!started) return
+        val now = SystemClock.elapsedRealtime()
+
+        var startSidePrompt = false
+        var detectTopology = false
+        var resolveDisconnect = false
+        var resetRematch = false
+        var startProducer = false
+        var logT0: String? = null
+        var logCapture: String? = null
+        var noteCliff = false
+        var sustainedZeroBuzz = false
+        var sendStunTime = false
+        var localStunLog: String? = null
+
+        synchronized(lock) {
+            val previous = lastStats
+            val previousAt = lastStatsAtMs
+            lastStats = stats
+            lastStatsAtMs = now
+            stunSeen = stunSeen || stats.stunInterceptedIpv4 > 0L || stats.stunInterceptedIpv6 > 0L
+
+            // First — or a fresh burst of — matchmaking STUN is this phone's
+            // room-call time. Wall clock: the two phones compare it directly,
+            // and SideSuggestion's 45 s–30 min window absorbs clock skew and
+            // stale times from an older room.
+            val stunCount = stats.stunInterceptedIpv4 + stats.stunInterceptedIpv6
+            if (stunCount > lastStunCountSeen) {
+                val freshBurst = lastStunCountSeen == 0L ||
+                    now - lastStunChangeAtMs >= STUN_BURST_QUIET_MS
+                lastStunCountSeen = stunCount
+                lastStunChangeAtMs = now
+                if (freshBurst) {
+                    localFirstStunMs = System.currentTimeMillis()
+                    sendStunTime = true
+                    localStunLog = "[MATCH-ROLE] Local matchmaking call recorded (t=$localFirstStunMs)"
+                }
+            }
+
+            if (!sideSelectionStarted && stunSeen && stats.totalTunneledPackets >= SIDE_PROMPT_PACKET_THRESHOLD) {
+                sideSelectionStarted = true
+                startSidePrompt = true
+                detectTopology = true
+                // (Re)send our time so the peer has it when the card renders.
+                sendStunTime = true
+            }
+
+            // Fresh 54B signal since the previous poll (monotonic counter).
+            val smallDelta = stats.smallGamePackets - lastSmallGamePackets
+            lastSmallGamePackets = stats.smallGamePackets
+            val smallArrived = smallDelta > 0
+
+            if (previous == null || previousAt <= 0L || now <= previousAt) return@synchronized
+            val dt = (now - previousAt).coerceAtLeast(1L)
+            val outPps = normalizePps(stats.tunnelOutPackets - previous.tunnelOutPackets, dt)
+            val inPps = normalizePps(stats.tunnelInPackets - previous.tunnelInPackets, dt)
+
+            if (scoreConfirmed) {
+                val signal = ppsDirection?.let { ppsFor(it, outPps, inPps) } ?: outPps
+                if (now - scoreConfirmedAtMs >= REMATCH_MIN_GAP_MS && signal in GAMEPLAY_PPS_MIN..GAMEPLAY_PPS_MAX) {
+                    if (rematchNormalSinceMs == 0L) rematchNormalSinceMs = now
+                    rematchNormalSamples++
+                    if (rematchNormalSamples >= 2) resetRematch = true
+                } else {
+                    rematchNormalSinceMs = 0L
+                    rematchNormalSamples = 0
+                }
+                return@synchronized
+            }
+
+            if (gameplayT0Ms == 0L) {
+                // Do not let unrelated pre-game/passthrough traffic define the
+                // match clock. T0 can only be established after the STUN-backed
+                // session has crossed the 200-tunneled-packet preparation gate.
+                if (!sideSelectionStarted) return@synchronized
+                ppsDirection = when {
+                    outPps in GAMEPLAY_PPS_MIN..GAMEPLAY_PPS_MAX -> PpsDirection.OUTBOUND
+                    inPps in GAMEPLAY_PPS_MIN..GAMEPLAY_PPS_MAX -> PpsDirection.INBOUND
+                    else -> null
+                }
+                if (ppsDirection != null) {
+                    gameplayT0Ms = now
+                    currentPps = ppsFor(ppsDirection!!, outPps, inPps)
+                    MatchTracker.markGameplayStarted()
+                    logT0 = "[MATCH-AUTO] GAMEPLAY_T0 detected pps=$currentPps direction=${ppsDirection!!.name} out=$outPps in=$inPps"
+                }
+                return@synchronized
+            }
+
+            val signal = ppsFor(ppsDirection ?: PpsDirection.OUTBOUND, outPps, inPps)
+            currentPps = signal
+            if (signal in GAMEPLAY_PPS_MIN..GAMEPLAY_PPS_MAX) {
+                gameplayBandHits++
+                if (!captureArmed && gameplayBandHits >= GAMEPLAY_ARM_SAMPLES) {
+                    captureArmed = true
+                    logT0 = "[MATCH-AUTO] Capture armed after ${gameplayBandHits}s of 24-27pps kickoff flow"
+                }
+            }
+
+            if (!captureArmed) {
+                if (signal < GAMEPLAY_PPS_MIN) {
+                    if (lowFlowSinceMs == 0L) lowFlowSinceMs = now
+                    if (!disconnectResolved && now - lowFlowSinceMs >= DISCONNECT_CONFIRM_MS) {
+                        disconnectResolved = true
+                        resolveDisconnect = true
+                    }
+                } else {
+                    lowFlowSinceMs = 0L
+                }
+                return@synchronized
+            }
+
+            // Track the 0pps episode of the armed feed. Pause menus and full
+            // time look identical at the packet layer (both collapse ~27->0),
+            // so nothing buzzes here: the verified score commit buzzes from
+            // commitDetectedScore() (stats on screen), and a collapse that
+            // never resumes gets the sustained fallback below.
+            if (signal <= ZERO_PPS_THRESHOLD) {
+                if (zeroPpsSinceMs == 0L) {
+                    zeroPpsSinceMs = now
+                } else if (now - zeroPpsSinceMs >= SUSTAINED_ZERO_PPS_MS && !sustainedZeroBuzzed) {
+                    sustainedZeroBuzzed = true
+                    sustainedZeroBuzz = true
+                    logCapture = "[MATCH-CAP ] 0pps sustained ${SUSTAINED_ZERO_PPS_MS / 1000}s (no resume, no score) -> haptic marker"
+                }
+            } else {
+                zeroPpsSinceMs = 0L
+                zeroPpsTailFired = false
+                sustainedZeroBuzzed = false
+            }
+
+            val mode = captureMode
+            when (mode) {
+                null -> {
+                    if (!rolesLocked) {
+                        if (smallArrived) {
+                            logCapture = "[MATCH-CAP ] 54B ignored — waiting for first 24-27pps kickoff and H/A lock"
+                        }
+                    } else if (smallArrived) {
+                        if (smallDelta >= PATH_A_MIN_BURST) {
+                            smallPacketSeenThisMatch = true
+                            enterModeLocked(CaptureMode.PATH_A_WATCH, now)
+                            startProducer = true
+                            logCapture = "[MATCH-CAP ] 54B burst ($smallDelta) -> Path A capture (4fps), expecting ~0pps within ${ZERO_PPS_CONFIRM_MS / 1000}s"
+                        } else {
+                            logCapture = "[MATCH-CAP ] lone 54B ($smallDelta) ignored — not a goodbye burst"
+                        }
+                    } else if (signal <= ZERO_PPS_THRESHOLD && zeroPpsSinceMs != 0L &&
+                        now - zeroPpsSinceMs >= ZERO_PPS_CONFIRM_MS && !zeroPpsTailFired
+                    ) {
+                        // Field data (2026-09-22): real full time never sends the
+                        // 54B goodbye burst — the feed itself is the end signal.
+                        // Open the tail burst so the stats board gets captured.
+                        zeroPpsTailFired = true
+                        noteCliff = true
+                        enterModeLocked(CaptureMode.PATH_A_TAIL, now)
+                        logCapture = "[MATCH-CAP ] 0pps collapse without 54B -> tail capture <= ${PATH_A_TAIL_MS / 1000}s"
+                        startProducer = true
+                    } else if (!smallPacketSeenThisMatch && signal in 1 until PATH_B_TRIGGER_PPS && now >= pathBCooldownUntilMs) {
+                        if (pathBTriggerSinceMs == 0L) {
+                            pathBTriggerSinceMs = now
+                        } else if (now - pathBTriggerSinceMs >= 1_000L) {
+                            enterModeLocked(CaptureMode.PATH_B, now)
+                            startProducer = true
+                            logCapture = "[MATCH-CAP ] pps=$signal < $PATH_B_TRIGGER_PPS without 54B -> Path B capture (4fps, max ${PATH_B_MAX_MS / 1000}s)"
+                        }
+                    } else if (signal >= PATH_B_TRIGGER_PPS) {
+                        pathBTriggerSinceMs = 0L
+                    }
+                    if (signal < GAMEPLAY_PPS_MIN) {
+                        if (lowFlowSinceMs == 0L) lowFlowSinceMs = now
+                        if (!disconnectResolved && now - lowFlowSinceMs >= DISCONNECT_CONFIRM_MS) {
+                            disconnectResolved = true
+                            resolveDisconnect = true
+                        }
+                    } else {
+                        lowFlowSinceMs = 0L
+                    }
+                }
+                CaptureMode.PATH_A_WATCH -> {
+                    // Capturing while waiting for the cliff. All timing
+                    // decisions live here (1Hz); the producer only follows
+                    // the current mode.
+                    if (signal <= ZERO_PPS_THRESHOLD) {
+                        // Marker only — no buzz here: pause menus produce the
+                        // same cliff (field: buzzed 11m before real FT).
+                        noteCliff = true
+                        enterModeLocked(CaptureMode.PATH_A_TAIL, now)
+                        logCapture = "[MATCH-CAP ] Path A cliff confirmed (pps=$signal) -> tail capture <= ${PATH_A_TAIL_MS / 1000}s"
+                    } else if (now - modeStartedAtMs >= ZERO_PPS_CONFIRM_MS) {
+                        enterModeLocked(CaptureMode.PATH_A_PAUSE, now)
+                        logCapture = "[MATCH-CAP ] No 0pps within ${ZERO_PPS_CONFIRM_MS / 1000}s -> capture paused ${PAUSE_WINDOW_MS / 1000}s watching for the cliff"
+                    }
+                }
+                CaptureMode.PATH_A_TAIL -> {
+                    // Cliff confirmed; the 7s tail budget is enforced here.
+                    if (signal >= GAMEPLAY_PPS_MIN) {
+                        // Gameplay-grade traffic returned after a confirmed
+                        // cliff: the "cliff" was a stall, not full time.
+                        endModeLocked()
+                        logCapture = "[MATCH-CAP ] Gameplay recovered after cliff watch -> capture ended"
+                    } else if (now - modeStartedAtMs >= PATH_A_TAIL_MS) {
+                        endModeLocked()
+                        logCapture = "[MATCH-CAP ] Path A tail window closed without a verified score"
+                    }
+                }
+                CaptureMode.PATH_A_PAUSE -> {
+                    // Capture producer paused; watching for a delayed cliff.
+                    if (signal <= ZERO_PPS_THRESHOLD) {
+                        noteCliff = true
+                        enterModeLocked(CaptureMode.PATH_A_TAIL, now)
+                        logCapture = "[MATCH-CAP ] Delayed cliff reached 0pps -> capture resumed, tail <= ${PATH_A_TAIL_MS / 1000}s"
+                    } else if (now - modeStartedAtMs >= PAUSE_WINDOW_MS) {
+                        endModeLocked()
+                        logCapture = "[MATCH-CAP ] No 0pps within pause window -> 54B was noise; capture ended"
+                    }
+                }
+                CaptureMode.PATH_B -> {
+                    // 54B inside a Path-B burst is deliberately ignored: the
+                    // burst already runs on the stronger deep-collapse signal.
+                    if (signal >= GAMEPLAY_PPS_MIN) {
+                        endModeLocked()
+                        logCapture = "[MATCH-CAP ] Gameplay recovered (pps=$signal) -> Path B capture ended"
+                    } else if (now - modeStartedAtMs >= PATH_B_MAX_MS) {
+                        endModeLocked()
+                        pathBTriggerSinceMs = 0L
+                        pathBCooldownUntilMs = now + 20_000L
+                        logCapture = "[MATCH-CAP ] Path B window closed without a verified score"
+                    }
+                }
+            }
+        }
+
+        logT0?.let {
+            AppState.appendLog(it)
+            PassthroughRecorder.note("T0 pps=$currentPps")
+        }
+        if (noteCliff) PassthroughRecorder.note("0pps_cliff")
+        logCapture?.let { AppState.appendLog(it) }
+        if (sustainedZeroBuzz) {
+            PassthroughRecorder.note("0pps_sustained")
+            vibrateFullTimeMarker("after ${SUSTAINED_ZERO_PPS_MS / 1000}s at 0pps")
+        }
+        if (startProducer) startProducerIfIdle()
+        localStunLog?.let { AppState.appendLog(it) }
+        if (sendStunTime) {
+            val t = synchronized(lock) { localFirstStunMs }
+            if (t > 0L) MatchControlChannel.sendStunTime(t)
+            refreshSuggestion()
+        }
+        if (startSidePrompt) MatchMarkerOverlay.beginSideSelection()
+        if (detectTopology) scope.launch { detectAndAdvertiseTopology() }
+        if (resolveDisconnect) scope.launch { resolveSustainedDisconnect() }
+        if (resetRematch) resetForRematch()
+    }
+
+    /**
+     * Double-buzz haptic marker for the capture timeline. Fires only on
+     * evidence that outlives a pause menu: a verified full-time score commit
+     * (stats board confirmed on screen) or a 0pps collapse sustained past any
+     * observed pause (56s in field data). The raw cliff itself must not buzz —
+     * a pause menu produced an identical cliff 11 minutes before real FT.
+     */
+    private fun vibrateFullTimeMarker(reason: String) {
+        val context = appContext ?: return
+        val effect = longArrayOf(0, 70, 110, 70)
+        val done = runCatching {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                val manager = context.getSystemService(android.content.Context.VIBRATOR_MANAGER_SERVICE)
+                    as? android.os.VibratorManager
+                manager?.defaultVibrator?.vibrate(android.os.VibrationEffect.createWaveform(effect, -1))
+            } else {
+                @Suppress("DEPRECATION")
+                (context.getSystemService(android.content.Context.VIBRATOR_SERVICE) as? android.os.Vibrator)
+                    ?.vibrate(android.os.VibrationEffect.createWaveform(effect, -1))
+            }
+        }.isSuccess
+        if (done) AppState.appendLog("[MATCH-CAP ] haptic marker $reason (vibrated)")
+    }
+
+    /** Must be called outside [lock] after a mode was entered. */
+    private fun startProducerIfIdle() {
+        val should = synchronized(lock) { captureMode != null && captureJob == null }
+        if (should) startAutoCapture()
+    }
+
+    private fun enterModeLocked(mode: CaptureMode, now: Long) {
+        captureMode = mode
+        modeStartedAtMs = now
+    }
+
+    private fun endModeLocked() {
+        captureMode = null
+        modeStartedAtMs = 0L
+        pathBTriggerSinceMs = 0L
+        captureGeneration++   // invalidates any running producer
+        captureJob?.cancel()
+        captureJob = null
+    }
+
+    fun chooseLocalSide(side: MatchControlChannel.Side) {
+        var conflict = false
+        synchronized(lock) {
+            if (!started || !sideSelectionStarted || scoreConfirmed || rolesLocked) return
+            localSide = side
+            localSideConfirmed = false
+            if (peerSide == side) conflict = true
+        }
+        if (conflict) {
+            roleConflict("both selected ${side.wire}")
+            return
+        }
+        MatchMarkerOverlay.showSelected(side)
+        MatchControlChannel.sendRole(side, confirmed = false)
+        AppState.appendLog("[MATCH-ROLE] Local tentative side=${side.name}")
+    }
+
+    fun confirmLocalSide(side: MatchControlChannel.Side) {
+        var reject = false
+        var conflict = false
+        var lockedNow = false
+        synchronized(lock) {
+            if (!started || scoreConfirmed || rolesLocked || localSide != side) {
+                reject = true
+            } else if (peerSide == null) {
+                reject = true
+            } else if (peerSide == side) {
+                conflict = true
+            } else {
+                localSideConfirmed = true
+                lockedNow = maybeLockRolesLocked()
+            }
+        }
+        when {
+            conflict -> roleConflict("same-side confirmation")
+            reject -> {
+                MatchMarkerOverlay.rejectFeedback()
+                // Re-advertise the tentative choice in case the peer missed it.
+                synchronized(lock) { localSide }?.let { MatchControlChannel.sendRole(it, localSideConfirmed) }
+            }
+            else -> {
+                MatchControlChannel.sendRole(side, confirmed = true)
+                if (lockedNow) onRolesLocked() else AppState.appendLog("[MATCH-ROLE] Local ${side.name} confirmed; waiting for peer confirmation")
+            }
+        }
+    }
+
+    override fun onPeerRole(side: MatchControlChannel.Side, confirmed: Boolean) {
+        var conflict = false
+        var lockedNow = false
+        synchronized(lock) {
+            if (!started || !sideSelectionStarted || scoreConfirmed || rolesLocked) return
+            peerSide = side
+            peerSideConfirmed = confirmed
+            if (localSide == side) conflict = true
+            else lockedNow = maybeLockRolesLocked()
+        }
+        if (conflict) roleConflict("peer also selected ${side.name}")
+        else if (lockedNow) onRolesLocked()
+        else {
+            // The human tapped our suggestion card; the confirm just needed
+            // the peer's side to arrive. Completing it now still traces back
+            // to that tap — no tap on this phone, no confirm.
+            val confirmNow = synchronized(lock) {
+                val mine = localSide
+                pendingSuggestionConfirm && !rolesLocked && mine != null && peerSide == mine.opposite()
+            }
+            if (confirmNow) {
+                AppState.appendLog("[MATCH-ROLE] Peer choice arrived — completing card-tap confirm")
+                synchronized(lock) { localSide }?.let { confirmLocalSide(it) }
+            }
+        }
+    }
+
+    override fun onPeerRoleReset() {
+        synchronized(lock) {
+            if (!started || !sideSelectionStarted || scoreConfirmed || rolesLocked) return
+            resetRolesLocked()
+        }
+        MatchMarkerOverlay.beginSideSelection()
+        AppState.appendLog("[MATCH-ROLE] Peer requested H/A reset")
+    }
+
+    override fun onPeerTopology(topology: String) {
+        synchronized(lock) {
+            peerTopology = runCatching { Topology.valueOf(topology) }.getOrDefault(Topology.UNKNOWN)
+        }
+    }
+
+    override fun onPeerForfeit(reason: String) {
+        val shouldRecord = synchronized(lock) {
+            if (!started || scoreConfirmed) false else {
+                scoreConfirmed = true
+                scoreConfirmedAtMs = SystemClock.elapsedRealtime()
+                true
+            }
+        }
+        if (!shouldRecord) return
+        endModeLocked()
+        MatchTracker.confirmForfeit(localPlayerLost = false, reason = "peer:$reason")
+        MatchMarkerOverlay.setWaiting()
+        AppState.appendLog("[MATCH-AUTO] Peer forfeit received reason=$reason -> local 3-0")
+    }
+
+    override fun onPeerStunTime(epochMs: Long) {
+        synchronized(lock) {
+            if (!started || epochMs <= 0L) return
+            peerFirstStunMs = epochMs
+        }
+        refreshSuggestion()
+        AppState.appendLog("[MATCH-ROLE] Peer matchmaking call time received (t=$epochMs)")
+    }
+
+    override fun onPeerSwap() {
+        synchronized(lock) {
+            if (!started) return
+            // Idempotent on purpose: sendReliable delivers three copies and
+            // both players may hold — one flip is always exactly one flip.
+            suggestionSwapped = true
+            pendingSuggestionConfirm = false
+        }
+        refreshSuggestion()
+        AppState.appendLog("[MATCH-ROLE] Peer swapped the suggestion — both sides flip")
+    }
+
+    /** Recompute from the exchanged times and publish to the overlay. */
+    private fun refreshSuggestion() {
+        var haveBoth = false
+        var detail = ""
+        val side = synchronized(lock) {
+            haveBoth = localFirstStunMs > 0L && peerFirstStunMs > 0L
+            if (haveBoth) {
+                val gap = kotlin.math.abs(localFirstStunMs - peerFirstStunMs)
+                detail = "gap=${gap / 1000}s swapped=$suggestionSwapped"
+            }
+            if (!started || scoreConfirmed || rolesLocked || !sideSelectionStarted) {
+                null
+            } else {
+                computeSuggestionLocked()
+            }
+        }
+        if (side != null || haveBoth) {
+            AppState.appendLog(
+                "[MATCH-ROLE] Side suggestion ${side?.name ?: "none"} ($detail)",
+            )
+        }
+        MatchMarkerOverlay.showSideSuggestion(side)
+    }
+
+    private fun computeSuggestionLocked(): MatchControlChannel.Side? =
+        SideSuggestion.compute(localFirstStunMs, peerFirstStunMs, suggestionSwapped)
+
+    /**
+     * Tap on the suggestion card: accept the suggested side in one step.
+     * Locking still needs the peer's own tap — pendingSuggestionConfirm just
+     * finishes the confirm the moment the peer's choice arrives, so a card is
+     * never auto-locked without a human tap on BOTH phones.
+     */
+    fun acceptSideSuggestion() {
+        val side = synchronized(lock) {
+            if (!started || !sideSelectionStarted || scoreConfirmed || rolesLocked) return
+            computeSuggestionLocked()
+        } ?: return
+        chooseLocalSide(side)
+        var confirmNow = false
+        synchronized(lock) {
+            if (!scoreConfirmed && !rolesLocked && localSide == side) {
+                pendingSuggestionConfirm = true
+                confirmNow = peerSide != null
+            }
+        }
+        AppState.appendLog("[MATCH-ROLE] Suggestion accepted: ${side.name}")
+        if (confirmNow) confirmLocalSide(side)
+    }
+
+    /**
+     * Hold on the suggestion card: the player disagrees — reset both phones
+     * and flip the suggestion on both, so each side taps once again on the
+     * opposite answer. Never flips alone: the SWAP message travels with the
+     * RESET so the peer's card flips too.
+     */
+    fun swapSideSuggestion() {
+        synchronized(lock) {
+            if (!started || scoreConfirmed) return
+            suggestionSwapped = true
+            pendingSuggestionConfirm = false
+            resetRolesLocked()
+        }
+        MatchControlChannel.sendReset()
+        MatchControlChannel.sendSwap()
+        refreshSuggestion()
+        MatchMarkerOverlay.beginSideSelection()
+        AppState.appendLog("[MATCH-ROLE] Suggestion hold — both sides flip, re-tap to lock")
+    }
+
+    fun manualFullTimeCapture() {
+        val context = appContext ?: return
+        val generation = synchronized(lock) {
+            if (!started || !rolesLocked || scoreConfirmed || gameplayT0Ms <= 0L) return
+            sessionGeneration
+        }
+        if (!manualCaptureBusy.compareAndSet(false, true)) return
+        AppState.appendLog("[MATCH-FT  ] Manual FT tap")
+        AppState.appendLog("[MATCH-FT  ] candidate=${confirmedCandidate()?.let { "${it.home}-${it.away}" } ?: "none"} hits=$autoCandidateHits")
+        scope.launch {
+            try {
+                val candidate = confirmedCandidate()
+                when (PrimeClient.isPackageForeground(EFOOTBALL_PACKAGE)) {
+                    false -> {
+                        if (candidate != null && commitDetectedScore(candidate, "manual-candidate", generation)) {
+                            AppState.appendLog("[MATCH-FT  ] Confirmed toasted candidate ${candidate.home}-${candidate.away} after leaving eFootball")
+                            return@launch
+                        }
+                        var forfeited = false
+                        synchronized(lock) {
+                            if (started && sessionGeneration == generation && !scoreConfirmed) {
+                                forfeited = MatchTracker.confirmForfeit(
+                                    localPlayerLost = true,
+                                    reason = "invalid_manual_ft",
+                                )
+                                if (forfeited) {
+                                    scoreConfirmed = true
+                                    scoreConfirmedAtMs = SystemClock.elapsedRealtime()
+                                    MatchMarkerOverlay.setWaiting()
+                                }
+                            }
+                        }
+                        if (forfeited) {
+                            MatchControlChannel.sendForfeit("invalid_manual_ft")
+                            AppState.appendLog("[MATCH-FT  ] Invalid manual FT: eFootball was not foreground -> local 0-3")
+                            main.post {
+                                Toast.makeText(
+                                    context,
+                                    "Invalid FT claim. Match forfeited 0–3.",
+                                    Toast.LENGTH_LONG,
+                                ).show()
+                            }
+                        } else {
+                            main.post { Toast.makeText(context, "Open eFootball and try FT again", Toast.LENGTH_SHORT).show() }
+                        }
+                        return@launch
+                    }
+                    null -> {
+                        if (candidate != null && commitDetectedScore(candidate, "manual-candidate", generation)) return@launch
+                        main.post { Toast.makeText(context, "Could not verify eFootball is foreground — try FT again", Toast.LENGTH_SHORT).show() }
+                        return@launch
+                    }
+                    true -> Unit
+                }
+
+                val captured = PrimeScreenScoreDetector.captureScore(context)
+                // A confirmed candidate (the same score read repeatedly on the
+                // calibrated stats board) outranks a fresh read from an
+                // uncalibrated surface. Menu and lobby screens have misread
+                // digits before (e.g. "2-2" from a 1-1 result menu), so never
+                // let a menu capture override board evidence.
+                val score = when {
+                    captured == null -> candidate
+                    candidate == null -> captured
+                    captured.source.contains("menu") && !candidate.source.contains("menu") -> {
+                        AppState.appendLog(
+                            "[MATCH-FT  ] menu read ${captured.home}-${captured.away} ignored; " +
+                                "using board candidate ${candidate.home}-${candidate.away} (hits confirmed)"
+                        )
+                        candidate
+                    }
+                    else -> captured
+                }
+                AppState.appendLog(
+                    "[MATCH-FT  ] foreground=true captured=${captured?.let { "${it.home}-${it.away}/${it.source}/final=${it.finalScreen}" } ?: "null"} " +
+                        "candidate=${candidate?.let { "${it.home}-${it.away}" } ?: "none"} using=${if (captured != null) "new-photo" else if (candidate != null) "toasted-candidate" else "nothing"}"
+                )
+                if (score == null) {
+                    // Never Toast on this path: eFootball is confirmed foreground
+                    // above, so a system Toast is drawn straight onto the screen
+                    // we read. It covered the bottom 3 rows (Interceptions,
+                    // Tackles, Saves) of a captured stats board and cost 3 stat
+                    // rows. The message is preserved in the log; feedback is the
+                    // overlay's haptic, which occludes nothing.
+                    AppState.appendLog("[MATCH-FT  ] Final score not visible — keep the result visible and retry")
+                    MatchMarkerOverlay.rejectFeedback()
+                    return@launch
+                }
+                val mode = if (captured != null) "manual" else "manual-candidate"
+                if (!commitDetectedScore(score, mode, generation)) {
+                    // Same occlusion rule as above: eFootball is foreground, so a
+                    // Toast here would sit on the content the next read needs.
+                    AppState.appendLog("[MATCH-FT  ] Score ${score.home}–${score.away} read but NOT saved — see match log")
+                    MatchMarkerOverlay.conflictFeedback()
+                }
+            } finally {
+                manualCaptureBusy.set(false)
+            }
+        }
+    }
+
+    private fun confirmedCandidate(): PrimeScreenScoreDetector.Score? = synchronized(lock) {
+        val score = lastAutoCandidate
+        if (score != null && autoCandidateHits >= 2) score else null
+    }
+
+    /**
+     * One producer/consumer capture burst. The producer is a pure follower:
+     * it captures 4fps whenever a burst mode is active and holds (without
+     * capturing) through PATH_A_PAUSE. All timing and mode transitions are
+     * decided by onNativeStats at 1Hz; a transition that ends the burst
+     * (endModeLocked) bumps [captureGeneration], which the producer treats
+     * as a stop signal.
+     */
+    private fun startAutoCapture() {
+        val context = appContext ?: return
+        val (generation, burst) = synchronized(lock) {
+            val mode = captureMode ?: return
+            if (!started || scoreConfirmed || captureJob != null) return
+            lastAutoCandidate = null
+            autoCandidateHits = 0
+            sessionGeneration to ++captureGeneration
+        }
+        val job = scope.launch(start = CoroutineStart.LAZY) {
+            if (!PrimeClient.isAlive(timeoutMs = 500)) {
+                AppState.appendLog("[MATCH-CAP ] PrimeServer unavailable; automatic score capture skipped")
+                clearCaptureJob(burst)
+                return@launch
+            }
+
+            // Capture and OCR are decoupled. The producer keeps the requested
+            // 250 ms cadence while one OCR consumer works on only the newest
+            // available frame. Capacity stays at one, so memory cannot grow if
+            // OCR briefly takes longer than a frame interval.
+            val frames = Channel<PrimeScreenScoreDetector.CapturedFrame>(capacity = 1)
+            var captured = 0
+            var capturedOk = 0
+            var capturedNull = 0
+            var dropped = 0
+            var analyzed = 0
+            var confirmationPrompted = false
+            val ocrJob = launch {
+                for (frame in frames) {
+                    try {
+                        analyzed++
+                        val score = PrimeScreenScoreDetector.detectFrame(frame)
+                        val stillValid = synchronized(lock) {
+                            started && sessionGeneration == generation && !scoreConfirmed &&
+                                captureGeneration == burst && captureJob != null && captureMode != null
+                        }
+                        if (!stillValid) {
+                            AppState.appendLog("[MATCH-OCR ] drop stale frame score=${score?.home}-${score?.away}")
+                        } else if (score != null && score.source.contains("menu") && !score.finalScreen) {
+                            // Lobby and other menu screens have no match score on
+                            // them, yet their loose digit gates produce garbage
+                            // reads (2-5 from "Opponent is choosing settings").
+                            // Only the result menu (final=true) may become a
+                            // candidate; everything else is discarded here.
+                            AppState.appendLog("[MATCH-OCR ] discard menu read ${score.home}-${score.away} (finality unknown)")
+                        } else if (score != null && registerAutomaticCandidate(score, generation, burst)) {
+                            val efootball = PrimeClient.isPackageForeground(EFOOTBALL_PACKAGE)
+                            AppState.appendLog("[MATCH-OCR ] candidate ${score.home}-${score.away} src=${score.source} final=${score.finalScreen} efootball=$efootball hits=$autoCandidateHits")
+                            if (efootball == true) {
+                                if (score.finalScreen && !score.source.contains("menu")) {
+                                    // Auto-commit only calibrated stats-board reads.
+                                    // The result menu has misread digits before
+                                    // (2-2 from a 1-1 screen), so menu evidence
+                                    // stays candidate-only and waits for the FT tap.
+                                    if (commitDetectedScore(score, "auto", generation, burst)) break
+                                } else if (!confirmationPrompted) {
+                                    confirmationPrompted = true
+                                    AppState.appendLog("[MATCH-OCR ] Score ${score.home}-${score.away} read; final-time context unclear, awaiting FT tap")
+                                    main.post {
+                                        val valid = synchronized(lock) { started && sessionGeneration == generation && !scoreConfirmed }
+                                        if (valid) Toast.makeText(context,
+                                            "Score ${score.home}–${score.away} found. If the match has ended, tap FT to confirm.",
+                                            Toast.LENGTH_LONG).show()
+                                    }
+                                }
+                            }
+                        } else if (score != null) {
+                            AppState.appendLog("[MATCH-OCR ] candidate rejected ${score.home}-${score.away} src=${score.source} hits=$autoCandidateHits roles=$rolesLocked")
+                        }
+                    } finally {
+                        frame.recycle()
+                    }
+                }
+            }
+
+            var nextFrameAt = SystemClock.elapsedRealtime()
+            try {
+                while (isActive) {
+                    val modeNow = synchronized(lock) {
+                        if (!started || sessionGeneration != generation ||
+                            captureGeneration != burst || scoreConfirmed || captureJob == null
+                        ) null else captureMode
+                    }
+                    if (modeNow == null) break
+                    if (modeNow != CaptureMode.PATH_A_PAUSE) {
+                        val frame = PrimeScreenScoreDetector.captureFrame(context)
+                        captured++
+                        if (frame != null) {
+                            capturedOk++
+                            if (frames.trySend(frame).isFailure) {
+                                frames.tryReceive().getOrNull()?.recycle()
+                                dropped++
+                                if (frames.trySend(frame).isFailure) frame.recycle()
+                            }
+                        } else {
+                            capturedNull++
+                        }
+                    }
+                    nextFrameAt += CAPTURE_INTERVAL_MS
+                    val wait = nextFrameAt - SystemClock.elapsedRealtime()
+                    if (wait > 0L) delay(wait)
+                    else nextFrameAt = SystemClock.elapsedRealtime()
+                }
+            } finally {
+                withContext(NonCancellable) {
+                    frames.close()
+                    ocrJob.cancel()
+                    ocrJob.join()
+                    // A capacity-1 channel may still contain one unconsumed
+                    // frame when the mode ends or a score is confirmed.
+                    while (true) {
+                        val leftover = frames.tryReceive().getOrNull() ?: break
+                        leftover.recycle()
+                    }
+                    AppState.appendLog(
+                        "[MATCH-CAP ] Capture burst ended captured=$captured ok=$capturedOk null=$capturedNull dropped=$dropped analyzed=$analyzed " +
+                            "scoreConfirmed=${synchronized(lock) { scoreConfirmed }} last=${lastAutoCandidate?.home}-${lastAutoCandidate?.away} hits=$autoCandidateHits"
+                    )
+                    clearCaptureJob(burst)
+                }
+            }
+        }
+        synchronized(lock) {
+            if (!started || sessionGeneration != generation || captureGeneration != burst || captureJob != null) {
+                job.cancel()
+                return
+            }
+            captureJob = job
+        }
+        job.start()
+    }
+
+    private fun registerAutomaticCandidate(score: PrimeScreenScoreDetector.Score, generation: Long, burst: Long): Boolean = synchronized(lock) {
+        if (!started || sessionGeneration != generation || captureGeneration != burst || !rolesLocked) return@synchronized false
+        val previous = lastAutoCandidate
+        if (previous != null && previous.home == score.home && previous.away == score.away) {
+            autoCandidateHits++
+            lastAutoCandidate = score
+        } else {
+            lastAutoCandidate = score
+            autoCandidateHits = 1
+        }
+        // Two matching frames only cost ~250 ms but substantially reduce an OCR
+        // misread on a transition frame.
+        autoCandidateHits >= 2
+    }
+
+    private fun commitDetectedScore(score: PrimeScreenScoreDetector.Score, mode: String, generation: Long, burst: Long? = null): Boolean {
+        synchronized(lock) {
+            if (!started || sessionGeneration != generation || !rolesLocked || scoreConfirmed) return false
+            if (burst != null && captureGeneration != burst) return false
+            val side = localSide ?: return false
+            val mine = if (side == MatchControlChannel.Side.HOME) score.home else score.away
+            val theirs = if (side == MatchControlChannel.Side.HOME) score.away else score.home
+            // Serialize validation and ledger commit against stop, rematch and competing OCR.
+            if (!MatchTracker.confirmScreenScore(mine, theirs, "$mode:${score.source}", score.stats)) {
+                val phase = MatchTracker.state.value.phase
+                AppState.appendLog(
+                    "[MATCH-OCR ] Commit rejected ${score.home}-${score.away} ($mode): tracker phase=$phase" +
+                        (if (phase == MatchPhase.SEALED) " — sealed epoch; rematch was not registered" else "")
+                )
+                return false
+            }
+            scoreConfirmed = true
+            scoreConfirmedAtMs = SystemClock.elapsedRealtime()
+            MatchMarkerOverlay.setWaiting()
+        }
+        AppState.appendLog("[MATCH-OCR ] Confirmed HOME ${score.home}-${score.away} AWAY ($mode)")
+        PassthroughRecorder.note("score_commit ${score.home}-${score.away} mode=$mode")
+        vibrateFullTimeMarker("at verified full time ${score.home}-${score.away} (stats on screen)")
+        return true
+    }
+
+    private fun cancelAutoCapture(reason: String) {
+        val job = synchronized(lock) {
+            endModeLocked()
+            captureJob.also { captureJob = null }
+        }
+        job?.cancel()
+        if (job != null) AppState.appendLog("[MATCH-CAP ] Capture cancelled: $reason")
+    }
+
+    private fun clearCaptureJob(burst: Long) {
+        synchronized(lock) { if (captureGeneration == burst) captureJob = null }
+    }
+
+    private fun maybeLockRolesLocked(): Boolean {
+        val mine = localSide ?: return false
+        val theirs = peerSide ?: return false
+        if (mine == theirs || !localSideConfirmed || !peerSideConfirmed) return false
+        rolesLocked = true
+        return true
+    }
+
+    private fun onRolesLocked() {
+        val mine = synchronized(lock) { localSide } ?: return
+        MatchMarkerOverlay.showFullTime()
+        AppState.appendLog("[MATCH-ROLE] Locked complementary sides: local=${mine.name} peer=${mine.opposite().name}; FT enabled")
+    }
+
+    private fun roleConflict(reason: String) {
+        synchronized(lock) { resetRolesLocked() }
+        MatchControlChannel.sendReset()
+        MatchMarkerOverlay.beginSideSelection()
+        MatchMarkerOverlay.conflictFeedback()
+        AppState.appendLog("[MATCH-ROLE] CONFLICT $reason -> both sides reset")
+    }
+
+    private fun resetRolesLocked() {
+        localSide = null
+        localSideConfirmed = false
+        peerSide = null
+        peerSideConfirmed = false
+        rolesLocked = false
+        pendingSuggestionConfirm = false
+    }
+
+    private fun resetSessionLocked() {
+        sessionGeneration++
+        endModeLocked()
+        lastStats = null
+        lastStatsAtMs = 0L
+        stunSeen = false
+        sideSelectionStarted = false
+        // Fresh session = fresh room: forget both matchmaking times and any
+        // swap so the suggestion is rebuilt from this room's own evidence.
+        lastStunCountSeen = 0L
+        lastStunChangeAtMs = 0L
+        localFirstStunMs = 0L
+        peerFirstStunMs = 0L
+        suggestionSwapped = false
+        ppsDirection = null
+        gameplayT0Ms = 0L
+        gameplayBandHits = 0
+        captureArmed = false
+        currentPps = 0
+        lastSmallGamePackets = 0L
+        smallPacketSeenThisMatch = false
+        resetRolesLocked()
+        localTopology = Topology.UNKNOWN
+        peerTopology = Topology.UNKNOWN
+        lastAutoCandidate = null
+        autoCandidateHits = 0
+        pathBTriggerSinceMs = 0L
+        pathBCooldownUntilMs = 0L
+        zeroPpsSinceMs = 0L
+        zeroPpsTailFired = false
+        sustainedZeroBuzzed = false
+        lowFlowSinceMs = 0L
+        disconnectResolved = false
+        scoreConfirmed = false
+        scoreConfirmedAtMs = 0L
+        rematchNormalSinceMs = 0L
+        rematchNormalSamples = 0
+    }
+
+    private fun resetForRematch() {
+        val now = SystemClock.elapsedRealtime()
+        synchronized(lock) {
+            if (!started || !scoreConfirmed) return
+            sessionGeneration++
+            endModeLocked()
+            scoreConfirmed = false
+            scoreConfirmedAtMs = 0L
+            gameplayT0Ms = now
+            gameplayBandHits = 0
+            captureArmed = false
+            lastAutoCandidate = null
+            autoCandidateHits = 0
+            lastSmallGamePackets = lastStats?.smallGamePackets ?: lastSmallGamePackets
+            smallPacketSeenThisMatch = false
+            zeroPpsSinceMs = 0L
+            zeroPpsTailFired = false
+            sustainedZeroBuzzed = false
+            lowFlowSinceMs = 0L
+            disconnectResolved = false
+            rematchNormalSinceMs = 0L
+            rematchNormalSamples = 0
+            sideSelectionStarted = true
+            resetRolesLocked()
+        }
+        MatchControlChannel.sendReset()
+        MatchMarkerOverlay.beginSideSelection()
+        // Reopening the tracker epoch is not optional: the previous result
+        // sealed it, and confirmScreenScore rejects every commit while
+        // sealed. Without this call the rematch's scores — auto and FT-tap
+        // alike — fail silently for the whole match.
+        MatchTracker.markGameplayStarted()
+        PassthroughRecorder.note("rematch_ha_reset")
+        AppState.appendLog("[MATCH-AUTO] New sustained 24-27pps flow after result -> rematch T0 and H/A reset")
+    }
+
+    private fun normalizePps(delta: Long, dtMs: Long): Int {
+        if (delta <= 0L) return 0
+        return (delta.toDouble() * 1_000.0 / dtMs.toDouble()).roundToInt().coerceAtLeast(0)
+    }
+
+    private fun ppsFor(direction: PpsDirection, outPps: Int, inPps: Int): Int =
+        if (direction == PpsDirection.OUTBOUND) outPps else inPps
+
+    private suspend fun detectAndAdvertiseTopology() {
+        val iface = AppState.localLanInterfaceName.get().orEmpty()
+        val route = if (iface.isNotBlank() && PrimeClient.isAlive(350)) {
+            PrimeClient.execute("ip route show dev ${iface.replace(Regex("[^A-Za-z0-9_.:-]"), "")}", 1_500).orEmpty()
+        } else ""
+        // A SoftAP owner is identifiable POSITIVELY: it exposes an ap*/swlan*/softap
+        // interface, which a plain Wi-Fi client never has. The old rule
+        // `route.contains(localIp)` matched EVERY client too — its own route prints
+        // "src <localIp>" — so both phones logged HOTSPOT_OWNER (m3/old21 on wlan0)
+        // and disconnect faults got misattributed. Checked first because an owner can
+        // also carry a default route on another interface.
+        val hasSoftApIface = runCatching {
+            java.util.Collections.list(java.net.NetworkInterface.getNetworkInterfaces()).any { n ->
+                if (!runCatching { n.isUp }.getOrDefault(false)) return@any false
+                val name = n.name.orEmpty()
+                name.startsWith("ap") || name.startsWith("swlan") ||
+                    name.contains("softap", ignoreCase = true)
+            }
+        }.getOrDefault(false)
+        val topology = when {
+            hasSoftApIface -> Topology.HOTSPOT_OWNER
+            route.contains("default via") -> Topology.WIFI_CLIENT
+            iface.contains("ap", ignoreCase = true) || iface.contains("soft", ignoreCase = true) -> Topology.HOTSPOT_OWNER
+            else -> Topology.UNKNOWN
+        }
+        synchronized(lock) { localTopology = topology }
+        MatchControlChannel.sendTopology(topology.name)
+        AppState.appendLog("[MATCH-NET ] topology=$topology iface=$iface")
+    }
+
+    private suspend fun resolveSustainedDisconnect() {
+        val context = appContext ?: return
+        val outcome = synchronized(lock) {
+            if (!started || scoreConfirmed) return
+            determineDisconnectFaultLocked(context)
+        }
+        when (outcome) {
+            true -> {
+                synchronized(lock) {
+                    if (scoreConfirmed) return
+                    scoreConfirmed = true
+                    scoreConfirmedAtMs = SystemClock.elapsedRealtime()
+                }
+                MatchTracker.confirmForfeit(localPlayerLost = true, reason = "network_disconnect")
+                MatchControlChannel.sendForfeit("network_disconnect")
+                MatchMarkerOverlay.setWaiting()
+                AppState.appendLog("[MATCH-NET ] Sustained disconnect attributed locally -> 0-3")
+            }
+            false -> {
+                synchronized(lock) {
+                    if (scoreConfirmed) return
+                    scoreConfirmed = true
+                    scoreConfirmedAtMs = SystemClock.elapsedRealtime()
+                }
+                MatchTracker.confirmForfeit(localPlayerLost = false, reason = "peer_network_disconnect")
+                MatchMarkerOverlay.setWaiting()
+                AppState.appendLog("[MATCH-NET ] Local LAN identity survived sustained disconnect -> peer 0-3")
+            }
+            null -> {
+                synchronized(lock) {
+                    if (scoreConfirmed) return
+                    scoreConfirmed = true
+                    scoreConfirmedAtMs = SystemClock.elapsedRealtime()
+                }
+                endModeLocked()
+                MatchTracker.confirmNoContest("unattributed_network_disconnect")
+                MatchMarkerOverlay.setWaiting()
+                AppState.appendLog("[MATCH-NET ] Sustained disconnect could not be safely attributed -> No Contest")
+            }
+        }
+    }
+
+    /** true=local fault, false=peer fault, null=not safe to attribute. */
+    private fun determineDisconnectFaultLocked(context: Context): Boolean? {
+        val exactLanPresent = hasExactLanIp(AppState.localIp.get().orEmpty())
+        val wifi = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+        val wifiEnabled = runCatching { wifi?.isWifiEnabled ?: false }.getOrDefault(false)
+        val otherIpv4 = hasOtherWifiIpv4(AppState.localIp.get().orEmpty())
+
+        return when (localTopology) {
+            Topology.HOTSPOT_OWNER -> if (exactLanPresent) null else true
+            Topology.WIFI_CLIENT -> when {
+                exactLanPresent -> null // A retained IP lease cannot prove the opponent caused the outage.
+                !wifiEnabled -> true
+                otherIpv4 -> true // local phone switched away from the match LAN
+                // When the peer is the hotspot owner, loss of that hotspot can
+                // legitimately remove our LAN address while Wi-Fi itself stays
+                // enabled. The hotspot owner independently verifies whether its
+                // SoftAP/LAN identity survived, so do not classify this local
+                // side as a fault merely because the lease disappeared.
+                peerTopology == Topology.HOTSPOT_OWNER -> null
+                else -> null       // shared router/AP failure: No Contest
+            }
+            Topology.UNKNOWN -> when {
+                exactLanPresent -> null // A retained IP lease cannot prove the opponent caused the outage.
+                !wifiEnabled -> true
+                otherIpv4 -> true
+                else -> null
+            }
+        }
+    }
+
+    private fun hasExactLanIp(localIp: String): Boolean {
+        if (localIp.isBlank()) return false
+        return runCatching {
+            Collections.list(NetworkInterface.getNetworkInterfaces()).any { iface ->
+                iface.interfaceAddresses.any { addr ->
+                    (addr.address as? Inet4Address)?.hostAddress == localIp
+                }
+            }
+        }.getOrDefault(false)
+    }
+
+    private fun hasOtherWifiIpv4(localIp: String): Boolean = runCatching {
+        Collections.list(NetworkInterface.getNetworkInterfaces()).any { iface ->
+            val name = iface.name.lowercase()
+            (name.contains("wlan") || name.contains("ap")) &&
+                iface.interfaceAddresses.any { addr ->
+                    (addr.address as? Inet4Address)?.hostAddress?.let { it != localIp } == true
+                }
+        }
+    }.getOrDefault(false)
+
+    private var localTopology = Topology.UNKNOWN
+    private var peerTopology = Topology.UNKNOWN
+}
