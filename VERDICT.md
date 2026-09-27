@@ -103,14 +103,22 @@ Note `vtable[0x48]` is called at `0x6f90758` and its **return value is discarded
 immediately follows) — it is a side-effect refresh, *not* the source of `last_activity`.
 
 **Fire path = log, then act.** On `elapsed >= threshold`: `0x6f907b8` copies `[this+0x10]` into the
-event, `0x6f907bc` loads a logger (`0x7dc0390` = `*(0xa4b3d8)`), and if non-null calls
+event, `0x6f907bc` loads a logger (`0x7dc0390` returns `*(0xa4b23d8)`), and if non-null calls
 `0x7dc04c4(logger, s1, s2, s3, w4=0x214=532)` where the strings are built from
-**`"G:\PES22HC\…\MatchOnlineWatchDog.cpp"` with `w1 = 0x55` (85)** via `0x698d3a4` (which strips the
-path down to the basename at `MatchOnlineWatchDog.cpp`). Only then `0x6f8ee24` runs the action and the
+**`"G:\PES22HC\…\MatchOnlineWatchDog.cpp"` with `w1 = 0x55` (85)** via `0x698d3a4`. `0x7dc04c4`
+hands the record to `0x7dc06fc`, which strips the directory out of the path (`cmp w11,#0x2f` = `/`,
+`cmp w11,#0x5c` = `\`) under the mutex at `obj+0x38`. Only then `0x6f8ee24` runs the action and the
 function returns true.
-**=> logcat grep `MatchOnlineWatchDog` is the empirical test: one line proves the rule fired, and the
-neighbouring `kind` (`event+0x80`, set by `0x6f50e44`) identifies which of the 7 rows above it was.**
-`"AbnormalEnd"` sits at `0xa1223c` immediately after this code and is the likely end-reason token.
+
+**=> that log line is NOT observable in logcat — census §2f.** `trace_calls.py` follows direct
+`BL`/`B` edges for 8 hops from `0x6f907b8` (625 functions), `0x7dc04c4` (89) and `0x7dc06fc` (85) and
+reaches neither `__android_log_print`/`_write`/`_vprint`, nor `printf`, nor the UE4 emitter; the
+control (`0x7de8250`, gRPC's logger) reaches `__android_log_write` in one hop, so the method detects
+what exists. **`adb logcat | grep MatchOnlineWatchDog` therefore returns nothing whether or not the
+rule fired, and a negative grep proves nothing.** The neighbouring `kind` (`event+0x80`, set by
+`0x6f50e44`) still identifies which of the 7 rows fired — but it has to be read by instrumentation,
+not by logcat. `"AbnormalEnd"` sits at `0xa1223c` immediately after this code and is the likely
+end-reason token.
 
 **Cross-check against healthy play** (`udp_trace.csv`, tun level, n=10,922 over 3.6 min):
 
@@ -154,6 +162,9 @@ Do NOT tune jitter/pipeline first: radio clumps 60–177ms + 60–90ms pipeline 
 - **"The ms values need Ghidra" — disproved.** They are plain `u32` constants in `.rodata` loaded by four `ldr q` in the `X` constructor `0x7d36874`; extracted in one script (`efootball-apk/read_defaults.py`) with capstone + the ELF program headers. No headless analysis, no `0x75505a8` enum table.
 - **"`BRIDGE-GAP-T0 gapMs` = how long the game was silent" — disproved.** `TunnelEngine.kt:2177-2187` gates it at `GAP_THRESHOLD_MS=150`, but in the window where `udp_trace` shows 10,922 tun packets with a **maximum** dir=out gap of 70 ms, it still reports ~300 gaps of 154–2975 ms, all `missing=0 qTun=0`, and its dominant lengths (`208` ×561, `40` ×337, `576` ×115, `362` ×93) are essentially absent from the gameplay stream (`udp_trace dir=out` top lens are 100/91/103/105/134). Every earlier "silence at quit" bracket derived from it is therefore void.
 - **"`kUdpTraceCapacity=32768` is enough for end-of-match analysis" — disproved.** The session wrote **228,393** events (`capturedEvents=32768 overwritten=195625`), so only the last ~4.8 min (02:53:40–02:57:17) survived. All three stall windows (02:34:48 / 02:37:15 / 02:45:53) were overwritten — which is exactly the data needed to compare `now - last_activity` against the 180/300 ms slots.
+
+- **"`adb logcat | grep MatchOnlineWatchDog` would show the rule firing" — disproved (census §2f).** The game never writes its own messages to logcat: 193 native logcat call sites in total (184 `__android_log_print`, 3 `__android_log_write`, 6 `__android_log_vprint`, correct PLT `0x8b356f0`/`0x8b3af80`/`0x8b3cea0`) and every literal argument is from a bundled SDK — `threaded_app`, `jnihelper`, `iab`, `playcore`, `SwappyCommon`, `ChoreographerThread`, `CriPrintf`, `GRPC`, plus a single `UE4`-tagged one-shot warning about `CaptureStackBackTrace`. Directly, the watchdog's own fire path (625 functions walked from `0x6f907b8`, 89 from `0x7dc04c4`, 85 from `0x7dc06fc`) reaches no log import, no `printf`, and no UE4 emitter, while the control at `0x7de8250` does reach `__android_log_write`. Independently, UE4's emitter sink is never installed and Konami's `Java_jp_konami_Logger_PrintNative` is a 4-byte `ret`. **A negative grep from this test proves nothing**; the kill-test must be re-based on PeerLink-side ms telemetry.
+- **"`__android_log_print` has 187 callers in this binary" — wrong, and retracted.** That count came from PLT `0x8b356e0`, which is **`rand`**: the stubs were decoded as if VA == file offset, an identity that fails in PT_LOAD #1 (`off 0x28253c0` ↔ `va 0x28293c0`, 0x4000 delta). `plt_table.py` maps through the program headers and resolves 15,345 stubs; the true figure is 184 for `__android_log_print` at `0x8b356f0`. The same bug had `0x8b3af70` labelled `_write` (it is `asprintf`) and `0x8b3ce90` labelled `_vprint` (it is `std::__ndk1::regex_error::~regex_error()`).
 
 ## 5. Capture defect fixed (prerequisite for the next verdict)
 

@@ -512,7 +512,7 @@ claim here, which is what produced this correction.
 | route | before | now |
 |---|---|---|
 | **(a) MITM the TLS leg** | "proven feasible — no pinning" | **open question.** The Android side genuinely has no pinning and no network security config, but Konami's TLS is native, and a 4096-bit key sits beside the game hostname with its usage still unidentified. |
-| **(b) `adb logcat` off the phone** | viable | **unaffected.** Reads the reason without touching the network, so no TLS assumption is involved. |
+| **(b) `adb logcat` off the phone** | viable | **dead for the game's own text — see §2f.** 193 native logcat call sites, every one inside a bundled SDK, and the watchdog's own `MatchOnlineWatchDog.cpp:85` record reaches no log import (625 functions walked, control passing). PeerLink's *own* `Log.*` output and OS-level events are unaffected. |
 
 (b) remains the correct next step; (a) must not be described as established.
 
@@ -630,6 +630,126 @@ counters, not the score.
 - `CmdConnectGrpc.php` and the `Def_Online_gRPC_*` settings (§2d.3) name an
   additional possible transport. It would still be TLS on 443, so it does not
   change the answer.
+
+---
+
+## 2f. Can `adb logcat` show the game's own events? **No** — and the earlier "187 callers" figure was counting `rand`
+
+This section decides whether the planned kill-test
+`adb logcat | grep -E "MatchOnlineWatchDog|AbnormalEnd"` can mean anything.
+
+Reproducible via `plt_table.py`, `logcat_sites.py`, `trace_calls.py`,
+`sink_reg.py` (all committed).
+
+### 2f.1 Correction: three PLT labels were wrong
+
+PLT stubs were being decoded as if **VA == file offset**. That identity holds
+inside PT_LOAD #0 but **not** in PT_LOAD #1 (`off 0x28253c0` ↔ `va 0x28293c0`, a
+0x4000 delta), so from `0x28293c0` onward the bytes read were not the
+instructions at that address. `plt_table.py` maps through the program headers
+and joins 15,345 stubs to `.rela.plt` `R_AARCH64_JUMP_SLOT` entries:
+
+| real PLT | is actually | was recorded as |
+|---|---|---|
+| `0x8b356f0` | `__android_log_print` | `0x8b356e0`, which is **`rand`** |
+| `0x8b3af80` | `__android_log_write` | `0x8b3af70`, which is **`asprintf`** |
+| `0x8b3cea0` | `__android_log_vprint` | `0x8b3ce90`, which is **`std::__ndk1::regex_error::~regex_error()`** |
+
+**Withdrawn:** the previously reported *"187 callers of `__android_log_print`,
+of which only 5 pass a literal"* was a count of `rand`. It supported no claim
+about the disconnects, but it was wrong and is replaced here.
+
+### 2f.2 The real logcat census — 193 sites, every one inside a bundled SDK
+
+| function | PLT | call sites | sites with a readable literal |
+|---|---|---|---|
+| `__android_log_print` | `0x8b356f0` | 184 | 184/184 |
+| `__android_log_write` | `0x8b3af80` | 3 | 3/3 |
+| `__android_log_vprint` | `0x8b3cea0` | 6 | 6/6 |
+| **total** | | **193** | **193/193** |
+
+Tags actually seen: `threaded_app`, `UE4`, `jnihelper`, `iab`, `playcore`,
+`SwappyCommon`, `ChoreographerThread`, `Trace`, `FrameStatistics`, `CriPrintf`,
+`##CRIERR`, `GRPC`.
+
+Keyword scan of **every** literal argument for
+`score|match|result|goal|watchdog|abnormal|disconnect|forfeit|relay|hole_punch|
+peer|pes|konami|ntls` → **0 game hits**. The 10 textual matches are Play Core's
+own wording ("unexpected null **result**", "ignoring **result**") plus one
+`nativeKonamiIabInitializationFinished` billing callback.
+
+The one site tagged `UE4` (`0x41bdbec`) is a **one-shot warning**, level 3,
+guarded by a once-flag at `0x9e077e0`:
+
+> `FAndroidPlatformStackWalk::CaptureStackBackTrace disabled on Android 10 with
+> TargetSDK >= 29 due to XOM.`
+
+So even the engine's own tag carries exactly one hardcoded message — UE4's
+general log output does **not** route to logcat in this build.
+
+### 2f.3 The watchdog's message reaches no log import
+
+The fire path builds `"G:\PES22HC\…\MatchOnlineWatchDog.cpp"` with `w1 = 0x55`
+(85) at `0x6f907f0..0x6f907fc`, then calls `0x7dc04c4` → `0x7dc06fc`, which
+strips the directory out of the path (`cmp w11,#0x2f` = `/`, `cmp w11,#0x5c` =
+`\`) under the mutex at `obj+0x38`.
+
+`trace_calls.py` breadth-first follows direct `BL`/`B` edges, stopping each node
+at its first `ret`, using the corrected LIVE set:
+
+| start | nodes walked | hops | → logcat? | → `printf`? | → UE4 emitter? |
+|---|---|---|---|---|---|
+| `0x6f907b8` watchdog fire block | 625 | 8 | **no** | **no** | **no** |
+| `0x7dc04c4` message builder | 89 | 8 | **no** | **no** | **no** |
+| `0x7dc06fc` emit | 85 | 8 | **no** | **no** | **no** |
+| `0x283205c` UE4 `NativeCalls.UELogLog` | 227 | 8 | **no** | yes (34 paths via `0x41f7b8c`) | no |
+| `0x7de8250` **control** — gRPC's logger | 6 | — | **yes** → `__android_log_write` @ `0x7de82cc` | — | — |
+
+The control is what makes the negatives usable: the walker does report a log
+import when one exists on the path.
+
+### 2f.4 Three further inert paths (independent of 2f.3)
+
+1. **UE4's own emitter.** `0x39e5ff8` (678 call sites, including
+   `Score  HOME[%d] AWAY[%d]`) is gated on `.bss` slot `0x9c14870`, which starts
+   NULL, has exactly **one** writer (`SetSink` `0x39e5fdc`), and that setter's
+   only entry is thunk `0x3a05918` with **zero** references of any kind — 0
+   PC-relative, 0 raw qwords, 0 raw dwords, 0 relocation addends (types 1027
+   and 257). `sink_audit.py` confirms `0x9c14870` has a single writer across all
+   50 ADRP sites on page `0x9c14000`.
+2. **Konami's Java logger.** All 33 `jp.konami` files calling `jp.konami.Logger.*`
+   funnel into `Java_jp_konami_Logger_PrintNative` at `0x684e71c`, size 4 — the
+   instruction is `0xd65f03c0` = **`ret`**. Only `Logger.e(tag,msg,Throwable)`
+   touches `android.util.Log`, and its 116 uses are exception paths.
+3. **No log file.** `ue4_strings.txt` (404,160 strings / 10,103,878 bytes)
+   contains **0** matches for `.log`, `Saved/Logs`, `Logs/`, `ue4.log`.
+
+### 2f.5 Limits of this evidence
+
+- `trace_calls.py` follows only **direct** `BL`/`B` edges and stops at the first
+  `ret`; an indirect `blr` through a vtable is not followed. For 2f.3 that
+  matters only if such a dispatch reaches something real — and 2f.4 shows the
+  emitter it would land on has no sink installed.
+- `sink_reg.py` walks 64 instructions forward from each of the **119** sites that
+  call the logger getter `0x7dc0390` and finds **no** store into the table fields
+  `+0x10 / +0x28 / +0x30` that `0x7dc06fc` iterates. A store made *inside a
+  callee* of one of those sites is **not** excluded — that is the one open hole.
+- `0x7dc06fc`'s zero-count tail (`0x7dc0b18`) is a different path from its
+  non-zero tail (`0x7dc0c6c`) and is not fully decoded. I therefore do **not**
+  claim "the message is discarded"; only that it never reaches a log import, a
+  `printf`, or the UE4 emitter.
+- String absence is not call absence (the §1 rule). Here the argument does not
+  rest on absence: 2f.3 is a positive call-graph search with a passing control.
+
+### 2f.6 Verdict
+
+> **No.** `adb logcat` cannot show the game's own events.
+
+`adb logcat | grep -E "MatchOnlineWatchDog|AbnormalEnd"` returns **nothing
+whether or not the rule fired** — a negative grep is uninformative. The planned
+kill-test as written is void; §2d.6 route (b) is corrected below. The
+replacement is PeerLink-side ms-resolution telemetry (the raised
+`kUdpTraceCapacity` ring) plus the OS-level symptoms of a stall.
 
 ---
 
@@ -849,4 +969,8 @@ gRPC command-channel keepalive (§8), hole-punch/relay errors (§5, setup only).
 02:37:15 / 02:45:53 stalls. The ms-resolution ring that would show it was
 overwritten (`overwritten=195625`); `kUdpTraceCapacity` has since been raised
 32768 → 262144 in `Peerlink-app@4fd7840`. Confirmation still requires one
-instrumented match: `adb logcat | grep -E "MatchOnlineWatchDog|AbnormalEnd"`.
+instrumented match — and it **cannot** be `adb logcat`: §2f shows the game never
+writes its own messages to logcat, so a negative grep would prove nothing. Use
+PeerLink-side ms-resolution telemetry instead: flag every inbound silence
+≥180 ms at the tun and check it lands inside the stall window, on both phones
+within the same second.

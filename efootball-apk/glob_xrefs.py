@@ -66,17 +66,27 @@ def find_window(target, span=0x300):
                 addr = pg + (imm << (12 if sh else 0))
                 if lo <= addr <= hi:
                     out.append((int(pc[i]), int(pc[k]), addr, "ADD"))
-            # LDR/STR unsigned offset 64-bit -> field within page
-            if (w & 0xFFC00000) in (0xF9400000, 0xF9000000):
+            # LDR unsigned offset 64-bit / STR unsigned offset 64-bit
+            if (w & 0xFFC00000) == 0xF9400000:
                 imm = (w >> 10) & 0xFFF
                 addr = pg + imm * 8
                 if lo <= addr <= hi:
-                    out.append((int(pc[i]), int(pc[k]), addr, "LDR/STR"))
+                    out.append((int(pc[i]), int(pc[k]), addr, "LOAD"))
+            if (w & 0xFFC00000) == 0xF9000000:
+                imm = (w >> 10) & 0xFFF
+                addr = pg + imm * 8
+                if lo <= addr <= hi:
+                    out.append((int(pc[i]), int(pc[k]), addr, "STORE"))
     return out
 
 
-for name, t in (("CA-root/key/cert config 0xa4a8478", 0xa4a8478),
-                ("public-key buffer 0xa4b0298", 0xa4b0298)):
+print("=" * 78)
+if len(sys.argv) > 1:
+    targets = [(a, int(a, 16)) for a in sys.argv[1:]]
+else:
+    targets = [("CA-root/key/cert config 0xa4a8478", 0xa4a8478),
+               ("public-key buffer 0xa4b0298", 0xa4b0298)]
+for name, t in targets:
     print("=" * 78)
     print(name)
     print("=" * 78)
