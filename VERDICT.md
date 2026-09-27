@@ -77,6 +77,41 @@ has 12 call sites in 5 functions, all pure loads; and a full-binary scan of ever
 all inspected (`0x76b0480`, `0x7ad5790`, `0x7ad5d98`, `0x79ecbe0…`) belong to *other* objects
 (a `std::list` head, a bool field, a global at `0xa4a7708`). No server-side or runtime write reaches the block.
 
+**Which of the 7 slots applies — the resolver's full decision tree** (`0x6f908d4`, returns
+`threshold_us = ms * 1000`). Every branch ends at `0x6f90a60` (`mul w8, w8, #1000; str w8, [x19]`):
+
+| # | guard (in order) | telemetry `w3` = kind | value read | ms |
+|---|---|---|---|---|
+| 0 | `0x6836fbc(state) == 0xa` → **return false** | — | — | rule inactive |
+| 1 | `vtable[0x68](arg)` true | `0x0f` = 15 | `[X+0x70c]` | **180** |
+| 2 | `vtable[0x160](ctx, 6)` true | `0x1e` = 30 | `csel(w23==1, [X+0x718], [X+0x71c])` | **10 / 30** |
+| 3 | `vtable[0x160](ctx, 5)` true | `0x1e` = 30 | `csel(w23==1, [X+0x710], [X+0x714])` | **10 / 300** |
+| 4 | `vtable[0x38](arg)` true | `0x14` = 20 | `str wzr, [x19]` | **0** (fires instantly) |
+| 5 | `!vtable[0x40](ctx)` | `0x1b` = 27 | `csel(w23==1, [X+0x720], [X+0x724])` | **60 / 90** |
+| 6 | `w23!=1 && vtable[0x30](ctx) && !vtable[0x20](arg) && !(vtable[0x28](arg)\|\|w27)` | `0x18` = 24 | `[X+0x708]` | **120** |
+| 7 | `vtable[0x30](arg)` true, else **return false** | `0x19` = 25 | `csel(w23==1, [X+0x728], [X+0x72c])` | **60 / 180** |
+
+`w23 = 0x68b6d14(state)` is the only per-side discriminator; `x21 = 0x68b4224(singleton 0x7d2bf4c)`
+produces the `X` whose block accessor is `0x7d376b0`. Branch 1 is the **first, mainline** case, and
+branch 0 can switch the whole rule off — so "not all 7 are reachable at once" is proven, not assumed.
+
+**What resets the clock.** `elapsed = now − [this+0x10]`, and `[this+0x10]` is re-stamped whenever
+`pred(this)` is true, `[this+0x10]==0`, or `[this+0x18] != seq`. `pred` (`0x6f90be4`) returns true if
+**any of six byte-pairs** `[2]!=[1], [4]!=[3], [6]!=[5], [8]!=[7], [10]!=[9], [12]!=[11]` differ — i.e. a
+shadow-copy change detector. The copy (`0x6f906c0`) writes `[2]=[1], [4]=[3] … [12]=[11]`, clearing it.
+Note `vtable[0x48]` is called at `0x6f90758` and its **return value is discarded** (`mov x0, x19`
+immediately follows) — it is a side-effect refresh, *not* the source of `last_activity`.
+
+**Fire path = log, then act.** On `elapsed >= threshold`: `0x6f907b8` copies `[this+0x10]` into the
+event, `0x6f907bc` loads a logger (`0x7dc0390` = `*(0xa4b3d8)`), and if non-null calls
+`0x7dc04c4(logger, s1, s2, s3, w4=0x214=532)` where the strings are built from
+**`"G:\PES22HC\…\MatchOnlineWatchDog.cpp"` with `w1 = 0x55` (85)** via `0x698d3a4` (which strips the
+path down to the basename at `MatchOnlineWatchDog.cpp`). Only then `0x6f8ee24` runs the action and the
+function returns true.
+**=> logcat grep `MatchOnlineWatchDog` is the empirical test: one line proves the rule fired, and the
+neighbouring `kind` (`event+0x80`, set by `0x6f50e44`) identifies which of the 7 rows above it was.**
+`"AbnormalEnd"` sits at `0xa1223c` immediately after this code and is the likely end-reason token.
+
 **Cross-check against healthy play** (`udp_trace.csv`, tun level, n=10,922 over 3.6 min):
 
 | direction | p50 | p95 | p99 | max | gaps >300 ms |
