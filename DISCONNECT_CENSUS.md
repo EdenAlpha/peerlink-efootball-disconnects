@@ -260,6 +260,136 @@ pinning**, so it is encrypted in transit but observable as metadata.
 
 ---
 
+## 2c. Can the game's *stated reason* be read off that plaintext HTTP? No — but a transport signature can
+
+Asked directly, answered by exhaustive search rather than assertion.
+Reproduce every step with `scan_reason.py`, `diff_types.py`, `diff_pair.py`,
+`rtt_trend.py`, `counters.py`.
+
+### 2c.1 The game's own reason fields are not in the plaintext — 0 of 10, 0 of 23
+
+All **23** plaintext HTTP bodies across both phones were decoded (`dat=` hex →
+UTF-8) and searched for the ten field names that §2 proved belong to
+`CmdGetVscomGameResult.php`:
+
+| field | z1 (11 msgs) | z2 (11 msgs) |
+|---|---|---|
+| `game_id` | never | never |
+| `abnormalend_reason` | never | never |
+| `is_problem` | never | never |
+| `is_stun_keep_alive_failed` | never | never |
+| `is_network_blocked_disconn` | never | never |
+| `is_background_timeout` | never | never |
+| `is_background_at_match` | never | never |
+| `user_network_status` | never | never |
+| `error_code` | never | never |
+| `intentional_give_up` | never | never |
+
+So the answer to "can't you still interpret the reason from what the game sends
+on HTTP" is: **not the reason the game itself assigns.** That upload lives on a
+channel this capture does not render in the clear. What the plaintext carries is
+a different report — `ReportLog.php`, the NTL transport dump.
+
+### 2c.2 The plaintext report is nevertheless a perfect stall discriminator
+
+Every `ReportLog.php` body carries a `type=` tag. Observed values and their
+timing:
+
+| phone | `type=uds` (normal) | `type=ude` (pre-stall / match end) |
+|---|---|---|
+| z1 | `05:56.830`, `11:59.413`, `14:29.621`, `22:36.522` | `10:43.265`, `13:09.445`, `21:47.049`, `33:10.902` |
+| z2 | `05:57.010`, `11:59.587`, `14:29.743`, `22:37.781` | `10:43.220`, `13:09.760`, `21:47.151` |
+
+All four `ude` on z1 and all three on z2 land **0.41–1.42 s before a recorded
+stall cliff** (§2b). The `pds`/`pde` pair is a pre-match startup report and
+contains no `EventHistory`.
+
+Structurally `ude` and `uds` are **identical** — same sections, same key set
+(`diff_types.py` prints an empty set-difference both ways). The only
+discriminator is the tag itself, plus the numbers below.
+
+### 2c.3 `rtt:` — 8/8 vs 7/7 with no overlap
+
+`rtt_trend.py` extracts the scalar `$"rtt:"` from every report:
+
+```
+z1  uds 14   ude  0 | uds 14   ude  0 | uds 13   ude  1 | uds 13   ude  0
+z2  uds 16   ude  0 | uds 21   ude  1 | uds 19   ude  1 | uds 16
+```
+
+- every `uds`: **13, 13, 14, 14, 16, 16, 19, 21 ms** (8/8)
+- every `ude`: **0, 0, 0, 0, 0, 1, 1 ms** (7/7)
+
+The two sets are disjoint with a clean gap between 1 and 13. A value of `0` in
+an RTT field means *no measurement completed*, i.e. the peer stopped answering
+the probe — and this is already true at the `ude` report, **before** the cliff
+that both phones record 0.4–1.4 s later.
+
+The tail packet dump agrees. At every `ude` the last 20 recorded sends are
+**only 26 / 27 / 32-byte keepalives** — no payload. At every `uds` the tail
+still contains `256`, `64`, `48`, `56`-byte packets. `diff_pair.py` shows the
+transition on a 70-second-apart pair:
+
+```
+-	[ 197.210.53.2:46839 ][ 256 bytes ][ 0000 ]   (uds, normal)
++	[ 197.210.53.2:46839 ][ 26 bytes ][ 0000 ]     (ude, 1 s before stall)
+-${"rtt:":14}
++${"rtt:":0}
+```
+
+### 2c.4 Konami's own counters measure the blackout: 76.1 / 80.2 / 89.5 s
+
+`sendCnt` is monotonic across the whole session on both phones. Differentiating
+it between consecutive reports gives an independent send rate:
+
+| period | z1 Δsend / Δt | rate | z2 rate |
+|---|---|---|---|
+| `uds` → `ude` (healthy play) | 7831 / 286.4 s, 1857 / 70.0 s, 12012 / 437.4 s, 17406 / 634.4 s | **26.5 – 27.5 /s** | 25.3 – 27.0 /s |
+| `ude` → next `uds` (post-stall) | 31 / 76.1 s, 34 / 80.2 s, 24 / 89.5 s | **0.27 – 0.42 /s** | 0.4 – 0.6 /s |
+
+So after every stall the peer channel collapses from ~27 sends/s to a heartbeat
+of roughly one packet every 2.5–3 s, and stays there for **76.1 s, 80.2 s and
+89.5 s** before full rate resumes with the next `uds`. The first two agree with
+PeerLink's independently-measured recoveries of 75.3 s and 78.9 s to within the
+report-to-cliff offset. The third does **not** (89.5 s vs 50.0 s); that
+discrepancy is unresolved and is stated here rather than smoothed over.
+
+### 2c.5 Konami's transport does not call it a failure until the very last report
+
+Throughout all three stalls the `PeerDump` status stays **`CONNECTED`** and
+`TimeoutMsec` stays `0`, and no `ev:"CLOSE"` appears in any stall report. The
+first and only close record in the entire capture is in z1's final report at
+`33:10.902`, 50 s after `score_commit`:
+
+```
+${"t":1711627,"ev":"CLOSE","tg":"TARGET_PEER","p":3,"rlast":20011,
+  "ravg":"2001","via":"HOST_DIRECT","ep":"PEER_REFLEXIVE"}
+${"status":"FORMALLY_TIMEOUT"}
+```
+
+z2 never emits a `CLOSE` at all.
+
+### 2c.6 What this does and does not establish
+
+**Established:** the plaintext channel cannot supply the game's assigned
+reason (0/23, ten field names); it *can* supply a pre-stall transport signature
+that separates stall reports from normal ones on both phones with zero
+misclassification (tag, `rtt:`, tail packet sizes, send rate).
+
+**Not established:** what `s`/`e` in `type=uds`/`type=ude` stand for — the
+sections and keys are byte-identical in kind, so no semantic reading of the tag
+is provable from this capture. Nor is causation: `rtt: 0` appearing 0.4–1.4 s
+before the cliff shows the link was already degenerate when the report was
+built, not what started it.
+
+**To read the game's actual reason** two routes remain open, both already in the
+plan: (a) MITM the TLS leg — §2b proved there is no certificate pinning, so a
+user-installed root would decrypt `Cmd*.php`; (b) `adb logcat | grep -E
+"MatchOnlineWatchDog|AbnormalEnd"` during one match, which reads the reason off
+the phone without touching the network.
+
+---
+
 ## 3. LIVE — session timeouts, all config-driven
 
 Parsed by function `0x7d3f938`, which reads a JSON node literally named
