@@ -18,3 +18,6 @@ efootball-apk/kaggle_*/
 efootball-apk/win_dump.txt
 efootball-apk/xref_dump.txt
 efootball-apk/quit_silence.txt
+
+# regenerable string dump (~10 MB) from strdump.py
+efootball-apk/ue4_strings.txt
