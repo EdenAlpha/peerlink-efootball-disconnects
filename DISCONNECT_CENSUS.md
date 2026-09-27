@@ -227,16 +227,25 @@ machine, RTTs, and the whole P2P event history.
 plaintext channel carries Konami's **NTL P2P/NAT diagnostics**; the abnormal-end
 *flags* ride the `Cmd*.php` channel.
 
-### Certificate pinning: none
+### Certificate pinning: none — **Java only; see §2d for the correction**
 
 Swept all **13,999** Java files under `jadx_out/sources` for
 `CertificatePinner` / `.pin(` / `X509TrustManager` / `checkServerTrusted` /
 `HostnameVerifier` / `SSLContext` / `usesCleartextTraffic` /
 `network_security_config`: **0 hits** (the only matches anywhere are Google's ad
-SDK and one `https://…konami` link in the Applilink agreement dialog). Native
-side has stock BoringSSL/OpenSSL, no pinned roots. So the TLS leg is *not*
-additionally pinned — but it is still TLS: without a CA installed you get SNI,
-destination, timing and size, not content.
+SDK and one `https://…konami` link in the Applilink agreement dialog).
+
+The Android side is additionally confirmed: `AndroidManifest.xml` declares
+**neither** `android:usesCleartextTraffic` **nor** `android:networkSecurityConfig`,
+`res/xml/` contains no `network_security_config.xml`, and a literal search for
+`networkSecurityConfig` across every XML under `apktool_out` returns **zero
+matches**.
+
+> **Retraction.** The original text here read *"Native side has stock
+> BoringSSL/OpenSSL, no pinned roots."* That sentence was **not supported by any
+> check I had run** — the native library had not been swept at the time. §2d
+> documents what the native sweep actually found, and why the Java sweep could
+> not have detected pinning on this app's TLS path in the first place.
 
 ### Limits of this evidence (stated, not hidden)
 
@@ -390,7 +399,122 @@ the phone without touching the network.
 
 ---
 
-## 3. LIVE — session timeouts, all config-driven
+## 2d. Correction — "no certificate pinning" was a Java-only claim
+
+Raised by direct challenge (*"are you sure?"*). Re-run properly; reproducible via
+`native_pin_scan.py`, `verify_mode.py`, `pem_dump.py`, `more_pems.py`,
+`pin_off2va.py`, `str_xrefs.py`, `glob_xrefs.py`.
+
+### 2d.1 Why the original check could not have worked
+
+The §2b sweep covered `jadx_out/sources` — **Java only**. But eFootball does not
+use Android's TLS for its own traffic. `libUE4.so` (160,822,968 bytes, the
+**only** native library shipped) contains a complete statically-linked
+OpenSSL **and** libcurl:
+
+| evidence in the string dump | count |
+|---|---|
+| `SSL_CTX_new`, `SSL_new`, `SSL_connect`, `SSL_do_handshake` | 1–5 each |
+| `SSL_read` / `SSL_write` | 5 / 7 |
+| `OpenSSL` / `openssl` | 29 / 9 |
+| `OPENSSL_init_ssl`, `SSL_CERT_DIR`, `SSL_CERT_FILE`, `SSL_CONF_cmd` | 1 each |
+| `CURLOPT_SSLCERT_BLOB`, `CURLOPT_SSLVERSION`, `CURL_SSL_BACKEND` | libcurl |
+| `DTLSv1`, `DTLS_RECORD_LAYER_new` | matches observed DTLS game traffic |
+| distinct `SSL`/`TLS`/`X509` identifiers | **388** |
+
+So pinning on this app's TLS path would have been implemented **natively**, in
+exactly the place the Java sweep did not look. The original claim was
+unfounded.
+
+### 2d.2 What the native sweep actually found
+
+`libUE4.so` embeds four PEM blocks (all offsets are file offsets, verified
+against the string dump):
+
+| # | block | file offset | VA | size |
+|---|---|---|---|---|
+| 1 | `BEGIN CERTIFICATE` — `C=JP, ST=Tokyo, L=Chuo-ku, O=KDE, OU=2 Prod, CN=CA root`, self-signed 4096-bit, valid **2020-09-23 → 2120-08-03** | 10329029 | `0x9d9bc5` | 2016 B |
+| 2 | `BEGIN CERTIFICATE` — same issuer, **`CN=localhost`** | 11576018 | `0xb0a2d2` | 1840 B |
+| 3 | `BEGIN RSA PRIVATE KEY` — **4096-bit** | 12197510 | `0xba1e86` | 3192 B |
+| 4 | `BEGIN PUBLIC KEY` — **4096-bit**, immediately preceded by the literals `pes22-game.cs.konami.net` and `.txt` | 10874228 | `0xa5ed74` | 799 B |
+
+`O=KDE, L=Chuo-ku, Tokyo` is **Konami Digital Entertainment** — a private CA,
+not a public one. Each block has **exactly one** code xref:
+
+```
+CA root      0x9d9bc5 -> 0x7b11044
+private key  0xba1e86 -> 0x7b11088
+localhost    0xb0a2d2 -> 0x7b110b8
+public key   0xa5ed74 -> 0x7d66e10
+hostname     0xa5ed56 -> 0x7d666f0
+'.txt'       0xa5ed6f -> 0x7d65c38
+```
+
+### 2d.3 Blocks 1–3 are gRPC **debug** credentials, not a server trust anchor
+
+A single initializer, `0x7b11028`, copies all three into one global config at
+`0xa4a8478`. The lengths passed are byte-exact:
+
+```
+0x7b11044  adrp/add x1 = 0x9d9bc5   mov w2, #0x7e1 = 2017   ; PEM 2016 + NUL
+0x7b11088  adrp/add x1 = 0xba1e86   mov w2, #0xc78 = 3192   ; PEM 3192
+0x7b110b8  adrp/add x1 = 0xb0a2d2   mov w2, #0x730 = 1840   ; PEM 1840
+```
+
+The **only** code that consumes the CA-root slot (`0xa4a8480`) is `0x7b1029c`,
+and it is gated by two settings read literally by name:
+
+```
+0x7b10258  "Def_Online_gRPC_insecure"          ; len 0x18 = 24
+0x7b1027c  bl  flag_lookup
+0x7b10280  cbnz w0, 0x7b105c8                  ; insecure -> skip everything
+
+0x7b10284  "Def_Online_gRPC_debug_root_ca"     ; len 0x1d = 29
+0x7b10294  bl  flag_lookup
+0x7b10298  cbz  w0, 0x7b103ac                  ; flag off -> other path
+0x7b1029c  adrp/add x8 = 0xa4a8480             ; flag on  -> use embedded CA
+```
+
+The embedded CA root, private key and `localhost` certificate are therefore the
+**`gRPC_debug_root_ca`** identity, used only when that setting is enabled. They
+are not, on this evidence, the trust anchor for `pes22-game.cs.konami.net`.
+
+### 2d.4 Block 4 — the public key — is not yet explained
+
+Its sole reader is `0x7d668a0`:
+
+```
+0x7d668a0  adrp/add x0 = 0xa4b02a0   ; the stored PEM
+0x7d668b0  bl      0x7dcae2c          ; build object from it
+0x7d668c0  ldr x8, [x0] ; ldr x9, [x8, #0x10] ; blr x9   ; virtual call
+```
+
+The surrounding code strips a UTF-8 BOM (`0xEF 0xBB 0xBF`) and widens to
+UTF-16 — that is the shape of a text/serialiser path, **not** of an `SSL_CTX`
+verify hook. Separately, `0x7d65c38` is in a function that builds a string and
+then appends the literal `".txt"` (`mov w2, #4`).
+
+Neither the hostname, the `.txt` suffix, nor the public key has been traced to a
+certificate comparison. **The pinning question for this key remains open.**
+
+### 2d.5 Methodological limit, stated plainly
+
+`SSL_CTX_set_cert_verify_callback`, `SSL_VERIFY_PEER`, `SSL_set1_host`,
+`X509_VERIFY_PARAM_set1_host`, `CURLOPT_PINNEDPUBLICKEY` and friends all return
+**0 hits** in the string dump. That is **weak evidence in both directions**:
+OpenSSL is statically linked and stripped, so an internal call need not leave its
+name in `.rodata` at all. This is the same `refs` limitation already recorded for
+§1 — *absence of a string is not absence of a call*. It was applied to my own
+claim here, which is what produced this correction.
+
+### 2d.6 Effect on the two routes to the game's reason
+
+| route | before | now |
+|---|---|---|
+| **(a) MITM the TLS leg** | "proven feasible — no pinning" | **open question.** The Android side genuinely has no pinning and no network security config, but Konami's TLS is native, and a 4096-bit key sits beside the game hostname with its usage still unidentified. |
+| **(b) `adb logcat` off the phone** | viable | **unaffected.** Reads the reason without touching the network, so no TLS assumption is involved. |
+
+(b) remains the correct next step; (a) must not be described as established.
 
 Parsed by function `0x7d3f938`, which reads a JSON node literally named
 **`"timeout_settings"`** (via `obj+0x98`). Values are stored at `obj+0x50..0x8c`.
