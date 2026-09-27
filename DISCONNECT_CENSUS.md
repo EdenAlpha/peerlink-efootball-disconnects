@@ -516,6 +516,125 @@ claim here, which is what produced this correction.
 
 (b) remains the correct next step; (a) must not be described as established.
 
+---
+
+## 2e. Where the full-time result travels: **HTTPS, not HTTP**
+
+Reproducible via `score_channel.py`, `score_host.py`, `score_timeline.py`
+(all committed).
+
+### 2e.1 What "the score" is called
+
+`libUE4.so` embeds **330** distinct `.php` names; **328** start with `Cmd`.
+The result-side ones include `CmdSetGameResult.php`, `CmdGetVscomGameResult.php`,
+`CmdCheckGameResult.php`, `CmdGetGameresultList.php`, `CmdSetPlaydataMatch.php`,
+`CmdSetOnlineStats.php`, `CmdSendReport.php`, `CmdSendSessionFailedNotice.php`,
+`CmdSendAnalysisLog.php`. Only `GateInfo.php` and `gate.php` are non-`Cmd`.
+
+### 2e.2 Test 1 — every captured byte searched for all 330 endpoint names
+
+| phone | payload bytes searched | `.php` names found in the clear | literal `Cmd` byte-runs |
+|---|---|---|---|
+| z1 | 1,587,736 | `GateInfo.php` | **0** |
+| z2 | 2,469,483 | `GateInfo.php` | **1** |
+
+The single `Cmd` hit on z2 is closed out by TEST 4: it is at session
+`21:19.944`, `10.0.0.2:57529 → 35.240.102.10:31406`, **UDP**, with binary
+context `…a3qCmdj\xe4\x98\x88B…` — random payload bytes, not an HTTP request
+line.
+
+**Zero `Cmd*.php` names appear in plaintext on either phone**, across
+4,057,219 bytes.
+
+### 2e.3 Test 2 — every plaintext HTTP request line in the capture
+
+| phone | requests | endpoints |
+|---|---|---|
+| z1 | 12 | 1× `POST /ntl/api/GateInfo.php`, 11× `POST /ntl/api/PES2022/ReportLog.php` |
+| z2 | 11 | 1× `POST /ntl/api/GateInfo.php`, 10× `POST /ntl/api/PES2022/ReportLog.php` |
+
+All to `35.174.175.11:80` / `34.193.147.150:80`. No `GET` anywhere, no other
+`POST`.
+
+### 2e.4 Test 3 — what is on the wire at full time
+
+Whole capture, outbound TCP payload by port:
+
+| phone | :80 | :443 | other |
+|---|---|---|---|
+| z1 | 77,836 B | 326,345 B | **0** |
+| z2 | 69,581 B | 320,154 B | 944 B — all DNS-over-TLS to `8.8.4.4:853` |
+
+**±45 s around `score_commit` (`32:20.431`):**
+
+| phone | port 80 | port 443 | other |
+|---|---|---|---|
+| z1 | **0** | 16,878 B | 0 |
+| z2 | **0** | 12,791 B | 0 |
+
+There is **no plaintext HTTP traffic at all** in that window on either phone.
+Every destination in it carries TLS SNI `pes22-game.cs.konami.net`:
+
+| phone | destination | SNI observed | SYN |
+|---|---|---|---|
+| z1 | `44.226.252.93:443` | 30:27.199 | — |
+| z1 | `52.38.62.255:443` | 31:47.488 | 31:47.180 |
+| z1 | `32.184.206.158:443` | 04:19.930 | — |
+| z2 | `184.34.183.36:443` | 30:28.022 | — |
+| z2 | `44.226.95.75:443` | 31:47.802 | 31:47.472 |
+| z2 | `54.187.87.37:443` | (session opened earlier in match) | — |
+
+DNS corroborates: `pes22-game.cs.konami.net` is queried 19× (z1) / 20× (z2)
+and CNAME-chased to five AWS load balancers
+(`*.elb.ap-southeast-7 / eu-south-1 / me-central-1 / ap-southeast-5 /
+sa-east-1.amazonaws.com`).
+
+### 2e.5 The plaintext blackout that brackets full time
+
+z1's plaintext request times end `… 21:47.049, 22:36.522, 33:10.902` — a
+**10 min 34 s** gap with zero port-80 bytes, inside which `score_commit`
+(`32:20.431`) sits. z2's last plaintext request is `22:37.781`, with none
+thereafter.
+
+So at full time there was **no port-80 connection even open**. The only
+plaintext traffic after the match is z1's `ReportLog.php` at `33:10.902`
+(8,301 B on port 80), which §2c already characterised as carrying connection
+counters, not the score.
+
+### 2e.6 Verdict
+
+> **HTTPS.** The full-time result does not travel over HTTP.
+
+**Proven:**
+
+1. No `Cmd*.php` name appears in plaintext anywhere in 4,057,219 captured
+   bytes across 68 minutes and both phones.
+2. All 23 plaintext HTTP requests in the whole capture are `GateInfo.php` and
+   `ReportLog.php`.
+3. In the ±45 s around `score_commit`, port 80 carried **0 bytes** on both
+   phones; port 443 carried everything, and every address involved is
+   `pes22-game.cs.konami.net` by SNI.
+4. Whole-capture outbound TCP is port 80 + port 443 only (plus 944 B of
+   DNS-over-TLS on z2) — there is no third clear-text channel to hide in.
+
+**Not proven:**
+
+- *Which* of the `pes22-game.cs.konami.net` TLS sessions carries the specific
+  result request, or which byte inside it — TLS content is opaque here.
+  §2b recorded that the gate URL is assembled at runtime and that the
+  `Cmd*.php` transport was inference only; this section upgrades it to
+  **"not on port 80, and all port-80 traffic is accounted for"**, which is
+  the part that was actually in doubt.
+- TCP **responses** are still not captured (`dir=r` exists only for UDP), so
+  the server's reply to the result is invisible.
+- `CmdConnectGrpc.php` and the `Def_Online_gRPC_*` settings (§2d.3) name an
+  additional possible transport. It would still be TLS on 443, so it does not
+  change the answer.
+
+---
+
+## 3. LIVE — session timeouts, all config-driven
+
 Parsed by function `0x7d3f938`, which reads a JSON node literally named
 **`"timeout_settings"`** (via `obj+0x98`). Values are stored at `obj+0x50..0x8c`.
 
