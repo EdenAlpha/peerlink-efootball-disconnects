@@ -9,3 +9,12 @@ efootball-apk/jadx-cli/
 efootball-apk/*.jar
 efootball-apk/*.zip
 efootball-apk/efootball-11.0.1-full.apk
+
+# generated analysis artefacts (regenerable, huge)
+efootball-apk/jadx_out/
+efootball-apk/apktool_out/
+efootball-apk/ghidra_*/
+efootball-apk/kaggle_*/
+efootball-apk/win_dump.txt
+efootball-apk/xref_dump.txt
+efootball-apk/quit_silence.txt

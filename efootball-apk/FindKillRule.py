@@ -1,6 +1,6 @@
 # Ghidra Jython script: find kill-rule strings, xrefs, decompile callers
 # @category: Analysis
-import os
+OUT = r"C:\Users\Administrator\Documents\Default Project\peerlink-efootball-disconnects\efootball-apk\killrule_out2.txt"
 targets = [
     "E_TURN_ALLOCATION_MISSMATCH",
     "MATCH_STOP_COUNT_SELF_BUF_EMPTY",
@@ -17,17 +17,6 @@ targets = [
     "NTL_PEER_KEEPALIVE",
     "MultiplaySessionRecvThreadReceiveTimeoutUs",
 ]
-out_path = os.path.join(str(getGhidraHome() if False else ""), "")
-# output next to script via environment? use fixed path passed as arg
-out_file = None
-try:
-    args = getScriptArgs()
-    if args and len(args) > 0:
-        out_file = args[0]
-except:
-    pass
-if out_file is None:
-    out_file = "/tmp/ghidra_killrule.txt"
 lines = []
 def log(s):
     lines.append(s)
@@ -36,27 +25,23 @@ from ghidra.app.decompiler import DecompInterface
 from ghidra.util.task import ConsoleTaskMonitor
 decomp = DecompInterface()
 decomp.openProgram(currentProgram)
-listing = currentProgram.getListing()
-mem = currentProgram.getMemory()
-fm = currentProgram.getFunctionManager()
 for t in targets:
-    log("="*80)
+    log("=" * 80)
     log("TARGET: " + t)
-    tbytes = t.encode()
+    hexpat = " ".join([ "%02x" % ord(c) for c in t ])
     found = []
-    for block in mem.getBlocks():
-        if not block.isInitialized():
-            continue
-        try:
-            addr = findBytes(block.getStart(), tbytes, 1, ConsoleTaskMonitor())
-        except Exception as e:
-            continue
-        while addr is not None and len(found) < 5:
-            found.append(addr)
+    try:
+        addrs = findBytes(currentProgram.getMinAddress(), hexpat, 5, ConsoleTaskMonitor())
+        a = addrs
+        while a is not None and len(found) < 5:
+            found.append(a)
             try:
-                addr = findBytes(addr.add(1), tbytes, 1, ConsoleTaskMonitor())
-            except:
+                a = findBytes(a.add(1), hexpat, 1, ConsoleTaskMonitor())
+            except Exception:
                 break
+    except Exception as e:
+        log("  find error: " + str(e))
+        continue
     if not found:
         log("  no hits")
         continue
@@ -74,7 +59,7 @@ for t in targets:
                     res = decomp.decompileFunction(fa, 60, ConsoleTaskMonitor())
                     if res and res.getDecompiledFunction():
                         code = res.getDecompiledFunction().getC()
-                        for i, l in enumerate(code.split("\n")[:120]):
+                        for l in code.split("\n")[:120]:
                             log("      |" + l[:220])
                     else:
                         log("      (decompile failed: " + str(res.getErrorMessage() if res else "?") + ")")
@@ -84,7 +69,7 @@ for t in targets:
         if n == 0:
             log("    (no xrefs)")
 try:
-    open(out_file, "w").write("\n".join(lines))
-    print("WROTE " + out_file + " lines=" + str(len(lines)))
+    open(OUT, "w").write("\n".join(lines))
+    print("WROTE " + OUT + " lines=" + str(len(lines)))
 except Exception as e:
     print("WRITE FAIL " + str(e))

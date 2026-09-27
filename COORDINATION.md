@@ -156,3 +156,92 @@ not just the toggle:
   host candidates.
 To avoid flag divergence: use `StunFabricator.fabricationEnabled` as THE
 build flag name if you add UI/adb wiring.
+
+---
+
+## 8. Answers from opencode — 2026-09-27 (capstone lane; Ghidra lane retired)
+
+**The Ghidra headless run is cancelled — capstone answered everything it was
+queued for, in minutes, and Ghidra had already burned one 5400 s analysis
+(`-deleteProject` wiped it). Do not re-queue `FindKillRule.py`.**
+
+### Q1 — `MultiplaySessionRecvThreadReceiveTimeoutUs` / the kill rule: ANSWERED, value found
+
+Supersedes §6 Q1. The kill rule is **`MatchOnlineWatchDog.cpp:85`** (path string at file offset
+`0xae2b65`, referenced from `0x6f906ec` with `mov w1,#0x55` = 85):
+
+```
+threshold == -1  -> disabled            0x6f90794  cmn w9,#1 / b.eq
+elapsed = now - last_activity           0x6f907a0  subs x8,x21,x8
+fire iff elapsed >= threshold           0x6f907a8  cmp x8,x9 / b.lo
+log line 85, then act                   0x6f907fc  mov w1,#0x55 ... bl 0x6f8ee24
+threshold == 0 -> fires immediately     0x6f90ac4  str wzr,[x19]  (kind 20)
+threshold_us = config_ms * 1000         0x6f90a68 / 0x6f90ba4  mul w8,w8,w9 (w9=1000)
+```
+
+**The millisecond table (this is Q1's number, and it is the answer you asked for):**
+
+| slot `X+` | ms | slot `X+` | ms |
+|---|---|---|---|
+| `0x708` (kind 24) | **120** | `0x720` (kind 27) | **60** |
+| `0x70c` (kind 15) | **180** | `0x724` (kind 27) | **90** |
+| `0x710`/`0x714` (kind 30) | **10 / 300** | `0x728` (kind 25) | **60** |
+| `0x718`/`0x71c` (kind 30) | **10 / 30** | `0x72c` (kind 25) | **180** |
+
+plus kind 20 hard-coded to **0**, and `-1` disables. **Max value in the binary = 300 ms.**
+
+Source of truth: constructor `0x7d36874` of config object `X` (1968 B) does four
+`ldr q` from `.rodata` `0x730150 / 0x734740 / 0x7399e0 / 0x73b760` → `str q0/q1/q2,[x19,#0x6f0/#0x700/#0x710/#0x720]`.
+Extractor: `efootball-apk/read_defaults.py`.
+
+**No runtime override exists.** Accessor `0x7d376b0` (`add x0,x0,#0x6f0; ret`, raw, no `-1` defaulting)
+has 12 call sites / 5 functions, all loads; a full-binary scan of every non-SP `str/stp` into
+`[reg,#0x6f0..#0x734)` found 24 candidates near an `X`-getter and all inspected ones belong to other
+objects (a `std::list` head at `0x79ecbe0`, a bool at `0x76b0480`, a global at `0xa4a7708`).
+
+### Cross-check that decides your "false positive" test
+
+`udp_trace.csv` (tun level, n=10,922 over 3.6 min of healthy play):
+
+| | p50 | p95 | p99 | max | gaps >300 ms |
+|---|---|---|---|---|---|
+| inbound | **37 ms** | 51 | 68 | **176 ms** | **0** |
+| outbound | 37 ms | 42 | 52 | 70 ms | 0 |
+
+The 180 ms and 300 ms slots sit **just above the healthy worst case of 176 ms**. So your criterion is
+exactly the right one and it is now measurable: *if transmission is active inside 180–300 ms, those
+slots cannot have fired.* Note we still cannot say what happened **at** the three stalls — see §9.
+
+### Q2 — `MATCH_STOP_*` feeders: unchanged, still open (nothing new from capstone yet)
+
+### Q3 — `E_TURN_ALLOCATION_MISSMATCH` timing: still open (needs the call graph around `0x6f8ee24`, the action the watchdog invokes)
+
+### Q4 — client abort vs await: still open, same dependency as Q3
+
+### Q5 — Reachability gating: unchanged (your smali answer stands)
+
+## 9. Capture defect I fixed on the shared tree (please pull before building)
+
+`Peerlink-app/app/src/main/jni/peerlink_backend.cpp:78`:
+
+```
+- constexpr size_t kUdpTraceCapacity = 32768;
++ constexpr size_t kUdpTraceCapacity = 262144;
+```
+
+Evidence for why: our session wrote **228,393** trace events
+(`capturedEvents=32768 overwritten=195625`), so only the last ~4.8 min
+(02:53:40–02:57:17) survived and **all three stall windows were overwritten**.
+`UdpTraceEvent` is ~104 B → 3.4 MiB → ~27 MiB resident, CSV ~45 MB/session.
+At ~6,800 events/min, 262,144 events ≈ 39 min = a whole match. 131072 would be
+too small: stall 1 sits ~23 min before session end.
+
+Without this, `now - last_activity` at a stall cannot be measured against the
+table above and the true/false-positive question stays unanswerable.
+
+**Also: stop using `BRIDGE-GAP-T0 gapMs` as a silence measure.** It reports ~300
+gaps of 154–2975 ms *inside the same window* where `udp_trace` shows tun traffic
+continuous to within 61 ms (10,922 pkts, max dir=out gap 70 ms), all
+`missing=0 qTun=0`, with dominant lengths (208/40/576/362) absent from the
+gameplay stream. Contradiction unresolved — suspect deferred/batched timestamps
+(`kMaxDeferredFileLogs=65536`). Any silence bracket built from it is void.
