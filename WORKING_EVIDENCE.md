@@ -49,3 +49,9 @@
 - GetWifiManager: RSSI/signal tracking (calcRssi, s_rate, s_wifiInfo, NetworkCallback, getConnectionInfo). No SSID/BSSID reads. Signal quality, not hotspot gating.
 - GetTrafficStats: byte counters only.
 - TURN cert anomaly: server delivers turn.konami.com cert inside DTLS 256B records with validity 2019-07-26 to 2021-... (expired 5y before 2026 capture) yet sessions establish and run 8+ min. Expiry not the immediate killer; noted for Ghidra (cert validation path).
+
+## Config-loader structure (capstone, no Ghidra needed)
+- 25 exact dataflow hits (ADRP->MOV/ADD tracked) for: reflexive_address x9, is_cheat_user x2, CmdGetTurnServerList x3, TurnReconnectWaitTimeMs, MultiplaySessionRecvThreadReceiveTimeoutUs, KeepAliveTimerUs, MatchAbortTimerCoefficient, DETECT_NAT_ABORTED, CHECK_STUN_RTT_TIMEOUT, MATCH_STOP_COUNT_SELF_BUF_EMPTY_BURST_L1 x2, NTL_PEER_KEEPALIVE_COUNT x2.
+- Timeout getters all share one pattern: bulk loader (e.g. near 0x7c05b7c) loops ADRP x2,<name> + BL typed-getter (0x7d2a9c0 int32 / 0x7d2aa38 int64 / 0x7d2ac90 bool) reading a config MAP object (flag byte [x0,#0x20], key lookup via 0x2f927dc-family). Neighbors in one block: BindNTLAddress, MaxPayloadLength, NetworkIoConnectionTimeoutUs, TurnReconnectWaitTimeMs, NtlReconnectWaitTimeMs.
+- Consequence: exact ms values are NOT immediates; they live in the map (server-pushed NTL config and/or defaults blob). Static strings give names+protocol, never numbers. Numbers need Ghidra decompile of map-fill/callers (running) or runtime read on phones.
+- E_TURN_ALLOCATION_MISSMATCH: ZERO direct code uses (enum-indexed table only; the 0x75505a8-region loop registers names via std::string machinery, w2=len). Mid-match vs alloc-time evaluation unprovable statically: pending Ghidra/logcat.
