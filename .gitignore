@@ -21,3 +21,7 @@ efootball-apk/quit_silence.txt
 
 # regenerable string dump (~10 MB) from strdump.py
 efootball-apk/ue4_strings.txt
+
+# python bytecode
+__pycache__/
+

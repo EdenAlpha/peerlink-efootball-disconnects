@@ -125,6 +125,141 @@ tracks whether its STUN keepalive failed.
 
 ---
 
+## 2b. Is these reports capturable by PeerLink's VPN, and are they encrypted?
+
+Short answer: **the VPN already captured them, and the Konami diagnostic
+channel is completely in the clear.** Every claim below is read out of
+`captures/match-2026-09-26/*/passthrough_capture.csv`, which is written by
+PeerLink's `VpnService` — so "capturable" is demonstrated by the file itself,
+not asserted.
+
+### The two Konami channels, observed
+
+Both phones, ~34 min each (z1: 13,187 packets, z2: 16,511):
+
+| host | resolved to | port | encryption | what crosses it |
+|---|---|---|---|---|
+| `ntl.service.konami.net` | 5 rotating A records, e.g. `35.174.175.11` | **80** | **none — plaintext HTTP** | `GateInfo.php`, `ReportLog.php` |
+| `pes22-game.cs.konami.net` | CNAME → `pes22-prd-lb-1361062069.us-west-2.elb.amazonaws.com` | 443 | TLS | everything else |
+
+Plaintext request lines recovered verbatim (reassembled by TCP sequence
+number, **0 missing bytes** across all 12 flows):
+
+```
+POST /ntl/api/GateInfo.php HTTP/1.1
+Host: ntl.service.konami.net
+Accept: */*
+Content-Length: 166
+Content-Type: application/x-www-form-urlencoded
+
+POST /ntl/api/PES2022/ReportLog.php HTTP/1.1
+Host: ntl.service.konami.net
+Accept: */*
+Content-Length: 6580
+Content-Type: application/x-www-form-urlencoded
+```
+
+Counts: z1 = 12 plaintext requests (1 × `GateInfo`, 11 × `ReportLog`);
+z2 = 11 (1 × `GateInfo`, 10 × `ReportLog`). **Plaintext `Cmd*.php` observed:
+0**, out of 68 minutes across both handsets.
+
+The body is `type=…&prefix=…&ver=4&dat=<hex>` — hex, not encryption. Decoding
+is `bytes.fromhex(urllib.parse.unquote(dat))`, nothing more.
+
+The hardcoded full URL `http://ntl.service.konami.net/ntl/api/GateInfo.php`
+is `UNREFERENCED`, yet that exact path was requested on the wire — the URL is
+assembled at runtime from the scheme literal `http://` (REFERENCED at
+`0x7bce114`, `0x7c4ef00`, `0x7d074d4`). There is **no `https://` builder in the
+binary at all**; the only `https://` strings are three hard-coded support links.
+
+### It fires on the stalls — six for six
+
+`passthrough_capture.csv` carries event markers. Parsing them for z1 gives
+three `0pps_cliff` pairs = your three stalls, and a plaintext report lands on
+every one of them, on **both** phones:
+
+| | stall #1 | stall #2 | stall #3 |
+|---|---|---|---|
+| **z1** ReportLog → cliff | `10:43.265` → `10:43.676` (**0.41 s**) | `13:09.445` → `13:10.869` (**1.42 s**) | `21:47.049` → `21:48.344` (**1.29 s**) |
+| **z2** ReportLog → cliff | `10:43.220` → `10:43.707` (**0.49 s**) | `13:09.760` → `13:10.770` (**1.01 s**) | `21:47.151` → `21:48.232` (**1.08 s**) |
+
+Two independent phones, independently timestamped, each posting a diagnostic
+report to Konami over **cleartext HTTP** within about a second of the game
+stream dropping to zero. Each is also a fresh TCP connection (SYN observed at
+`10:42.969`, request at `10:43.265`) — no keep-alive, so every report is its
+own trivially identifiable event.
+
+### What the plaintext report actually contains
+
+Full decoded body of the stall-#1 report (3,238 chars, complete):
+
+```
+## NTLInfo
+${"libVer":"1.17.1-Android-13"}
+${"uid":"e01a7766eb9df741b603aef191fb83d8"}
+...
+## NetworkInfo
+${"natType":0x10300090}
+${"hostAddress":"10.57.220.5:26031"}
+${"reflexiveAddrStr":"197.210.53.1:26031"}
+...
+## EventHistory
+${"t":8690,"ev":"CONNECT","tg":"TARGET_STUN_SERVER","p":-1,...,"ep":"PEER_STUN"}
+${"t":85546,"ev":"CONNECT","tg":"TARGET_PEER","p":0,...,"ep":"PEER_REFLEXIVE"}
+## PeerDump
+${"peerId":0}
+${"status":"CONNECTED"}
+${"exSessKey":"1012115771-1500395919-1790386201"}
+## TransportDump_via_HOST_DIRECT_ept_PEER_HOST
+${"appTo":"10.218.228.85:46839"}  ${"status":"RESTRAINED"}  ${"rtt":[0,0,500]}
+## TransportDump_via_HOST_DIRECT_ept_PEER_REFLEXIVE
+${"appTo":"197.210.53.2:46839"}   ${"status":"CONNECTED"}   ${"rtt":[0,0,24]}
+```
+
+So a passive VPN observer on that phone gets, unencrypted: your account `uid`,
+your public IP and mapped port, the opponent's public IP and port, both LAN
+addresses, the NAT type, the **peer session key**, the peer/transport state
+machine, RTTs, and the whole P2P event history.
+
+**But note what is *not* there.** None of §2's abnormal-end fields
+(`abnormalend_reason`, `is_stun_keep_alive_failed`, `is_network_blocked_disconn`,
+`is_background_timeout`, `intentional_give_up`) appear in this body. The
+plaintext channel carries Konami's **NTL P2P/NAT diagnostics**; the abnormal-end
+*flags* ride the `Cmd*.php` channel.
+
+### Certificate pinning: none
+
+Swept all **13,999** Java files under `jadx_out/sources` for
+`CertificatePinner` / `.pin(` / `X509TrustManager` / `checkServerTrusted` /
+`HostnameVerifier` / `SSLContext` / `usesCleartextTraffic` /
+`network_security_config`: **0 hits** (the only matches anywhere are Google's ad
+SDK and one `https://…konami` link in the Applilink agreement dialog). Native
+side has stock BoringSSL/OpenSSL, no pinned roots. So the TLS leg is *not*
+additionally pinned — but it is still TLS: without a CA installed you get SNI,
+destination, timing and size, not content.
+
+### Limits of this evidence (stated, not hidden)
+
+1. **TCP responses are not captured.** `dir=r` rows exist only for UDP (DNS).
+   So the `GateInfo.php` *reply* — which is where the client presumably learns
+   its gate address — is unavailable, as is any server→client TCP payload.
+2. **`Cmd*.php` transport is inference, not proof.** Zero plaintext `Cmd*.php`
+   in 68 min; and at `score_commit` (`32:20.431`) **no new TCP connection opened
+   for 50 s** (last Konami SYN at `31:47.180`, next at `33:10.605`). So if a
+   result command was sent at match end it reused an existing TLS session to
+   `pes22-prd-lb`. That is consistent with, but does not prove, TLS — it is
+   equally consistent with no command having been sent.
+3. Hex-encoded body ≠ confidentiality. `dat=` is hex, and it is reversible by
+   anyone who can read port 80.
+
+**Answer to the question as asked:** yes, your VPN captures it — it already
+has, for both phones, including full bodies. The Konami *diagnostic* report
+(`GateInfo.php`, `ReportLog.php`) is **unencrypted plain HTTP on port 80**. The
+game/command leg to `pes22-game.cs.konami.net` is **TLS 443 with no cert
+pinning**, so it is encrypted in transit but observable as metadata.
+
+---
+
 ## 3. LIVE — session timeouts, all config-driven
 
 Parsed by function `0x7d3f938`, which reads a JSON node literally named
