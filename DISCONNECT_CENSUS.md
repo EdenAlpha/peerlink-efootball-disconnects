@@ -753,6 +753,102 @@ replacement is PeerLink-side ms-resolution telemetry (the raised
 
 ---
 
+## 2g. What the watchdog actually *does* when it fires: it posts a command to a queue
+
+Reproducible via `fn_lits.py`, `sink_audit.py`, `win_dump.py` (all committed).
+
+### 2g.1 The fire action is a three-step dispatch, not an abort
+
+`0x6f8ee24(event)` is called from the fire block at `0x6f90844` with `x0 = sp+0x50`
+(the event built on the stack):
+
+| step | callee | role |
+|---|---|---|
+| 0 | `0x6f8ee94` | predicate: `handler->[+0x10] != 0` |
+| 1 | `0x6f8eea4` | validate the event |
+| 2 | `0x6f8ed8c` | gate — build and dispatch a command |
+| 3 | `0x6f8eff0` | record the event into the handler |
+
+If the global handler `*(0xa4590f8)` is NULL, **or** its `+0x10` field is 0, the
+whole call returns false and **nothing at all happens**.
+
+### 2g.2 The handler is a lazily-installed singleton — and it *is* installed
+
+- `0x6f8ea3c` — lazy getter: `new(0xb8)`, vtable `0x97a2888`, stores into
+  `0xa4590f8`, then calls `vtable[+0x10]`.
+- `0x6f8eae4` — destructor: `vtable[+8]`, then clears `0xa4590f8`.
+- `sink_audit.py 0xa459000 0xa4590f8` → **2 distinct writers** (`0x6f8ea8c`,
+  `0x6f8eb08`), both inside the getter/destructor.
+
+This is the opposite of the UE4 emitter sink `0x9c14870` (§2f.4), whose single
+writer is an unreachable thunk. Here the slot is populated, so **this path is live**.
+
+### 2g.3 Step 2 builds a 160-byte command object
+
+`0x6f8ed8c(handler, event)`:
+
+1. `x0 = *(event+0x90)`; if NULL, call `0x6f8f218()` (a singleton getter) and
+   store the result through `0x6f510b4`.
+2. `0x6f8f268(event)`:
+   - `0x7d37fe4(event)` → `event->vtable[+0x18](event)`; NULL ⇒ false.
+   - `new(0xa0)` (160 B); ctor `0x6f8f2dc` → vtable `0x97a2168`, copies 32 bytes
+     from `event+0x80` into `obj+0x80`.
+   - `0x6f50fc0(obj)`, then `0x7d37d00(obj)` — true only if that returns non-zero.
+   - on failure: `0x6f51040(obj)`, `delete(obj)`, return false.
+
+### 2g.4 Both dispatchers enqueue into a global queue
+
+`0x7d37d00(obj)` and `0x7d37fe4(obj)` both:
+
+- load a singleton from `0xa4afca8`,
+- call a virtual on the command object (`vtable[+0x20]` / `vtable[+0x18]`),
+- check a flag at `singleton->[+0x98]->[+0x13b]`,
+- take a mutex at `singleton+0x38` (`0x2efc5d0`),
+- read queue pointers at `singleton+0x10` and `singleton+0x28`.
+
+So the watchdog's action is **"enqueue a command"**. Whatever the match does next
+is decided when that queue is drained on another thread.
+
+### 2g.5 The activity clock, and the correction to VERDICT §1b
+
+`0x6f90be4(obj)` — the re-stamp predicate — compares **five** byte-pairs of an
+11-byte struct: `[2]vs[1], [4]vs[3], [6]vs[5], [8]vs[7], [0xa]vs[9]`, returning
+true if any differ. **VERDICT §1b said "six byte-pairs" and listed `[12]!=[11]`;**
+that was wrong and is corrected there.
+
+Two update paths write the threshold into the event, both `value * 1000`:
+
+| kind | source |
+|---|---|
+| `0x1b` (27) | `accessor->[+0x30]`, or `[+0x34]` when `w23 == 1` |
+| `0x18` (24) | `accessor->[+0x18]` |
+
+then `0x6f90c40` → `0x81604f4` supplies the timestamp.
+
+### 2g.6 What this establishes
+
+- The watchdog does **not** abort the match inline. It raises an event that a
+  registered handler turns into a **queued command**.
+- Therefore the ~70 s freeze is **not** the watchdog's own execution time — it is
+  whatever the queued command does when the queue is drained.
+- The handler slot is populated, so this path is live, not dead code.
+
+### 2g.7 Limits of this evidence
+
+- **The handler's class name is unknown.** The vtable at `0x97a2888` could not be
+  read: `.data.rel.ro` is filled by `R_AARCH64_RELATIVE` relocations, and this
+  ELF's relocation table is **not recoverable** — `.rela.dyn`'s section header
+  carries a bogus `sh_type` (`0x60000002`) and `sh_entsize` (`1`), and the dynamic
+  tags that should be `DT_RELA`/`DT_RELASZ` appear as `0x60000011`/`0x60000012`
+  pointing at `.rodata` content that decodes as garbage at both 16- and 24-byte
+  strides. Everything above is therefore read from **call sites**, not the vtable.
+- `0x6f8f35c(event)` returns `event->[+0x84]`; step 1's switch covers kinds
+  `0x15`–`0x1f` and not every case target has been enumerated.
+- Which thread drains the `0xa4afca8` queue, and what the drained command does,
+  is **not** yet known. That is the direct next question for §4 Q2/Q3.
+
+---
+
 ## 3. LIVE — session timeouts, all config-driven
 
 Parsed by function `0x7d3f938`, which reads a JSON node literally named

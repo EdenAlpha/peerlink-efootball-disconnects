@@ -97,8 +97,8 @@ branch 0 can switch the whole rule off — so "not all 7 are reachable at once" 
 
 **What resets the clock.** `elapsed = now − [this+0x10]`, and `[this+0x10]` is re-stamped whenever
 `pred(this)` is true, `[this+0x10]==0`, or `[this+0x18] != seq`. `pred` (`0x6f90be4`) returns true if
-**any of six byte-pairs** `[2]!=[1], [4]!=[3], [6]!=[5], [8]!=[7], [10]!=[9], [12]!=[11]` differ — i.e. a
-shadow-copy change detector. The copy (`0x6f906c0`) writes `[2]=[1], [4]=[3] … [12]=[11]`, clearing it.
+**any of five byte-pairs** `[2]!=[1], [4]!=[3], [6]!=[5], [8]!=[7], [0xa]!=[9]` differ — i.e. a
+shadow-copy change detector over an 11-byte struct. The copy (`0x6f906c0`) writes `[2]=[1] … [0xa]=[9]`, clearing it.
 Note `vtable[0x48]` is called at `0x6f90758` and its **return value is discarded** (`mov x0, x19`
 immediately follows) — it is a side-effect refresh, *not* the source of `last_activity`.
 
