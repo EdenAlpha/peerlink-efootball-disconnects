@@ -117,8 +117,10 @@ control (`0x7de8250`, gRPC's logger) reaches `__android_log_write` in one hop, s
 what exists. **`adb logcat | grep MatchOnlineWatchDog` therefore returns nothing whether or not the
 rule fired, and a negative grep proves nothing.** The neighbouring `kind` (`event+0x80`, set by
 `0x6f50e44`) still identifies which of the 7 rows fired — but it has to be read by instrumentation,
-not by logcat. `"AbnormalEnd"` sits at `0xa1223c` immediately after this code and is the likely
-end-reason token.
+not by logcat. **`"AbnormalEnd"` is confirmed** (census §2h): the bytes at
+`0xa1223c` are exactly that string, and it is returned by `0x6f51094`, a method
+of the watchdog's command class (vtable `0x97a2168`) whose only entry is a
+vtable slot with zero direct callers — the same slot the queue drain dispatches.
 
 **Cross-check against healthy play** (`udp_trace.csv`, tun level, n=10,922 over 3.6 min):
 

@@ -849,6 +849,109 @@ then `0x6f90c40` → `0x81604f4` supplies the timestamp.
 
 ---
 
+## 2h. The watchdog's command carries the token `AbnormalEnd`
+
+Reproducible via `find_addr.py`, `near_scan.py`, `movk_scan.py`, `rela_scan.py`,
+`fn_lits.py`, `win_dump.py` (all committed).
+
+### 2h.1 The command object's layout
+
+vtable `0x97a2168` (base `0x97a21d8`), 160 bytes (`new(0xa0)`), ctor `0x6f50e04`
+whose base ctor is `0x6f50ee0` → `0x698f948`.
+
+| offset | contents |
+|---|---|
+| `+0x00` | vptr |
+| `+0x08` | pointer, copied from `event+8` |
+| `+0x0f` | byte, copied from `event+0xf` |
+| `+0x18` | member, copied from `event+0x18` |
+| `+0x30` | member, copied from `event+0x30` |
+| `+0x48` | dword, copied from `event+0x48` |
+| `+0x50` | member, copied from `event+0x50` |
+| `+0x80` | **kind** (default `0x21` = 33) |
+| `+0x84` | byte |
+| `+0x88` | dword |
+| `+0x90` | pointer, 32 bytes of payload follow |
+
+`0x6f50e44(obj, w1, w2, w3, w4, x5)` is the "set kind and dispatch" entry point.
+It resets `+0x88`/`+0x84`, then:
+
+| call | effect |
+|---|---|
+| `0x6f510a0(obj, w4)` | `+0x84 = w4` |
+| `0x6f510a8(obj, 1, w2)` | `+0x88 = (w2 & 0xffffff) \| (1 << 28)` |
+| `0x6f510b4(obj, &x5)` | `+0x90 = *(x5)` |
+
+The watchdog calls it with `w3 = 0x1b` (27) or `0x18` (24) — the two kinds in
+§2g.5 — and `w1 = 0`, `w4 = 0`, `x5 = 0`.
+
+### 2h.2 `AbnormalEnd` — VERDICT §1b's prediction, confirmed
+
+`0x6f51094` is a three-instruction function that returns a string literal:
+
+```
+0x6f51094: adrp x0, #0xa12000
+0x6f51098: add  x0, x0, #0x23c
+0x6f5109c: ret
+```
+
+The bytes at `0xa1223c` are **`AbnormalEnd`**, preceded by `Atari_Ball_Hit_15`
+and followed by `MATCH_ID_DIRECTONLINE`.
+
+`0x6f50f9c` is a tail-call thunk to it, and `brute_ref.py 0x6f50f9c` reports
+**0 PC-relative references, 0 raw qwords, 0 raw dwords** — it is reachable
+*only* through a vtable. That matches the queue drain in §2g.4, which dispatches
+`element->vtable[+0x10]`.
+
+> **So the end-reason token the whole search was looking for is real, and it
+> belongs to the watchdog's command class.** VERDICT §1b predicted the string
+> and its address from adjacency alone; this confirms it and shows how it is used.
+
+### 2h.3 The queue singleton
+
+| property | value |
+|---|---|
+| global | `0xa4afca8` |
+| size | `0x108` (264 B) |
+| vtable | `0x9823660` |
+| mutex | `basic::RecursiveMutex` at `+0x38` |
+| vector 1 | begin `+0x10`, end `+0x18` |
+| vector 2 | begin `+0x28`, end `+0x30` |
+
+- installer `0x7d37bf0`–`0x7d37cb0` — lazy, mutex-guarded, `new(0x108)`
+- destructor `0x7d37cb4` — `vtable[+8]`, then clears the global
+- enqueue `0x7d37d00` and `0x7d37fe4`
+- **drain `0x7d380e0`** — lock, pop one element, call `vtable[+0x10]`, free it
+- empty? `0x7d381b0` — returns `([+0x30] == 0)`
+- drain loop `0x7d38208`
+
+### 2h.4 Recorded dead end: vtable slots are unrecoverable from this file
+
+This is stated because it cost real effort and because it invalidates an
+earlier assumption.
+
+- `.data.rel.ro` vtables are **all zero in the file** — verified for `0x97a2168`,
+  `0x97a21d8`, `0x9823660`, `0x97a2888`, and for the whole 11,829-entry
+  `DT_INIT_ARRAY` at `0x98bd898`.
+- There are **no** `R_AARCH64_RELATIVE` (type 1027) records. The 8-byte pattern
+  occurs 7,567 times; every hit is coincidental — decoding the surrounding
+  24 bytes yields `r_offset` values around 2^58.
+- No `ADRP+ADD`, `ADRP+LDR`, or `MOVZ/MOVK` triple computes any vtable slot. The
+  only code that computes a vtable *base* is constructors storing the vptr
+  (10 sites for `0x97a2168`, all of them command-object constructors).
+- `.rela.dyn`'s section header is corrupt — `sh_type` `0x60000002`,
+  `sh_entsize` `1` — and its declared address `0x2ed270` falls **inside**
+  `.dynstr`, which ends at `0x2ed2c4`. The header cannot be trusted, and the
+  dynamic tags that should be `DT_RELA`/`DT_RELASZ` appear as `0x60000011`/
+  `0x60000012` pointing at string data.
+
+**Consequence:** the slot → method mapping for these vtables cannot be recovered
+from this file. Everything in §2g and §2h is read from **call sites**, not from
+vtables. Any future claim that needs a vtable slot must be justified some other
+way.
+
+---
+
 ## 3. LIVE — session timeouts, all config-driven
 
 Parsed by function `0x7d3f938`, which reads a JSON node literally named
