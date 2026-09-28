@@ -1,0 +1,209 @@
+==============================================================================
+__android_log_print  PLT 0x8b356f0   call sites: 184
+==============================================================================
+  0x0284d0b4  No data on command pipe! | threaded_app
+  0x0284d4bc  threaded_app | could not create pipe: %s
+  0x0284d770  Failure writing android_app cmd: %s | threaded_app
+  0x0284daa0  Failure writing android_app cmd: %s | threaded_app
+  0x0284dc54  Failure writing android_app cmd: %s | threaded_app
+  0x0284dd34  Failure writing android_app cmd: %s | threaded_app
+  0x0284dd84  Failure writing android_app cmd: %s | threaded_app
+  0x0284de70  Failure writing android_app cmd: %s | threaded_app
+  0x0284e0b8  No data on command pipe! | threaded_app
+  0x041bdbec  UE4
+  0x07d29f18  CallObjectMethod NULL!!: %s | jnihelper
+  0x07d7bb90  iab | nativeOnBuyFinished
+  0x07d7bce0  nativeOnQueryPurchaseHistoryAsyncFinished | iab
+  0x07d7bd70  iab | Number of purchaseHistoryRecords: %d | ()I
+  0x07d7bee8  nativeOnGetBillingConfigFinished | iab
+  0x07d7c070  iab | nativeOnGetItemDetailsFinished
+  0x07d7c100  iab | ()I | Number of details: %d
+  0x07d7c290  iab | nativeOnGetItemProductDetailsFinished
+  0x07d7c320  iab | ()I | Number of details: %d
+  0x07d7c4b0  nativeOnGetInventoryFinished | iab
+  0x07d7c540  iab | ()I | Number of purchases: %d
+  0x07d7c6b8  iab | nativeOnConsumeFinished
+  0x07d7c7b4  iab | nativeOnAcknowledgeFinished
+  0x07d7c880  iab | nativeOnShowInAppMessageFinished
+  0x07d7c9b4  nativeKonamiIabInitializationFinished | iab
+  0x081fd7b4  playcore | Attempted to initialize AssetPackManager again.
+  0x081fdba0  playcore
+  0x081fdbe8  playcore
+  0x081fe134  playcore | Failed to RegisterNatives in AssetPackManager.
+  0x081fe340  playcore | Skipping state update for uninitialized AssetPackManager.
+  0x081febdc  Invalid request: num_asset_packs must be greater than 0. | playcore
+  0x081fec04  playcore | Invalid request: asset_packs[%zu] must not be null.
+  0x081fee64  playcore | Remove request failed due to null Asset Pack name.
+  0x081ff398  Get download state failed due to null out parameter. | playcore
+  0x081ff4e8  playcore | DestroyDownloadState removed %zu items
+  0x081ff6a0  %s called with an unknown AssetPackDownloadState | playcore
+  0x081ff8ec  playcore | Cellular data request failed due to null Android Activity.
+  0x081ff9b8  playcore | Cellular data status request failed due to null out parameter.
+  0x081ffb18  playcore | Confirmation dialog failed due to null Android Activity.
+  0x081ffbd8  playcore | Confirmation dialog status request failed due to null out parameter.
+  0x081ffcd0  Storage method request failed due to null out parameter. | playcore
+  0x081ffdb4  Confirmation dialog request failed with error %d. | playcore
+  0x081ffddc  playcore | Confirmation dialog request failed due to unexpected null result.
+  0x081ffe08  playcore | Confirmation dialog failed with unexpected result %d.
+  0x08200530  Uninitialized: ignoring remove result. | playcore
+  0x08200fec  playcore | Uninitialized: ignoring ShowCellularDataConfirmation() result.
+  0x0820100c  Confirmation dialog request failed with error %d. | playcore
+  0x0820102c  playcore | Confirmation dialog request failed due to unexpected null result.
+  0x0820129c  playcore | Uninitialized: ignoring ShowConfirmationDialog() result.
+  0x082012bc  Confirmation dialog request failed with error %d. | playcore
+  0x082012dc  playcore | Confirmation dialog request failed due to unexpected null result.
+  0x08201824  playcore | Skipping state updates for uninitialized AssetPackManager.
+  0x08202934  playcore | DestroyLocation removed %zu items
+  0x08202958  DestroyLocation called with a null AssetPackLocation | playcore
+  0x082029f4  playcore | GetStorageMethod called with a null AssetPackLocation
+  0x08202a8c  playcore | GetStorageMethod called with an unknown AssetPackLocation
+  0x08202b20  GetAssetsPath called with a null AssetPackLocation | playcore
+  0x08202bb4  playcore | GetAssetsPath called with an unknown AssetPackLocation
+  0x08204c08  playcore | "android_context" must be an instance of android.content.Context.
+  0x08204d4c  playcore | Attaching thread to JavaVM...
+  0x08204da8  Failed to attach thread to JavaVM: %d | playcore
+  0x08204dc8  playcore | Attached thread to JavaVM.
+  0x08204f30  ClassNotFoundException: %s | playcore
+  0x08204ff0  playcore | Detaching thread from JavaVM...
+  0x08205028  playcore | Skipping JNI thread detach since attach status=%d
+  0x08205054  Detached thread from JavaVM. | playcore
+  0x082056b4  Attempted to initialize ReviewManager again. | playcore
+  0x082058f0  playcore
+  0x08206084  playcore | LaunchReviewFlow android_activity param is null.
+  0x082060a4  playcore
+  0x0820616c  ReviewStatus request failed due to null out parameter. | playcore
+  0x08206210  Unexpected error %d while handling RequestReviewFlow. | playcore
+  0x08206228  playcore
+  0x0820628c  playcore | Unexpected error %d while handling LaunchReviewFlow.
+  0x08206518  Uninitialized, ignoring result. | playcore
+  0x08206540  Unexpected error %d while handling RequestReviewFlow. | playcore
+  0x08206558  playcore
+  0x08206748  playcore | Unexpected error %d while handling LaunchReviewFlow.
+  0x082067a8  Uninitialized, ignoring result. | playcore
+  0x08206d2c  playcore
+  0x08206e74  playcore | Failed to handle completed Task since TaskManager was null.
+  0x08207308  playcore | Failed to find task in HandleTaskComplete.
+  0x0820744c  playcore | Failed to cast exception to ApiException.
+  0x08984440  Swappy version %d.%d | SwappyCommon
+  0x089845a4  Error while getting method: getAppVsyncOffsetNanos | SwappyCommon | ()J
+  0x0898463c  SwappyCommon | ()J | Error while getting method: getPresentationDeadlineNanos
+  0x089847a8  Failed to get SDK version | SwappyCommon
+  0x08984834  Failed to get Build.VERSION.PREVIEW_SDK_INT field | SwappyCommon | I
+  0x08984890  SwappyCommon | Failed to get preview SDK version
+  0x089848b8  SwappyCommon | SDK version = %d preview = %d
+  0x08984b40  SwappyCommon | FATAL: cannot open libandroid.so: %s
+  0x08984d90  SwappyCommon
+  0x08984dcc  SwappyCommon | failed to initialize DisplayManager
+  0x08984eb4  Failed to get Build class | SwappyCommon
+  0x089856c8  SwappyCommon
+  0x08985ce0  SwappyCommon | failed to query display timings
+  0x089865d4  SwappyCommon
+  0x08988880  SwappyCommon | Failed to get string %s
+  0x08988a8c  Unable to load NDK tracing APIs | Trace
+  0x08988cd4  SwappyCommon | failed to query display timings
+  0x08989160  SwappyCommon | failed to query display timings
+  0x0898c644  FATAL: cannot get AChoreographer symbols | ChoreographerThread
+  0x0898c670  ChoreographerThread | FATAL: cannot open libandroid.so: %s
+  0x0898c7a0  Destroying NDKChoreographerThread | ChoreographerThread
+  0x0898ca04  Swappy found %d CPUs [%s]. | ChoreographerThread
+  0x0898cab0  SwappyChoreographer | ChoreographerThread | Setting '%s' thread [%d-0x%x] affinity mask to 0x%x.
+  0x0898cb34  Terminating Looper thread | ChoreographerThread
+  0x0898cb84  AChoreographer_getInstance failed | ChoreographerThread
+  0x0898d0d0  Unable to find dalvik/system/PathClassLoader. | ChoreographerThread
+  0x0898d118  ChoreographerThread | Using internal %s class from dex bytes.
+  0x0898d2d0  Unable to create a temporary file to store DEX with Java classes. | ChoreographerThread
+  0x0898d6c8  ChoreographerThread | Unable to write to %s file.
+  0x0898d704  ChoreographerThread | Using internal %s class from dex bytes.
+  0x0898d83c  Destroying JavaChoreographerThread | ChoreographerThread
+  0x0898dca8  Destroying NoChoreographerThread | ChoreographerThread
+  0x0898deb0  Swappy found %d CPUs [%s]. | ChoreographerThread
+  0x0898df60  SwappyChoreographer | ChoreographerThread | Setting '%s' thread [%d-0x%x] affinity mask to 0x%x.
+  0x0898e030  Terminating choreographer thread | ChoreographerThread
+  0x0898e48c  Using NDK Choreographer | ChoreographerThread
+  0x0898e530  ChoreographerThread | Using Java Choreographer
+  0x0898e560  Using no Choreographer (Best Effort) | ChoreographerThread
+  0x0898f7e4  SwappyDisplayManager | Unable to find dalvik/system/PathClassLoader.
+  0x0898f82c  SwappyDisplayManager | Using internal %s class from dex bytes.
+  0x0898f9d8  SwappyDisplayManager | Unable to create a temporary file to store DEX with Java classes.
+  0x0898fdd4  SwappyDisplayManager | Unable to write to %s file.
+  0x0898fe10  SwappyDisplayManager | Using internal %s class from dex bytes.
+  0x08990560  Swappy | Attempted to initialize SwappyGL twice
+  0x08990864  Swappy | Failed to get SwappyGL instance in setWindow
+  0x0899197c  Swappy | swappy.disable | Failed to load EGL functions
+  0x089919a4  Swappy | SwappyCommon could not initialize correctly.
+  0x089919bc  Swappy | SwappyGL initialized successfully
+  0x089920b8  == Frame statistics == | FrameStatistics
+  0x089920d0  total frames: %lu | FrameStatistics
+  0x08992208  %s | FrameStatistics
+  0x089922fc  %s | FrameStatistics
+  0x089923f0  %s | FrameStatistics
+  0x089924e4  %s | FrameStatistics
+  0x089925d8  %s | FrameStatistics
+  0x089927e8  eglGetNextFrameIdANDROID | Failed to load eglGetNextFrameIdANDROID | Swappy::EGL
+  0x08992818  Failed to load eglGetFrameTimestampsANDROID | eglGetFrameTimestampsANDROID | Swappy::EGL
+  0x08992920  Swappy::EGL | Failed to load eglGetError
+  0x0899293c  Swappy::EGL | Failed to load eglSurfaceAttrib
+  0x08992a24  Swappy::EGL | Failed to destroy sync fence
+  0x08992be8  Failed to get sync status | Swappy::EGL
+  0x08992c04  Unexpected sync status: %d | Swappy::EGL
+  0x08992cf8  Failed to get next frame ID | Swappy::EGL
+  0x08992e10  stats are not supported on this platform | Swappy::EGL
+  0x08992e7c  Failed to get timestamps for frame %llu | Swappy::EGL
+  0x08992f80  Swappy::EGL | Failed to load eglClientWaitSyncKHR | eglClientWaitSyncKHR
+  0x08992fac  Failed to load eglDestroySyncKHR | Swappy::EGL | eglDestroySyncKHR
+  0x08993224  Failed to wait sync
+  0x08993970  SwappyThread | Couldn't create thread
+  0x08af9344  CriFsLogOutput
+  0x08b0de60  criNetStmCustom_ThreadFuncLocal is not implemented. | E2018020100:CriHttpRequestAndroid module is already initialized. | CriHttpRequestAndroid
+  0x08b0dee0  E2018020107:CriHttpRequestAndroid failed to create JVM local frame. | CriHttpRequestAndroid
+  0x08b0e110  ()I | E2018020108:CriHttpRequestAndroid:Can't FindClass. | CriHttpRequestAndroid
+  0x08b0e148  E2018020109:CriHttpRequestAndroid:Can't do NewGlobalRef. | CriHttpRequestAndroid
+  0x08b0e294  E2018020102:CriHttpRequestAndroid failed to create JVM local frame. | CriHttpRequestAndroid
+  0x08b0e2b4  E2018020101:CriHttpRequestAndroid has to be initialized. | CriHttpRequestAndroid
+  0x08b0e32c  CriHttpRequestAndroid
+  0x08b0e348  CriHttpRequestAndroid
+  0x08b1517c  Invalid operation. | CRI AACDEC MEDIACODEC
+  0x08b151f4  audio/mp4a-latm | CRI AACDEC MEDIACODEC | AMediaCodec_createCodecByName() failed.
+  0x08b15260  AMediaCodec_delete() failed. err=%d | CRI AACDEC MEDIACODEC
+  0x08b15440  Not supported Sampling Frequency %d | CRI AACDEC MEDIACODEC
+  0x08b15468  Invalid operation. | CRI AACDEC MEDIACODEC
+  0x08b15490  y | CRI AACDEC MEDIACODEC | AMediaFormat_new() failed.
+  0x08b15548  AMediaCodec_configure() failed. err=%d | CRI AACDEC MEDIACODEC
+  0x08b155d4  AMediaCodec_start() failed. err=%d | CRI AACDEC MEDIACODEC
+  0x08b15650  y | AMediaCodec_stop() failed. err=%d | CRI AACDEC MEDIACODEC
+  0x08b157c0  CRI AACDEC MEDIACODEC | AMediaCodec_queueInputBuffer() failed. err=%d
+  0x08b1597c  AMediaCodec_releaseOutputBuffer() failed. err=%d | CRI AACDEC MEDIACODEC
+  0x08b18ab8  VideoDecode | VideoDecodeThread
+  0x08b18e50  VideoDecode
+  0x08b1f920  E2018122601:CriAesDecryptorAndroid failed to create JVM local frame. | CriAesDecryptorAndroid
+  0x08b1fa8c  E2018122602:CriAesDecryptorAndroid:Can't FindClass. | CriAesDecryptorAndroid
+  0x08b1faf8  CriAesDecryptorAndroid | E2018122604:CriAesDecryptorAndroid has to be initialized.
+  0x08b1fb14  CriAesDecryptorAndroid | E2018122603:CriAesDecryptorAndroid:Can't do NewGlobalRef.
+  0x08b1fb88  E2018122605:CriAesDecryptorAndroid failed to create JVM local frame. | CriAesDecryptorAndroid
+  0x08b1fba4  CriAesDecryptorAndroid
+  0x08b1fbc0  CriAesDecryptorAndroid
+  0x08b1fc28  CriAesDecryptorAndroid | E2018122700:CriAesDecryptorAndroid failed to create.
+  0x08b1feb4  CriAesDecryptorAndroid | E2018122608:CriAesDecryptorAndroid has to be initialized.
+  0x08b1fee0  CriAesDecryptorAndroid | E2018122609:CriAesDecryptorAndroid failed to create JVM local frame.
+  sites with at least one readable literal: 184 / 184
+
+==============================================================================
+__android_log_write  PLT 0x8b3af80   call sites: 3
+==============================================================================
+  0x07de82cc  GRPC
+  0x07e9e8f4  libprotobuf-native
+  0x07e9e96c  libprotobuf-native
+  sites with at least one readable literal: 3 / 3
+
+==============================================================================
+__android_log_vprint  PLT 0x8b3cea0   call sites: 6
+==============================================================================
+  0x08b0b2d8  CriPrintf
+  0x08b0b33c  CriPrintf
+  0x08b0b430  CriPrintf
+  0x08b0b4e8  CriPrintf
+  0x08b0b5e8  ##CRIERR | CriPrintf
+  0x08b0b6a0  ##CRIERR | CriPrintf
+  sites with at least one readable literal: 6 / 6
+
+TOTAL logcat call sites: 193

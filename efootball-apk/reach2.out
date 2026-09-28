@@ -1,0 +1,82 @@
+start=0x6f907b8 depth=8 nodes visited=625
+reachable log destinations: 0
+  NONE -- no path from 0x6f907b8 to a log destination within 8 hops
+start=0x7dc04c4 depth=8 nodes visited=89
+reachable log destinations: 0
+  NONE -- no path from 0x7dc04c4 to a log destination within 8 hops
+start=0x7dc06fc depth=8 nodes visited=85
+reachable log destinations: 0
+  NONE -- no path from 0x7dc06fc to a log destination within 8 hops
+start=0x283205c depth=8 nodes visited=227
+reachable log destinations: 34
+
+  STREAM printf   reached by BL at 0x41f8340
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f7d28 -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f8340
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f7e08 -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f8340
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f7dbc -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f8340
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f7d94 -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f8340
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f8334 -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f8340
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f7e9c -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f8340
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f80a4 -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f8340
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f8060 -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f98f4
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f9510 -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f8340
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f81c4 -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f8340
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f81c8 -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f8340
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f8190 -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f93f0
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f93e0 -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f98f4
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f93e0 -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f8340
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f8248 -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f8340
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f7c18 -> 0x41f8280 -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f8340
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f7d28 -> 0x41f82f4 -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f93f0
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f7e08 -> 0x41f91f4 -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f98f4
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f8334 -> 0x41f98e0 -> 0x8b38df0
+
+  STREAM printf   reached by BL at 0x41f98f4
+    path: 0x283205c -> 0x2835d6c -> 0x421eabc -> 0x421e498 -> 0x41ee57c -> 0x41f7b8c -> 0x41f9510 -> 0x41f9538 -> 0x8b38df0
+start=0x7de8250 depth=8 nodes visited=6
+reachable log destinations: 3
+
+  LIVE __android_log_write   reached by BL at 0x7de82cc
+    path: 0x7de8250 -> 0x8b3af80
+
+  LIVE __android_log_write   reached by BL at 0x7de82cc
+    path: 0x7de8250 -> 0x7de8288 -> 0x8b3af80
+
+  LIVE __android_log_write   reached by BL at 0x7de82cc
+    path: 0x7de8250 -> 0x7de82c0 -> 0x8b3af80

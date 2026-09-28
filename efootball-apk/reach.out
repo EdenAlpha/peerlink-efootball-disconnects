@@ -1,0 +1,23 @@
+start=0x6f907b8 depth=8 nodes visited=625
+reachable log destinations: 0
+  NONE -- no path from 0x6f907b8 to a log destination within 8 hops
+start=0x7dc04c4 depth=8 nodes visited=89
+reachable log destinations: 0
+  NONE -- no path from 0x7dc04c4 to a log destination within 8 hops
+start=0x7dc06fc depth=8 nodes visited=85
+reachable log destinations: 0
+  NONE -- no path from 0x7dc06fc to a log destination within 8 hops
+start=0x283205c depth=8 nodes visited=228
+reachable log destinations: 0
+  NONE -- no path from 0x283205c to a log destination within 8 hops
+start=0x7de8250 depth=8 nodes visited=6
+reachable log destinations: 3
+
+  LIVE __android_log_write   reached by BL at 0x7de82cc
+    path: 0x7de8250 -> 0x8b3af80
+
+  LIVE __android_log_write   reached by BL at 0x7de82cc
+    path: 0x7de8250 -> 0x7de8288 -> 0x8b3af80
+
+  LIVE __android_log_write   reached by BL at 0x7de82cc
+    path: 0x7de8250 -> 0x7de82c0 -> 0x8b3af80
