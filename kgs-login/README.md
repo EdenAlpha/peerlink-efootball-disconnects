@@ -7,10 +7,43 @@ request we synthesise with **`502 g=14`** — in ~0.3 s, on every one of the
 server's own IPs, with the game's real envelope and body. The game itself, on a
 real phone, is served normally.
 
-Address, TLS/ALPN, HTTP/2 framing, HPACK encoding, headers, envelope fields,
-body and message order have all been varied. Every combination produces the
-same refusal. So the remaining difference is **not synthesisable from outside**
-— it is something about the client's own code or state.
+Decoded with a correct HPACK decoder, the refusal is:
+
+```
+:status: 502
+server: awselb/2.0
+content-type: application/grpc
+content-length: 0
+grpc-status: 14
+grpc-message: unavailable
+```
+
+**`content-length: 0` is the key fact.** The request body is never processed —
+this is a load balancer failing to deliver the request to a gRPC backend, not
+the application rejecting our identity. That explains why 50+ request variants
+all produced the identical answer: varying the envelope, protobuf, HPACK
+encoding or message order could not have mattered.
+
+Varying only the path, on the same connection, shows what is and is not broken:
+
+| request | response | server |
+|---|---|---|
+| `GET /` | `403 Forbidden`, 289 B | **nginx** |
+| `GET /health` | `404` | **nginx** |
+| HTTP/2 on the gRPC path | `grpc-status: 14`, empty body | awselb/2.0 |
+
+So nginx is alive behind the ALB; the **gRPC target group specifically will not
+serve us**. ALPN is load-bearing (only `h2` reaches the gRPC path at all) but we
+already offer exactly what the game offers, `grpc-exp,h2`, and get a
+byte-identical result — so ALPN is eliminated.
+
+What remains is the **shape of the client's TLS ClientHello**, or connection
+state the ALB associates with the client. That is the one thing a proxy cannot
+substitute for, because a proxy would present its own ClientHello — which is
+why the work went into running the game itself rather than intercepting it.
+
+Address, ALPN, TLS version/cipher and message ordering are all eliminated with
+evidence; see `FINDINGS_KGS_2026-09-29.md`.
 
 The rule this directory follows: **never hand-assemble request bytes.** Run the
 game's own `libUE4.so` and read what it emits.
