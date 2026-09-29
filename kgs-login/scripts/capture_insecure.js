@@ -24,8 +24,26 @@
 'use strict';
 
 const GETTER_INT      = 0x2f0eaf0;    // int Def_ lookup, (x0=key, w1=len) -> w0
+const GETTER_STR      = 0x2f0e18c;    // std::string* Def_ lookup, (x0=key, x1=len)
+
+// Every offset below was read out of the binary, not inferred from a length:
+//   0x0c023be Def_Online_gRPC_insecure         (24)  int   -> 1
+//   0x0ba2aff Def_Online_gRPC_server_address   (30)  str   -> host
+//   0x09c69c1 Def_Online_gRPC_server_path      (27)  str   -> RPC path
+//   0x0b68de6 Def_Online_gRPC_server_port      (27)  int   -> 443
+// (Note _path and _port are both 27 chars, so the two are easy to swap.)
 const KEY_INSECURE    = 'Def_Online_gRPC_insecure';
-const KEY_INSECURE_VA = 0xc023be;     // its literal, for a cheap pre-filter
+const KEY_INSECURE_VA = 0xc023be;
+const KEY_ADDR        = 'Def_Online_gRPC_server_address';
+const KEY_ADDR_VA     = 0xba2aff;
+const KEY_PATH        = 'Def_Online_gRPC_server_path';
+const KEY_PATH_VA     = 0x9c69c1;
+const KEY_PORT        = 'Def_Online_gRPC_server_port';
+const KEY_PORT_VA     = 0xb68de6;
+
+const HOST = 'pes22-game.cs.konami.net';
+const RPC_PATH = '/command_service.CommandService/CommandStream';
+const PORT_NUM = 443;
 
 const DUMP_DIR = '/data/local/tmp/kgs';
 const MAX_CAPTURE = 4 * 1024 * 1024;
@@ -36,6 +54,70 @@ let hookInstalled = false;
 
 function log(s) { console.log('[kgs] ' + s); }
 
+// ---------------------------------------------- libc++ std::string builder
+// 0x2f0e18c returns a std::string*, and the insecure branch dereferences it
+// immediately (ldrb w8,[x0]) then calls size() on it. So we have to hand back a
+// real std::string object, not a bare char*.
+//
+// libc++ layout: byte0 = (size<<1) | is_long, data at +1 for short; for long,
+// byte0 = 1, size at +8, data pointer at +0x10.
+function makeStdString(text) {
+    const raw = [];
+    for (let i = 0; i < text.length; i++) raw.push(text.charCodeAt(i) & 0xff);
+    const obj = Memory.alloc(24);
+    obj.writeByteArray(new Uint8Array(24));
+    if (raw.length <= 22) {
+        const b = new Uint8Array(24);
+        b[0] = (raw.length << 1) & 0xff;
+        for (let i = 0; i < raw.length; i++) b[1 + i] = raw[i];
+        obj.writeByteArray(b);
+        obj.add(8).writeU64(0);
+        obj.add(0x10).writeU64(0);
+    } else {
+        const buf = Memory.alloc(raw.length + 1);
+        buf.writeByteArray(new Uint8Array(raw.concat([0])));
+        obj.writeU8(1);
+        obj.add(8).writeU64(raw.length);
+        obj.add(0x10).writePointer(buf);
+    }
+    return obj;
+}
+
+function hookAddressGetters() {
+    const base = Module.findBaseAddress('libUE4.so');
+    const strGet = base.add(GETTER_STR);
+    const addrObj = makeStdString(HOST);
+    const pathObj = makeStdString(RPC_PATH);
+    log('hooking Def_ string getter at ' + strGet);
+    log('  ' + KEY_ADDR + ' -> ' + HOST);
+    log('  ' + KEY_PATH + ' -> ' + RPC_PATH);
+    let nAddr = 0, nPath = 0;
+    Interceptor.attach(strGet, {
+        onEnter(args) {
+            this.hit = 0;
+            if (args[0].equals(base.add(KEY_ADDR_VA))) { this.hit = 1; nAddr++; }
+            else if (args[0].equals(base.add(KEY_PATH_VA))) { this.hit = 2; nPath++; }
+            else {
+                try {
+                    const k = args[0].readUtf8String(args[1].toInt32());
+                    if (k === KEY_ADDR) { this.hit = 1; nAddr++; }
+                    else if (k === KEY_PATH) { this.hit = 2; nPath++; }
+                } catch (e) { /* not a readable key */ }
+            }
+        },
+        onLeave(retval) {
+            if (this.hit === 1) {
+                if (nAddr <= 2) log('string getter: address -> ' + HOST);
+                retval.replace(addrObj);
+            } else if (this.hit === 2) {
+                if (nPath <= 2) log('string getter: path -> ' + RPC_PATH);
+                retval.replace(pathObj);
+            }
+        }
+    });
+    rpc.exports.strHits = function () { return { addr: nAddr, path: nPath }; };
+}
+
 // ------------------------------------------------------------ hook the getter
 function hookInsecureGetter() {
     const base = Module.findBaseAddress('libUE4.so');
@@ -44,6 +126,7 @@ function hookInsecureGetter() {
     // PIE it is relocated, so the absolute VA is wrong; compare against the
     // relocated address, and fall back to reading the string itself.
     const keyAddr = base.add(KEY_INSECURE_VA);
+    const portAddr = base.add(KEY_PORT_VA);
     log('hooking Def_ int getter at ' + target);
     log('key literal expected at ' + keyAddr);
     try {
@@ -51,29 +134,33 @@ function hookInsecureGetter() {
     } catch (e) {
         log('key literal not readable at that address (' + e + ')');
     }
-    let matched = 0;
+    let matched = 0, nPort = 0;
     Interceptor.attach(target, {
         onEnter(args) {
-            this.hit = false;
-            // cheap path: identical pointer
-            if (args[0].equals(keyAddr)) { this.hit = true; }
+            this.hit = 0;      // 0 = no match, 1 = insecure, 2 = port
+            if (args[0].equals(keyAddr)) { this.hit = 1; }
+            else if (args[0].equals(portAddr)) { this.hit = 2; }
             else {
-                // safe path: compare the actual key text
                 try {
                     const k = args[0].readUtf8String(args[1].toInt32());
-                    if (k === KEY_INSECURE) { this.hit = true; log('key text matched: ' + k); }
+                    if (k === KEY_INSECURE) { this.hit = 1; }
+                    else if (k === KEY_PORT) { this.hit = 2; }
                 } catch (e) { /* not a readable key, ignore */ }
             }
-            if (this.hit) matched++;
+            if (this.hit === 1) matched++;
+            if (this.hit === 2) nPort++;
         },
         onLeave(retval) {
-            if (this.hit) {
+            if (this.hit === 1) {
                 if (matched <= 3) log(KEY_INSECURE + ' -> forcing 1 (plaintext gRPC)');
                 retval.replace(ptr(1));
+            } else if (this.hit === 2) {
+                if (nPort <= 3) log(KEY_PORT + ' -> forcing ' + PORT_NUM);
+                retval.replace(ptr(PORT_NUM));
             }
         }
     });
-    rpc.exports.getterHits = function () { return matched; };
+    rpc.exports.getterHits = function () { return { insecure: matched, port: nPort }; };
 }
 
 // ------------------------------------------------- capture plaintext frames
@@ -199,6 +286,7 @@ function main() {
         clearInterval(t);
         log('libUE4.so at ' + base);
         try { hookInsecureGetter(); } catch (e) { log('getter hook: ' + e); }
+        try { hookAddressGetters(); } catch (e) { log('string getter hook: ' + e); }
         hookSockets();
         log('ready');
     }, 300);
