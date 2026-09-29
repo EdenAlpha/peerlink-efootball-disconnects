@@ -101,6 +101,15 @@ jobs:
           fi
           sudo docker exec redroid id
           sudo docker exec redroid getprop ro.odm.product.cpu.abilist64
+          # eFootball references libvulkan.so AND libGLESv3.so, and this runner
+          # has no GPU. Record what Android can actually offer, so a graphics
+          # failure later is diagnosable in seconds instead of guessed at.
+          echo "--- graphics capability inside android ---"
+          sudo docker exec redroid sh -c 'ls /vendor/lib64/hw/ 2>/dev/null | head -20' || true
+          sudo docker exec redroid sh -c 'ls /system/lib64/libEGL.so /system/lib64/libGLESv3.so /system/lib64/libvulkan.so 2>&1' || true
+          sudo docker exec redroid sh -c 'ls /vendor/lib64/libvulkan.so /vendor/lib64/hw/vulkan.*.so 2>&1' || true
+          sudo docker exec redroid sh -c 'dumpsys SurfaceFlinger 2>/dev/null | grep -iE "GLES|Vulkan|EGL" | head -8' || true
+          sudo docker exec redroid sh -c 'getprop | grep -iE "gpu|egl|gles|vulkan|hardware"' || true
 
       # ------------------------------------------- fetch the package (slow)
       # backgrounded so the download overlaps with the Frida setup, and cached
