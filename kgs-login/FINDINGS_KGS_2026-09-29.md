@@ -533,3 +533,40 @@ Since the whole point of this decoder is to read a header the game sends, a
 decoder that invents plausible header names is worse than no decoder. It now
 uses the `hpack` library and **refuses to fall back**, and
 `decode_capture.py`/`test_decode.py` were re-verified afterwards.
+
+## ALPN is eliminated as the discriminator (measured, not assumed)
+
+Since the 502 comes from `awselb/2.0`, one plausible discriminator is that the
+ALB routes by ALPN. `scripts/alpn_matrix.py` holds host, SNI, TLS version and
+cipher constant and varies only the offered ALPN:
+
+| ALPN offered | chosen by server | response |
+|---|---|---|
+| `h2` | `h2` | HTTP/2, 145 B, `grpc-status: 14` |
+| `grpc-exp`,`h2` (what the game offers) | `h2` | **byte-identical** 145 B |
+| `grpc-exp` only | *(none)* | `HTTP/1.1 400 Bad Request` — `server: awselb/2.0` |
+| `http/1.1` | `http/1.1` | `HTTP/1.1 464` — `server: awselb/2.0` |
+| *(none)* | *(none)* | `HTTP/1.1 464` / `400` |
+
+Conclusions:
+
+- ALPN **is** load-bearing: only `h2` reaches the gRPC path at all. Anything
+  else lands on an HTTP/1.1 error page from the same load balancer.
+- But we are **already on the `h2` path, offering exactly what the game
+  offers** (`grpc-exp`,`h2`), and the response is byte-identical to the
+  single-`h2` case. So ALPN cannot be what separates us from the phone.
+- Two distinct load-balancer error codes are reachable from here: `400` (when
+  HTTP/2 bytes arrive without `h2` negotiated) and `464` (HTTP/1.1). Neither is
+  the `502/14` we are chasing, so the `502/14` is specific to the HTTP/2 gRPC
+  target group.
+
+TLS 1.2 with `ECDHE-RSA-AES128-GCM-SHA256` was used for every row, and the
+ALB accepted it, so the TLS version is not being refused either.
+
+**Where that leaves the hunt.** Eliminated so far, each with evidence: request
+bytes (50+ variants, and now proven irrelevant since `content-length: 0`),
+address (all five game IPs), ALPN (above), TLS version/cipher (accepted), and
+message ordering. What remains is the shape of the client's TLS ClientHello
+itself, or connection state the ALB associates with the client — which is
+precisely what the on-device capture can show and what a proxy cannot,
+because a proxy would substitute its own ClientHello.

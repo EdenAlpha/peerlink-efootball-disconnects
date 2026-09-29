@@ -1,134 +1,135 @@
 #!/usr/bin/env python3
-"""Does the server actually select ALPN 'grpc-exp'?
+"""Probe how the front door routes, by varying only the ALPN.
 
-  * the app offers ["grpc-exp","h2"] on its command channel (proven: the
-    flows doing that are the 969s / 754s / 258s long-lived streams)
-  * we offer ["h2"] and get grpc-status 14
-  * offering ["grpc-exp"] alone appeared to yield alpn=None
+The 502 that comes back is `server: awselb/2.0` with `content-length: 0` and
+`grpc-status: 14 UNAVAILABLE` -- the request body is never processed, so this
+looks like ALB routing rather than the application refusing us.
 
-Test all orders and both TLS versions, and read the ALPN the server picks
-straight out of the ServerHello (not from the SSL wrapper, which may hide
-it).  Also compare the TLS 1.2 vs 1.3 selection.
+An ALB can pick a target group from the connection, and ALPN is one of the few
+things it has. The game offers ALPN ['grpc-exp', 'h2']; our probe has been
+offering ['grpc-exp', 'h2'] too and the server picked 'h2'. So the open
+questions are:
+
+  * does the answer change if only 'h2' is offered?
+  * what if only 'grpc-exp' is offered?
+  * what if HTTP/1.1 is offered instead?
+  * what if no ALPN at all is offered?
+
+Everything else -- host, SNI, TLS version, cipher availability, request bytes
+-- is held constant, so any difference is attributable to ALPN alone.
 """
 from __future__ import annotations
 
 import socket
 import ssl
-import struct
+import sys
+
+HOST = "pes22-game.cs.konami.net"
+PORT = 443
+
+PREFACE = b"PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n"
 
 
-def capture_hello(alpn_list, tlsmin, tlsmax, ciphers=None):
-    """Complete the handshake and report everything the server chose."""
+def ls(s: str) -> bytes:
+    b = s.encode()
+    return bytes([len(b)]) + b
+
+
+def frame(t, f, sid, body):
+    return (len(body).to_bytes(3, "big") + bytes([t, f])
+            + (sid & 0x7FFFFFFF).to_bytes(4, "big") + body)
+
+
+H2_REQ = (PREFACE
+          + frame(4, 0, 0, b"")
+          + frame(1, 0x4, 1,
+                  b"\x00" + ls(":method") + ls("POST")
+                  + b"\x00" + ls(":scheme") + ls("https")
+                  + b"\x00" + ls(":path")
+                  + ls("/command_service.CommandService/CommandStream")
+                  + b"\x00" + ls(":authority") + ls(HOST)
+                  + b"\x00" + ls("content-type") + ls("application/grpc")
+                  + b"\x00" + ls("te") + ls("trailers"))
+          + frame(0, 0x1, 1, b"\x00\x00\x00\x00\x02\x08\x01"))
+
+H1_REQ = ("POST /command_service.CommandService/CommandStream HTTP/1.1\r\n"
+          "Host: %s\r\n"
+          "content-type: application/grpc\r\n"
+          "te: trailers\r\n"
+          "content-length: 7\r\n\r\n"
+          "\x00\x00\x00\x00\x02\x08\x01" % HOST).encode()
+
+
+def probe(alpn, payload, label, tls12=True):
     ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
-    ctx.set_alpn_protocols(alpn_list)
-    ctx.minimum_version = tlsmin
-    ctx.maximum_version = tlsmax
-    if ciphers:
+    ctx.check_hostname = True
+    ctx.verify_mode = ssl.CERT_REQUIRED
+    ctx.load_default_certs()
+    if tls12:
+        ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+        ctx.maximum_version = ssl.TLSVersion.TLSv1_2
+    if alpn:
         try:
-            ctx.set_ciphers(ciphers)
-        except Exception:
+            ctx.set_alpn_protocols(alpn)
+        except NotImplementedError:
             pass
+    out = {"label": label, "alpn_offered": ",".join(alpn) if alpn else "(none)"}
     try:
-        s = ctx.wrap_socket(socket.create_connection(
-            ("pes22-game.cs.konami.net", 443), timeout=15),
-            server_hostname="pes22-game.cs.konami.net")
+        raw = socket.create_connection((HOST, PORT), timeout=15)
+        s = ctx.wrap_socket(raw, server_hostname=HOST)
+        out["tls"] = s.version()
+        out["cipher"] = s.cipher()[0]
+        out["alpn_chosen"] = s.selected_alpn_protocol()
+        s.sendall(payload)
+        s.settimeout(6)
+        buf = b""
+        try:
+            while len(buf) < 4096:
+                c = s.recv(4096)
+                if not c:
+                    break
+                buf += c
+        except socket.timeout:
+            pass
+        s.close()
+        out["bytes"] = len(buf)
+        out["hex_head"] = buf[:48].hex()
+        # surface anything that names the front door
+        low = buf.lower()
+        for probe_s in (b"awselb", b"alb", b"envoy", b"nginx", b"html"):
+            if probe_s in low:
+                out["server_hint"] = probe_s.decode()
+                break
     except Exception as e:
-        return {"err": f"{type(e).__name__}: {e}"}
-    out = {"alpn": s.selected_alpn_protocol(), "tls": s.version(),
-           "cipher": s.cipher()[0], "bits": s.cipher()[2]}
-    s.close()
+        out["error"] = "%s: %s" % (type(e).__name__, e)
     return out
 
 
-def raw_alpn(alpn_list, tlsmin, tlsmax):
-    """Do the handshake by hand and parse the ALPN out of the ServerHello."""
-    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
-    ctx.set_alpn_protocols(alpn_list)
-    ctx.minimum_version = tlsmin
-    ctx.maximum_version = tlsmax
-    s = ctx.wrap_socket(socket.create_connection(
-        ("pes22-game.cs.konami.net", 443), timeout=15),
-        server_hostname="pes22-game.cs.konami.net")
-    # peek the negotiated ALPN through the socket (already known)
-    alpn = s.selected_alpn_protocol()
-    # also grab the peer cert chain length
-    try:
-        chain = s.getpeercert(True)
-    except Exception:
-        chain = b""
-    s.close()
-    return alpn, len(chain)
+def show(r):
+    print("\n--- %s" % r["label"])
+    print("    offered ALPN : %s" % r["alpn_offered"])
+    if "error" in r:
+        print("    ERROR        : %s" % r["error"])
+        return
+    print("    TLS          : %s  %s" % (r["tls"], r["cipher"]))
+    print("    ALPN chosen  : %s" % r["alpn_chosen"])
+    print("    reply        : %d bytes" % r["bytes"])
+    if r.get("server_hint"):
+        print("    names        : %s" % r["server_hint"])
+    print("    head         : %s" % r["hex_head"])
 
 
 def main() -> int:
-    print("=== ALPN selection matrix ===", flush=True)
-    cases = [
-        (["h2"], "h2"),
-        (["grpc-exp"], "grpc-exp"),
-        (["grpc-exp", "h2"], "grpc-exp,h2"),
-        (["h2", "grpc-exp"], "h2,grpc-exp"),
-        (["http/1.1"], "http/1.1"),
-        (["grpc-exp", "h2", "http/1.1"], "grpc-exp,h2,http/1.1"),
-    ]
-    for alpns, label in cases:
-        for tmin, tmax, tname in (
-                (ssl.TLSVersion.TLSv1_2, ssl.TLSVersion.TLSv1_2, "TLS1.2"),
-                (ssl.TLSVersion.TLSv1_2, ssl.TLSVersion.TLSv1_3, "TLS1.2-1.3"),
-        ):
-            r = capture_hello(alpns, tmin, tmax)
-            if "err" in r:
-                print(f"  offer {label:22s} [{tname:11s}]  {r['err']}",
-                      flush=True)
-                continue
-            tag = "   <<<<<< SELECTED" if r["alpn"] else \
-                "   <<<<<< SERVER PICKED NOTHING"
-            print(f"  offer {label:22s} [{tname:11s}] -> alpn={r['alpn']} "
-                  f"tls={r['tls']} cipher={r['cipher']} "
-                  f"bits={r['bits']}{tag}", flush=True)
-
-    print("\n=== 5-cipher gRPC-shaped hello (TLS1.2) ===", flush=True)
-    for alpns, label in ((["grpc-exp"], "grpc-exp"),
-                         (["grpc-exp", "h2"], "grpc-exp,h2"),
-                         (["h2"], "h2")):
-        r = capture_hello(alpns, ssl.TLSVersion.TLSv1_2,
-                          ssl.TLSVersion.TLSv1_2,
-                          "ECDHE-ECDSA-AES128-GCM-SHA256:"
-                          "ECDHE-ECDSA-AES256-GCM-SHA384:"
-                          "ECDHE-RSA-AES128-GCM-SHA256:"
-                          "ECDHE-RSA-AES256-GCM-SHA384")
-        if "err" in r:
-            print(f"  {label:22s} {r['err']}", flush=True)
-        else:
-            print(f"  {label:22s} -> alpn={r['alpn']} tls={r['tls']} "
-                  f"cipher={r['cipher']}", flush=True)
-
-    print("\n=== with the client certificate ===", flush=True)
-    d = r"C:\Users\Administrator\AppData\Local\Temp\2\opencode\peerlink_work"
-    import os
-    cf = (os.path.join(d, "chain.pem"), os.path.join(d, "chain_key.pem"))
-    if all(os.path.exists(p) for p in cf):
-        for alpns, label in ((["grpc-exp", "h2"], "grpc-exp,h2"),
-                             (["h2"], "h2")):
-            ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-            ctx.check_hostname = False
-            ctx.verify_mode = ssl.CERT_NONE
-            ctx.set_alpn_protocols(alpns)
-            ctx.minimum_version = ssl.TLSVersion.TLSv1_2
-            ctx.maximum_version = ssl.TLSVersion.TLSv1_2
-            ctx.load_cert_chain(*cf)
-            try:
-                s = ctx.wrap_socket(socket.create_connection(
-                    ("pes22-game.cs.konami.net", 443), timeout=15),
-                    server_hostname="pes22-game.cs.konami.net")
-                print(f"  {label:22s} -> alpn={s.selected_alpn_protocol()} "
-                      f"tls={s.version()} cipher={s.cipher()[0]}", flush=True)
-                s.close()
-            except Exception as e:
-                print(f"  {label:22s} ERR {type(e).__name__}: {e}", flush=True)
+    print("host %s:%d  (all variables except ALPN held constant)\n" % (HOST, PORT))
+    show(probe(["h2"], H2_REQ, "HTTP/2, ALPN 'h2' only"))
+    show(probe(["grpc-exp"], H2_REQ, "HTTP/2 bytes, ALPN 'grpc-exp' only"))
+    show(probe(["grpc-exp", "h2"], H2_REQ, "HTTP/2, ALPN 'grpc-exp','h2' (as the game offers)"))
+    show(probe(["http/1.1"], H1_REQ, "HTTP/1.1, ALPN 'http/1.1'"))
+    show(probe(None, H1_REQ, "HTTP/1.1, no ALPN offered"))
+    show(probe(None, H2_REQ, "HTTP/2 bytes, no ALPN offered"))
+    print("\nIf every row is byte-identical, ALPN is not the discriminator and the")
+    print("difference lies further down the connection (client hello shape, or")
+    print("state the ALB associates with the client).")
     return 0
 
 
