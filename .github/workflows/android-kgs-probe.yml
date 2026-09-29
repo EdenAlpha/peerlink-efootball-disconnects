@@ -1,90 +1,96 @@
 name: android-kgs-probe
 
 # Free ARM64 runner (public repo): native arm64, 4 vCPU, 16 GB RAM, Ubuntu
-# kernel -- which is the kernel that HAS binder_linux. That is the whole
-# reason this exists: AWS's cloud kernel has binder compiled out.
+# kernel -- the kernel that HAS binder_linux. AWS's cloud kernel has binder
+# compiled out, which is why the EC2 route was a dead end.
+#
+# This job never fails the build: it writes what it found into
+# kgs-login/ci-report/ and commits it back, so the result is readable
+# without Actions log access.
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths: ['.github/workflows/android-kgs-probe.yml']
 
+permissions:
+  contents: write
+
 jobs:
   probe:
     runs-on: ubuntu-24.04-arm
-    timeout-minutes: 55
+    timeout-minutes: 50
     steps:
-      - name: 01 environment report
+      - name: collect
+        continue-on-error: true
         run: |
-          set -x
+          set +e
+          R=kgs-login/ci-report
+          mkdir -p $R
+          F=$R/latest.txt
+          exec > >(tee $F) 2>&1
+          echo "===== ARM64 RUNNER CAPABILITY REPORT ====="
+          date -u
           uname -a
-          nproc
-          free -h
-          df -h / /mnt 2>/dev/null || df -h /
-          echo "=== binder in kernel? ==="
-          sudo grep -iE "ANDROID_BINDER" /boot/config-$(uname -r) || \
-            sudo zcat /proc/config.gz | grep -i ANDROID_BINDER || echo "no config"
-          echo "=== docker ==="
-          docker version --format '{{.Server.Version}}' || \
-            { sudo apt-get update -qq && sudo apt-get install -y -qq docker.io; \
-              sudo systemctl start docker; sudo docker version; }
-
-      - name: 02 load binder + start redroid
-        run: |
-          set -x
-          sudo apt-get install -y -qq kmod
-          sudo modprobe binder_linux devices="binder,hwbinder,vndbinder" || \
-            sudo modprobe binder_linux devices=binder
-          ls -l /dev/binder* || true
+          echo "--- cpu/mem/disk ---"
+          nproc; free -h; df -h / | tail -1
+          echo "--- kernel binder config ---"
+          sudo grep -iE "ANDROID_BINDER" /boot/config-$(uname -r) 2>/dev/null \
+            || sudo zcat /proc.config.gz 2>/dev/null | grep -i ANDROID_BINDER \
+            || echo "binder config not readable"
+          echo "--- privileged docker? ---"
+          sudo docker version --format 'server={{.Server.Version}}' 2>&1 | tail -2
+          sudo docker run --rm --privileged alpine:latest echo PRIVILEGED_OK 2>&1 | tail -3
+          echo "--- modprobe binder ---"
+          sudo apt-get install -y -qq kmod >/dev/null 2>&1
+          sudo modprobe binder_linux devices="binder,hwbinder,vndbinder" 2>&1
+          sudo modprobe binder_linux devices=binder 2>&1
+          ls -l /dev/binder* 2>&1
+          echo "--- try mount binderfs ---"
           sudo mkdir -p /dev/binderfs
-          sudo mount -t binder binder /dev/binderfs || \
-            sudo mount -t binderfs binder /dev/binderfs || true
-          mount | grep -i binder || echo "binderfs not mounted (container may still work)"
-          sudo mkdir -p /root/redroid-data
-          sudo docker rm -f redroid 2>/dev/null || true
+          sudo mount -t binder binder /dev/binderfs 2>&1
+          sudo mount -t binderfs binder /dev/binderfs 2>&1
+          mount | grep -i binder || echo "binderfs: NOT mounted"
+          echo "--- start redroid ---"
+          sudo mkdir -p /root/rd
+          sudo docker rm -f redroid >/dev/null 2>&1
           sudo docker run -d --name redroid --privileged \
-            --restart=on-failure \
-            -v /root/redroid-data:/data \
-            -p 5555:5555 \
+            -v /root/rd:/data -p 5555:5555 \
             redroid/redroid:14.0.0_64only-latest \
-            androidboot.redroid_width=720 \
-            androidboot.redroid_height=1280 \
-            androidboot.redroid_dpi=320 \
-            androidboot.redroid_fps=30 \
-            androidboot.use_memfd=true
-
-      - name: 03 wait for android + adb
-        run: |
-          set -x
-          for i in $(seq 1 40); do
-            if sudo docker exec redroid getprop sys.boot_completed 2>/dev/null | grep -q 1; then
-              echo "android booted after ${i}0s"; break
+            androidboot.redroid_width=720 androidboot.redroid_height=1280 \
+            androidboot.redroid_dpi=320 androidboot.use_memfd=true 2>&1 | tail -3
+          sleep 5
+          sudo docker ps -a --format '{{.Names}} {{.Status}}' 2>&1
+          echo "--- wait for boot (up to 5 min) ---"
+          for i in $(seq 1 30); do
+            st=$(sudo docker exec redroid getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+            if [ "$st" = "1" ]; then echo "BOOTED after $((i*10))s"; break; fi
+            if [ $((i % 6)) -eq 0 ]; then
+              echo "…${i}0s state=$st"; sudo docker logs --tail 3 redroid 2>&1
             fi
-            sudo docker logs --tail 5 redroid || true
             sleep 10
           done
-          sudo docker exec redroid getprop | grep -E "boot_completed|ro.product|abi" || true
-          sudo docker exec redroid ps -A | head -5 || true
-          sudo docker exec redroid id || true
-          free -h
+          echo "--- android props ---"
+          sudo docker exec redroid getprop 2>&1 | grep -E "boot_completed|product.cpu.abi|ro.build.version" | head
+          echo "--- android identity (root?) ---"
+          sudo docker exec redroid id 2>&1
+          sudo docker exec redroid sh -c 'ls /system/bin/sh && echo SHELL_OK' 2>&1
+          echo "--- free space inside android ---"
+          sudo docker exec redroid df -h /data 2>&1 | tail -2
+          echo "--- container logs ---"
+          sudo docker logs --tail 40 redroid 2>&1
+          echo "===== END REPORT ====="
 
-      - name: 04 fetch the eFootball package
-        run: |
-          set -x
-          cd /root
-          curl -fsSL -o apkeep \
-            https://github.com/EFForg/apkeep/releases/download/1.0.0/apkeep-aarch64-unknown-linux-gnu
-          chmod +x apkeep
-          ./apkeep -a jp.konami.pesam -d apk-pure /root || \
-            ./apkeep -a jp.konami.pesam -d apk-pure .
-          ls -la /root/*.xapk /root/*.apk 2>/dev/null || true
-
-      - name: 05 report
+      - name: publish report
         if: always()
         run: |
-          echo "=== container status ==="
-          sudo docker ps -a
-          echo "=== container logs (tail) ==="
-          sudo docker logs --tail 60 redroid 2>&1 || true
-          echo "=== host mem ==="
-          free -h
+          set -e
+          R=kgs-login/ci-report
+          cp -f $R/latest.txt $R/$(date -u +%Y%m%d-%H%M%S).txt || true
+          sed -i 's/^/\`\`\`text\n/' $R/latest.txt
+          echo '```' >> $R/latest.txt
+          git config user.name  "ci-bot"
+          git config user.email "ci-bot@users.noreply.github.com"
+          git add -f $R || true
+          git commit -m "ci: ARM64 runner capability report" || echo "nothing to commit"
+          git push || echo "push failed"
