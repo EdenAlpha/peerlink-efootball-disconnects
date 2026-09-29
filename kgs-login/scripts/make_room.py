@@ -127,7 +127,7 @@ def show(msgid: str, r: dict) -> bytes:
 
 
 CHAIN = [
-    ("CMD_GET_SESSION_ID", {}),
+    ("CMD_GET_SESSION_ID", {"game_id": UID}),
     ("CMD_LOGIN", {}),
     ("CMD_CREATEJOIN_ROOM", {"room_name": "peerlink",
                              "room_comment": "", "max_user": 2,
@@ -135,6 +135,11 @@ CHAIN = [
     ("CMD_GET_ROOM_INFO", {"room_id": ROOM_ID}),
     ("CMD_SEND_RECRUIT_CODE", {"room_id": ROOM_ID}),
 ]
+
+# response fields (xref'd from the game's own response parsers):
+#   CMD_CREATEJOIN_ROOM   -> result, room_id, event_log
+#   CMD_SEND_RECRUIT_CODE -> recruit_code        (the join code for the user)
+#   CMD_GET_SESSION_ID    -> needs 'game_id' in the REQUEST
 
 
 def main() -> int:

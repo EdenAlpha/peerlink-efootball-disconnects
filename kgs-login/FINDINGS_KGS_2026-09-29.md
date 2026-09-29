@@ -80,6 +80,37 @@ GateInfo body shape (game's own):
 Also `CMD_GET_KGS_GUEST_LOGIN_TOKEN` for KGS guest login.
 `make_room.py` runs the chain over the same gRPC transport.
 
+### ctor / writer addresses (xref from the msgid strings)
+
+| command | ctor fn | second ref fn |
+|---|---|---|
+| `CMD_CREATEJOIN_ROOM` | `0x77b1830` | `0x77b7414..0x77b7558` |
+| `CMD_GET_SESSION_ID` | `0x7da8794` | `0x7da8aa8..0x7da8c2c` |
+| `CMD_SEND_RECRUIT_CODE` | `0x76c5c74` | (same fn) |
+
+Every command's ctor serialises the **same 10-field base map**:
+`msgid, rqid, user_id, session_id, my_platform, s_keyword, lang, region,
+platform, client_version` — the per-command writer (e.g. CMD_LOGIN's
+`0x76b1b28`) appends the real fields.
+
+### room-related field names in the binary (MessagePack keys)
+
+`room_id`, `room_kind`, `room_mode`, `room_core_settings`,
+`room_match_settings`, `room_entry_restriction`, `room_create_time`,
+`room_users`, `room_info`, `room_list_num`, `recruit_code`, `comment`,
+`team_id`, `select_team_id`, `select_compe_unit_id`, `match_num`,
+`game_mode`, `kick_user_id`.
+
+### confirmed request/response fields (from the game's own parsers)
+
+| command | request fields beyond the 10-field base | response fields |
+|---|---|---|
+| `CMD_GET_SESSION_ID` | `game_id` | `session_id` |
+| `CMD_CREATEJOIN_ROOM` | (room request builder fn `0x77bf578..0x77c2ab8`, refs `room_kind`) | **`result`, `room_id`, `event_log`** |
+| `CMD_SEND_RECRUIT_CODE` | `recruit_code` (write path `0x76c5e40..0x76c60e0`) | **`recruit_code`** ← the join code |
+| `CMD_GET_KGS_GUEST_LOGIN_TOKEN` | base map only (`NotImplement` defaults) | token |
+| `CMD_LOGIN` | writer `0x76b1b28`, 25-field map | session_id / user_id |
+
 ## 6. OTHER PROVEN FACTS (today)
 
 - Capture-era gate IPs (June 2026 etc.) are gone/reassigned: hostname
