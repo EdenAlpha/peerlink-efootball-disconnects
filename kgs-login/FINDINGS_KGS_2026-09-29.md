@@ -365,3 +365,43 @@ so the function cannot be recovered from the stripped binary that way.
 4. **`binder_linux.ko` is in `linux-modules-extra-$(uname -r)`**, not the base
    runner image. Without that `apt` line `modprobe` has nothing to load and
    `mount -t binder` has no filesystem type to mount.
+
+## Measured redroid behaviour on the ARM64 runner
+
+- Plain invocation boots in **~10 s**:
+  ```
+  redroid/redroid:14.0.0_64only-latest \
+    androidboot.redroid_width=720 androidboot.redroid_height=1280 \
+    androidboot.redroid_dpi=320 androidboot.use_memfd=true
+  ```
+  → `sys.boot_completed=1`, `uid=0(root)`, `ro.odm.product.cpu.abilist64=arm64-v8a`.
+- **`androidboot.redroid_gpu_mode=swiftshader` prevents boot entirely.** Added
+  speculatively for the UE4/Vulkan requirement; measured result was a 180 s
+  wait that never saw `boot_completed`, with the container started but
+  Android never finishing init. Removed. (Software rendering, if it turns out
+  to be needed, has to be solved some other way.)
+- The kernel config is `CONFIG_ANDROID_BINDER_DEVICES=""` and
+  `modprobe binder` fails (the module is `binder_linux`), yet
+  `mount -t binder binder /dev/binderfs` succeeds — the kernel resolves
+  `fs-binder` and loads `binder_linux` itself. So the mount is the reliable
+  test, not modprobe.
+
+## Tooling now built and self-tested
+
+| script | purpose |
+|---|---|
+| `kgs-login/scripts/capture_insecure.js` | Frida: force `Def_Online_gRPC_insecure=1`, then hook libc `send`/`write` to capture plaintext HTTP/2 |
+| `kgs-login/scripts/decode_capture.py` | reassemble captured sends → h2 frames → HPACK (static + Huffman) → gRPC envelope → recursive protobuf |
+| `kgs-login/scripts/test_decode.py` | self-test for the decoder; **PASS** |
+| `kgs-login/scripts/replay_capture.py` | send the game's own bytes verbatim over real TLS; both outcomes are decisive |
+| `kgs-login/scripts/trust_our_ca.js` | alternative path: point the game at our CA via the `0xa4a8480` global (kept in case plaintext mode is refused) |
+| `kgs-login/scripts/make_mitm.py` | mitmproxy addon, same fallback |
+
+## Why "just MITM it" is not a valid shortcut
+
+If the `502 g=14` were caused by TLS-layer filtering, a MITM would be
+useless: the proxy would be the TLS client to Konami, presenting Python's or
+Go's handshake, not the game's BoringSSL one. Capturing the game's bytes
+*inside its own process* is the only measurement that keeps the real client
+identity intact — which is why the work went into the plaintext-config route
+rather than a proxy.
