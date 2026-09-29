@@ -98,41 +98,93 @@ jobs:
       # started in the background so it overlaps with the Frida setup
       - name: 02 fetch eFootball package
         run: |
+          set +e
           set -x
-          curl -fsSL -o /root/apkeep \
-            https://github.com/EFForg/apkeep/releases/download/1.0.0/apkeep-aarch64-unknown-linux-gnu
+          cd /root
+          # diagnose egress first, so a failure is never silent
+          curl -sS -o /dev/null -w "github.com HTTP %{http_code}\n" \
+            --max-time 30 https://github.com/ || echo "cannot reach github.com"
+          for tag in 1.0.0; do
+            for asset in apkeep-aarch64-unknown-linux-gnu \
+                         apkeep-aarch64-unknown-linux-gnu.static; do
+              url="https://github.com/EFForg/apkeep/releases/download/${tag}/${asset}"
+              echo "trying $url"
+              curl -fsSL --max-time 300 -o /root/apkeep "$url" && break
+              echo "  failed rc=$?"
+            done
+            [ -s /root/apkeep ] && break
+          done
+          if [ ! -s /root/apkeep ]; then
+            echo "=== APKEEP DOWNLOAD FAILED ==="
+            curl -sS --max-time 30 \
+              https://api.github.com/repos/EFForg/apkeep/releases/tags/1.0.0 \
+              | grep -o '"browser_download_url": *"[^"]*aarch64[^"]*"' || true
+            echo "=== END ==="
+            exit 1
+          fi
           chmod +x /root/apkeep
-          /root/apkeep -a jp.konami.pesam -d apk-pure /root &
+          ls -la /root/apkeep
+          /root/apkeep --version || true
+          /root/apkeep -a jp.konami.pesam -d apk-pure /root > /root/apkeep.log 2>&1 &
           echo $! > /root/apkeep.pid
+          sleep 20
           echo "apkeep running in background (pid $(cat /root/apkeep.pid))"
+          cat /root/apkeep.log || true
 
       # ----------------------------------------------------------- frida
       - name: 03 frida
         run: |
+          set +e
           set -x
-          python3 -m pip install --quiet --break-system-packages frida-tools
-          FRIDA_VER=$(python3 -c "import frida; print(frida.__version__)")
-          echo "frida client version: $FRIDA_VER"
-          curl -fsSL -o /root/frida-server.xz \
-            "https://github.com/frida/frida/releases/download/${FRIDA_VER}/frida-server-${FRIDA_VER}-android-arm64.xz"
-          xz -d -f /root/frida-server.xz
-          sudo docker cp /root/frida-server redroid:/data/local/tmp/frida-server
+          python3 -m pip install --quiet --break-system-packages frida-tools || \
+            { echo "PIP FAILED"; pip3 install --break-system-packages frida-tools; }
+          FRIDA_VER=$(python3 -c "import frida; print(frida.__version__)" 2>/dev/null)
+          echo "frida client version: ${FRIDA_VER:-<none>}"
+          [ -n "$FRIDA_VER" ] || { echo "NO FRIDA PYTHON MODULE"; exit 1; }
+          ok=0
+          for asset in "frida-server-${FRIDA_VER}-android-arm64.xz"; do
+            url="https://github.com/frida/frida/releases/download/${FRIDA_VER}/${asset}"
+            echo "trying $url"
+            curl -fsSL --max-time 300 -o /root/frida-server.xz "$url" && { ok=1; break; }
+            echo "  failed rc=$?"
+          done
+          if [ "$ok" != "1" ]; then
+            echo "=== FRIDA SERVER DOWNLOAD FAILED ==="
+            curl -sS --max-time 30 "https://api.github.com/repos/frida/frida/releases/latest" \
+              | grep -o '"name": *"frida-server-[^"]*android-arm64[^"]*"' || true
+            echo "=== END ==="
+            exit 1
+          fi
+          xz -d -f /root/frida-server.xz || { echo "XZ FAILED"; exit 1; }
+          ls -la /root/frida-server
+          sudo docker cp /root/frida-server redroid:/data/local/tmp/frida-server || exit 1
           sudo docker exec redroid chmod 755 /data/local/tmp/frida-server
           sudo docker exec redroid mkdir -p /data/local/tmp/kgs
           sudo docker exec -d redroid /data/local/tmp/frida-server
           sleep 5
-          sudo docker exec redroid sh -c 'ps -A | grep -i frida' || true
-          nc -zv 127.0.0.1 27042 && echo "frida-server REACHABLE"
+          sudo docker exec redroid sh -c 'ps -A | grep -i frida' || echo "frida-server not running"
+          nc -zv 127.0.0.1 27042 && echo "frida-server REACHABLE" || echo "frida-server NOT reachable"
 
       # ------------------------------------------------------- install game
       - name: 04 install eFootball
         run: |
+          set +e
           set -x
-          for i in $(seq 1 120); do
-            [ -f /root/jp.konami.pesam.xapk ] && break
+          i=0
+          while [ $i -lt 160 ]; do
+            if [ -f /root/jp.konami.pesam.xapk ]; then break; fi
+            if ! kill -0 "$(cat /root/apkeep.pid 2>/dev/null)" 2>/dev/null; then
+              if [ ! -f /root/jp.konami.pesam.xapk ]; then
+                echo "=== APKEEP EXITED WITHOUT A PACKAGE ==="
+                cat /root/apkeep.log 2>/dev/null
+                exit 1
+              fi
+            fi
             sleep 15
+            i=$((i+1))
+            [ $((i % 4)) -eq 0 ] && { ls -la /root/*.xapk 2>/dev/null; tail -2 /root/apkeep.log 2>/dev/null; }
           done
-          ls -la /root/*.xapk || { echo "NO XAPK"; exit 1; }
+          ls -la /root/*.xapk || { echo "NO XAPK after $((i*15))s"; cat /root/apkeep.log 2>/dev/null; exit 1; }
           cd /root
           python3 - <<'PY'
           import json, zipfile, os
