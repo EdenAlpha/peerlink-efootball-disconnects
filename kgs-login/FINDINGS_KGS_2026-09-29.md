@@ -221,8 +221,49 @@ Decoding the 13:54 capture properly (not dismissing it as noise) shows
   code (run in the Unicorn harness) confirms the channel target is exactly
   `dns:///pes22-game.cs.konami.net:443/` — the door we use.
 
-**Conclusion:** the blocker is not the request, it is that a direct
-connection is refused. The workable routes are (a) reproduce whatever the
-device proxy does, (b) run the real client inside that same environment
-(VPhoneOS/emulator), or (c) capture a decrypted working session and diff it
-against a direct one.
+### 10a. CORRECTION 15:10 UTC — the 34-byte blobs are a CAPTURE artifact
+
+Checked against `peerlink_match_1790619339531.zip`'s
+`passthrough_capture.csv`, which records the **real internet-side bytes**:
+**0 of 2071 TCP packets** contain the 34-byte `IeFootball™` marker, while the
+same-session local pcap has 659. So the marker is added by the local capture
+VPN (PeerLink's own tun capture), never reaches the internet, and is not
+what Konami sees. **The "hidden proxy" theory above is withdrawn.**
+
+### 10b. What the internet-side match capture proves (ground truth)
+
+`passthrough_capture.csv` (2026-09-28 19:15, 8739 packets) contains five
+TLS connections with SNI `pes22-game.cs.konami.net` — a **live, logged-in
+match**:
+
+| local port | server IP | up | ALPN offered |
+|---|---|---|---|
+| 34572 | 44.232.213.50 | 34,679 B | `http/1.1` |
+| 45846 | 34.208.149.190 | 12,733 B | `http/1.1` |
+| 53370 | 44.232.213.50 | 8,957 B | **`grpc-exp, h2`** |
+| 52312 | 44.232.213.50 | 4,624 B | `http/1.1` |
+| 34820 | 44.255.253.52 | 2,096 B | `http/1.1` |
+
+- Confirms: the game really does use gRPC (`grpc-exp, h2`, ciphers
+  `c02b,c02c,c02f,c030,ff`, no TLS-1.3 offer on that socket), and the
+  other four sockets are plain HTTPS.
+- These are **different IPs from our DNS pool** (`us-west-2` ELB) — the
+  capture was taken through the capture VPN, so geo-DNS resolved elsewhere.
+- Probed **every** one of those exact IPs with the real-identity envelope:
+  `44.232.213.50`, `34.208.149.190`, `44.255.253.52`, `16.146.220.162` →
+  **all `502 g=14`**. Combined with the 50+ request variants, the refusal is
+  independent of both the address and the request.
+- Also visible in plaintext: `ntljp.service.konami.net` (4×) and
+  `ntl.service.konami.net` (1×) — the Japanese-region gate host, consistent
+  with the phone's locale.
+
+**Where this leaves the diagnosis.** Every observable we can change from
+outside — address, TLS/ALPN, HTTP/2 framing, HPACK, headers, envelope
+fields, body, message order — produces the identical `502 g=14` in ~0.3 s,
+while the identical TLS version, cipher set and ALPN from the real client
+on the same day gets served. The remaining difference is not on the wire in
+any form we can synthesise; it is something about the client's *identity or
+environment* (a value sealed in the game's own certificate/key material, or
+state the server checks before the first stream). The decisive experiment is
+therefore to let the game's own code produce the bytes: run its gRPC client
+inside the Unicorn harness and capture the exact request it emits.
