@@ -1088,3 +1088,53 @@ A further caveat worth stating: even with the routes, a real login needs a valid
 (`titleCode=PES2022, locale=US, version=6.0.1, uid=3c5aad3c…`) — and the game
 obtains its auth token from a Konami account flow. Reaching a room code is a
 chain of five commands plus a real session, not a single request.
+
+## The login sequence, reconstructed in order from the capture
+
+Read strictly first-to-last rather than jumping to the most recent traffic,
+because the ordering is the information (`scripts/login_sequence.py`):
+
+```
+   t_s  flow                                        bytes  state
+   0.00  10.0.0.2 -> 8.8.4.4:53                        472  open,fin
+   0.00  10.0.0.2 -> 8.8.8.8:53                        472  open,fin
+  35.84  10.0.0.2 -> 52.85.47.53:443   (applilink)    7289  open,fin
+  42.98  10.0.0.2 -> 44.232.213.50:443  GAME SERVER   4604  open,fin
+  56.23  10.0.0.2 -> 44.232.213.50:443  GAME SERVER  34659  open,fin
+  80.53  10.0.0.2 -> 44.232.213.50:443  GAME SERVER   8937  open
+  92.84  10.0.0.2 -> 52.196.4.126:80   POST /ntl/api/GateInfo.php
+  96.16  10.0.0.2 -> 52.196.4.126:80   POST /ntl/api/PES2022/ReportLog.php
+ 103.55  10.0.0.2 -> 52.196.4.126:80   POST /ntl/api/PES2022/ReportLog.php
+ 151.95  10.0.0.2 -> 52.196.4.126:80   POST /ntl/api/PES2022/ReportLog.php
+ 373.22  10.0.0.2 -> 34.208.149.190:443 GAME SERVER  12713  open
+```
+
+Two things this settles that guessing could not:
+
+1. **The gRPC session is established *before* the NTL gate call** — the game
+   reaches `44.232.213.50:443` at t=43 s and again at t=56 s, and only calls
+   `GateInfo.php` at t=93 s. So the gRPC channel is the bootstrap. The NTL gate
+   is not what hands out the endpoint, which rules out the theory that the gate
+   supplies connection parameters.
+2. **The gate carries no configuration.** Its body is hex-encoded and decodes
+   to a version ping and nothing else (`scripts/gate_bodies.py`):
+
+   ```
+   POST /ntl/api/GateInfo.php
+   req = {"titleCode":"PES2022","locale":"US","version":"6.0.1",
+          "extra":"","apiLevel":"4"}
+   ```
+
+   The `ReportLog.php` bodies are the app identity, also already known:
+
+   ```
+   ## NTLInfo
+   ${"libVer":"1.17.1-Android-15"}
+   ${"uid":"3c5aad3c6b8425c611ebe2f5da6c25af"}
+   ${"opt":22011111}
+   ```
+
+So no route table is fetched over the network at login either. The command
+routes are either compiled into the client in a form not recoverable as
+strings, or established server-side when the session is created — which again
+makes the game's own request bytes the only source.
