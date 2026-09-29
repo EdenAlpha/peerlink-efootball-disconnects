@@ -155,19 +155,33 @@ jobs:
       # --------------------------------------------------------- capture
       - name: 05 capture plaintext gRPC
         run: |
+          set +e
           set -x
           sudo docker cp kgs-login/scripts/capture_insecure.js \
             redroid:/data/local/tmp/capture_insecure.js
-          timeout 420 frida -H 127.0.0.1:27042 -f jp.konami.pesam \
+          # dismiss the package installer dialogs first
+          sudo docker exec redroid /system/bin/pm list packages | grep -i konami
+          timeout 600 frida -H 127.0.0.1:27042 -f jp.konami.pesam \
             -l kgs-login/scripts/capture_insecure.js --runtime=v8 \
             > /root/frida.log 2>&1 &
           FRIDA_PID=$!
           echo "frida pid $FRIDA_PID; letting the game run..."
-          for i in $(seq 1 30); do
+          # The first launch shows a splash / terms-of-use screen. Nobody is
+          # there to tap it, so nudge the UI periodically -- without this the
+          # game may never reach the KGS login at all.
+          for i in $(seq 1 45); do
             sleep 10
-            n=$(sudo docker exec redroid sh -c 'ls /data/local/tmp/kgs 2>/dev/null | wc -l' | tr -d '\r')
-            echo "  t=$((i*10))s  frames=$n"
-            [ "$n" -gt 0 ] && sleep 30 && break
+            n=$(sudo docker exec redroid sh -c 'ls /data/local/tmp/kgs 2>/dev/null | wc -l' 2>/dev/null | tr -d '\r')
+            alive=$(sudo docker exec redroid sh -c 'ps -A | grep -c pesam' 2>/dev/null | tr -d '\r')
+            echo "  t=$((i*10))s  frames=${n:-?}  pesam_procs=${alive:-?}"
+            # tap centre, then ENTER, then BACK -- clears most first-run dialogs
+            sudo docker exec redroid /system/bin/input tap 360 640  >/dev/null 2>&1
+            sudo docker exec redroid /system/bin/input keyevent 66 >/dev/null 2>&1
+            sudo docker exec redroid /system/bin/input keyevent 4  >/dev/null 2>&1
+            if [ "${n:-0}" -gt 0 ] 2>/dev/null; then
+              echo "frames appeared; letting it settle"
+              sleep 30; break
+            fi
           done
           sudo docker exec redroid sh -c 'ls -la /data/local/tmp/kgs' || true
           echo "=== frida log ==="
