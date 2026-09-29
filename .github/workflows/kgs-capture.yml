@@ -67,12 +67,16 @@ jobs:
           mount | grep -i binder
           sudo mkdir -p /root/rd
           sudo docker rm -f redroid >/dev/null 2>&1 || true
+          # NOTE: do NOT add androidboot.redroid_gpu_mode here. Measured on this
+          # runner: with gpu_mode=swiftshader redroid never reaches
+          # boot_completed and the 180 s wait times out; with the plain
+          # invocation below it boots in ~10 s. If the game later turns out to
+          # need a GPU, deal with it then -- get to a booted Android first.
           sudo docker run -d --name redroid --privileged \
             -v /root/rd:/data -p 5555:5555 -p 27042:27042 \
             redroid/redroid:14.0.0_64only-latest \
             androidboot.redroid_width=720 androidboot.redroid_height=1280 \
-            androidboot.redroid_dpi=320 androidboot.use_memfd=true \
-            androidboot.redroid_gpu_mode=swiftshader || \
+            androidboot.redroid_dpi=320 androidboot.use_memfd=true || \
             { echo "DOCKER RUN FAILED"; sudo docker logs redroid; exit 1; }
           booted=0
           for i in $(seq 1 36); do
