@@ -267,14 +267,26 @@ jobs:
           sudo docker cp $W/out/. redroid:/data/local/tmp/splits/
           sudo docker exec redroid sh -c 'ls /data/local/tmp/splits/*.apk | wc -l'
           sudo docker exec redroid sh -c 'ls -la /data/local/tmp/splits/*.apk' | head -30
-          echo "--- install-multiple with the complete set ---"
-          timeout 1800 sudo docker exec redroid sh -c \
-            'cd /data/local/tmp/splits && pm install-multiple -r -g ./*.apk' 2>&1 | tail -25
-          if ! sudo docker exec redroid /system/bin/pm list packages 2>/dev/null | grep -qi konami; then
-            echo "=== install-multiple failed; retry base+lib only, explicitly named ==="
-            sudo docker exec redroid sh -c \
-              'cd /data/local/tmp/splits && pm install-multiple -r -g base.apk split_config.arm64_v8a.apk' 2>&1 | tail -10
-          fi
+          # redroid's pm has NO install-multiple subcommand:
+          #     Unknown command: install-multiple
+          # Every earlier INSTALL_FAILED_* was a fallback running after that.
+          # The supported path is the session API.
+          echo "--- pm subcommands available ---"
+          sudo docker exec redroid sh -c 'pm help 2>&1 | grep -iE "install" | head -12'
+          echo "--- install via session api ---"
+          timeout 1800 sudo docker exec redroid sh -c '
+            cd /data/local/tmp/splits || exit 1
+            SESSION=$(pm install-create -r | tr -d "\r")
+            echo "session=[$SESSION]"
+            case "$SESSION" in
+              ""|*[!0-9]*) echo "could not create a session"; exit 1 ;;
+            esac
+            for f in ./*.apk; do
+              echo "  write $f"
+              pm install-write "$SESSION" "$(basename $f)" "$f" || echo "  write FAILED $f"
+            done
+            pm install-commit "$SESSION"
+          ' 2>&1 | tail -40
           echo "--- package state ---"
           sudo docker exec redroid /system/bin/pm list packages | grep -i konami \
             || { echo "=== GAME NOT INSTALLED AT ALL ===";
