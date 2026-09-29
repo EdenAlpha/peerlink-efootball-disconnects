@@ -61,22 +61,40 @@ def describe(blob: bytes) -> None:
         i += 9 + ln
 
 
-def read_response(sock, limit=65536, timeout=20.0) -> bytes:
-    sock.settimeout(timeout)
+def read_response(sock, limit=262144, timeout=20.0, settle=3.0) -> bytes:
+    """Read until the peer stops sending for `settle` seconds, or we time out.
+
+    Reading only one frame is not enough: the server's SETTINGS/WINDOW_UPDATE
+    arrive immediately, and the answer that matters is the response to our
+    request, which follows.
+    """
+    import time
+    sock.settimeout(settle)
     out = b""
-    try:
-        while len(out) < limit:
+    deadline = time.time() + timeout
+    last = time.time()
+    while len(out) < limit and time.time() < deadline:
+        try:
             chunk = sock.recv(16384)
-            if not chunk:
-                break
-            out += chunk
-            if len(out) >= 9:
-                # stop once we have a complete HEADERS/DATA frame
-                ln = int.from_bytes(out[0:3], "big")
-                if len(out) >= 9 + ln:
+        except socket.timeout:
+            break
+        if not chunk:
+            break
+        out += chunk
+        last = time.time()
+        # a complete response for a gRPC unary call ends with trailers
+        if len(out) >= 9:
+            i, frames = 0, []
+            while i + 9 <= len(out):
+                ln = int.from_bytes(out[i:i + 3], "big")
+                frames.append((out[i + 3], out[i + 4], ln))
+                i += 9 + ln
+            if i == len(out) and len(frames) >= 3:
+                types = [f[0] for f in frames]
+                # SETTINGS + (HEADERS|DATA) ... and something END_STREAM
+                if 4 in types and any(t in (0, 1) for t in types) \
+                        and any(f[1] & 0x1 for f in frames):
                     break
-    except socket.timeout:
-        pass
     return out
 
 
