@@ -125,7 +125,14 @@ def main() -> int:
                 s = open_stream()
                 continue
             done += 1
-            if st != "14":
+            if st is None:
+                # A timeout is NOT a resolution. An earlier version of this
+                # script tested `st != "14"`, which counted every timeout as a
+                # hit and printed 384 false "RESOLVED" lines. Only an actual
+                # status counts.
+                print("  %-34s -> NO STATUS (timeout, not a result)" % p,
+                      flush=True)
+            elif st != "14":
                 print("  %-34s -> grpc=%-4s data=%-4d %s   <<< RESOLVED"
                       % (p, st, len(data), gm[:70]), flush=True)
                 resolved.append((p, st, gm, data))
@@ -133,11 +140,11 @@ def main() -> int:
                     mlen = int.from_bytes(data[1:5], "big")
                     dec = command_response(data[5:5 + mlen])
                     print("        CommandResponse: %s" % dec, flush=True)
-            if st is None:
-                print("  %-34s -> NO STATUS (timeout)" % p, flush=True)
             if done % 40 == 0:
                 print("     ...%d/%d, %d resolved" % (done, len(names),
                                                       len(resolved)), flush=True)
+                if resolved:
+                    break
     finally:
         try:
             s.close()
@@ -145,6 +152,10 @@ def main() -> int:
             pass
     print("\nswept %d, RESOLVED %d: %s"
           % (done, len(resolved), [r[0] for r in resolved]), flush=True)
+    if not resolved:
+        print("No CMD_* name resolves. `path` is not a command enum name; it is\n"
+              "most likely a URL path. The remaining source for the real value\n"
+              "is the game's own request bytes.", flush=True)
     return 0
 
 

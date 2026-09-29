@@ -881,3 +881,62 @@ There are 384 `CMD_*` strings in the binary to sweep
 `scripts/kgs_client.py` is a working client: it builds a `CommandRequest`,
 sends it over HTTP/2 with the `grpc-exp,h2` ALPN the game uses, and decodes
 `CommandResponse{id, packMode, res}` out of the DATA frame.
+
+## `path` is not a command enum name — 0 of 384 candidates resolve
+
+The `CMD_*` strings in the binary are the *client's* internal command
+identifiers. None of them is the `path` the server routes on:
+
+- **Slow sweep** (`scripts/sweep_commands.py`, 6 s per request, one connection
+  each): 17 priority names plus the remaining 369 — **0 resolved**, every one
+  `grpc-status: 14 UNAVAILABLE`, including a deliberately unknown control.
+- **Path-form matrix** (`scripts/path_forms.py`): leading slash, package
+  qualified (`command_service.X`, `command_service/X`), the full method path,
+  lower case, underscore-stripped, and the bare suffix — all `14`.
+- **Payload shapes**: empty, `{}`, `null`, `[]`, a JSON object naming the
+  command, and non-JSON text — all `14`.
+- **`packMode`**: 0, 1, 2, 99 — all `14`.
+- **`id`**: empty, `1`, `test`, a random UUID, the nil UUID — all `14`.
+- **Pipelined on a single `CommandStream`**: also `14`.
+
+A correction to the tooling: the first version of `scripts/fast_sweep.py`
+tested `status != "14"`, which counted every **timeout** as a hit and printed
+384 false `RESOLVED` lines. It now distinguishes "no status" from a status, and
+treats only a real status as a result. The slow sweep, which waits properly,
+never showed a single false positive — the honest result is 0 of 384.
+
+### What this implies
+
+`CommandRequest{id, packMode, req, path}` is a **generic envelope**: an
+identifier, an encoding, a request body and a *route*. Since no command name
+resolves, `path` is most likely a **URL path** rather than an enum name — the
+same shape as the plain-HTTP endpoints the game already uses
+(`http://ntl.service.konami.net/ntl/api/GateInfo.php`). No such path is
+recoverable from the binary as a literal, so the remaining source is the game's
+own request bytes.
+
+That makes the on-device capture the only route to the last missing value, which
+is where the effort should go.
+
+## GitHub runner: the install failure is diagnosed
+
+```
+Failure [INSTALL_FAILED_INVALID_APK: Full install must include a base package]
+```
+
+`pm install-multiple` decides which APK is the base **by filename**, not by
+reading the XAPK manifest. The XAPK stores `jp.konami.pesam.apk` as the base,
+which `pm` does not recognise, so it saw only splits. The fix renames on the way
+into the container to the standard convention:
+
+```
+base.apk  split_config.arm64_v8a.apk  split_pad_it_0.apk  split_pad_it_1.apk
+```
+
+with a `pm install-create` / `install-write` / `install-commit` session as the
+fallback, and the asset packs still non-fatal.
+
+Also confirmed working on the runner: `frida-server 17.19.0` for ARM64 is now
+**reachable** (launching it through `sh -c` with its stderr captured fixed the
+silent failure), and redroid reports `ro.opengles.version 196610` — **OpenGL ES
+3.2 via ANGLE** — so the UE4 renderer has what it needs without a GPU.

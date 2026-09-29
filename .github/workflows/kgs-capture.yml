@@ -281,9 +281,16 @@ jobs:
           if [ ! -f $W/extracted.ok ]; then
             echo "=== EXTRACTION FAILED ==="; exit 1
           fi
-          for f in jp.konami.pesam.apk config.arm64_v8a.apk pad_it_0.apk pad_it_1.apk; do
-            if [ -f "$W/$f" ]; then sudo docker cp "$W/$f" "redroid:/data/local/tmp/$f"; fi
-          done
+          # pm decides which APK is the base BY FILENAME, not by the XAPK
+          # manifest. Renaming to the standard split convention is required:
+          #   base.apk / split_config.arm64_v8a.apk / split_pad_it_0.apk ...
+          # Without this: INSTALL_FAILED_INVALID_APK: Full install must include
+          # a base package.
+          sudo docker cp $W/jp.konami.pesam.apk    redroid:/data/local/tmp/base.apk
+          sudo docker cp $W/config.arm64_v8a.apk  redroid:/data/local/tmp/split_config.arm64_v8a.apk
+          sudo docker cp $W/pad_it_0.apk          redroid:/data/local/tmp/split_pad_it_0.apk
+          sudo docker cp $W/pad_it_1.apk          redroid:/data/local/tmp/split_pad_it_1.apk
+          sudo docker exec redroid sh -c 'ls -la /data/local/tmp/*.apk' || true
           sudo docker exec redroid sh -c 'ls -la /data/local/tmp/*.apk' || true
           # Install the SMALL pair first and verify it. The base APK is 22 MB
           # and the arm64 split is 57 MB, and libUE4.so lives in the arm64
@@ -293,23 +300,32 @@ jobs:
           # the single 860 MB install-multiple.
           echo "--- install base + arm64 split (small, fast) ---"
           sudo docker exec redroid /system/bin/pm install-multiple -r -g \
-            /data/local/tmp/jp.konami.pesam.apk \
-            /data/local/tmp/config.arm64_v8a.apk 2>&1 | tail -20
+            /data/local/tmp/base.apk \
+            /data/local/tmp/split_config.arm64_v8a.apk 2>&1 | tail -20
           echo "--- minimal package state ---"
           if ! sudo docker exec redroid /system/bin/pm list packages 2>/dev/null \
                | grep -qi konami; then
-            echo "=== MINIMAL INSTALL FAILED, retrying one at a time ==="
-            sudo docker exec redroid /system/bin/pm install -r -g \
-              /data/local/tmp/jp.konami.pesam.apk 2>&1 | tail -10
-            sudo docker exec redroid /system/bin/pm install -r -g \
-              /data/local/tmp/config.arm64_v8a.apk 2>&1 | tail -10
+            echo "=== MINIMAL INSTALL FAILED, retrying via a pm session ==="
+            # install-multiple is the only correct way to add a split; a
+            # session is the fallback when the CLI refuses the set.
+            sudo docker exec redroid sh -c '
+              session=$(pm install-create -r | tr -d "\r")
+              echo "session=$session"
+              pm install-write "$session" base.apk /data/local/tmp/base.apk
+              pm install-write "$session" split_config.arm64_v8a.apk \
+                 /data/local/tmp/split_config.arm64_v8a.apk
+              pm install-commit "$session"
+            ' 2>&1 | tail -15
           fi
           sudo docker exec redroid /system/bin/pm list packages | grep -i konami \
             || { echo "=== GAME NOT INSTALLED AT ALL ==="; exit 1; }
           sudo docker exec redroid /system/bin/pm path jp.konami.pesam
           echo "--- adding the asset packs (non-fatal, slow) ---"
           timeout 900 sudo docker exec redroid /system/bin/pm install-multiple -r -g \
-            /data/local/tmp/pad_it_0.apk /data/local/tmp/pad_it_1.apk 2>&1 | tail -8 \
+            /data/local/tmp/base.apk \
+            /data/local/tmp/split_config.arm64_v8a.apk \
+            /data/local/tmp/split_pad_it_0.apk \
+            /data/local/tmp/split_pad_it_1.apk 2>&1 | tail -8 \
             || echo "asset pack install failed or timed out - continuing"
           sudo docker exec redroid sh -c \
             'du -sh /data/app/*jp.konami.pesam* 2>/dev/null' || true
