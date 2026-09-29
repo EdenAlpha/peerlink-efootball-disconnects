@@ -405,6 +405,21 @@ jobs:
           for f in "$R"/kgs/*.bin; do
             [ -f "$f" ] && cp "$f" "$R/capture/$(basename "$f")"
           done
+          # the game's own ClientHello: gzip it, and only if it is small enough
+          # to be worth committing
+          if [ -f $W/game.pcap ]; then
+            SZ=$(stat -c %s $W/game.pcap)
+            echo "game.pcap is $SZ bytes"
+            if [ "$SZ" -lt 20000000 ]; then
+              gzip -c $W/game.pcap > "$R/capture/game.pcap.gz"
+              echo "published game.pcap.gz"
+            else
+              echo "pcap too large to commit; extracting ClientHellos only"
+              sudo docker exec redroid sh -c \
+                'tcpdump -r /data/local/tmp/game.pcap -s 0 -X "tcp[tcpflags] & tcp-syn != 0" 2>/dev/null | head -400' \
+                > "$R/capture/syn-dump.txt" 2>&1
+            fi
+          fi
           cp -f "$R/capture.md" "$R/latest.md"
           { echo '## capture'; echo; echo '```text';
             head -60 $W/step01.log 2>/dev/null; echo;
