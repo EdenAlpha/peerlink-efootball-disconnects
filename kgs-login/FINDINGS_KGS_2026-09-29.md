@@ -267,3 +267,101 @@ environment* (a value sealed in the game's own certificate/key material, or
 state the server checks before the first stream). The decisive experiment is
 therefore to let the game's own code produce the bytes: run its gRPC client
 inside the Unicorn harness and capture the exact request it emits.
+
+---
+
+# Session 2 — the decisive experiment is now RUNNING (2026-09-29 ~22:45Z)
+
+## The binary was never the problem (correction)
+
+Downloaded the genuine package: `jp.konami.pesam.xapk`, 822 MB,
+**versionName 11.0.1 / versionCode 311000101** — byte-for-byte the build on
+the user's phone. Its `lib/arm64-v8a/libUE4.so` is **SHA-256
+`2ac4ff17ac8ad713…` — identical to the `libUE4.so` we had been reverse
+engineering all day.** So an assumption from earlier in this investigation
+("we analysed an older 5.x/6.x build") was wrong and is now retracted: the
+binary we read is the current one. Host `pes22-game.cs.konami.net`, the single
+gRPC service path `/command_service.CommandService/CommandStream`, and the
+`Def_Online_*` key set are therefore all confirmed correct, and the `502 g=14`
+is definitively **not** caused by reading the wrong values out of the binary.
+
+Note on the Play Store question: the package was fetched from a mirror
+(`apkeep -d apk-pure`) because Google's own download path requires
+authenticating a Google account. The artifact itself is the Play one —
+matching version code, and the shared library is bit-identical to the one
+running on the user's phone.
+
+## Free ARM64 compute — solved, and it is GitHub
+
+The user's suggestion to use their GitHub account was the answer. The public
+repo gets a **free native-ARM64 runner** (`ubuntu-24.04-arm`). Measured on it
+(report: `kgs-login/ci-report/latest.md`):
+
+| fact | value |
+|---|---|
+| kernel | `6.17.0-1022-azure` (Ubuntu) |
+| `CONFIG_ANDROID_BINDER_IPC` | `m` |
+| `CONFIG_ANDROID_BINDERFS` | `m` |
+| binderfs mount | `binder on /dev/binderfs type binder (rw,relatime,max=1048576)` |
+| cpu / ram / disk | 4 vCPU / 15 GiB / 108 GB free |
+| docker privileged | yes (`PRIVILEGED_OK`, server 28.0.4) |
+| redroid 14 `arm64-v8a` | **boots in ~10 s, `uid=0(root)`** |
+
+This is the whole reason AWS was a dead end and this is not: Debian's AWS
+kernel has `CONFIG_ANDROID_BINDER_IPC` **unset** (so `mount -t binder` cannot
+work at all), whereas Ubuntu ships `binder_linux` as a loadable module. The
+8x larger RAM and correct OS are a bonus, not the reason.
+
+## Capture technique: plaintext by configuration, not by interception
+
+Rather than break TLS or hunt a stripped `SSL_write`, the game's own gRPC
+loader can be told to speak plaintext. Fully decoded from `0x7b101f8`:
+
+```
+0x7b10258  adrp x0, #0xc02000 ; add x0, x0, #0x3be ; mov w1, #0x18
+0x7b1027c  bl   0x2f0eaf0                     ; int Def_ getter, (x0=key,w1=len)
+0x7b10280  cbnz w0, #0x7b105c8                ; non-zero => plaintext channel
+            ; literal = "Def_Online_gRPC_insecure" (24 bytes at 0xc023be)
+
+0x7b10284  adrp x0, #0xaf7000 ; add x0, x0, #0x14b ; mov w1, #0x1d
+0x7b10294  bl   0x2f0eaf0                     ; "Def_Online_gRPC_debug_root_ca" (29)
+0x7b1029c  adrp x8, #0xa4a8000 ; add x8, x8, #0x480
+                                               ; global std::string = root CA path
+```
+
+So one Interceptor on the int getter at **`0x2f0eaf0`** that returns 1 when
+the key pointer equals `0xc023be` puts the channel in plaintext. From then on
+gRPC writes HTTP/2 frames straight to the socket and a plain libc
+`send`/`write` hook (always resolvable) captures the request verbatim. The
+bytes come from the game's own serializer — nothing is hand-assembled.
+
+`SSL_write` was tried first and is a dead end: the `"SSL_write"` literal at
+`0xa27cf3` has **no ADRP/ADD code reference** in the 104 MB executable segment,
+so the function cannot be recovered from the stripped binary that way.
+
+## Corrections to earlier notes
+
+- The two phone captures in `uploads/` (`PCAPdroid_29_Sep_13_54_22.pcap`,
+  `..._10_31_15.pcap`) are **connectivity checks, not game sessions**. Every
+  ClientHello in them is `www.applilink.jp` with `ALPN http/1.1`. The genuine
+  `pes22-game` TLS facts came from `passthrough_capture.csv`, not these pcaps.
+- ClientHello parsing had an off-by-3 bug: the 24-bit handshake length sits
+  between the handshake type and `legacy_version`. Fixed; hello sizes and
+  extension orders now parse correctly.
+- The 34-byte `IeFootball™` blob appears on **both directions of every**
+  connection including 34-byte packets with no TLS record header — consistent
+  with a capture tool artefact, as previously concluded.
+
+## GitHub Actions gotchas that cost three failed runs
+
+1. **A workflow with no `actions/checkout` step has no git repo**, so
+   `git add`/`git commit`/`git push` all fail silently (they were hidden behind
+   `|| echo`). Every self-report was being discarded.
+2. **`actions/checkout` leaves a detached HEAD** on `push` events, so a bare
+   `git push` does nothing — push by refspec: `HEAD:refs/heads/<branch>`.
+3. **The runner's shell is `bash -e -o pipefail`.** An unguarded
+   `cmd_a || cmd_b` where *both* may fail aborts the whole step instantly.
+   Every optional command needs its own `|| true`.
+4. **`binder_linux.ko` is in `linux-modules-extra-$(uname -r)`**, not the base
+   runner image. Without that `apt` line `modprobe` has nothing to load and
+   `mount -t binder` has no filesystem type to mount.
