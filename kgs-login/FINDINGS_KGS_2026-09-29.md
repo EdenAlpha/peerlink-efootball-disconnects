@@ -985,3 +985,40 @@ For the record, the wrong turns that got here, all of which produced
 | the game's own HTTP endpoints (`/ntl/api/GateInfo.php`, full URL) | 14 |
 | the gRPC method path itself | 14 |
 | every payload shape, `packMode` 0/1/2/99, five `id` formats | 14 |
+
+## The install failures were one missing subcommand
+
+Every `INSTALL_FAILED_*` seen on the runner traced back to a single line in the
+report:
+
+```
++ pm install-multiple -r -g /data/local/tmp/jp.konami.pesam.apk ...
+Unknown command: install-multiple
+Failure [INSTALL_FAILED_MISSING_SPLIT: Missing split for jp.konami.pesam]
+Failure [INSTALL_FAILED_INVALID_APK: Full install must include a base package]
+```
+
+**redroid's `pm` does not implement `install-multiple`.** The two `Failure`
+lines were the fallback paths that ran afterwards, which is why they pointed at
+the APK set and the filenames and sent the investigation after the wrong thing
+twice — renaming to `base.apk` was a reasonable guess but not the cause.
+
+The supported route is the session API, and the step now uses it:
+
+```sh
+SESSION=$(pm install-create -r | tr -d "\r")
+for f in ./*.apk; do
+  pm install-write "$SESSION" "$(basename $f)" "$f"
+done
+pm install-commit "$SESSION"
+```
+
+`pm` still identifies the base by the name passed to `install-write`, so the
+`base.apk` / `split_*.apk` naming is kept. The step also dumps
+`pm help | grep install` so the available subcommands are visible in the report
+rather than assumed.
+
+This is the fourth time in this investigation that a *fallback* masked the real
+error — the pattern is worth naming: when a step runs a second path after the
+first fails, the second path's error is what gets read, and it is about the
+fallback rather than about the cause.
