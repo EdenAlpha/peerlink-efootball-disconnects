@@ -16,8 +16,10 @@ captured bytes.
 """
 from __future__ import annotations
 
+import base64
 import glob
 import os
+import re
 import struct
 import sys
 
@@ -240,6 +242,39 @@ TYPES = {0: "DATA", 1: "HEADERS", 2: "PRIORITY", 3: "RST_STREAM", 4: "SETTINGS",
 FLAGS = {0x1: "END_STREAM", 0x4: "END_HEADERS", 0x8: "PADDED",
          0x20: "PRIORITY", 0x100: "ACK"}
 
+# A plain gRPC request carries only pseudo-headers plus a small standard set.
+# Anything else is the interesting part -- that is the whole reason we are
+# decoding the game's own bytes rather than guessing at them.
+STANDARD = {
+    ":method", ":scheme", ":path", ":authority",
+    "content-type", "user-agent", "te", "grpc-encoding", "grpc-accept-encoding",
+    "grpc-timeout", "grpc-status", "grpc-message", "grpc-status-details-bin",
+    "accept-encoding", "content-encoding", "cache-control", "date",
+    "x-forwarded-for", "x-forwarded-proto", "x-envoy-upstream-service-time",
+    "server", "via", "alt-svc",
+}
+
+notable = []
+
+
+def flag_header(name, value):
+    low = name.lower()
+    if low.startswith(":") or low in STANDARD:
+        return
+    notable.append(("non-standard header", name, value))
+    if low.startswith("x-") or low.startswith("grpc-"):
+        notable.append(("custom metadata", name, value))
+    # base64-looking values are the classic "sealed identity" carrier
+    compact = value.strip()
+    if len(compact) >= 24 and re.fullmatch(r"[A-Za-z0-9+/=_-]+", compact):
+        try:
+            raw = base64.b64decode(compact + "=" * (-len(compact) % 4), validate=True)
+            if len(raw) >= 16:
+                notable.append(("base64 value, %d B decoded" % len(raw),
+                                name, value[:72] + "..."))
+        except Exception:
+            pass
+
 
 def fl(flags):
     return ",".join(n for b, n in sorted(FLAGS.items()) if flags & b) or "-"
@@ -298,8 +333,10 @@ def main() -> int:
             for name, val in hpack_decode(blk, table):
                 if isinstance(name, tuple):
                     print("  %s: %s" % (name[0], name[1]))
+                    flag_header(name[0], name[1])
                 else:
                     print("  %s: %s" % (name, val))
+                    flag_header(name, val)
         elif typ == 0:                                 # DATA
             j = 0
             pad = 0
@@ -328,6 +365,14 @@ def main() -> int:
         else:
             if body:
                 print("  %s" % body.hex())
+    if notable:
+        print("\n" + "=" * 70)
+        print("NOTABLE -- anything outside a plain gRPC request")
+        print("=" * 70)
+        for kind, name, val in notable:
+            print("  [%s] %s: %s" % (kind, name, val))
+    else:
+        print("\nNOTABLE: nothing. Every header is standard gRPC.")
     return 0
 
 
