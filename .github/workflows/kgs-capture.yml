@@ -338,26 +338,67 @@ jobs:
             > $W/frida.log 2>&1 &
           FRIDA_PID=$!
           echo "frida pid $FRIDA_PID"
-          # if frida did not come up, still launch the game normally: the
-          # tcpdump running above will capture its real TLS ClientHello
-          sleep 20
+          sleep 15
           if ! kill -0 $FRIDA_PID 2>/dev/null; then
-            echo "=== FRIDA UNAVAILABLE - launching the game anyway for tcpdump ==="
+            echo "=== FRIDA UNAVAILABLE in phase 2 (frida-server likely down) ==="
             cat $W/frida.log
-            sudo docker exec redroid sh -c \
-              'am start -n jp.konami.pesam/com.konami.eff.anchor.MainActivity' \
-              2>&1 | tail -3
-            sudo docker exec redroid sh -c \
-              'monkey -p jp.konami.pesam -c android.intent.category.LAUNCHER 1' \
-              2>&1 | tail -3
+          fi
+
+          # ============ PHASE 1: normal launch, real TLS, no frida ============
+          # Given the ALB finding (502 with content-length 0, nginx healthy
+          # behind it) the shape of the game's own ClientHello is the leading
+          # remaining suspect. This phase needs no instrumentation at all, so
+          # it works even while frida-server is broken.
+          echo "########## PHASE 1: normal launch, capture the real ClientHello"
+          sudo docker exec redroid sh -c 'am force-stop jp.konami.pesam' 2>/dev/null
+          sudo docker exec redroid sh -c \
+            'monkey -p jp.konami.pesam -c android.intent.category.LAUNCHER 1' 2>&1 | tail -2
+          for i in $(seq 1 18); do
+            sleep 10
+            sz=$(sudo docker exec redroid sh -c \
+                  'ls -la /data/local/tmp/game.pcap 2>/dev/null | awk "{print \$5}"' 2>/dev/null | tr -d '\r')
+            alive=$(sudo docker exec redroid sh -c 'ps -A | grep -c pesam' 2>/dev/null | tr -d '\r')
+            echo "  phase1 t=$((i*10))s pcap=${sz:-?}B pesam_procs=${alive:-?}"
+            sudo docker exec redroid /system/bin/input tap 360 640   >/dev/null 2>&1
+            sudo docker exec redroid /system/bin/input keyevent 66 >/dev/null 2>&1
+          done
+          sudo docker exec redroid sh -c 'pkill -f tcpdump' 2>/dev/null
+          sudo docker exec redroid sh -c 'ls -la /data/local/tmp/game.pcap' 2>&1
+          sudo docker exec redroid sh -c 'cat /data/local/tmp/tcpdump.out 2>&1' | tail -3 || true
+          sudo docker exec redroid logcat -d -t 300 > $W/logcat-phase1.txt 2>&1 || true
+          echo "--- phase 1 konami / crash lines ---"
+          grep -iE "konami|pesam|FATAL|AndroidRuntime|libUE4|Vulkan|EGL" \
+            $W/logcat-phase1.txt 2>/dev/null | tail -30 || true
+          sudo docker cp redroid:/data/local/tmp/game.pcap $W/game.pcap 2>&1 \
+            || echo "no pcap to copy"
+          ls -la $W/game.pcap 2>/dev/null && echo "PHASE 1 PCAP CAPTURED" \
+            || echo "PHASE 1: no pcap"
+          if [ -s $W/game.pcap ]; then
+            python3 kgs-login/scripts/summarise_pcap.py $W/game.pcap || true
+          fi
+
+          # ============ PHASE 2: frida, force plaintext gRPC ============
+          echo "########## PHASE 2: frida, force Def_Online_gRPC_insecure=1"
+          sudo docker exec redroid sh -c 'am force-stop jp.konami.pesam' 2>/dev/null
+          sudo docker exec redroid sh -c \
+            'rm -rf /data/local/tmp/kgs; mkdir -p /data/local/tmp/kgs' 2>/dev/null
+          timeout 420 frida -H 127.0.0.1:27042 -f jp.konami.pesam \
+            -l kgs-login/scripts/capture_insecure.js --runtime=v8 \
+            > $W/frida2.log 2>&1 &
+          FRIDA2_PID=$!
+          echo "phase 2 frida pid $FRIDA2_PID"
+          sleep 20
+          if ! kill -0 $FRIDA2_PID 2>/dev/null; then
+            echo "=== frida exited; the game was still launched by -f, watching anyway"
+            cat $W/frida2.log
           fi
           # the first launch shows a splash / terms screen and nobody is there
           # to tap it, so nudge the UI periodically
-          for i in $(seq 1 60); do
+          for i in $(seq 1 36); do
             sleep 10
             n=$(sudo docker exec redroid sh -c 'ls /data/local/tmp/kgs 2>/dev/null | wc -l' 2>/dev/null | tr -d '\r')
             alive=$(sudo docker exec redroid sh -c 'ps -A | grep -c pesam' 2>/dev/null | tr -d '\r')
-            echo "  t=$((i*10))s frames=${n:-?} pesam_procs=${alive:-?}"
+            echo "  phase2 t=$((i*10))s frames=${n:-?} pesam_procs=${alive:-?}"
             sudo docker exec redroid /system/bin/input tap 360 640   >/dev/null 2>&1
             sudo docker exec redroid /system/bin/input keyevent 66 >/dev/null 2>&1
             sudo docker exec redroid /system/bin/input keyevent 4  >/dev/null 2>&1
