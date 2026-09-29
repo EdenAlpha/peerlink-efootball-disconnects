@@ -168,6 +168,12 @@ jobs:
           sudo docker exec redroid sh -c 'ls -la /data/local/tmp/kgs' || true
           echo "=== frida log ==="
           tail -60 /root/frida.log || true
+          # if the game died, this is where the reason is
+          sudo docker exec redroid logcat -d -t 400 > /root/logcat.txt 2>&1 || true
+          echo "=== konami / crash lines from logcat ==="
+          grep -iE "konami|pesam|FATAL|AndroidRuntime|libUE4|Vulkan|EGL" /root/logcat.txt 2>/dev/null | tail -40 || true
+          echo "=== did the process stay alive? ==="
+          sudo docker exec redroid sh -c 'ps -A | grep -i pesam' || echo "GAME PROCESS GONE"
 
       - name: 06 publish
         if: always()
@@ -186,13 +192,18 @@ jobs:
             echo '```text'; head -120 /root/step01.log 2>/dev/null; echo '```';
             echo; echo '### frida';
             echo '```text'; cat /root/frida.log 2>/dev/null | head -100; echo '```';
+            echo; echo '### logcat (filtered)';
+            echo '```text';
+            grep -iE "konami|pesam|FATAL|AndroidRuntime|libUE4|Vulkan|EGL" \
+              /root/logcat.txt 2>/dev/null | tail -50; echo '```';
             echo; echo '### frames'; echo '```text';
             cat "$R/capture/index.txt"; echo '```'; } > "$R/capture.md"
           cp -f "$R/capture.md" "$R/latest.md"
           { echo '## capture'; echo; echo '```text';
-            head -120 /root/step01.log 2>/dev/null; echo;
-            cat /root/frida.log 2>/dev/null | head -60; echo '```';
-            } >> "$GITHUB_STEP_SUMMARY"
+            head -80 /root/step01.log 2>/dev/null; echo;
+            cat /root/frida.log 2>/dev/null | head -40; echo;
+            grep -iE "FATAL|AndroidRuntime" /root/logcat.txt 2>/dev/null | tail -20;
+            echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           git config user.name  "ci-bot"
           git config user.email "ci-bot@users.noreply.github.com"
           git add -f "$R"
