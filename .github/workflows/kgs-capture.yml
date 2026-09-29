@@ -1,0 +1,164 @@
+name: kgs-capture
+
+# Run the REAL eFootball 11.0.1 in a rooted arm64 Android on the free ARM64
+# GitHub runner, force its gRPC channel to plaintext, and capture the exact
+# request bytes its own code produces.
+#
+# Why this works (all decoded from libUE4.so 11.0.1, which is byte-identical
+# to the build on the user's phone):
+#   * 0x7b101f8 (gRPC config loader) asks the int Def_ getter 0x2f0eaf0 for
+#     "Def_Online_gRPC_insecure" (literal at 0xc023be, len 0x18) and branches
+#     on it. Force it non-zero -> plaintext channel.
+#   * Plaintext channel -> gRPC writes HTTP/2 frames straight to the socket,
+#     so a libc send/write hook sees the request verbatim. No TLS to break.
+#
+# Environment facts already proven on this runner (see kgs-login/ci-report):
+#   CONFIG_ANDROID_BINDER_IPC=m, binderfs mounts, docker privileged OK,
+#   redroid 14 arm64 boots in ~10 s as root, 4 vCPU / 15 GiB.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/kgs-capture.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 90
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      # ---------------------------------------------------- binder + android
+      - name: 01 binder + redroid
+        run: |
+          set -x
+          sudo modprobe binder_linux devices="binder,hwbinder,vndbinder" || \
+            sudo modprobe binder_linux
+          sudo mkdir -p /dev/binderfs
+          sudo mount -t binder binder /dev/binderfs || true
+          mount | grep -i binder || { echo "BINDER MISSING"; exit 1; }
+          sudo mkdir -p /root/rd
+          sudo docker rm -f redroid >/dev/null 2>&1 || true
+          sudo docker run -d --name redroid --privileged \
+            -v /root/rd:/data -p 5555:5555 -p 27042:27042 \
+            redroid/redroid:14.0.0_64only-latest \
+            androidboot.redroid_width=720 androidboot.redroid_height=1280 \
+            androidboot.redroid_dpi=320 androidboot.use_memfd=true
+          for i in $(seq 1 30); do
+            [ "$(sudo docker exec redroid getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ] \
+              && { echo "BOOTED after $((i*5))s"; break; }
+            sleep 5
+          done
+          sudo docker exec redroid id
+          sudo docker exec redroid getprop ro.odm.product.cpu.abilist64
+
+      # ------------------------------------------- fetch the package (slow)
+      # started in the background so it overlaps with the Frida setup
+      - name: 02 fetch eFootball package
+        run: |
+          set -x
+          curl -fsSL -o /root/apkeep \
+            https://github.com/EFForg/apkeep/releases/download/1.0.0/apkeep-aarch64-unknown-linux-gnu
+          chmod +x /root/apkeep
+          /root/apkeep -a jp.konami.pesam -d apk-pure /root &
+          echo $! > /root/apkeep.pid
+          echo "apkeep running in background (pid $(cat /root/apkeep.pid))"
+
+      # ----------------------------------------------------------- frida
+      - name: 03 frida
+        run: |
+          set -x
+          python3 -m pip install --quiet --break-system-packages frida-tools
+          FRIDA_VER=$(python3 -c "import frida; print(frida.__version__)")
+          echo "frida client version: $FRIDA_VER"
+          curl -fsSL -o /root/frida-server.xz \
+            "https://github.com/frida/frida/releases/download/${FRIDA_VER}/frida-server-${FRIDA_VER}-android-arm64.xz"
+          xz -d -f /root/frida-server.xz
+          sudo docker cp /root/frida-server redroid:/data/local/tmp/frida-server
+          sudo docker exec redroid chmod 755 /data/local/tmp/frida-server
+          sudo docker exec redroid mkdir -p /data/local/tmp/kgs
+          sudo docker exec -d redroid /data/local/tmp/frida-server
+          sleep 5
+          sudo docker exec redroid sh -c 'ps -A | grep -i frida' || true
+          nc -zv 127.0.0.1 27042 && echo "frida-server REACHABLE"
+
+      # ------------------------------------------------------- install game
+      - name: 04 install eFootball
+        run: |
+          set -x
+          for i in $(seq 1 120); do
+            [ -f /root/jp.konami.pesam.xapk ] && break
+            sleep 15
+          done
+          ls -la /root/*.xapk || { echo "NO XAPK"; exit 1; }
+          cd /root
+          python3 - <<'PY'
+          import json, zipfile, os
+          z = zipfile.ZipFile('/root/jp.konami.pesam.xapk')
+          mf = json.loads(z.read('manifest.json'))
+          print('version', mf['version_name'], mf['version_code'])
+          want = [e['file'] for e in mf['split_apks']
+                  if e.get('id') in ('base', 'config.arm64_v8a')]
+          for f in want:
+              with open('/root/' + f, 'wb') as o:
+                  o.write(z.read(f))
+              print('extracted', f, os.path.getsize('/root/' + f))
+          PY
+          sudo docker cp /root/jp.konami.pesam.apk redroid:/data/local/tmp/base.apk
+          sudo docker cp /root/config.arm64_v8a.apk redroid:/data/local/tmp/arm64.apk
+          sudo docker exec redroid /system/bin/pm install-multiple -r -g \
+            /data/local/tmp/base.apk /data/local/tmp/arm64.apk 2>&1 | tail -20
+          sudo docker exec redroid /system/bin/pm list packages | grep konami
+
+      # --------------------------------------------------------- capture
+      - name: 05 capture plaintext gRPC
+        run: |
+          set -x
+          sudo docker cp kgs-login/scripts/capture_insecure.js \
+            redroid:/data/local/tmp/capture_insecure.js
+          timeout 420 frida -H 127.0.0.1:27042 -f jp.konami.pesam \
+            -l kgs-login/scripts/capture_insecure.js --runtime=v8 \
+            > /root/frida.log 2>&1 &
+          FRIDA_PID=$!
+          echo "frida pid $FRIDA_PID; letting the game run..."
+          for i in $(seq 1 30); do
+            sleep 10
+            n=$(sudo docker exec redroid sh -c 'ls /data/local/tmp/kgs 2>/dev/null | wc -l' | tr -d '\r')
+            echo "  t=$((i*10))s  frames=$n"
+            [ "$n" -gt 0 ] && sleep 30 && break
+          done
+          sudo docker exec redroid sh -c 'ls -la /data/local/tmp/kgs' || true
+          echo "=== frida log ==="
+          tail -60 /root/frida.log || true
+
+      - name: 06 publish
+        if: always()
+        run: |
+          set +e
+          R=kgs-login/ci-report
+          mkdir -p "$R/capture"
+          sudo docker exec redroid sh -c 'ls /data/local/tmp/kgs' > "$R/capture/index.txt" 2>&1
+          sudo docker exec redroid sh -c 'cd /data/local/tmp && tar cf - kgs' \
+            | sudo tar xf - -C "$R" 2>/dev/null
+          for f in "$R"/kgs/*.bin; do
+            [ -f "$f" ] && cp "$f" "$R/capture/$(basename "$f")"
+          done
+          tail -80 /root/frida.log > "$R/frida-log.txt" 2>/dev/null
+          { echo '```text'; cat /root/frida.log 2>/dev/null | head -100;
+            echo; echo '--- frames ---'; cat "$R/capture/index.txt";
+            echo '```'; } > "$R/capture.md"
+          cp -f "$R/capture.md" "$R/latest.md"
+          { echo '## capture'; echo; echo '```text';
+            cat /root/frida.log 2>/dev/null | head -100; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          git config user.name  "ci-bot"
+          git config user.email "ci-bot@users.noreply.github.com"
+          git add -f "$R"
+          git commit -m "kgs: capture run" 2>&1 | tail -2
+          git push origin "HEAD:refs/heads/${{ github.ref_name }}" 2>&1 | tail -3
+          echo published
