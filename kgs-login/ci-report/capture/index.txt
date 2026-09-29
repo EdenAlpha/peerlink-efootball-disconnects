@@ -1,1 +1,3 @@
-Error response from daemon: No such container: redroid
+total 8
+drwxr-xr-x 2 root  root  4096 2026-09-29 23:07 .
+drwxrwx--x 3 shell shell 4096 2026-09-29 23:07 ..
