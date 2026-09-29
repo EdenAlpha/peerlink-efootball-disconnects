@@ -492,34 +492,67 @@ sent 221 bytes (h2 preface + SETTINGS + HEADERS + DATA/END_STREAM)
   grpc-message: unavailable
 ```
 
-What this establishes, and it is different from what we assumed:
+What this establishes:
 
 1. **The front door is an AWS Elastic Load Balancer v2** (`server: awselb/2.0`).
    The earlier `awel` reading was a decoder artifact, not a hostname.
 2. **The response is a single trailers-only HEADERS frame with `END_STREAM`** —
-   the server never sends a gRPC response message. There is nothing to decode
-   from the game because the game never sees the request.
-3. **`content-length: 0` and `grpc-status: 14 UNAVAILABLE`** — this is the ALB
-   failing to deliver the request to a healthy backend, not the application's
-   authentication or authorisation layer rejecting our identity.
+   no gRPC response message is sent, just an error status.
+3. `grpc-status: 14` = `UNAVAILABLE`, `grpc-message: unavailable`.
 
-That reframes the whole investigation. We had been treating `502/14` as
-"the server read our request and refused it". It is the opposite: the request
-body is never processed. So varying the envelope, the protobuf, the HPACK
-encoding or the message order could never have changed the outcome — which is
-consistent with all 50+ variants returning the identical `502 g=14` in ~0.3 s.
+### RETRACTION: `content-length: 0` does not mean the body went unread
 
-The difference between us and the phone is therefore at the **connection /
-load-balancer routing layer**, not in the request semantics. Candidate causes,
-none yet confirmed:
+An earlier version of this document claimed that `content-length: 0` proved the
+ALB was "failing to deliver the request to a healthy backend" and that our
+payload was "never processed". **That was an inference presented as a finding,
+and it is retracted.**
 
-- ALB target selection or health for the IPs we resolve versus the ones the
-  phone used. (We probed all five game IPs from the capture; all `502/14`.)
-- Something in the TLS handshake the ALB uses to decide how to route.
+A gRPC error is returned as a *trailers-only* response, which by definition has
+no message body, so `content-length: 0` carries no information about whether the
+request was read. The two readings — "ALB cannot route to the gRPC target" and
+"the gRPC service read the request and returned UNAVAILABLE" — are both
+consistent with what we can see, and the claim of certainty was not warranted.
 
-This is exactly why the capture still matters, but for a different reason than
-assumed: we now need the game's **connection behaviour**, and the plaintext
-capture will also show whether the game's request differs at all.
+`UNAVAILABLE` (14) rather than `UNAUTHENTICATED` (16) or `INVALID_ARGUMENT` (3)
+is itself weak evidence *for* the service having processed the request: a server
+that ignored the payload entirely would have no basis for choosing that code.
+That is an inference too, and is being tested rather than assumed
+(`scripts/body_differs.py`).
+
+### The TLS handshake is NOT the discriminator (measured)
+
+The game's real gRPC ClientHello was recovered byte for byte from
+`passthrough_capture.csv` in the match exports (`scripts/extract_game_hello.py`,
+`scripts/scan_for_grpc_hello.py`). It is genuinely unusual:
+
+```
+185 bytes, legacy_version 0x0303, NO supported_versions  -> TLS 1.2 only
+ciphers (5)      c02b c02c c02f c030 00ff
+extensions (9)   server_name ec_point_formats supported_groups session_ticket
+                 0x3374 ALPN encrypt_then_mac session_ticket signature_algorithms
+ALPN             grpc-exp,h2
+SNI              pes22-game.cs.konami.net
+```
+
+That is Chromium's **Cronet** stack, which also explains `Def_Online_Use_Cronet`
+in the binary — so the gRPC channel is not BoringSSL-direct after all.
+
+Those exact 185 bytes were then put on the wire unaltered
+(`scripts/hello_shot.py`), alongside a stock Python TLS 1.2 ClientHello as a
+control:
+
+| client | result |
+|---|---|
+| the game's exact ClientHello (fresh random) | **ServerHello**, handshake proceeds, cipher `c02f` |
+| the game's exact ClientHello (verbatim) | **ServerHello**, handshake proceeds |
+| stock Python TLS 1.2 | handshake completes, `alpn=h2`, then HTTP/2 SETTINGS |
+
+**Both are accepted.** The ClientHello shape is therefore eliminated as the
+discriminator, despite being the single most distinctive thing about the game's
+traffic. (A first version of `hello_shot.py` printed a "DIFFERENTLY" verdict
+because it compared a TLS record header against an HTTP/2 frame header; that
+comparison was meaningless and the verdict is wrong. The table above is the
+real result.)
 
 ### A decoder bug that had to be fixed first
 
@@ -628,3 +661,87 @@ install, and fails in the capture step with an **empty frida log** — i.e.
 `frida-server` never started, and `docker exec -d` was discarding its stderr.
 The next run captures that output, checks SELinux state and verifies the
 binary's architecture, so the reason is visible instead of inferred.
+
+## ROOT CAUSE FOUND: the `content-type` header was the whole problem
+
+Two measurements in sequence, both on the live endpoint.
+
+**Step 1 — does the server read our body?** (`scripts/body_differs.py`)
+
+The same request was sent with different message payloads. The response length
+tracked the payload:
+
+| request payload | response | HEADERS frame |
+|---|---|---|
+| 5 B (empty message) | 145 B | 87 B |
+| 7 B (`field 1 = 1`) | 145 B | 87 B |
+| 7 B (`field 1 = 2`) | 145 B | 87 B |
+| **71 B (invalid protobuf)** | **192 B** | **134 B** |
+
+So the server *is* parsing our protobuf. The "the body is never processed"
+theory is dead for good.
+
+**Step 2 — read what it says.** (`scripts/read_grpc_message.py`)
+
+Decoding the trailers of each response exposed the actual cause:
+
+```
+content-type: application/grpc
+    :status 502   grpc-status 14   grpc-message "unavailable"
+    content-length 0
+
+content-type: application/grpc+proto
+    :status 200   grpc-status 13
+    grpc-message "Error deserializing request: invalid wire type 7 at offset 8"
+```
+
+**`application/grpc` never reaches the gRPC application at all** — the load
+balancer answers it with `502 / UNAVAILABLE` and an empty body. With
+`application/grpc+proto` the request is delivered, parsed, and the server
+returns a *detailed protobuf error*.
+
+Every request we ever sent used `application/grpc`. That single header explains
+all 50+ identical `502 g=14` results in ~0.3 s: the load balancer was replying
+before the gRPC server was ever involved, so no amount of variation in the
+envelope, the protobuf, the HPACK encoding or the message order could have made
+any difference.
+
+It also explains the misleading evidence gathered along the way. `502`,
+`content-length: 0` and `server: awselb/2.0` all looked like an application
+refusal, and `grpc-status: 14 UNAVAILABLE` looked like a service that was
+merely unavailable. In fact the request was being diverted at the load balancer
+by its content type.
+
+### What this unlocks
+
+The server is now an **oracle**. With `application/grpc+proto` it parses our
+message and tells us precisely what is wrong with it:
+
+- `invalid wire type 7 at offset 8` — a wire-type byte it does not recognise
+- `index out of range: 205 + 8 > 205` — a length prefix past the end
+
+That means the `command_service.CommandRequest` schema can be reconstructed
+iteratively against real responses instead of guessed from strings, and the
+login chain (`CMD_GET_SESSION_ID` → `CMD_LOGIN` → `CMD_CREATEJOIN_ROOM` →
+`CMD_GET_ROOM_INFO` → `CMD_SEND_RECRUIT_CODE`) becomes reachable.
+
+### The game's real ClientHello, for the record
+
+Recovered byte-for-byte from the match exports
+(`scripts/scan_for_grpc_hello.py`; 10+ exports contain it):
+
+```
+185 bytes, legacy_version 0x0303, NO supported_versions  -> TLS 1.2 only
+ciphers (5)      c02b c02c c02f c030 00ff
+extensions (9)   server_name ec_point_formats supported_groups session_ticket
+                 0x3374 ALPN encrypt_then_mac session_ticket signature_algorithms
+ALPN             grpc-exp,h2
+```
+
+That is Chromium's **Cronet** stack — consistent with `Def_Online_Use_Cronet`
+in the binary, so the gRPC channel is not BoringSSL-direct after all. Putting
+those exact 185 bytes on the wire unaltered gets a normal ServerHello, and so
+does a stock Python ClientHello (`scripts/hello_shot.py`), so the ClientHello
+shape is *not* a discriminator. It was worth ruling out explicitly: it is the
+most distinctive thing about the game's traffic and it turns out to be
+irrelevant.
