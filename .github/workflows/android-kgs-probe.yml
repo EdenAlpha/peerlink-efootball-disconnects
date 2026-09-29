@@ -1,0 +1,90 @@
+name: android-kgs-probe
+
+# Free ARM64 runner (public repo): native arm64, 4 vCPU, 16 GB RAM, Ubuntu
+# kernel -- which is the kernel that HAS binder_linux. That is the whole
+# reason this exists: AWS's cloud kernel has binder compiled out.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/android-kgs-probe.yml']
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 55
+    steps:
+      - name: 01 environment report
+        run: |
+          set -x
+          uname -a
+          nproc
+          free -h
+          df -h / /mnt 2>/dev/null || df -h /
+          echo "=== binder in kernel? ==="
+          sudo grep -iE "ANDROID_BINDER" /boot/config-$(uname -r) || \
+            sudo zcat /proc/config.gz | grep -i ANDROID_BINDER || echo "no config"
+          echo "=== docker ==="
+          docker version --format '{{.Server.Version}}' || \
+            { sudo apt-get update -qq && sudo apt-get install -y -qq docker.io; \
+              sudo systemctl start docker; sudo docker version; }
+
+      - name: 02 load binder + start redroid
+        run: |
+          set -x
+          sudo apt-get install -y -qq kmod
+          sudo modprobe binder_linux devices="binder,hwbinder,vndbinder" || \
+            sudo modprobe binder_linux devices=binder
+          ls -l /dev/binder* || true
+          sudo mkdir -p /dev/binderfs
+          sudo mount -t binder binder /dev/binderfs || \
+            sudo mount -t binderfs binder /dev/binderfs || true
+          mount | grep -i binder || echo "binderfs not mounted (container may still work)"
+          sudo mkdir -p /root/redroid-data
+          sudo docker rm -f redroid 2>/dev/null || true
+          sudo docker run -d --name redroid --privileged \
+            --restart=on-failure \
+            -v /root/redroid-data:/data \
+            -p 5555:5555 \
+            redroid/redroid:14.0.0_64only-latest \
+            androidboot.redroid_width=720 \
+            androidboot.redroid_height=1280 \
+            androidboot.redroid_dpi=320 \
+            androidboot.redroid_fps=30 \
+            androidboot.use_memfd=true
+
+      - name: 03 wait for android + adb
+        run: |
+          set -x
+          for i in $(seq 1 40); do
+            if sudo docker exec redroid getprop sys.boot_completed 2>/dev/null | grep -q 1; then
+              echo "android booted after ${i}0s"; break
+            fi
+            sudo docker logs --tail 5 redroid || true
+            sleep 10
+          done
+          sudo docker exec redroid getprop | grep -E "boot_completed|ro.product|abi" || true
+          sudo docker exec redroid ps -A | head -5 || true
+          sudo docker exec redroid id || true
+          free -h
+
+      - name: 04 fetch the eFootball package
+        run: |
+          set -x
+          cd /root
+          curl -fsSL -o apkeep \
+            https://github.com/EFForg/apkeep/releases/download/1.0.0/apkeep-aarch64-unknown-linux-gnu
+          chmod +x apkeep
+          ./apkeep -a jp.konami.pesam -d apk-pure /root || \
+            ./apkeep -a jp.konami.pesam -d apk-pure .
+          ls -la /root/*.xapk /root/*.apk 2>/dev/null || true
+
+      - name: 05 report
+        if: always()
+        run: |
+          echo "=== container status ==="
+          sudo docker ps -a
+          echo "=== container logs (tail) ==="
+          sudo docker logs --tail 60 redroid 2>&1 || true
+          echo "=== host mem ==="
+          free -h
