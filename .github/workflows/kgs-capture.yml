@@ -37,9 +37,14 @@ jobs:
       # ---------------------------------------------------- binder + android
       - name: 01 binder + redroid
         run: |
+          set +e
           set -x
-          sudo modprobe binder_linux devices="binder,hwbinder,vndbinder" || \
-            sudo modprobe binder_linux
+          # modprobe may legitimately fail: mounting "binder" makes the kernel
+          # request_module("fs-binder") itself. Also note GitHub runs this shell
+          # with -e -o pipefail, so every optional step needs its own guard.
+          sudo apt-get install -y -qq kmod >/dev/null 2>&1
+          sudo modprobe binder_linux devices="binder,hwbinder,vndbinder" || true
+          sudo modprobe binder_linux || true
           sudo mkdir -p /dev/binderfs
           sudo mount -t binder binder /dev/binderfs || true
           mount | grep -i binder || { echo "BINDER MISSING"; exit 1; }
@@ -50,12 +55,16 @@ jobs:
             redroid/redroid:14.0.0_64only-latest \
             androidboot.redroid_width=720 androidboot.redroid_height=1280 \
             androidboot.redroid_dpi=320 androidboot.use_memfd=true \
-            androidboot.redroid_gpu_mode=swiftshader
+            androidboot.redroid_gpu_mode=swiftshader || \
+            { echo "DOCKER RUN FAILED"; exit 1; }
+          booted=0
           for i in $(seq 1 30); do
-            [ "$(sudo docker exec redroid getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ] \
-              && { echo "BOOTED after $((i*5))s"; break; }
+            if [ "$(sudo docker exec redroid getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
+              echo "BOOTED after $((i*5))s"; booted=1; break
+            fi
             sleep 5
           done
+          [ "$booted" = "1" ] || { echo "ANDROID DID NOT BOOT"; exit 1; }
           sudo docker exec redroid id
           sudo docker exec redroid getprop ro.odm.product.cpu.abilist64
 
