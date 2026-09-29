@@ -79,37 +79,91 @@ function hookInsecureGetter() {
 // ------------------------------------------------- capture plaintext frames
 // With the channel in plaintext, every send() on the konami socket carries
 // HTTP/2 frames: the connection preface, SETTINGS, HEADERS, DATA.
+//
+// We also watch connect() so that, if the Def_ hook above MISSES, the log still
+// tells us what the channel did: a first byte of 0x16 means TLS (hook failed)
+// and "PRI" means plaintext (hook worked). That distinction is the difference
+// between "our approach is wrong" and "our offset is wrong".
+const konamiFds = {};
+let connectSeen = 0;
+
+function hookConnect() {
+    const sym = Module.findExportByName(null, 'connect');
+    if (!sym) return;
+    Interceptor.attach(sym, {
+        onEnter(args) {
+            const fd = args[0].toInt32();
+            const sa = args[1], len = args[2].toInt32();
+            try {
+                const family = sa.readU16();
+                let ip = '?', port = 0;
+                if (family === 2 && len >= 8) {          // AF_INET
+                    port = sa.add(2).readU16();
+                    const b = [sa.add(4).readU8(), sa.add(5).readU8(),
+                               sa.add(6).readU8(), sa.add(7).readU8()];
+                    ip = b.join('.');
+                } else if (family === 10 && len >= 24) {  // AF_INET6
+                    port = sa.add(2).readU16();
+                    ip = 'v6';
+                }
+                connectSeen++;
+                if (port === 443) {
+                    konamiFds[fd] = { ip: ip, port: port, seen: 0 };
+                    if (connectSeen <= 20) {
+                        log('connect() fd=' + fd + ' -> ' + ip + ':' + port);
+                    }
+                }
+            } catch (e) { /* ignore */ }
+        }
+    });
+    log('hooked connect');
+}
+
+function noteFirstBytes(fd, bytes) {
+    const k = konamiFds[fd];
+    if (!k || k.seen > 0) return;
+    k.seen++;
+    const tag = (bytes[0] === 0x50 && bytes[1] === 0x52 && bytes[2] === 0x49)
+        ? 'PLAINTEXT h2 preface  -> the Def_ hook WORKED'
+        : (bytes[0] === 0x16 ? 'TLS ClientHello       -> the Def_ hook MISSED'
+                             : 'unknown first byte 0x' + bytes[0].toString(16));
+    log('fd ' + fd + ' (' + k.ip + ':' + k.port + ') first bytes: ' + tag);
+    log('   ' + bytes.slice(0, 24).map(function (x) {
+        return ('0' + x.toString(16)).slice(-2);
+    }).join(' '));
+}
+
 function hookSockets() {
     if (hookInstalled) return;
     hookInstalled = true;
+    hookConnect();
 
-    ['send', 'sendto', 'sendmsg', 'write', 'writev'].forEach(function (name) {
+    ['send', 'sendto', 'write'].forEach(function (name) {
         const sym = Module.findExportByName(null, name) ||
                     Module.findExportByName('libc.so', name);
         if (!sym) return;
         Interceptor.attach(sym, {
             onEnter(args) {
+                const fd = args[0].toInt32();
                 if (captured > MAX_CAPTURE) return;
-                let buf, len, isSend = true;
-                switch (name) {
-                    case 'send':    buf = args[1]; len = args[2].toInt32(); break;
-                    case 'sendto':  buf = args[1]; len = args[2].toInt32(); break;
-                    case 'sendmsg': return;                     // msghdr, skip
-                    case 'write':   buf = args[1]; len = args[2].toInt32(); break;
-                    case 'writev':  return;                     // iovec, skip
-                    default: return;
-                }
+                const buf = args[1], len = args[2].toInt32();
                 if (len <= 0 || len > 262144) return;
-                // only plaintext HTTP/2: the preface, or a frame header
+
+                // always note what a konami socket is doing first
+                if (konamiFds[fd]) {
+                    try {
+                        noteFirstBytes(fd, new Uint8Array(
+                            buf.readByteArray(Math.min(len, 24))));
+                    } catch (e) { /* ignore */ }
+                }
+
                 const head = buf.readByteArray(Math.min(len, 24));
                 if (head === null) return;
                 const b = new Uint8Array(head);
                 const isPreface = b[0] === 0x50 && b[1] === 0x52 && b[2] === 0x49; // "PRI"
                 let isFrame = false;
                 if (len >= 9) {
-                    const t = b[0];
-                    // DATA/CONTROL frame types have the high bit set
-                    isFrame = (t & 0x80) !== 0;
+                    isFrame = (b[0] & 0x80) !== 0;
                 }
                 if (!isPreface && !isFrame) return;
                 try {
@@ -120,7 +174,7 @@ function hookSockets() {
                     const f = new File(path, 'wb');
                     f.write(bytes);
                     f.close();
-                    log('captured ' + len + ' B  ' + name + '  ' +
+                    log('captured ' + len + ' B  ' + name + '  fd=' + fd + '  ' +
                         (isPreface ? 'PREFACE' : 'h2 frame type=0x' +
                          bytes[0].toString(16)) + '  -> ' + path);
                     if (seq === 1) {
