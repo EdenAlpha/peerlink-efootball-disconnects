@@ -322,9 +322,15 @@ jobs:
           fi
           echo "game is installed"
           sudo docker exec redroid /system/bin/pm path jp.konami.pesam
-          sudo docker exec redroid sh -c 'ps -A | grep -i frida' \
-            || { echo "FRIDA SERVER NOT RUNNING"; exit 1; }
-          nc -zv 127.0.0.1 27042 || { echo "FRIDA PORT CLOSED"; exit 1; }
+          # Independent route to the key evidence: capture the game's own TLS
+          # ClientHello off the device's interface. This needs no Frida at all,
+          # so it still produces the one thing a proxy cannot substitute for.
+          sudo docker exec redroid sh -c \
+            'rm -f /data/local/tmp/game.pcap; tcpdump -i any -s 0 -w /data/local/tmp/game.pcap tcp port 443 >/data/local/tmp/tcpdump.out 2>&1 &'
+          sleep 3
+          sudo docker exec redroid sh -c 'ps -A | grep -i tcpdump' \
+            || echo "NOTE: tcpdump not running (capture will be empty)"
+          sudo docker exec redroid /system/bin/pm list packages | grep -i konami
           sudo docker cp kgs-login/scripts/capture_insecure.js \
             redroid:/data/local/tmp/capture_insecure.js
           timeout 660 frida -H 127.0.0.1:27042 -f jp.konami.pesam \
@@ -332,6 +338,19 @@ jobs:
             > $W/frida.log 2>&1 &
           FRIDA_PID=$!
           echo "frida pid $FRIDA_PID"
+          # if frida did not come up, still launch the game normally: the
+          # tcpdump running above will capture its real TLS ClientHello
+          sleep 20
+          if ! kill -0 $FRIDA_PID 2>/dev/null; then
+            echo "=== FRIDA UNAVAILABLE - launching the game anyway for tcpdump ==="
+            cat $W/frida.log
+            sudo docker exec redroid sh -c \
+              'am start -n jp.konami.pesam/com.konami.eff.anchor.MainActivity' \
+              2>&1 | tail -3
+            sudo docker exec redroid sh -c \
+              'monkey -p jp.konami.pesam -c android.intent.category.LAUNCHER 1' \
+              2>&1 | tail -3
+          fi
           # the first launch shows a splash / terms screen and nobody is there
           # to tap it, so nudge the UI periodically
           for i in $(seq 1 60); do
@@ -354,6 +373,15 @@ jobs:
           grep -iE "konami|pesam|FATAL|AndroidRuntime|libUE4|Vulkan|EGL|ANR" $W/logcat.txt 2>/dev/null | tail -50 || true
           echo "=== process alive? ==="
           sudo docker exec redroid sh -c 'ps -A | grep -i pesam' || echo "GAME PROCESS GONE"
+          # stop the capture and pull the game's own ClientHello off the wire
+          sudo docker exec redroid sh -c \
+            'pkill -f tcpdump; ls -la /data/local/tmp/game.pcap' 2>&1 || true
+          sudo docker exec redroid sh -c 'cat /data/local/tmp/tcpdump.out 2>&1' | tail -5 || true
+          sudo docker cp redroid:/data/local/tmp/game.pcap $W/game.pcap 2>&1 \
+            || echo "no pcap to copy"
+          ls -la $W/game.pcap 2>/dev/null \
+            && echo "GAME PCAP CAPTURED: $W/game.pcap" \
+            || echo "no pcap captured"
 
       - name: 06 publish
         if: always()
