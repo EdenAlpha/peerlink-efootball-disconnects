@@ -940,3 +940,48 @@ Also confirmed working on the runner: `frida-server 17.19.0` for ARM64 is now
 **reachable** (launching it through `sh -c` with its stderr captured fixed the
 silent failure), and redroid reports `ro.opengles.version 196610` — **OpenGL ES
 3.2 via ANGLE** — so the UE4 renderer has what it needs without a GPU.
+
+## UNLOCKED: `path` is a URL path, and the server names the command it dispatched
+
+`scripts/path_kinds.py` tried the kinds of value a `string` field could hold.
+One answered:
+
+```
+path = "/"   ->   grpc-status 0 (OK)
+   CommandResponse { id: "CMD_END_CONNECTION", packMode: 0,
+                     res: "{\"result\":\"NOERR\"}" }
+```
+
+That is a complete, working request/response, and it settles three things at
+once:
+
+1. **`path` is a URL path**, not a command enum name. That is why all 384
+   `CMD_*` strings failed: they are the *client's* internal identifiers.
+2. **The response's `id` is the resolved command name**, not an echo of the id we
+   sent (we sent a random UUID and got back `CMD_END_CONNECTION`). The server
+   names the command it dispatched, which makes it a clean oracle — any path
+   that comes back is a real route, and it tells us which command it is.
+3. **`res` is JSON** under `packMode = 0`, so the payload is a JSON document in
+   a string field, exactly as `CommandRequest.req` being a `string` implied.
+
+`path = ""` and `path = " "` also return OK, so there is a default route;
+`path = "/"` is the root of it.
+
+`scripts/sweep_paths.py` now sweeps every `/`-prefixed, route-shaped string in
+`libUE4.so` against the live endpoint, printing the command each one resolves
+to. That is the remaining step to the full chain
+(`CMD_GET_SESSION_ID` → `CMD_LOGIN` → `CMD_CREATEJOIN_ROOM` →
+`CMD_GET_ROOM_INFO` → `CMD_SEND_RECRUIT_CODE`) and then to a room code.
+
+For the record, the wrong turns that got here, all of which produced
+`grpc-status: 14`:
+
+| attempt | result |
+|---|---|
+| 384 `CMD_*` names as `path` | 14 |
+| qualified / slashed / lower-cased forms | 14 |
+| numeric ids, empty, `default`, `root` | 14 |
+| `/session`, `/login`, `/api/session`, `/v1/...` | 14 |
+| the game's own HTTP endpoints (`/ntl/api/GateInfo.php`, full URL) | 14 |
+| the gRPC method path itself | 14 |
+| every payload shape, `packMode` 0/1/2/99, five `id` formats | 14 |
