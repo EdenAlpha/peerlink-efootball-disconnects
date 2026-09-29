@@ -1174,3 +1174,31 @@ real signal.
 | `pad_it_0` / `pad_it_1` | 782 MB scanned in place | 0 route strings (binary noise only) |
 | JSON payload keys | 13 spellings, 5 samples each | only malformed JSON rejected |
 | NTL gate at login | `GateInfo.php`, `ReportLog.php` bodies | version ping and app identity only |
+
+## The path check is deterministic, and stricter than "unknown route"
+
+`scripts/map_router.py` probes the router structurally instead of by
+vocabulary: every possible single-character first segment, 3 samples each.
+
+```
+/a .. /z   ->  14  x3      (every one, both cases)
+/A .. /Z   ->  14  x3
+/          ->  default route (CMD_END_CONNECTION), 5/5
+""  and  " "  ->  default route
+```
+
+Two conclusions:
+
+1. **`14 UNAVAILABLE` on a bad path is deterministic, not the transient.** Three
+   of three samples for all 62 single-character segments. So the intermittent
+   `502/14` seen in bulk sweeps is a genuinely different thing, and the two can
+   be told apart: a bad path is 14 every time, the transient is 14 occasionally.
+2. **The path check is strict, and `/` is the only value that passes.** Not
+   "unknown route falls through to the default" — a one-character path is
+   *rejected*, while `/`, the empty string and a single space are *accepted* and
+   reach the default handler.
+
+So the route table exists and the dispatcher validates against it, but its
+entries are not derivable from anything in the shipped artifacts, and they are
+not short or single-segment. Every wordlist approach has been exhausted; the
+remaining source is the game's own request bytes.
