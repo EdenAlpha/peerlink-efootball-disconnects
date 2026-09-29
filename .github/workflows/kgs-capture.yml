@@ -188,33 +188,65 @@ jobs:
             i=$((i+1))
             [ $((i % 4)) -eq 0 ] && { ls -la $W/*.xapk 2>/dev/null; tail -3 $W/apkeep.log 2>/dev/null; }
           done
-          ls -la $W/*.xapk || { echo "NO XAPK after $((i*15))s"; cat $W/apkeep.log 2>/dev/null; exit 1; }
+          ls -la $W/ | head -20
+          XAPK=$(ls -1 $W/*.xapk $W/*.apkm $W/*.apks 2>/dev/null | head -1)
+          if [ -z "$XAPK" ]; then
+            echo "=== NO PACKAGE ARCHIVE IN $W ==="
+            ls -la $W/
+            cat $W/apkeep.log 2>/dev/null
+            exit 1
+          fi
+          echo "archive: $XAPK  ($(stat -c %s "$XAPK") bytes)"
+          if [ "$(stat -c %s "$XAPK")" -lt 100000000 ]; then
+            echo "=== ARCHIVE TOO SMALL, apkeep must have failed ==="
+            cat $W/apkeep.log 2>/dev/null
+            exit 1
+          fi
           cd $W
-          python3 - <<'PY'
-          import json, zipfile, os
+          XAPK="$XAPK" python3 - <<'PY'
+          import json, os, sys, zipfile
           W = '/tmp/kgs'
-          z = zipfile.ZipFile(os.path.join(W, 'jp.konami.pesam.xapk'))
-          mf = json.loads(z.read('manifest.json'))
-          print('version', mf['version_name'], mf['version_code'])
-          # base + the arm64 lib split + the two asset packs. The asset packs
-          # are 780 MB of the 822 MB total: a UE4 title that cannot load its
-          # assets may never reach the login screen at all, so install them.
-          # The per-locale config.* splits are ~0 bytes each and are skipped.
-          want = [e['file'] for e in mf['split_apks']
-                  if e.get('id') in ('base', 'config.arm64_v8a',
-                                     'pad_it_0', 'pad_it_1')]
-          print('installing:', want)
-          for f in want:
-              dst = os.path.join(W, f)
+          src = os.environ['XAPK']
+          z = zipfile.ZipFile(src)
+          names = z.namelist()
+          if 'manifest.json' in names:
+              mf = json.loads(z.read('manifest.json'))
+              ver = (mf.get('version_name'), mf.get('version_code'))
+              splits = [e['file'] for e in mf.get('split_apks', [])
+                        if e.get('id') in ('base', 'config.arm64_v8a',
+                                           'pad_it_0', 'pad_it_1')]
+          else:
+              # some bundles use a different manifest name
+              cand = [n for n in names if n.lower().endswith('manifest.json')]
+              print('manifest candidates:', cand)
+              mf = json.loads(z.read(cand[0])) if cand else {}
+              ver = (mf.get('version_name'), mf.get('version_code'))
+              splits = [n for n in names if n.endswith('.apk')]
+          print('archive', src)
+          print('version', ver)
+          print('split candidates', splits)
+          if not splits:
+              print('=== NO SPLITS FOUND IN ARCHIVE ===')
+              print(names[:40])
+              sys.exit(1)
+          for f in splits:
+              dst = os.path.join(W, os.path.basename(f))
               with open(dst, 'wb') as o:
                   o.write(z.read(f))
-              print('  extracted', f, '%.1f MB' % (os.path.getsize(dst) / 1e6))
-          open(os.path.join(W, 'splits.txt'), 'w').write('\n'.join(
-              '/data/local/tmp/' + f for f in want))
+              sz = os.path.getsize(dst)
+              print('  extracted %-26s %8.1f MB' % (os.path.basename(f), sz / 1e6))
+              if sz < 100000:
+                  print('=== SPLIT SUSPICIOUSLY SMALL:', f, sz)
+                  sys.exit(1)
+          open(os.path.join(W, 'extracted.ok'), 'w').write('ok')
           PY
+          if [ ! -f $W/extracted.ok ]; then
+            echo "=== EXTRACTION FAILED ==="; exit 1
+          fi
           for f in jp.konami.pesam.apk config.arm64_v8a.apk pad_it_0.apk pad_it_1.apk; do
-            [ -f "$W/$f" ] && sudo docker cp "$W/$f" "redroid:/data/local/tmp/$f"
+            if [ -f "$W/$f" ]; then sudo docker cp "$W/$f" "redroid:/data/local/tmp/$f"; fi
           done
+          sudo docker exec redroid sh -c 'ls -la /data/local/tmp/*.apk' || true
           echo "--- install-multiple (base + lib + assets) ---"
           sudo docker exec redroid /system/bin/pm install-multiple -r -g \
             /data/local/tmp/jp.konami.pesam.apk \
@@ -228,7 +260,8 @@ jobs:
               /data/local/tmp/config.arm64_v8a.apk 2>&1 | tail -10
           fi
           echo "--- final package state ---"
-          sudo docker exec redroid /system/bin/pm list packages | grep -i konami
+          sudo docker exec redroid /system/bin/pm list packages | grep -i konami \
+            || { echo "=== GAME NOT INSTALLED ==="; exit 1; }
           sudo docker exec redroid /system/bin/pm path jp.konami.pesam
           sudo docker exec redroid sh -c 'du -sh /data/app/*jp.konami.pesam* 2>/dev/null' || true
 
