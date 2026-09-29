@@ -465,7 +465,7 @@ Frida script now matches on the key *text* as well as the pointer.
 | symptom | actual cause |
 |---|---|
 | job fails in ~6 s at `modprobe` | `cmd_a \|\| cmd_b` where both may fail, under `bash -e` |
-| job fails in ~0–3 s at the apkeep step | `curl` succeeded; `chmod +x apkeep` referenced a different path than the `-o /root/apkeep` target |
+| job fails in ~0–3 s at the apkeep step | **the runner user is not root, so `/root` is not writable** — `curl -o /root/apkeep` dies with permission denied before it transfers anything. The first diagnosis blamed a `chmod +x apkeep` path mismatch, which was wrong; the step log is empty either way, so it was checked rather than assumed. This also explains why `tee /root/step01.log` never produced a log in the report. All host-side work now lives in `/tmp/kgs`. |
 | step 01 times out at exactly 180 s | `androidboot.redroid_gpu_mode=swiftshader` prevents `boot_completed` |
 | reports never appear in the repo | no `actions/checkout` step, so there is no git repo at all |
 | report push silently does nothing | `actions/checkout` leaves a detached HEAD |
