@@ -1,3 +1,4 @@
+```text
 ===== ARM64 RUNNER REPORT =====
 Tue Sep 29 22:33:33 UTC 2026
 Linux runnervmoyp6c 6.17.0-1022-azure #22-Ubuntu SMP Mon Jul 27 17:12:01 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
@@ -47,3 +48,4 @@ uid=0(root) gid=0(root) groups=0(root)
 [ro.product.build.version.release_or_codename]: [14]
 --- logs ---
 ===== END REPORT =====
+```
