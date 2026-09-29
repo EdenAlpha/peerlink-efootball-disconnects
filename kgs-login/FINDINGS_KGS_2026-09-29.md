@@ -1138,3 +1138,39 @@ So no route table is fetched over the network at login either. The command
 routes are either compiled into the client in a form not recoverable as
 strings, or established server-side when the session is created — which again
 makes the game's own request bytes the only source.
+
+## Quantifying the transient: ~0.7% of requests
+
+The broad sweep over all 2711 path-shaped strings in `libUE4.so` finished with
+"18 resolved", and every one of them had `cmd = None` — a status but no
+decodable `CommandResponse`. Those are the intermittent `502 / UNAVAILABLE`
+responses, not routes.
+
+That gives a measured rate: **18 in 2711 requests, about 0.7%**, returned the
+transient instead of the normal answer.
+
+This is the number that explains the two retracted conclusions. A 0.7% failure
+rate is invisible in a single sample and dominant in a few hundred:
+
+- `content-type: application/grpc` sampled once returned 502, and the `+proto`
+  form did not — a clean-looking difference that was pure noise.
+- `{"method": "CMD_GET_SESSION_ID"}` sampled once returned 14, and repeated
+  five times gave the default route four times and 14 once.
+
+Practical rule for this endpoint, now that it is measured rather than guessed:
+**any claim needs at least five samples, and a single differing observation is
+worthless.** A difference seen once is more likely to be one of these 18 than a
+real signal.
+
+## Search coverage for the route table
+
+| source | scope | result |
+|---|---|---|
+| `libUE4.so` `CMD_*` identifiers | 384 names, as `path` | 0 resolved |
+| `libUE4.so` path-shaped strings | 2711 candidates | 0 resolved (18 transient) |
+| `libUE4.so` route-shaped strings | 4932 candidates from the CMD vocabulary | 0 resolved |
+| base APK config/text assets | 261 files, incl. inflated blobs | 0 route strings |
+| `config.*` splits | 19 splits | 0 route strings |
+| `pad_it_0` / `pad_it_1` | 782 MB scanned in place | 0 route strings (binary noise only) |
+| JSON payload keys | 13 spellings, 5 samples each | only malformed JSON rejected |
+| NTL gate at login | `GateInfo.php`, `ReportLog.php` bodies | version ping and app identity only |
