@@ -738,3 +738,71 @@ does a stock Python ClientHello (`scripts/hello_shot.py`), so the ClientHello
 shape is *not* a discriminator. It was worth ruling out explicitly: it is the
 most distinctive thing about the game's traffic and it turns out to be
 irrelevant.
+
+## STATUS CHANGE: the endpoint is serving us now. The 502 was transient.
+
+`scripts/is_it_flaky.py` sent **20 byte-identical requests** and counted the
+outcomes:
+
+```
+  # 1..20   :status 200   grpc-status 13   content-type application/grpc+proto
+             "Error deserializing request: invalid wire type 7 at offset 8"
+
+  20 x  :status=200 grpc-status=13
+  VERDICT: identical bytes gave an identical outcome 20 times.
+```
+
+So:
+
+- The `502 / UNAVAILABLE` from `awselb/2.0` **is not reproducible**. It was a
+  transient load-balancer condition — no healthy target at that moment — and it
+  has since cleared. It was never a rejection of our request, which is why 50+
+  request variants all produced the same answer: none of them were the problem.
+- **We are now reaching the gRPC application**, and it is parsing our messages
+  and returning diagnostics.
+- The response `content-type` is `application/grpc+proto` regardless of what we
+  send, so it is the server normalising, not an echo.
+
+This changes the shape of the remaining work entirely. The question is no longer
+"why are we refused" but "what is the correct request", and the server is now
+answering that question for us in detail.
+
+## The `command_service` schema, recovered from the binary
+
+The generated `pb.cc` embeds the descriptor, and its string table gives the
+schema directly (file offsets in `libUE4.so`):
+
+```
+0xc95b02  command_service.proto
+0xc95b2c  CommandRequest        0xc95b4a  path       0xc95b58  packMode
+0xc95b85  req                   0xc95b92  CommandResponse
+0xc95bb1  packMode              0xc95bde  res
+0xc95beb  PackMode              0xc95bf7  PACK_MODE_JSON
+0xc95c0b  PACK_MODE_MSGPACK     0xc95c22  CommandService
+0xc95c34  CommandStream         0xc95c8c  proto3
+```
+
+```protobuf
+syntax = "proto3";
+package command_service;
+
+message CommandRequest  { string path; PackMode packMode; bytes req; }
+message CommandResponse { PackMode packMode; bytes res; }
+
+enum PackMode { PACK_MODE_JSON = 0; PACK_MODE_MSGPACK = 1; }
+
+service CommandService {
+  rpc CommandStream(stream CommandRequest) returns (stream CommandResponse);
+}
+```
+
+**`req` is MessagePack, not protobuf.** That alone explains the
+`invalid wire type 7` errors we were generating — we had been putting protobuf
+or arbitrary bytes where a msgpack document belongs.
+
+The field *numbers* are varints inside the descriptor blob rather than in the
+string table, and that blob references its strings indirectly, so it could not be
+read directly (`scripts/parse_descriptor.py` documents the attempt).
+`scripts/find_schema.py` recovers them instead by using the server as an oracle:
+a field in the wrong slot produces an immediate wire-format complaint, while a
+field in the right slot moves the error to a complaint about the *contents*.
