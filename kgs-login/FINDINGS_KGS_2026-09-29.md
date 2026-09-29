@@ -126,12 +126,41 @@ platform, client_version` — the per-command writer (e.g. CMD_LOGIN's
   `libUE4.so` is from an older title build (5.x) whose protocol is unchanged
   on the wire (the capture proves the shapes we send are right).
 
-## 7. NEXT
+## 7. THE DECISIVE TEST — the backend is down FOR EVERYONE
 
-1. `gate_retry.py` fires at 08:05 UTC and every 20 min; watch
-   `gate_retry_out.txt` for the first non-maintenance answer.
-2. On a real answer: `CMD_GET_SERVER_ENV` (get PUT_LOG_URL/config),
-   `CMD_GET_KGS_GUEST_LOGIN_TOKEN` → then `fire_login.py <auth_code> [hash]`.
+- **12:22:43 UTC**: the user's *phone itself* (Termux curl 8.12.1, HTTP/2 via
+  nghttp2, residential mobile IP, fresh OpenSSL 3.4.1 stack) POSTed the exact
+  probe to `command_service.CommandService/CommandStream` →
+  `HTTP/2 502`, `server: awselb/2.0`, `grpc-status: 14`,
+  `grpc-message: unavailable`.
+- **12:22:00 UTC**: this VM's probe → byte-for-byte the same `502 g=14`.
+- Same host, same minute, two unrelated IPs on opposite sides of the planet →
+  identical answer. **The source-IP / ALB-geo-block theory is dead.**
+- The phone had a *live* gRPC session at 09:40 UTC (PCAPdroid capture:
+  ClientHello → 6 server frames → keepalives for 90 s) and is refused at
+  12:22. So the KGS backend went down between **09:40 and 12:22 UTC, on a
+  Tuesday** — unscheduled, outside the Thursday 02:00–08:00 maintenance window.
+- ALB `502` = no healthy target / target connection failure. Rule-based
+  rejections from the same front end return `464`/`415`/`403` — we get those
+  when we vary method/headers, which proves the front end is up and applying
+  rules; only the backend targets are gone.
+- Therefore no byte-level variable (headers, metadata, TLS fingerprint, ALPN,
+  payload) is what is blocking us: every variation gives the same 502, and the
+  phone's completely different stack gives it too. When the targets come back,
+  our bytes should be accepted (they already were once — the 09:40 session).
+- Relay attempts to re-run the probe from the phone's IP before this test:
+  localhost.run tunnels kept dropping ("no tunnel here"), and this VM's sshd
+  is unreachable (cloud security group blocks 22) — moot now that the phone
+  can run the probe directly with `curl --http2`.
+
+## 8. NEXT
+
+1. `health_poll.py` (running, 10-min interval) watches gRPC + gate; watch
+   `health_poll_out.txt` for the first non-502.
+2. On recovery: `CMD_GET_SERVER_ENV` (get PUT_LOG_URL/config),
+   `CMD_GET_KGS_GUEST_LOGIN_TOKEN` → `fire_login.py <auth_code> [hash]`
+   (needs a gRPC-channel variant of the gate-POST scripts; a few MB of phone
+   data at most, against the user-approved 30 MB budget).
 3. `auth_code` still needs the user's own browser (account.konami.net is
    IP-blocked from this VM); the code lives ~60 s.
 4. Then `make_room.py` for the room code.
