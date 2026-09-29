@@ -103,8 +103,15 @@ jobs:
           sudo docker exec redroid getprop ro.odm.product.cpu.abilist64
 
       # ------------------------------------------- fetch the package (slow)
-      # backgrounded so the download overlaps with the Frida setup
+      # backgrounded so the download overlaps with the Frida setup, and cached
+      # so only the first run pays the 822 MB
       - name: 02 fetch eFootball package
+        uses: actions/cache@v4
+        with:
+          path: /tmp/kgs/jp.konami.pesam.xapk
+          key: pesam-311000101-${{ runner.os }}-${{ runner.arch }}
+
+      - name: 02b get eFootball package
         run: |
           set +e
           set -x
@@ -112,6 +119,11 @@ jobs:
           cd $W
           echo "whoami=$(whoami) cwd=$(pwd)"
           touch $W/probe && echo "workdir writable" || echo "WORKDIR NOT WRITABLE"
+          if [ -s $W/jp.konami.pesam.xapk ]; then
+            echo "cache hit: $(stat -c %s $W/jp.konami.pesam.xapk) bytes"
+            exit 0
+          fi
+          echo "cache miss, downloading"
           curl -sS -o /dev/null -w "github.com HTTP %{http_code}\n" \
             --max-time 30 https://github.com/ || echo "cannot reach github.com"
           got=""
@@ -124,22 +136,14 @@ jobs:
           done
           if [ ! -s $W/apkeep ]; then
             echo "=== APKEEP DOWNLOAD FAILED ==="
-            curl -sS --max-time 30 \
-              https://api.github.com/repos/EFForg/apkeep/releases/tags/1.0.0 \
-              | grep -o '"browser_download_url": *"[^"]*aarch64[^"]*"' || true
-            echo "=== END ==="
             exit 1
           fi
-          echo "got apkeep from $got"
           chmod +x $W/apkeep
-          ls -la $W/apkeep
-          $W/apkeep --version || true
           $W/apkeep -a jp.konami.pesam -d apk-pure $W > $W/apkeep.log 2>&1 &
           echo $! > $W/apkeep.pid
-          sleep 25
-          echo "apkeep pid $(cat $W/apkeep.pid)"
+          sleep 30
           cat $W/apkeep.log || true
-          ls -la $W/*.xapk 2>/dev/null || echo "(download still in progress)"
+          ls -la $W/ | head
 
       - name: 03 frida
         run: |
