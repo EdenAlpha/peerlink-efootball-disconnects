@@ -168,3 +168,30 @@ platform, client_version` — the per-command writer (e.g. CMD_LOGIN's
 3. `auth_code` still needs the user's own browser (account.konami.net is
    IP-blocked from this VM); the code lives ~60 s.
 4. Then `make_room.py` for the room code.
+
+## 9. 2026-09-29 AFTERNOON — game works, our bytes don't (same door)
+
+- User's 13:54 UTC PCAPdroid capture: the working game holds TLS sessions
+  with `54.203.69.122` (a pool member our DNS also returns). Per-flow
+  handshake parse (`parse_hs.py`): two `https` flows (ALPN `http/1.1`,
+  one moving ~74 KB — config/assets) + one **gRPC flow** (sport 60892:
+  ClientHello 185B-style, ciphers `c02b,c02c,c02f,c030,00ff`, ALPN
+  `['grpc-exp','h2']`, server selects `h2`, ~4.5 KB server→client =
+  a real answered stream).
+- Our TLS profile now matches the game's (TLS1.2, same cipher set,
+  ALPN `['grpc-exp','h2']` → server picks `h2`), yet `probe_game_ip.py`
+  aimed at `54.203.69.122` returns `502 g=14` for: empty body, the
+  game's own composer-built body, AND a real-identity body
+  (uid `3c5aad…`, lang/region US, platform Android, ver 6.0.1).
+- Full-binary sweep: no custom `grpc-*`/`x-*` metadata keys anywhere in
+  `libUE4.so` (147k strings) — the game sends no exotic headers. The
+  `Authorization`/token strings present are generic HTTP-stack leftovers.
+- Remaining suspects, in order: (1) source IP (VM's AWS address refused,
+  phone's accepted — phone `--resolve` test to `54.203.69.122` decides);
+  (2) TLS-fingerprint (BoringSSL ext list vs python-ssl); (3) in-stream
+  `path` value / `CMD_CONNECT_GRPC`-first sequencing (app drops unknown
+  streams → ALB 502); (4) exact user-agent/encoding header minutiae.
+- Side note: 34-byte `00000107…eFootball™…` blobs interleaved in the
+  capture's TCP segments (even to ad-CDN IPs) are an on-device artifact
+  (Infinix game-booster/proxy tagging), not Konami's protocol — our
+  bare-ClientHello TLS handshake completes fine without them.
