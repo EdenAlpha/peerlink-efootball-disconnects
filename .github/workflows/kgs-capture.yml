@@ -196,25 +196,41 @@ jobs:
           z = zipfile.ZipFile(os.path.join(W, 'jp.konami.pesam.xapk'))
           mf = json.loads(z.read('manifest.json'))
           print('version', mf['version_name'], mf['version_code'])
-          for e in mf['split_apks']:
-              if e.get('id') in ('base', 'config.arm64_v8a'):
-                  with open(os.path.join(W, e['file']), 'wb') as o:
-                      o.write(z.read(e['file']))
-                  print('extracted', e['file'], os.path.getsize(os.path.join(W, e['file'])))
+          # base + the arm64 lib split + the two asset packs. The asset packs
+          # are 780 MB of the 822 MB total: a UE4 title that cannot load its
+          # assets may never reach the login screen at all, so install them.
+          # The per-locale config.* splits are ~0 bytes each and are skipped.
+          want = [e['file'] for e in mf['split_apks']
+                  if e.get('id') in ('base', 'config.arm64_v8a',
+                                     'pad_it_0', 'pad_it_1')]
+          print('installing:', want)
+          for f in want:
+              dst = os.path.join(W, f)
+              with open(dst, 'wb') as o:
+                  o.write(z.read(f))
+              print('  extracted', f, '%.1f MB' % (os.path.getsize(dst) / 1e6))
+          open(os.path.join(W, 'splits.txt'), 'w').write('\n'.join(
+              '/data/local/tmp/' + f for f in want))
           PY
-          sudo docker cp $W/jp.konami.pesam.apk redroid:/data/local/tmp/base.apk
-          sudo docker cp $W/config.arm64_v8a.apk redroid:/data/local/tmp/arm64.apk
-          echo "--- install base + arm64 split ---"
+          for f in jp.konami.pesam.apk config.arm64_v8a.apk pad_it_0.apk pad_it_1.apk; do
+            [ -f "$W/$f" ] && sudo docker cp "$W/$f" "redroid:/data/local/tmp/$f"
+          done
+          echo "--- install-multiple (base + lib + assets) ---"
           sudo docker exec redroid /system/bin/pm install-multiple -r -g \
-            /data/local/tmp/base.apk /data/local/tmp/arm64.apk 2>&1 | tail -20
+            /data/local/tmp/jp.konami.pesam.apk \
+            /data/local/tmp/config.arm64_v8a.apk \
+            /data/local/tmp/pad_it_0.apk \
+            /data/local/tmp/pad_it_1.apk 2>&1 | tail -20
           if ! sudo docker exec redroid /system/bin/pm list packages | grep -qi konami; then
-            echo "--- install-multiple failed, one at a time ---"
-            sudo docker exec redroid /system/bin/pm install -r -g /data/local/tmp/base.apk 2>&1 | tail -10
-            sudo docker exec redroid /system/bin/pm install -r -g /data/local/tmp/arm64.apk 2>&1 | tail -10
+            echo "--- install-multiple failed, minimal set only ---"
+            sudo docker exec redroid /system/bin/pm install-multiple -r -g \
+              /data/local/tmp/jp.konami.pesam.apk \
+              /data/local/tmp/config.arm64_v8a.apk 2>&1 | tail -10
           fi
           echo "--- final package state ---"
           sudo docker exec redroid /system/bin/pm list packages | grep -i konami
           sudo docker exec redroid /system/bin/pm path jp.konami.pesam
+          sudo docker exec redroid sh -c 'du -sh /data/app/*jp.konami.pesam* 2>/dev/null' || true
 
       - name: 05 capture plaintext gRPC
         run: |
