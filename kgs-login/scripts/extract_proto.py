@@ -146,6 +146,28 @@ def main() -> int:
                                         vnum = fv
                                 print("    %s = %d" % (vname, vnum))
                         print("  enum %s" % ename)
+                    elif no == 6:      # service
+                        sname = ""
+                        for sno, swt, sv in fields(val):
+                            if sno == 1:
+                                sname = sv.decode()
+                            elif sno == 2:
+                                mname, inp, out, cs, ss = "?", "", "", False, False
+                                for mno, mwt, mv in fields(sv):
+                                    if mno == 1:
+                                        mname = mv.decode()
+                                    elif mno == 2:
+                                        inp = mv.decode()
+                                    elif mno == 3:
+                                        out = mv.decode()
+                                    elif mno == 5 and mwt == 0:
+                                        cs = bool(mv)
+                                    elif mno == 6 and mwt == 0:
+                                        ss = bool(mv)
+                                print("    %s(%s) returns (%s) "
+                                      "client_stream=%s server_stream=%s"
+                                      % (mname, inp, out, cs, ss))
+                        print("  service %s" % sname)
                     ni += ln
                 elif wt in (1, 5):
                     ni += 8 if wt == 1 else 4
