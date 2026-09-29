@@ -806,3 +806,78 @@ read directly (`scripts/parse_descriptor.py` documents the attempt).
 `scripts/find_schema.py` recovers them instead by using the server as an oracle:
 a field in the wrong slot produces an immediate wire-format complaint, while a
 field in the right slot moves the error to a complaint about the *contents*.
+
+## THE ACTUAL SCHEMA, parsed from the binary
+
+`scripts/descriptor2.py` locates the embedded `FileDescriptorProto` by its own
+name field. At `0xc95b00` the bytes are `0a 15` + `"command_service.proto"` —
+21 characters, which is why the earlier search for `\x0a\x18` (a 24-character
+assumption) found nothing. Parsed properly:
+
+```protobuf
+syntax = "proto3";
+package command_service;
+
+enum PackMode {
+    PACK_MODE_JSON    = 0;
+    PACK_MODE_MSGPACK = 1;
+}
+
+message CommandRequest {
+    string   id       = 1;   // request correlation id
+    PackMode packMode = 2;
+    string   req      = 3;   // a STRING: the payload carried as text
+    string   path     = 4;   // the command name
+}
+
+message CommandResponse {
+    string   id       = 1;
+    PackMode packMode = 2;
+    string   res      = 3;
+}
+
+service CommandService {
+    rpc CommandStream(stream CommandRequest) returns (stream CommandResponse);
+}
+```
+
+Three things were wrong in every earlier attempt, and each was independently
+observable:
+
+1. **`path` is field 4**, not field 1, 2 or 3. The string table lists the names
+   in the order `path, packMode, req`, which invited the assumption that `path`
+   was field 1. Declaration order in the string table is not field-number order.
+2. **`req` is a `string`, not `bytes`** — the JSON or MessagePack document is
+   carried as text, not as a nested binary blob.
+3. **There is an `id` field**, the request correlation id, which is why the
+   envelope needed an identifier in the first place.
+
+### Why this is the 502
+
+With the wrong schema the message either failed to parse (`grpc-status: 13`) or
+parsed into a request with no resolvable command. An unresolvable command is
+what the application answers with `grpc-status: 14 UNAVAILABLE` — and the AWS
+load balancer translates gRPC 14 into **HTTP 502**. So:
+
+> **`502 g=14` was never a load-balancer fault, a health-check failure, a TLS
+> fingerprint issue, or a content-type rule. It was the application saying "I do
+> not know that command", rendered as an HTTP 502 by the proxy in front of it.**
+
+That single misunderstanding is why 50+ variants all produced the same answer,
+and why the evidence kept pointing at the load balancer: `server: awselb/2.0`,
+`content-length: 0`, and an empty body are all exactly what a gRPC 14 looks like
+after proxy translation.
+
+### Where it stands now
+
+With the correct schema, requests parse cleanly and the server answers
+`grpc-status: 14` for every `path` tried so far, including a deliberately
+unknown one. So the remaining unknown is the **command naming**, and the server
+is a clean membership test for it: any path that does *not* return 14 is real.
+There are 384 `CMD_*` strings in the binary to sweep
+(`scripts/sweep_commands.py`), starting with `CMD_CONNECT_GRPC`,
+`CMD_GET_SESSION_ID`, `CMD_CREATE_USER` and `CMD_AUTH_XSTS`.
+
+`scripts/kgs_client.py` is a working client: it builds a `CommandRequest`,
+sends it over HTTP/2 with the `grpc-exp,h2` ALPN the game uses, and decodes
+`CommandResponse{id, packMode, res}` out of the DATA frame.
