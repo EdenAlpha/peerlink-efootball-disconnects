@@ -405,3 +405,67 @@ Go's handshake, not the game's BoringSSL one. Capturing the game's bytes
 *inside its own process* is the only measurement that keeps the real client
 identity intact — which is why the work went into the plaintext-config route
 rather than a proxy.
+
+## The gRPC config loader, fully decoded
+
+`0x7b101f8` is the loader. It has two branches and the **insecure branch is not
+a variant of the secure one** — it resolves its target from different `Def_`
+keys entirely. That matters: forcing the insecure flag without also supplying
+those keys would leave the channel with no destination and nothing would ever
+connect.
+
+```
+0x7b10258  adrp x0,#0xc02000 ; add x0,x0,#0x3be ; mov w1,#0x18
+0x7b1027c  bl 0x2f0eaf0                     ; int getter
+0x7b10280  cbnz w0, #0x7b105c8              ; --> insecure branch
+
+; secure branch, 0x7b10284:
+0x7b10284  adrp x0,#0xaf7000 ; add x0,x0,#0x14b ; mov w1,#0x1d
+0x7b10294  bl 0x2f0eaf0                     ; "Def_Online_gRPC_debug_root_ca" (29)
+0x7b1029c  adrp x8,#0xa4a8000 ; add x8,x8,#0x480
+                                            ; global std::string = root CA path
+
+; insecure branch, 0x7b105c8:
+0x7b105c8  x23 = this+0x308 ; x22 = this+0x320 ; x21 = this+0x338
+0x7b105e0  bl 0x7d65c84                     ; clear the three
+0x7b105e4  literal 0xba2aff (30) -> 0x2f0e18c ; str -> this+0x308
+0x7b1061c  literal 0x9c69c1 (27) -> 0x2f0e18c ; str -> this+0x320
+0x7b10654  literal 0xb68de6 (27) -> 0x2f0eaf0 ; int -> strh [this+0x338]
+0x7b10674  bl 0x7b10ac4
+```
+
+### Verified `Def_Online_gRPC_*` literals (offsets read from the file, not inferred)
+
+| key | offset | getter | supplied value |
+|---|---|---|---|
+| `Def_Online_gRPC_insecure` | `0x0c023be` | int `0x2f0eaf0` | `1` |
+| `Def_Online_gRPC_server_address` | `0x0ba2aff` | string `0x2f0e18c` | `pes22-game.cs.konami.net` |
+| `Def_Online_gRPC_server_path` | `0x09c69c1` | string `0x2f0e18c` | `/command_service.CommandService/CommandStream` |
+| `Def_Online_gRPC_server_port` | `0x0b68de6` | int `0x2f0eaf0` | `443` |
+| `Def_Online_gRPC_debug_root_ca` | `0x0af714b` | int `0x2f0eaf0` | (flag; CA path is the global at `0xa4a8480`) |
+
+**A mistake caught before it cost a run:** `_server_path` and `_server_port` are
+*both 27 characters*, so inferring the key from the immediate's length alone
+identifies them ambiguously. The first draft hooked `_server_port` and supplied
+a port string where a path was required. Reading the actual bytes at each
+offset settles it. The same class of error is why the key comparison in the
+Frida script now matches on the key *text* as well as the pointer.
+
+### Return conventions (needed to override them)
+
+- `0x2f0eaf0` (int): `(x0 = key bytes, w1 = key length) -> w0`
+- `0x2f0e18c` (string): `(x0 = key bytes, x1 = key length) -> x0 = std::string*`
+  — the caller immediately does `ldrb w8,[x0]` (the SSO size byte) and then
+  calls `size()`, so a raw `char*` will not do. The script builds a real
+  libc++ `std::string` (short form if <= 22 bytes, otherwise the long form with
+  a data pointer at `+0x10`).
+
+## Observed GitHub Actions failure modes, with timings
+
+| symptom | actual cause |
+|---|---|
+| job fails in ~6 s at `modprobe` | `cmd_a \|\| cmd_b` where both may fail, under `bash -e` |
+| job fails in ~0–3 s at the apkeep step | `curl` succeeded; `chmod +x apkeep` referenced a different path than the `-o /root/apkeep` target |
+| step 01 times out at exactly 180 s | `androidboot.redroid_gpu_mode=swiftshader` prevents `boot_completed` |
+| reports never appear in the repo | no `actions/checkout` step, so there is no git repo at all |
+| report push silently does nothing | `actions/checkout` leaves a detached HEAD |
