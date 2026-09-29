@@ -55,6 +55,9 @@ jobs:
           set +e
           set -x
           W=/tmp/kgs; mkdir -p $W
+          # one continuous log for every step after boot: a failure in the
+          # middle of the pipeline used to publish an empty report
+          exec >> >(tee -a $W/pipeline.log) 2>&1
           exec > >(tee $W/step01.log) 2>&1
           id
           echo "whoami=$(whoami)  writable /root? $( [ -w /root ] && echo yes || echo no )"
@@ -125,6 +128,9 @@ jobs:
           set +e
           set -x
           W=/tmp/kgs; mkdir -p $W
+          # one continuous log for every step after boot: a failure in the
+          # middle of the pipeline used to publish an empty report
+          exec >> >(tee -a $W/pipeline.log) 2>&1
           cd $W
           echo "whoami=$(whoami) cwd=$(pwd)"
           touch $W/probe && echo "workdir writable" || echo "WORKDIR NOT WRITABLE"
@@ -159,6 +165,9 @@ jobs:
           set +e
           set -x
           W=/tmp/kgs; mkdir -p $W
+          # one continuous log for every step after boot: a failure in the
+          # middle of the pipeline used to publish an empty report
+          exec >> >(tee -a $W/pipeline.log) 2>&1
           python3 -m pip install --quiet --break-system-packages frida-tools || \
             { echo "PIP FAILED, retrying verbose"; pip3 install --break-system-packages frida-tools; }
           FRIDA_VER=$(python3 -c "import frida; print(frida.__version__)" 2>/dev/null)
@@ -181,16 +190,32 @@ jobs:
           sudo docker cp $W/frida-server redroid:/data/local/tmp/frida-server || exit 1
           sudo docker exec redroid chmod 755 /data/local/tmp/frida-server
           sudo docker exec redroid mkdir -p /data/local/tmp/kgs
-          sudo docker exec -d redroid /data/local/tmp/frida-server
-          sleep 6
-          sudo docker exec redroid sh -c 'ps -A | grep -i frida' || echo "frida-server not running"
+          # keep frida-server's stderr: Android 14 runs SELinux enforcing and
+          # exec from /data/local/tmp is a common failure, and `docker exec -d`
+          # throws that output away, which is why this step previously failed
+          # with an empty log.
+          sudo docker exec -d redroid sh -c \
+            '/data/local/tmp/frida-server > /data/local/tmp/frida.out 2>&1'
+          sleep 8
+          echo "--- frida-server output ---"
+          sudo docker exec redroid sh -c 'cat /data/local/tmp/frida.out 2>&1' || true
+          echo "--- process list ---"
+          sudo docker exec redroid sh -c 'ps -A | grep -i frida' || echo "frida-server NOT running"
+          echo "--- selinux ---"
+          sudo docker exec redroid sh -c 'getenforce 2>&1' || true
+          echo "--- port ---"
           nc -zv 127.0.0.1 27042 && echo "frida-server REACHABLE" || echo "frida-server NOT reachable"
+          echo "--- host arch sanity (a wrong-arch binary fails exactly like this) ---"
+          file $W/frida-server 2>/dev/null || head -c 20 $W/frida-server | xxd | head -2
 
       - name: 04 install eFootball
         run: |
           set +e
           set -x
           W=/tmp/kgs; mkdir -p $W
+          # one continuous log for every step after boot: a failure in the
+          # middle of the pipeline used to publish an empty report
+          exec >> >(tee -a $W/pipeline.log) 2>&1
           i=0
           while [ $i -lt 160 ]; do
             [ -f $W/jp.konami.pesam.xapk ] && break
@@ -283,6 +308,9 @@ jobs:
           set +e
           set -x
           W=/tmp/kgs; mkdir -p $W
+          # one continuous log for every step after boot: a failure in the
+          # middle of the pipeline used to publish an empty report
+          exec >> >(tee -a $W/pipeline.log) 2>&1
           # do not burn ten minutes if step 04 never installed anything
           if ! sudo docker exec redroid /system/bin/pm list packages 2>/dev/null \
                | grep -qi konami; then
@@ -336,8 +364,8 @@ jobs:
           mkdir -p "$R/capture"
           { echo '## capture'; echo; echo '### step 01 (binder + android)';
             echo '```text'; head -100 $W/step01.log 2>/dev/null; echo '```';
-            echo; echo '### apkeep'; echo '```text';
-            cat $W/apkeep.log 2>/dev/null | tail -20; echo '```';
+            echo; echo '### pipeline (apkeep, frida, install, capture)';
+            echo '```text'; tail -250 $W/pipeline.log 2>/dev/null; echo '```';
             echo; echo '### frida'; echo '```text';
             head -120 $W/frida.log 2>/dev/null; echo '```';
             echo; echo '### logcat (filtered)'; echo '```text';
