@@ -570,3 +570,61 @@ message ordering. What remains is the shape of the client's TLS ClientHello
 itself, or connection state the ALB associates with the client — which is
 precisely what the on-device capture can show and what a proxy cannot,
 because a proxy would substitute its own ClientHello.
+
+## The topology behind the 502: nginx is healthy, the gRPC target group is not
+
+Same TLS session, same host, same ALPN, only the request path varied
+(HTTP/1.1, `Server` header read from the reply):
+
+| request | response | server |
+|---|---|---|
+| `GET /` | `403 Forbidden` (289 B of real content) | **nginx** |
+| `GET /health` | `404 Not Found` | **nginx** |
+| `GET /nonexistent-xyz` | `404 Not Found` | **nginx** |
+| `GET /command_service.CommandService/CommandStream` | `464` | awselb/2.0 |
+| HTTP/2 `GET /` | 277 B, HTTP/2 HEADERS | (ALB) |
+| HTTP/2 `GET /health` | 273 B | (ALB) |
+| HTTP/2 on the gRPC path, with DATA | 99 B → `grpc-status: 14` | awselb/2.0 |
+
+Two things follow:
+
+1. **There is a live nginx behind the load balancer.** It answers `/` with a
+   289-byte 403 and unknown paths with 404. The host is not dead and TLS is not
+   being refused.
+2. **The gRPC service is a separate target group, and that group will not serve
+   us.** The ALB answers 502/`UNAVAILABLE` with `content-length: 0`, so the
+   request never reaches a gRPC backend. The game reaches it from the phone.
+
+Since the same host, path, SNI, TLS version, cipher and ALPN all work for the
+phone, and the only remaining difference we can see from outside is **the shape
+of the TLS ClientHello itself**, the next measurement is the game's real
+ClientHello byte-for-byte.
+
+That is directly obtainable now: run the game normally (TLS to the real
+endpoint) inside the rooted container with a packet capture on the device's
+own interface, and read the ClientHello off the wire. It is the one piece of
+evidence a proxy cannot substitute for, because a proxy would present its own.
+
+### Environment note: redroid does have software Vulkan
+
+The concern that eFootball (UE4, references `libvulkan.so`) could not start
+without a GPU turns out to be unfounded. Inside the booted container:
+
+```
+/vendor/lib64/hw/vulkan.lvp.so        <- Mesa lavapipe, software Vulkan
+/vendor/lib64/hw/vulkan.pastel.so
+/vendor/lib64/hw/vulkan.panfrost.so
+/gralloc.redroid.so, /hwcomposer.redroid.so
+/system/lib64/libvulkan.so, libEGL.so, libGLESv3.so
+```
+
+`androidboot.redroid_gpu_mode=swiftshader` is not needed and actively prevents
+boot; the image already provides a software Vulkan ICD.
+
+### Remaining blocker in the capture pipeline
+
+The on-device run now completes boot, download, Frida install and package
+install, and fails in the capture step with an **empty frida log** — i.e.
+`frida-server` never started, and `docker exec -d` was discarding its stderr.
+The next run captures that output, checks SELinux state and verifies the
+binary's architecture, so the reason is visible instead of inferred.
