@@ -1022,3 +1022,69 @@ This is the fourth time in this investigation that a *fallback* masked the real
 error — the pattern is worth naming: when a step runs a second path after the
 first fails, the second path's error is what gets read, and it is about the
 fallback rather than about the cause.
+
+## RETRACTION: the `method` key is not the selector — it was the transient 502
+
+A single sample of `req = {"method": "CMD_GET_SESSION_ID"}` came back
+`grpc-status: 14` while every other payload shape returned the default route,
+and that was read as "the payload selects the command through a `method` key".
+
+It does not survive repetition. `scripts/repeat_test.py` sends each case 5 times:
+
+| case | outcomes over 5 samples |
+|---|---|
+| `req = {}` | default route ×5 |
+| `req = {"method": X}` | default route ×4, **14 ×1** |
+| `req = {"cmd"/"command"/"name"/"type"/"id"/"path"/"action"/"op"/"function"/"service": X}` | default route ×5 each |
+| **`req` = not JSON** | **14 ×5** |
+
+The one `14` under `method` is the intermittent `502/14` we already know about.
+The only reproducible rule is that **the server validates `req` as JSON**:
+malformed JSON is rejected, and any well-formed JSON falls through to the
+default route.
+
+This is the second false conclusion produced by a single sample — the first was
+the `content-type` theory, also retracted above. The endpoint returns
+`502 / UNAVAILABLE` intermittently, so a one-off difference is not evidence.
+Any future claim from this endpoint needs repeated sampling.
+
+### What the `method` sweep did establish
+
+All 384 `CMD_*` names were sent as a `method` value at `path="/"`: **0 resolved,
+4 rejected** (and the 4 rejections are within the noise of the transient rate).
+So the command names are not reachable through the payload either.
+
+## Honest state of the login
+
+Solved:
+
+- Why we got `502 g=14` — the application could not resolve the command, and
+  the ALB renders gRPC 14 as HTTP 502.
+- The exact wire schema, parsed from the binary and hand-verified against the
+  descriptor bytes.
+- A working client: `scripts/kgs_client.py` builds a `CommandRequest`, speaks
+  HTTP/2 with the game's ALPN, and decodes `CommandResponse`. `path="/"`
+  round-trips successfully.
+- The payload is JSON in a string field, validated by the server.
+
+Not solved:
+
+- **The command route table.** `path` is a URL path; `/` is the only route
+  reachable, and it maps to `CMD_END_CONNECTION`. The routes are in none of the
+  shipped artifacts: not `libUE4.so` (384 `CMD_*` names and 2711 path-shaped
+  strings, both swept), not the base APK's 261 config/text assets, not the 18
+  `config.*` splits, not the 780 MB asset packs, and not as a payload selector
+  in a dozen spellings.
+
+The single remaining source for the route table is the game's own request
+bytes, which is what the ARM64 runner capture exists to obtain. Everything needed
+on that side is now in place: binder mounts, redroid 14 arm64 boots as root with
+GLES 3.2 via ANGLE, frida-server 17.19.0 is reachable, the package downloads and
+extracts, and the install uses the `pm` session API because redroid has no
+`install-multiple` subcommand at all.
+
+A further caveat worth stating: even with the routes, a real login needs a valid
+`req` payload — device identity, an auth token, the app identity values
+(`titleCode=PES2022, locale=US, version=6.0.1, uid=3c5aad3c…`) — and the game
+obtains its auth token from a Konami account flow. Reaching a room code is a
+chain of five commands plus a real session, not a single request.
