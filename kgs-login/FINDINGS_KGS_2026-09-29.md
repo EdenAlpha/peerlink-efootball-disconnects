@@ -191,7 +191,38 @@ platform, client_version` — the per-command writer (e.g. CMD_LOGIN's
   (2) TLS-fingerprint (BoringSSL ext list vs python-ssl); (3) in-stream
   `path` value / `CMD_CONNECT_GRPC`-first sequencing (app drops unknown
   streams → ALB 502); (4) exact user-agent/encoding header minutiae.
-- Side note: 34-byte `00000107…eFootball™…` blobs interleaved in the
-  capture's TCP segments (even to ad-CDN IPs) are an on-device artifact
-  (Infinix game-booster/proxy tagging), not Konami's protocol — our
-  bare-ClientHello TLS handshake completes fine without them.
+## 10. THE REAL CAUSE (found 14:45 UTC): a 34-byte per-packet proxy on the phone
+
+Decoding the 13:54 capture properly (not dismissing it as noise) shows
+**659 of 1311 TCP payload segments are 34-byte blobs**:
+
+    00 00 01 07 | 20 21 | 00 00 | 29 | "IeFootball™" | 00*8 | <4-byte varies>
+
+- Identical 34-byte prefix on every one; only the last 4 bytes vary
+  (checksum/sequence).
+- They appear on **every** connection in the capture — including Google's
+  ad servers (`108.139.200.68`, `108.156.162.47`, `142.250.181.110`) and
+  the DoH resolver. So they are **not** Konami's protocol and not gRPC: they
+  are injected by a **transparent per-packet proxy/tunnel on the device**
+  (the same VPN that gave the phone its `102.91.105.50` address).
+- Consequence: the game never presents a clean TLS stream to
+  `pes22-game.cs.konami.net`. Every packet is tagged, so Konami's front end
+  sees a different byte stream than any direct client — which is why the
+  game authenticates and gets answers while **every** direct attempt
+  (ours, and the user's own `curl`, from 2 networks) gets `502 g=14`.
+- This invalidates the "our bytes are wrong" family of theories. Ruled out
+  by experiment today: IP (2 networks), 50+ request variants (path x4,
+  version, user-agent incl. real `grpc-c++/1.x` form, 5 envelope `id`
+  forms, 3 pack modes, empty body, game-composer body, real-identity body),
+  connect-first sequencing, ALPN, content-type (`application/grpc` and
+  `+proto`), HTTP/1.1 vs h2, hand-built frames with literal (non-Huffman)
+  HPACK, WINDOW_UPDATE, SETTINGS ordering, stream open vs half-closed, and
+  `grpc-timeout`. Every one: `502 g=14` in ~0.3 s. The game's own config
+  code (run in the Unicorn harness) confirms the channel target is exactly
+  `dns:///pes22-game.cs.konami.net:443/` — the door we use.
+
+**Conclusion:** the blocker is not the request, it is that a direct
+connection is refused. The workable routes are (a) reproduce whatever the
+device proxy does, (b) run the real client inside that same environment
+(VPhoneOS/emulator), or (c) capture a decrypted working session and diff it
+against a direct one.
