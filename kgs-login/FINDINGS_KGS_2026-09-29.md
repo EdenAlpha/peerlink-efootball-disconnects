@@ -662,68 +662,61 @@ install, and fails in the capture step with an **empty frida log** — i.e.
 The next run captures that output, checks SELinux state and verifies the
 binary's architecture, so the reason is visible instead of inferred.
 
-## ROOT CAUSE FOUND: the `content-type` header was the whole problem
+## The `content-type` theory was wrong — the 502 appears to be intermittent
 
-Two measurements in sequence, both on the live endpoint.
+This section previously claimed a root cause. **That claim is retracted.** It is
+kept here because the sequence of measurements is the useful part, and because
+getting it wrong is exactly the kind of thing worth recording.
 
-**Step 1 — does the server read our body?** (`scripts/body_differs.py`)
-
-The same request was sent with different message payloads. The response length
-tracked the payload:
-
-| request payload | response | HEADERS frame |
-|---|---|---|
-| 5 B (empty message) | 145 B | 87 B |
-| 7 B (`field 1 = 1`) | 145 B | 87 B |
-| 7 B (`field 1 = 2`) | 145 B | 87 B |
-| **71 B (invalid protobuf)** | **192 B** | **134 B** |
-
-So the server *is* parsing our protobuf. The "the body is never processed"
-theory is dead for good.
-
-**Step 2 — read what it says.** (`scripts/read_grpc_message.py`)
-
-Decoding the trailers of each response exposed the actual cause:
+**What was observed.** `scripts/read_grpc_message.py` sent five requests:
 
 ```
-content-type: application/grpc
-    :status 502   grpc-status 14   grpc-message "unavailable"
-    content-length 0
-
-content-type: application/grpc+proto
-    :status 200   grpc-status 13
-    grpc-message "Error deserializing request: invalid wire type 7 at offset 8"
+content-type: application/grpc        -> :status 502  grpc-status 14  "unavailable"
+content-type: application/grpc+proto  -> :status 200  grpc-status 13
+                                         "Error deserializing request: invalid
+                                          wire type 7 at offset 8"
 ```
 
-**`application/grpc` never reaches the gRPC application at all** — the load
-balancer answers it with `502 / UNAVAILABLE` and an empty body. With
-`application/grpc+proto` the request is delivered, parsed, and the server
-returns a *detailed protobuf error*.
+That looked conclusive: the plain form is diverted by the load balancer, the
+`+proto` form reaches the application, and every request we had ever sent used
+the plain form.
 
-Every request we ever sent used `application/grpc`. That single header explains
-all 50+ identical `502 g=14` results in ~0.3 s: the load balancer was replying
-before the gRPC server was ever involved, so no amount of variation in the
-envelope, the protobuf, the HPACK encoding or the message order could have made
-any difference.
+**Why it is wrong.** `scripts/ctype_matrix.py` then sent nine requests varying
+only the content type, and:
 
-It also explains the misleading evidence gathered along the way. `502`,
-`content-length: 0` and `server: awselb/2.0` all looked like an application
-refusal, and `grpc-status: 14 UNAVAILABLE` looked like a service that was
-merely unavailable. In fact the request was being diverted at the load balancer
-by its content type.
+```
+application/grpc                -> :status 200  grpc-status 13  (parse error)
+application/grpc+proto          -> :status 200  grpc-status 13  (parse error)
+application/grpc;               -> :status 200  grpc-status 13
+application/grpc+json           -> :status 200  grpc-status 13
+application/grpc-proto          -> :status 200  grpc-status 13
+APPLICATION/GRPC+PROTO          -> :status 415  (uppercase rejected)
+application/grpc+proto; charset -> :status 200  grpc-status 13
+```
 
-### What this unlocks
+`application/grpc` returned **200 with the same parse error** as `+proto`. So
+content-type is not the discriminator; the first run happened to catch the 502
+on the rows that used `application/grpc`.
 
-The server is now an **oracle**. With `application/grpc+proto` it parses our
-message and tells us precisely what is wrong with it:
+The lesson is about method: one observation of a difference is not a cause, and
+these two runs differed only in time.
 
-- `invalid wire type 7 at offset 8` — a wire-type byte it does not recognise
-- `index out of range: 205 + 8 > 205` — a length prefix past the end
+### What survives
 
-That means the `command_service.CommandRequest` schema can be reconstructed
-iteratively against real responses instead of guessed from strings, and the
-login chain (`CMD_GET_SESSION_ID` → `CMD_LOGIN` → `CMD_CREATEJOIN_ROOM` →
-`CMD_GET_ROOM_INFO` → `CMD_SEND_RECRUIT_CODE`) becomes reachable.
+- **The server does read and parse our body.** Solid: a 71-byte invalid payload
+  produced a 134-byte error HEADERS frame where a 5-byte payload produced 87
+  (`scripts/body_differs.py`).
+- **The gRPC server is reachable and answering us right now**, with detailed
+  protobuf diagnostics — a far better position than where this investigation
+  started.
+- **The 502/14 is an `awselb/2.0` response with an empty body**, produced at the
+  load balancer rather than by the gRPC application.
+
+The open question is whether the 502 is a transient availability or
+health-check condition, which `scripts/is_it_flaky.py` measures by sending
+byte-identical requests repeatedly and counting outcomes. If both outcomes occur
+for identical bytes, no request-side change can address it, and `502/14` should
+be treated as a retryable condition rather than a rejection.
 
 ### The game's real ClientHello, for the record
 
