@@ -1,191 +1,111 @@
-# KGS login — headless eFootball: from captures to the real protocol
+# KGS login — running the game's own code instead of reimplementing it
 
-Everything learned about Konami's eFootball (`pes22` / `jp.konami.pesam`)
-server protocol, and the tools that learned it. Two lines of work:
+## The problem
 
-1. **`captures/match-2026-09-26/`** (repo root) — why two phones freeze mid
-   match and get kicked to the lobby.
-2. **`kgs-login/`** (this directory) — how to log in to Konami KGS without the
-   app, by running the game's own code. This directory.
+eFootball's KGS endpoint (`pes22-game.cs.konami.net`, gRPC) answers every
+request we synthesise with **`502 g=14`** — in ~0.3 s, on every one of the
+server's own IPs, with the game's real envelope and body. The game itself, on a
+real phone, is served normally.
 
-Read `findings/FINDINGS_KGS_LOGIN.md` first — it is the current, tested
-verdict. The `FINDINGS_M2*.md` notes are the milestones in order.
+Address, TLS/ALPN, HTTP/2 framing, HPACK encoding, headers, envelope fields,
+body and message order have all been varied. Every combination produces the
+same refusal. So the remaining difference is **not synthesisable from outside**
+— it is something about the client's own code or state.
 
----
+The rule this directory follows: **never hand-assemble request bytes.** Run the
+game's own `libUE4.so` and read what it emits.
 
-## The story, beginning to end
+## What is established
 
-### M22 — a working request, for one endpoint
-`ntl.service.konami.net/ntl/api/GateInfo.php` answered `STATUS: 200` to a
-byte-exact copy of the game's own bootstrap request. First live Konami
-response. (`findings/FINDINGS_M22_live_login.md`)
+- The genuine Play package is **eFootball 11.0.1, versionCode 311000101** —
+  the build on the user's phone.
+- Its `lib/arm64-v8a/libUE4.so` is **byte-identical** (SHA-256
+  `2ac4ff17ac8ad713…`) to the binary being reverse engineered. The binary was
+  never the problem; an earlier assumption that it was an older build is
+  retracted.
+- Host, the single gRPC service path
+  `/command_service.CommandService/CommandStream`, and the `command_service`
+  schema are all confirmed correct.
 
-### M23 — the pointer tables are invisible in the file
-**The finding that explains every dead end.** This binary uses Android packed
-relocations (`SHT_ANDROID_RELA`, APS2). Consequence: every pointer table —
-vtables, dispatch tables, handler registries — is **zero-filled in the file**.
-Static scans for who points at a function or string return nothing, not
-because the reference is absent but because it only exists after the loader
-unpacks the relocations. Call-graph ascent, raw pointer scans, ADRP+ADD
-scans, branch-target scans: all empty, all misleading.
-(`findings/FINDINGS_M23_dispatch_tables.md`)
+## How the capture works
 
-### M24 — the HTTP stack
-The sub-request object, its vtable, the composer, the senders, the pump.
-GateInfo runs end to end **through the game's own code**.
-(`findings/FINDINGS_M24_http_stack.md`)
+`libUE4.so` has gRPC statically linked, and its gRPC configuration is read
+through two `Def_` getters. Decoded from the binary:
 
-### M25 — the gate endpoint
-`https://pes22-game.cs.konami.net/pes22/gate/gate_<msgid>.php`. Real command
-names answer 500 (the PHP runs and fatals); invented names answer 404. The
-path is right — and the IP theory is disproven here by testing three
-different networks (AWS, Cloudflare WARP, a phone on mobile data) and getting
-the byte-identical blank 500. (`findings/FINDINGS_M25_gate_endpoint.md`)
-
-### M26 — LIEF unpacks the relocations, the vtables come alive
-`pip install lief` decodes APS2: **1,335,097 relocations**, 1,297,240 of them
-`R_AARCH64_RELATIVE`. The vtable at `0x97d4448` resolves, and it independently
-confirms the two functions we had been calling by hand (`0x767ec60` bind,
-`0x767edbc` serialise) really are the game's own methods.
-(`findings/FINDINGS_M26_vtables_zero.md`)
-
-With the tables alive, several long-standing harness bugs surfaced and were
-fixed (`scripts/uc_loader.py`, `scripts/uc_loader2.py`):
-* `STUB_SIZE` raised 64 KB -> 4 MB (15,345 PLT imports did not fit)
-* `call()` zeroed `x6`/`x7` right after setting them — any call needing a 7th
-  or 8th argument silently lost it
-* `symcalloc`/`symfree` (curl's private allocator) unimplemented — that is why
-  `curl_easy_init` returned NULL
-* `getentropy`/`syscall(278)` unimplemented — curl's RNG stayed empty and TLS
-  aborted with "Insufficient randomness"
-* `fopen`/`fread`/`fgets`/`open`/`read`/`stat`/`opendir` — libcurl's entropy
-  and config-file reads
-* the 11,829 `.init_array` constructors were never run (11,824 now run clean)
-
-### The verdict — the PHP gate is dead by design
-The binary's own embedded config says it:
-
-```json
-{"invitation_task": {"enable": true, "use_http_command": false},
- "connect_grpc_task": {"disable": true}}
+```
+0x7b101f8   gRPC config loader
+0x7b10258   literal 0x0c023be "Def_Online_gRPC_insecure" (24)
+0x7b1027c   bl 0x2f0eaf0            ; int getter
+0x7b10280   cbnz w0, 0x7b105c8      ; non-zero => plaintext channel
 ```
 
-**`use_http_command: false` — the game is configured not to use HTTP for
-commands.** Every blank 500 over `gate_CMD_*.php` was a dead legacy route. The
-app never POSTs there.
+Forcing that flag to 1 makes the channel **plaintext**, so gRPC writes HTTP/2
+frames straight to the socket and an ordinary libc `send`/`write` hook captures
+the request verbatim. No TLS interception, and no need for BoringSSL's
+`SSL_write` — which cannot be recovered from the stripped binary anyway (its
+string literal at `0xa27cf3` has no code reference in the 104 MB text segment).
 
-### The real protocol — `command_service.proto`
-Decoded from the protobuf FileDescriptorProto embedded at `0xc95afa`
-(`scripts/decode_proto.py`):
+The insecure branch resolves its own destination, so all four keys are supplied
+(offsets read from the file, not inferred from length — `_server_path` and
+`_server_port` are both 27 characters):
 
-```proto
-syntax = "proto3";
-package command_service;
-enum PackMode { PACK_MODE_JSON = 0; PACK_MODE_MSGPACK = 1; }
-message CommandRequest  { string id = 1; PackMode packMode = 2;
-                          string req = 3; string path = 4; }
-message CommandResponse { string id = 1; PackMode packMode = 2;
-                          string res = 3; }
-service CommandService {
-  rpc CommandStream (stream CommandRequest) returns (stream CommandResponse);
-}
-```
+| key | offset | getter | value |
+|---|---|---|---|
+| `Def_Online_gRPC_insecure` | `0x0c023be` | int `0x2f0eaf0` | `1` |
+| `Def_Online_gRPC_server_address` | `0x0ba2aff` | string `0x2f0e18c` | `pes22-game.cs.konami.net` |
+| `Def_Online_gRPC_server_path` | `0x09c69c1` | string `0x2f0e18c` | `/command_service.CommandService/CommandStream` |
+| `Def_Online_gRPC_server_port` | `0x0b68de6` | int `0x2f0eaf0` | `443` |
 
-Full method: **`/command_service.CommandService/CommandStream`** — a
-bidirectional stream over HTTP/2, on `pes22-game.cs.konami.net`. The URL we
-chased all along is the `path` **field**; the msgid is the `id` field; the
-MessagePack body we built is the `req` field. Everything derived was correct —
-it just was never an HTTP POST.
+The string getter returns a `std::string*` (the caller reads the SSO size byte
+immediately), so a real `libc++ std::string` is constructed for the reply.
 
-### The endpoint is live and speaks the protocol
-| what is sent | what comes back |
+## Where it runs
+
+The free **ARM64 GitHub runner** (`ubuntu-24.04-arm`, public repo). Measured on
+it: kernel `6.17.0-1022-azure` with `CONFIG_ANDROID_BINDER_IPC=m`, binderfs
+mounts, docker privileged allowed, 4 vCPU / 15 GiB / 108 GB, and redroid 14
+`arm64-v8a` **boots in ~10 s as root**.
+
+This is also exactly why AWS Graviton was a dead end: Debian's AWS kernel has
+`CONFIG_ANDROID_BINDER_IPC` **unset**, so `mount -t binder` cannot work at all.
+Ubuntu ships the driver as a module. The OS was the deciding factor, not the
+CPU architecture or the instance size.
+
+## Files
+
+| file | purpose |
 |---|---|
-| stream opened, no message | `grpc-status: 0 OK` |
-| 1 byte of garbage | `grpc-status: 13` *"Error deserializing request: index out of range: 1 + 1 > 1"* |
-| any valid `CommandRequest` | `grpc-status: 14 UNAVAILABLE` |
+| `FINDINGS_KGS_2026-09-29.md` | full record, including retractions |
+| `scripts/capture_insecure.js` | Frida: force plaintext, hook `connect`/`send`/`write`, dump frames |
+| `scripts/decode_capture.py` | captured sends → h2 frames → HPACK → gRPC envelope → protobuf; flags non-standard headers |
+| `scripts/test_decode.py` | decoder self-test (PASS) |
+| `scripts/replay_capture.py` | send the game's own bytes verbatim over real TLS |
+| `scripts/trust_our_ca.js` | fallback: point the game at our CA via the global at `0xa4a8480` |
+| `scripts/make_mitm.py` | mitmproxy addon, same fallback path |
+| `ci-report/latest.md` | what the runner last observed |
 
-The garbage case is the proof: the server **parses the protobuf and reports a
-decode error**. Only a real gRPC server does that. Wrong method names get
-`12 UNIMPLEMENTED` / *"The server does not implement the method"*. Backend is
-`server: awselb/2.0` (AWS ALB with gRPC routing).
+## Why the replay step is decisive
 
-### Where it stands
-`CommandStream` accepts the connection and parses the messages, but the
-gateway answers `14` to anything with a body. The `14` arrives in **headers at
-0 ms** (vs ~170 ms to connect) and is deterministic 8/8 — a gateway routing
-decision, not a backend round trip.
+Sending the game's own captured bytes over a real TLS connection gives one of
+two answers, and both are conclusive:
 
-Ruled out on the gRPC path, all giving identical `14`: 24 `path` forms, 8
-`msgid`s, 6 `req` encodings (raw MessagePack, hex, base64, JSON, `req=<hex>`,
-empty), field-presence combinations, `authorization` / `grpc-timeout` /
-`x-konami-session` metadata, 6 `:authority` variants, and the **client
-certificate** (leaf and full chain).
+- **served normally** → the difference was in the request bytes, and diffing
+  the capture against our probes localises it;
+- **`502 g=14` again** → the request bytes are not the problem, so the
+  difference is in the transport (TLS fingerprint / connection setup).
 
-Strongest remaining lead: `CMD_GET_SERVER_ENV` is a config fetch whose answer
-supplies `Def_Online_gRPC_server_address` / `_port` / `_path` — the values are
-not in the binary or the data packs; they arrive at runtime. Without them the
-gateway has no upstream to route to, which matches `14` as a routing failure
-rather than an auth rejection.
+A MITM would *not* answer this: the proxy would itself be the TLS client to
+Konami, presenting a different handshake from the game's BoringSSL. Capturing
+inside the game's own process is the only measurement that keeps the real
+client identity intact.
 
----
+## Actions traps (each one cost a run)
 
-## Layout
-
-```
-kgs-login/
-  README.md            this file
-  findings/            FINDINGS_KGS_LOGIN.md  (current verdict) + M22..M26
-  scripts/             every tool written along the way (233)
-  harness/             the Unicorn ARM64 emulator harness
-     scripts/          uc_loader.py / uc_loader2.py  (ELF loader + libc stubs)
-     peerlink/         online_client, game_http, netsplice, kgs, rooms, ...
-  evidence/            bodies, logs, outputs, the Ghidra headless script
-```
-
-### Notable tools
-| tool | what it does |
+| symptom | cause |
 |---|---|
-| `scripts/decode_proto.py` | minimal protobuf wire decoder; pulled `command_service.proto` out of the binary |
-| `scripts/rev_reloc.py` | **reverse relocation map** — "which slots point at this VA". Inverts LIEF's 1.33M `R_AARCH64_RELATIVE` addends; this is what cracked the invisible pointer tables |
-| `scripts/rebuild_relocs_lief.py` | rebuilds `packed_relocs.npz` + `plt_map.json` from the ELF via LIEF (APS2) |
-| `scripts/grpc_probe.py` / `grpc_shapes.py` / `grpc_where.py` | raw gRPC over HTTP/2; the live results above |
-| `scripts/capture_hosts.py` | TLS ClientHello SNI + DNS extraction from the phone captures — ground truth for which hosts the app talks to |
-| `scripts/send_real_body.py` | drives the game's own serializer + composer + POST sender under the emulator |
-| `evidence/ghidra/Deco.java` | Ghidra headless decompiler for the composer + gate builder |
-
-### Tools used, and what they were for
-* **LIEF** — decoded the Android packed relocations (APS2) that a plain
-  `.rela.dyn` walk cannot see. That is what fixed the vtables.
-* **Unicorn** — runs the game's own ARM64 code headless (no GPU, no device).
-* **Ghidra 12.1.4** — headless decompilation (already in `efootball-apk/`).
-* **curl_cffi** — TLS fingerprint impersonation; used to **disprove** the JA3
-  theory (13 real browser fingerprints, all identical).
-* **h2 / hpack** — the raw HTTP/2 gRPC client.
-
-### Ruled out, with the evidence that killed it
-Full list in `findings/FINDINGS_KGS_LOGIN.md`. Short version: the IP address
-(three networks, same result), TLS fingerprinting (13 browser fingerprints),
-the client certificate (leaf/chain/none, on both PHP and gRPC), the request
-body format (MessagePack, JSON, hex, base64, 15 field names, 5 content types),
-query parameters and headers (30+ variants, 9 Host variants), a hidden login
-host (the app's own TLS SNI says otherwise), gRPC-as-`Def_Online_gRPC_*`-less
-guesswork, `ChangeServer.bin` (a store-receipt path, not network config),
-and `jp.applilink.sdk` (an ad SDK).
-
-### Not redistributed here on purpose
-`pristine_libUE4.so` (160 MB, Konami property), `funcs_eh.txt`, `packed_relocs.npz`
-(374 MB), `plt_map.json`, `ghidra_vtables.txt`, `dynsym_funcs.txt`, the Ghidra
-project, and **Konami's client TLS private key** (`bin_privkey.pem` /
-`client_key.pem` / `chain_key.pem`) — extracted during the mTLS work but not
-published. The extracted **certificates** (`ca_root.pem`, `client_cert.pem`)
-are included; the private keys are not.
-
----
-
-## Capture thread
-
-The other half of this repo — `captures/match-2026-09-26/`, `VERDICT.md`,
-`DISCONNECT_CENSUS.md`, `CAPTURE_AUTOPSY.md`, `WORKING_EVIDENCE.md` — is the
-P2P disconnect investigation. Two phones, three stalls, `0pps cliff`, DTLS to
-`turn.konami.com` going quiet 0.7-3.4 s before each cliff. That work is
-unaffected by anything in this directory.
+| report never appears in the repo | no `actions/checkout` step ⇒ no git repo; the `\|\| echo` hid it |
+| report push does nothing | `actions/checkout` leaves a detached HEAD — push by refspec |
+| step dies in seconds | the shell is `bash -e -o pipefail`; guard every optional command |
+| step 02 dies in 0–3 s | the runner user is not root, so `/root` is unwritable |
+| `modprobe` finds nothing | `binder_linux.ko` is in `linux-modules-extra-$(uname -r)` |
+| Android never finishes booting | `androidboot.redroid_gpu_mode=swiftshader` blocks `boot_completed` |
