@@ -1,19 +1,22 @@
 #!/usr/bin/env python3
-"""gRPC + the app's bundled client identity.
+"""THE mTLS test: the app ships a client TLS certificate.
 
-Earlier we "disproved" the client cert -- but only against the PHP gate.
-We never tried it on the gRPC CommandStream, which has its own CA config
-(Def_Online_gRPC_debug_root_ca, Def_Online_gRPC_insecure).
+TLS 1.2 only + exactly 5 ciphers is the fingerprint of a client that pins a
+restricted SSL context.  If the gate and/or the gRPC front end REQUIRE that
+client certificate, then:
+  * our certificate-less probes -> gate PHP fatal 500 (script reads the TLS
+    client identity and dies without it) and gRPC 502/unavailable
+  * the real app, which presents the cert -> works
 
-Evidence it matters here:
-  * valid CommandRequest -> grpc-status 14 UNAVAILABLE  (identity rejected)
-  * garbage 1-byte msg   -> grpc-status 13 INTERNAL     (parser runs)
-  * the binary ships CN=localhost cert + matching RSA key + CA root
+The cert/key pair was extracted from the game's own binary (certs may be
+shared; the keys are used here only for local TLS and are NOT committed).
 
-Test leaf-only and full chain on the stream.
+Runs every probe both WITHOUT and WITH the client certificate so the
+difference is unambiguous.
 """
 from __future__ import annotations
 
+import os
 import socket
 import ssl
 import struct
@@ -21,124 +24,160 @@ import struct
 import h2.config
 import h2.connection
 import h2.events
+import msgpack
 
+HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = "pes22-game.cs.konami.net"
 METHOD = "/command_service.CommandService/CommandStream"
 UA = "grpc-c/1.0 (android; arm64; pesam)"
-BODY = open("real_body.bin", "rb").read()
+CIPHERS = ("ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:"
+           "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:"
+           "TLS_EMPTY_RENEGOTIATION_INFO_SCSV")
+
+CERT = os.path.join(HERE, "client_cert.pem")
+KEY = os.path.join(HERE, "client_key.pem")
+CHAIN = os.path.join(HERE, "chain.pem")
+
+VER = "6.0.1"
+UID = "3c5aad3c6b8425c611ebe2f5da6c25af"
 
 
-def varint(v):
-    o = bytearray()
+def enc_varint(v: int) -> bytes:
+    out = bytearray()
     while True:
         b = v & 0x7F
         v >>= 7
-        o.append(b | 0x80 if v else b)
+        out.append(b | 0x80 if v else b)
         if not v:
-            return bytes(o)
+            return bytes(out)
 
 
-def fstr(f, s):
-    raw = s.encode("utf-8") if isinstance(s, str) else bytes(s)
-    return bytes([f << 3 | 2]) + varint(len(raw)) + raw
+def enc_str(field: int, s) -> bytes:
+    raw = s.encode() if isinstance(s, str) else bytes(s)
+    return bytes([field << 3 | 2]) + enc_varint(len(raw)) + raw
 
 
-def request(msgid, body, path, pack=1):
-    return (fstr(1, msgid) + bytes([2 << 3 | 0]) + varint(pack)
-            + fstr(3, body) + fstr(4, path))
+def command_request(msgid, body, path, pack_mode=1) -> bytes:
+    return (enc_str(1, msgid) + bytes([2 << 3 | 0]) + enc_varint(pack_mode)
+            + enc_str(3, body) + enc_str(4, path))
 
 
-def frame(p):
+def grpc_frame(p: bytes) -> bytes:
     return b"\x00" + struct.pack(">I", len(p)) + p
 
 
-def call(label, payload, certfiles=None, chain=None, verify_ca=False):
+def ctx_for(mtls: bool, alpn=("grpc-exp", "h2"), tls12=True):
     ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
-    ctx.set_ciphers("ALL:@SECLEVEL=0")
-    ctx.set_alpn_protocols(["h2"])
-    if certfiles:
-        ctx.load_cert_chain(*certfiles)
-    sock = ctx.wrap_socket(socket.create_connection((HOST, 443), timeout=20),
-                           server_hostname=HOST)
-    cfg = h2.config.H2Configuration(client_side=True, header_encoding="utf-8")
-    c = h2.connection.H2Connection(config=cfg)
-    c.initiate_connection()
-    sock.sendall(c.data_to_send())
-    c.send_headers(1, [(":method", "POST"), (":scheme", "https"),
-                       (":authority", HOST), (":path", METHOD),
-                       ("content-type", "application/grpc"),
-                       ("te", "trailers"), ("user-agent", UA)],
-                   end_stream=False)
-    c.send_data(1, frame(payload), end_stream=True)
-    sock.sendall(c.data_to_send())
+    if tls12:
+        ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+        ctx.maximum_version = ssl.TLSVersion.TLSv1_2
+    ctx.set_alpn_protocols(list(alpn))
+    ctx.set_ciphers(CIPHERS)
+    if mtls:
+        # full chain if available, else leaf cert + key
+        try:
+            ctx.load_cert_chain(CERT, KEY)
+        except ssl.SSLError:
+            return None
+    return ctx
 
-    sock.settimeout(12)
-    status = grpc = msg = None
-    out = b""
-    trail = {}
+
+def gate_http(mtls: bool) -> str:
+    body = msgpack.packb(
+        {"msgid": "CMD_GET_SERVER_ENV", "rqid": 0, "user_id": UID,
+         "session_id": "", "my_platform": "Android", "s_keyword": "",
+         "lang": "US", "region": "US", "platform": "Android",
+         "client_version": VER}, use_bin_type=True)
+    ip = socket.gethostbyname(HOST)
+    ctx = ctx_for(mtls, alpn=("http/1.1",), tls12=False)
+    if ctx is None:
+        return "ERR cert/key load failed"
+    with ctx.wrap_socket(socket.create_connection((ip, 443), timeout=12),
+                         server_hostname=HOST) as s:
+        s.settimeout(15)
+        req = ("POST /pes22/gate/gate_CMD_GET_SERVER_ENV.php HTTP/1.1\r\n"
+               "Host: %s\r\nAccept: */*\r\nContent-Type: application/"
+               "x-www-form-urlencoded\r\nContent-Length: %d\r\n"
+               "Connection: close\r\n\r\n" % (HOST, len(body))).encode()
+        s.sendall(req + body)
+        d = b""
+        while len(d) < 4000:
+            b = s.recv(2000)
+            if not b:
+                break
+            d += b
+    return d.decode("latin1", "replace")[:300]
+
+
+def grpc_call(mtls: bool, msgid="CMD_GET_KGS_GUEST_LOGIN_TOKEN") -> str:
+    body = msgpack.packb(
+        {"msgid": msgid, "rqid": 0, "user_id": UID, "session_id": "",
+         "my_platform": "Android", "s_keyword": "", "lang": "US",
+         "region": "US", "platform": "Android", "client_version": VER},
+        use_bin_type=True)
+    frame = grpc_frame(command_request(msgid, body,
+                                       "gate/gate_%s.php" % msgid))
+    ip = socket.gethostbyname(HOST)
+    ctx = ctx_for(mtls)
+    if ctx is None:
+        return "ERR cert/key load failed"
+    s = ctx.wrap_socket(socket.create_connection((ip, 443), timeout=12),
+                        server_hostname=HOST)
+    s.settimeout(15)
+
+    conn = h2.connection.H2Connection(
+        config=h2.config.H2Configuration(client_side=True,
+                                         header_encoding="utf-8"))
+    conn.initiate_connection()
+    conn.send_headers(1, [
+        (":method", "POST"), (":scheme", "https"), (":authority", HOST),
+        (":path", METHOD), ("content-type", "application/grpc"),
+        ("te", "trailers"), ("user-agent", UA),
+        ("grpc-encoding", "identity"), ("grpc-accept-encoding", "identity"),
+    ], end_stream=False)
+    conn.send_data(1, frame, end_stream=True)
+    s.sendall(conn.data_to_send())
+
+    out, hdrs = [], {}
     try:
         while True:
-            d = sock.recv(65535)
-            if not d:
+            chunk = s.recv(65535)
+            if not chunk:
                 break
-            for ev in c.receive_data(d):
+            for ev in conn.receive_data(chunk):
                 if isinstance(ev, h2.events.ResponseReceived):
-                    h = dict(ev.headers)
-                    status = h.get(":status")
-                    grpc = h.get("grpc-status")
-                    msg = h.get("grpc-message")
+                    hdrs = dict(ev.headers)
                 elif isinstance(ev, h2.events.DataReceived):
-                    out += ev.data
-                    c.acknowledge_received_data(ev.flow_controlled_length,
-                                                ev.stream_id)
-                elif isinstance(ev, h2.events.TrailersReceived):
-                    trail = dict(ev.headers)
+                    out.append(ev.data)
                 elif isinstance(ev, h2.events.StreamEnded):
-                    break
-            o = c.data_to_send()
-            if o:
-                sock.sendall(o)
-            if status:
-                break
-    except socket.timeout:
-        status = "(timeout)"
+                    s.close()
+                    return "hdrs=%s body=%r" % (hdrs, b"".join(out)[:300])
+            s.sendall(conn.data_to_send())
     except Exception as e:
-        status = f"ERR {type(e).__name__}: {e}"
-    sock.close()
-    g = trail.get("grpc-status", grpc)
-    m = trail.get("grpc-message", msg)
-    tag = "   <<<<<< CHANGED!" if (status != "502" or g != "14") else ""
-    print(f"  {label:44s} HTTP={status} grpc={g} msg={m} "
-          f"body={len(out)}B{tag}", flush=True)
-    if out:
-        print(f"      {out[:240]!r}", flush=True)
-    if trail:
-        print(f"      trailers={trail}", flush=True)
-    return g, out
-
-
-MSG = "CMD_GET_SERVER_ENV"
-P = "gate/gate_CMD_GET_SERVER_ENV.php"
-REQ = request(MSG, BODY, P)
-
-CASES = [
-    ("no client cert (baseline)", None),
-    ("leaf only (CN=localhost)", ("client_cert.pem", "client_key.pem")),
-    ("CHAIN leaf + CA root", ("chain.pem", "chain_key.pem")),
-]
-
-for title, payload in (("CMD_GET_SERVER_ENV", REQ),
-                       ("CMD_GET_KGS_GUEST_LOGIN_TOKEN",
-                        request("CMD_GET_KGS_GUEST_LOGIN_TOKEN", BODY,
-                                "gate/gate_CMD_GET_KGS_GUEST_LOGIN_TOKEN.php")),
-                       ("CMD_LOGIN",
-                        request("CMD_LOGIN", BODY,
-                                "gate/gate_CMD_LOGIN.php"))):
-    print(f"\n=== {title} ===", flush=True)
-    for label, cf in CASES:
+        return "ERR %s: %s | hdrs=%s body=%r" % (
+            type(e).__name__, str(e)[:60], hdrs, b"".join(out)[:300])
+    finally:
         try:
-            call(label, payload, certfiles=cf)
+            s.close()
+        except Exception:
+            pass
+    return "hdrs=%s body=%r" % (hdrs, b"".join(out)[:300])
+
+
+def main() -> int:
+    for label, fn in (("gate  no cert", lambda: gate_http(False)),
+                      ("gate  WITH CLIENT CERT", lambda: gate_http(True)),
+                      ("grpc  no cert", lambda: grpc_call(False)),
+                      ("grpc  WITH CLIENT CERT", lambda: grpc_call(True))):
+        print("\n=== %s ===" % label, flush=True)
+        try:
+            print("  " + fn().replace("\n", "\n  "), flush=True)
         except Exception as e:
-            print(f"  {label:44s} TLS-ERR {type(e).__name__}: {e}", flush=True)
+            print("  ERR %s: %s" % (type(e).__name__, str(e)[:90]), flush=True)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
