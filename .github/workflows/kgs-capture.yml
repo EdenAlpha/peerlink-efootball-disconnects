@@ -148,9 +148,20 @@ jobs:
           PY
           sudo docker cp /root/jp.konami.pesam.apk redroid:/data/local/tmp/base.apk
           sudo docker cp /root/config.arm64_v8a.apk redroid:/data/local/tmp/arm64.apk
+          echo "--- install base + arm64 split ---"
           sudo docker exec redroid /system/bin/pm install-multiple -r -g \
             /data/local/tmp/base.apk /data/local/tmp/arm64.apk 2>&1 | tail -20
-          sudo docker exec redroid /system/bin/pm list packages | grep konami
+          if ! sudo docker exec redroid /system/bin/pm list packages | grep -qi konami; then
+            echo "--- install-multiple failed, retrying one at a time ---"
+            sudo docker exec redroid /system/bin/pm install -r -g \
+              /data/local/tmp/base.apk 2>&1 | tail -10
+            sudo docker exec redroid /system/bin/pm install -r -g \
+              /data/local/tmp/arm64.apk 2>&1 | tail -10
+          fi
+          echo "--- final package state ---"
+          sudo docker exec redroid /system/bin/pm list packages | grep -i konami
+          sudo docker exec redroid /system/bin/pm path jp.konami.pesam
+          sudo docker exec redroid sh -c 'ls -la /data/app/*/lib/arm64/ 2>/dev/null | head' || true
 
       # --------------------------------------------------------- capture
       - name: 05 capture plaintext gRPC
