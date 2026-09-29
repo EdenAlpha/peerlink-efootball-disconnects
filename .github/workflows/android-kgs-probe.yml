@@ -80,12 +80,14 @@ jobs:
         run: |
           set +e
           R=kgs-login/ci-report
-          mkdir -p $R
-          cp -f $R/latest.txt $R/$(date -u +%Y%m%d-%H%M%S).txt 2>/dev/null
-          { echo '```text'; cat $R/latest.txt; echo '```'; } > $R/latest.md
-          cp -f $R/latest.md $R/latest.txt
+          mkdir -p "$R"
+          cp -f "$R/latest.txt" "$R/$(date -u +%Y%m%d-%H%M%S).txt" 2>/dev/null
+          { echo '```text'; cat "$R/latest.txt"; echo '```'; } > "$R/latest.md"
+          { echo "## ARM64 runner report"; echo; echo '```text'; cat "$R/latest.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          # checkout leaves a DETACHED HEAD on push events -> push by refspec
           git config user.name  "ci-bot"
           git config user.email "ci-bot@users.noreply.github.com"
-          git add -f $R
-          git commit -m "ci: ARM64 runner report" || echo "nothing to commit"
-          git push || echo "push failed"
+          git add -f "$R" 2>/dev/null
+          git commit -m "ci: ARM64 runner report" 2>&1 | tail -2
+          git push origin "HEAD:refs/heads/${{ github.ref_name }}" 2>&1 | tail -3
+          echo "push done"
