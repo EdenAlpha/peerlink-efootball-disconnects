@@ -41,7 +41,7 @@ bbb77fa6888e: Download complete
 bbb77fa6888e: Pull complete
 Digest: sha256:0a611199ba2e0b5d60af39b3327a517f6407231f4352114ed3bd3cbfe2be69aa
 Status: Downloaded newer image for redroid/redroid:14.0.0_64only-latest
-7be8604a2d9a3f087eb22f634ed81b388592cc153a180c37bbf5b4cf29727379
+f1cb698f0ecf4f8c1968a481882c7ad04379257af4de9ba968f311a15c01bbda
 + booted=0
 ++ seq 1 36
 + for i in $(seq 1 36)
@@ -106,15 +106,12 @@ ls: /vendor/lib64/libvulkan.so: No such file or directory
 
 ### pipeline (apkeep, frida, install, capture)
 ```text
-Unable to find image 'redroid/redroid:14.0.0_64only-latest' locally
-14.0.0_64only-latest: Pulling from redroid/redroid
-bbb77fa6888e: Pulling fs layer
 bbb77fa6888e: Verifying Checksum
 bbb77fa6888e: Download complete
 bbb77fa6888e: Pull complete
 Digest: sha256:0a611199ba2e0b5d60af39b3327a517f6407231f4352114ed3bd3cbfe2be69aa
 Status: Downloaded newer image for redroid/redroid:14.0.0_64only-latest
-7be8604a2d9a3f087eb22f634ed81b388592cc153a180c37bbf5b4cf29727379
+f1cb698f0ecf4f8c1968a481882c7ad04379257af4de9ba968f311a15c01bbda
 + booted=0
 ++ seq 1 36
 + for i in $(seq 1 36)
@@ -187,10 +184,10 @@ GL_AMD_performance_monitor GL_ANGLE_base_vertex_base_instance GL_ANGLE_base_vert
 + sudo docker exec redroid sh -c 'getprop | grep -iE "gpu|egl|gles|vulkan|hardware"'
 [debug.renderengine.backend]: [gles]
 [init.svc.gpu]: [running]
-[init.svc_debug_pid.gpu]: [114]
+[init.svc_debug_pid.gpu]: [115]
 [persist.graphics.egl]: []
 [ro.boot.hardware]: [redroid]
-[ro.boottime.gpu]: [630052208042]
+[ro.boottime.gpu]: [1022695426347]
 [ro.hardware]: [redroid]
 [ro.hardware.egl]: [angle]
 [ro.hardware.gralloc]: [redroid]
@@ -219,24 +216,24 @@ trying https://github.com/EFForg/apkeep/releases/download/1.0.0/apkeep-aarch64-u
 + break
 + '[' '!' -s /tmp/kgs/apkeep ']'
 + chmod +x /tmp/kgs/apkeep
-+ echo 11764
-+ sleep 30
++ echo 11597
 + /tmp/kgs/apkeep -a jp.konami.pesam -d apk-pure /tmp/kgs
++ sleep 30
 + cat /tmp/kgs/apkeep.log
 Downloading jp.konami.pesam...
 jp.konami.pesam downloaded successfully!
-+ ls -la /tmp/kgs/
 + head
-total 856476
-drwxr-xr-x  2 runner runner      4096 Sep 29 23:18 .
-drwxrwxrwt 14 root   root        4096 Sep 29 23:18 ..
--rwxr-xr-x  1 runner runner  14690688 Sep 29 23:18 apkeep
--rw-r--r--  1 runner runner        72 Sep 29 23:18 apkeep.log
--rw-r--r--  1 runner runner         6 Sep 29 23:18 apkeep.pid
--rw-r--r--  1 runner runner 862294575 Sep 29 23:18 jp.konami.pesam.xapk
--rw-r--r--  1 runner runner     11214 Sep 29 23:18 pipeline.log
--rw-r--r--  1 runner runner         0 Sep 29 23:18 probe
--rw-r--r--  1 runner runner      9885 Sep 29 23:18 step01.log
++ ls -la /tmp/kgs/
+total 856480
+drwxr-xr-x  2 runner runner      4096 Sep 29 23:30 .
+drwxrwxrwt 14 root   root        4096 Sep 29 23:30 ..
+-rwxr-xr-x  1 runner runner  14690688 Sep 29 23:30 apkeep
+-rw-r--r--  1 runner runner        72 Sep 29 23:30 apkeep.log
+-rw-r--r--  1 runner runner         6 Sep 29 23:30 apkeep.pid
+-rw-r--r--  1 runner runner 862294575 Sep 29 23:30 jp.konami.pesam.xapk
+-rw-r--r--  1 runner runner     11215 Sep 29 23:31 pipeline.log
+-rw-r--r--  1 runner runner         0 Sep 29 23:30 probe
+-rw-r--r--  1 runner runner      9886 Sep 29 23:30 step01.log
 + python3 -m pip install --quiet --break-system-packages frida-tools
 ++ python3 -c 'import frida; print(frida.__version__)'
 + FRIDA_VER=17.19.0
@@ -254,7 +251,7 @@ curl rc=0 ok=1
 + '[' 1 '!=' 1 ']'
 + xz -d -f /tmp/kgs/frida-server.xz
 + ls -la /tmp/kgs/frida-server
--rw-r--r-- 1 runner runner 59071912 Sep 29 23:18 /tmp/kgs/frida-server
+-rw-r--r-- 1 runner runner 59071912 Sep 29 23:31 /tmp/kgs/frida-server
 + sudo docker cp /tmp/kgs/frida-server redroid:/data/local/tmp/frida-server
 + sudo docker exec redroid chmod 755 /data/local/tmp/frida-server
 + sudo docker exec redroid mkdir -p /data/local/tmp/kgs
@@ -287,19 +284,19 @@ frida-server REACHABLE
 + '[' 0 -lt 160 ']'
 + '[' -f /tmp/kgs/jp.konami.pesam.xapk ']'
 + break
-+ ls -la /tmp/kgs/
 + head -20
-total 914016
-drwxr-xr-x  2 runner runner      4096 Sep 29 23:18 .
-drwxrwxrwt 14 root   root        4096 Sep 29 23:19 ..
--rwxr-xr-x  1 runner runner  14690688 Sep 29 23:18 apkeep
--rw-r--r--  1 runner runner        72 Sep 29 23:18 apkeep.log
--rw-r--r--  1 runner runner         6 Sep 29 23:18 apkeep.pid
--rw-r--r--  1 runner runner  59071912 Sep 29 23:18 frida-server
--rw-r--r--  1 runner runner 862294575 Sep 29 23:18 jp.konami.pesam.xapk
--rw-r--r--  1 runner runner     14017 Sep 29 23:19 pipeline.log
--rw-r--r--  1 runner runner         0 Sep 29 23:18 probe
--rw-r--r--  1 runner runner      9885 Sep 29 23:18 step01.log
++ ls -la /tmp/kgs/
+total 914020
+drwxr-xr-x  2 runner runner      4096 Sep 29 23:31 .
+drwxrwxrwt 14 root   root        4096 Sep 29 23:31 ..
+-rwxr-xr-x  1 runner runner  14690688 Sep 29 23:30 apkeep
+-rw-r--r--  1 runner runner        72 Sep 29 23:30 apkeep.log
+-rw-r--r--  1 runner runner         6 Sep 29 23:30 apkeep.pid
+-rw-r--r--  1 runner runner  59071912 Sep 29 23:31 frida-server
+-rw-r--r--  1 runner runner 862294575 Sep 29 23:30 jp.konami.pesam.xapk
+-rw-r--r--  1 runner runner     14018 Sep 29 23:31 pipeline.log
+-rw-r--r--  1 runner runner         0 Sep 29 23:30 probe
+-rw-r--r--  1 runner runner      9886 Sep 29 23:30 step01.log
 ++ ls -1 /tmp/kgs/jp.konami.pesam.xapk '/tmp/kgs/*.apkm' '/tmp/kgs/*.apks'
 ++ head -1
 + XAPK=/tmp/kgs/jp.konami.pesam.xapk
@@ -333,28 +330,31 @@ split candidates ['jp.konami.pesam.apk', 'pad_it_0.apk', 'pad_it_1.apk', 'config
 + '[' -f /tmp/kgs/pad_it_1.apk ']'
 + sudo docker cp /tmp/kgs/pad_it_1.apk redroid:/data/local/tmp/pad_it_1.apk
 + sudo docker exec redroid sh -c 'ls -la /data/local/tmp/*.apk'
--rw-r--r-- 1 radio radio  57148181 2026-09-29 23:19 /data/local/tmp/config.arm64_v8a.apk
--rw-r--r-- 1 radio radio  22347497 2026-09-29 23:19 /data/local/tmp/jp.konami.pesam.apk
--rw-r--r-- 1 radio radio 386375435 2026-09-29 23:19 /data/local/tmp/pad_it_0.apk
--rw-r--r-- 1 radio radio 395420368 2026-09-29 23:19 /data/local/tmp/pad_it_1.apk
-+ echo '--- install-multiple (base + lib + assets) ---'
---- install-multiple (base + lib + assets) ---
+-rw-r--r-- 1 radio radio  57148181 2026-09-29 23:31 /data/local/tmp/config.arm64_v8a.apk
+-rw-r--r-- 1 radio radio  22347497 2026-09-29 23:31 /data/local/tmp/jp.konami.pesam.apk
+-rw-r--r-- 1 radio radio 386375435 2026-09-29 23:31 /data/local/tmp/pad_it_0.apk
+-rw-r--r-- 1 radio radio 395420368 2026-09-29 23:31 /data/local/tmp/pad_it_1.apk
++ echo '--- install base + arm64 split (small, fast) ---'
+--- install base + arm64 split (small, fast) ---
++ sudo docker exec redroid /system/bin/pm install-multiple -r -g /data/local/tmp/jp.konami.pesam.apk /data/local/tmp/config.arm64_v8a.apk
 + tail -20
-+ sudo docker exec redroid /system/bin/pm install-multiple -r -g /data/local/tmp/jp.konami.pesam.apk /data/local/tmp/config.arm64_v8a.apk /data/local/tmp/pad_it_0.apk /data/local/tmp/pad_it_1.apk
 Unknown command: install-multiple
++ echo '--- minimal package state ---'
+--- minimal package state ---
 + sudo docker exec redroid /system/bin/pm list packages
 + grep -qi konami
-+ echo '--- install-multiple failed, minimal set only ---'
---- install-multiple failed, minimal set only ---
-+ sudo docker exec redroid /system/bin/pm install-multiple -r -g /data/local/tmp/jp.konami.pesam.apk /data/local/tmp/config.arm64_v8a.apk
++ echo '=== MINIMAL INSTALL FAILED, retrying one at a time ==='
+=== MINIMAL INSTALL FAILED, retrying one at a time ===
++ sudo docker exec redroid /system/bin/pm install -r -g /data/local/tmp/jp.konami.pesam.apk
 + tail -10
-Unknown command: install-multiple
-+ echo '--- final package state ---'
---- final package state ---
+Failure [INSTALL_FAILED_MISSING_SPLIT: Missing split for jp.konami.pesam]
++ sudo docker exec redroid /system/bin/pm install -r -g /data/local/tmp/config.arm64_v8a.apk
++ tail -10
+Failure [INSTALL_FAILED_INVALID_APK: Full install must include a base package]
 + sudo docker exec redroid /system/bin/pm list packages
 + grep -i konami
-+ echo '=== GAME NOT INSTALLED ==='
-=== GAME NOT INSTALLED ===
++ echo '=== GAME NOT INSTALLED AT ALL ==='
+=== GAME NOT INSTALLED AT ALL ===
 + exit 1
 ```
 
