@@ -126,7 +126,7 @@ platform, client_version` — the per-command writer (e.g. CMD_LOGIN's
   `libUE4.so` is from an older title build (5.x) whose protocol is unchanged
   on the wire (the capture proves the shapes we send are right).
 
-## 7. THE DECISIVE TEST — the backend is down FOR EVERYONE
+## 7. REFUTED 12:35 UTC — the backend is NOT down (game loads fine on the phone)
 
 - **12:22:43 UTC**: the user's *phone itself* (Termux curl 8.12.1, HTTP/2 via
   nghttp2, residential mobile IP, fresh OpenSSL 3.4.1 stack) POSTed the exact
@@ -136,18 +136,22 @@ platform, client_version` — the per-command writer (e.g. CMD_LOGIN's
 - **12:22:00 UTC**: this VM's probe → byte-for-byte the same `502 g=14`.
 - Same host, same minute, two unrelated IPs on opposite sides of the planet →
   identical answer. **The source-IP / ALB-geo-block theory is dead.**
-- The phone had a *live* gRPC session at 09:40 UTC (PCAPdroid capture:
-  ClientHello → 6 server frames → keepalives for 90 s) and is refused at
-  12:22. So the KGS backend went down between **09:40 and 12:22 UTC, on a
-  Tuesday** — unscheduled, outside the Thursday 02:00–08:00 maintenance window.
-- ALB `502` = no healthy target / target connection failure. Rule-based
-  rejections from the same front end return `464`/`415`/`403` — we get those
-  when we vary method/headers, which proves the front end is up and applying
-  rules; only the backend targets are gone.
-- Therefore no byte-level variable (headers, metadata, TLS fingerprint, ALPN,
-  payload) is what is blocking us: every variation gives the same 502, and the
-  phone's completely different stack gives it too. When the targets come back,
-  our bytes should be accepted (they already were once — the 09:40 session).
+- **12:35 UTC CORRECTION — the whole "down for everyone" reading above is
+  WRONG.** The user reports the game loads fine on the phone right now, and a
+  web check agrees (downdetector: no current eFootball problems). The 12:22
+  phone-curl 502 therefore does NOT mean dead backends — it means OUR request
+  differs from the real client's in a way that earns 502, on both networks.
+- What stays true from the test: path
+  `/command_service.CommandService/CommandStream` and host
+  `pes22-game.cs.konami.net` are byte-correct (verified 12:40 UTC by sweeping
+  all 147,375 printable strings in `libUE4.so`: exact path string + host
+  string present, `command_service.proto` message names match). So the
+  difference is elsewhere: destination IP (game may use `Def_Online_gRPC_server_address`
+  override / `CS_SERVER_ADDRESS` / pinned IP instead of DNS pool), port, ALPN,
+  metadata/headers, or body.
+- The 09:40 "live session" was likely the game working normally — consistent
+  with the server being up all along. The day's uniform 502s = our probe
+  missing something, not an outage.
 - Relay attempts to re-run the probe from the phone's IP before this test:
   localhost.run tunnels kept dropping ("no tunnel here"), and this VM's sshd
   is unreachable (cloud security group blocks 22) — moot now that the phone
