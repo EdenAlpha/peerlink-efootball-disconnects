@@ -270,7 +270,20 @@ jobs:
           set +e
           set -x
           W=/tmp/kgs; mkdir -p $W
-          sudo docker exec redroid /system/bin/pm list packages | grep -i konami
+          # do not burn ten minutes if step 04 never installed anything
+          if ! sudo docker exec redroid /system/bin/pm list packages 2>/dev/null \
+               | grep -qi konami; then
+            echo "=== GAME NOT INSTALLED - bailing out early ==="
+            sudo docker exec redroid sh -c 'ls -la /data/local/tmp/' 2>&1 | head -30
+            sudo docker exec redroid /system/bin/pm list packages 2>&1 | head -5
+            echo "=== BAIL ==="
+            exit 1
+          fi
+          echo "game is installed"
+          sudo docker exec redroid /system/bin/pm path jp.konami.pesam
+          sudo docker exec redroid sh -c 'ps -A | grep -i frida' \
+            || { echo "FRIDA SERVER NOT RUNNING"; exit 1; }
+          nc -zv 127.0.0.1 27042 || { echo "FRIDA PORT CLOSED"; exit 1; }
           sudo docker cp kgs-login/scripts/capture_insecure.js \
             redroid:/data/local/tmp/capture_insecure.js
           timeout 660 frida -H 127.0.0.1:27042 -f jp.konami.pesam \
