@@ -1,12 +1,10 @@
 name: android-kgs-probe
 
-# Free ARM64 runner (public repo): native arm64, 4 vCPU, 16 GB RAM, Ubuntu
-# kernel -- the kernel that HAS binder_linux. AWS's cloud kernel has binder
-# compiled out, which is why the EC2 route was a dead end.
-#
-# This job never fails the build: it writes what it found into
-# kgs-login/ci-report/ and commits it back, so the result is readable
-# without Actions log access.
+# Free ARM64 runner (public repo): native arm64, 4 vCPU, 16 GB, Ubuntu kernel.
+# Step 02 previously failed in seconds at `modprobe binder_linux` -- on Ubuntu
+# the binder driver is a MODULE that lives in linux-modules-extra, so it has to
+# be installed before it can be loaded. This version installs it explicitly and
+# falls back through the known-good variants.
 on:
   workflow_dispatch:
   push:
@@ -29,28 +27,30 @@ jobs:
           mkdir -p $R
           F=$R/latest.txt
           exec > >(tee $F) 2>&1
-          echo "===== ARM64 RUNNER CAPABILITY REPORT ====="
-          date -u
-          uname -a
-          echo "--- cpu/mem/disk ---"
-          nproc; free -h; df -h / | tail -1
-          echo "--- kernel binder config ---"
-          sudo grep -iE "ANDROID_BINDER" /boot/config-$(uname -r) 2>/dev/null \
-            || sudo zcat /proc.config.gz 2>/dev/null | grep -i ANDROID_BINDER \
-            || echo "binder config not readable"
-          echo "--- privileged docker? ---"
-          sudo docker version --format 'server={{.Server.Version}}' 2>&1 | tail -2
-          sudo docker run --rm --privileged alpine:latest echo PRIVILEGED_OK 2>&1 | tail -3
-          echo "--- modprobe binder ---"
-          sudo apt-get install -y -qq kmod >/dev/null 2>&1
+          echo "===== ARM64 RUNNER REPORT ====="
+          date -u; uname -a; nproc; free -h; df -h / | tail -1
+          echo "--- kernel says about binder ---"
+          sudo grep -iE "ANDROID_BINDER" /boot/config-$(uname -r) 2>/dev/null || \
+            sudo zcat /proc/config.gz 2>/dev/null | grep -i ANDROID_BINDER || \
+            echo "(config unreadable)"
+          echo "--- install the module package (this is what was missing) ---"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq kmod "linux-modules-extra-$(uname -r)" 2>&1 | tail -3
+          echo "--- module files present now? ---"
+          find /lib/modules/$(uname -r) -name 'binder*' 2>/dev/null || echo "no binder module file"
+          echo "--- try to load it ---"
           sudo modprobe binder_linux devices="binder,hwbinder,vndbinder" 2>&1
           sudo modprobe binder_linux devices=binder 2>&1
+          sudo modprobe binder 2>&1
           ls -l /dev/binder* 2>&1
-          echo "--- try mount binderfs ---"
+          echo "--- mount binderfs ---"
           sudo mkdir -p /dev/binderfs
           sudo mount -t binder binder /dev/binderfs 2>&1
           sudo mount -t binderfs binder /dev/binderfs 2>&1
-          mount | grep -i binder || echo "binderfs: NOT mounted"
+          mount | grep -i binder || echo "binderfs NOT mounted"
+          echo "--- docker ---"
+          sudo docker version --format 'server={{.Server.Version}}' 2>&1 | tail -1
+          sudo docker run --rm --privileged alpine:latest echo PRIVILEGED_OK 2>&1 | tail -2
           echo "--- start redroid ---"
           sudo mkdir -p /root/rd
           sudo docker rm -f redroid >/dev/null 2>&1
@@ -58,39 +58,34 @@ jobs:
             -v /root/rd:/data -p 5555:5555 \
             redroid/redroid:14.0.0_64only-latest \
             androidboot.redroid_width=720 androidboot.redroid_height=1280 \
-            androidboot.redroid_dpi=320 androidboot.use_memfd=true 2>&1 | tail -3
-          sleep 5
-          sudo docker ps -a --format '{{.Names}} {{.Status}}' 2>&1
-          echo "--- wait for boot (up to 5 min) ---"
-          for i in $(seq 1 30); do
+            androidboot.redroid_dpi=320 androidboot.use_memfd=true 2>&1 | tail -2
+          sleep 8
+          sudo docker ps -a --format '{{.Names}} {{.Status}}'
+          echo "--- wait for android boot (up to 6 min) ---"
+          for i in $(seq 1 36); do
             st=$(sudo docker exec redroid getprop sys.boot_completed 2>/dev/null | tr -d '\r')
             if [ "$st" = "1" ]; then echo "BOOTED after $((i*10))s"; break; fi
-            if [ $((i % 6)) -eq 0 ]; then
-              echo "…${i}0s state=$st"; sudo docker logs --tail 3 redroid 2>&1
-            fi
+            if [ $((i % 9)) -eq 0 ]; then echo "...${i}0s state='$st'"; sudo docker logs --tail 4 redroid 2>&1; fi
             sleep 10
           done
-          echo "--- android props ---"
-          sudo docker exec redroid getprop 2>&1 | grep -E "boot_completed|product.cpu.abi|ro.build.version" | head
-          echo "--- android identity (root?) ---"
+          echo "--- inside android ---"
           sudo docker exec redroid id 2>&1
-          sudo docker exec redroid sh -c 'ls /system/bin/sh && echo SHELL_OK' 2>&1
-          echo "--- free space inside android ---"
-          sudo docker exec redroid df -h /data 2>&1 | tail -2
-          echo "--- container logs ---"
-          sudo docker logs --tail 40 redroid 2>&1
+          sudo docker exec redroid getprop 2>&1 | grep -E "boot_completed|cpu.abi|version.release" | head
+          echo "--- logs ---"
+          sudo docker logs --tail 50 redroid 2>&1
           echo "===== END REPORT ====="
 
       - name: publish report
         if: always()
         run: |
-          set -e
+          set +e
           R=kgs-login/ci-report
-          cp -f $R/latest.txt $R/$(date -u +%Y%m%d-%H%M%S).txt || true
-          sed -i 's/^/\`\`\`text\n/' $R/latest.txt
-          echo '```' >> $R/latest.txt
+          mkdir -p $R
+          cp -f $R/latest.txt $R/$(date -u +%Y%m%d-%H%M%S).txt 2>/dev/null
+          { echo '```text'; cat $R/latest.txt; echo '```'; } > $R/latest.md
+          cp -f $R/latest.md $R/latest.txt
           git config user.name  "ci-bot"
           git config user.email "ci-bot@users.noreply.github.com"
-          git add -f $R || true
-          git commit -m "ci: ARM64 runner capability report" || echo "nothing to commit"
+          git add -f $R
+          git commit -m "ci: ARM64 runner report" || echo "nothing to commit"
           git push || echo "push failed"
