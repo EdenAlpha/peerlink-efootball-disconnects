@@ -40,20 +40,40 @@ function log(s) { console.log('[kgs] ' + s); }
 function hookInsecureGetter() {
     const base = Module.findBaseAddress('libUE4.so');
     const target = base.add(GETTER_INT);
+    // The key literal lives in the module's read-only segment. If libUE4.so is
+    // PIE it is relocated, so the absolute VA is wrong; compare against the
+    // relocated address, and fall back to reading the string itself.
+    const keyAddr = base.add(KEY_INSECURE_VA);
     log('hooking Def_ int getter at ' + target);
+    log('key literal expected at ' + keyAddr);
+    try {
+        log('key literal reads: ' + keyAddr.readUtf8String(KEY_INSECURE.length));
+    } catch (e) {
+        log('key literal not readable at that address (' + e + ')');
+    }
+    let matched = 0;
     Interceptor.attach(target, {
         onEnter(args) {
-            // cheap identity pre-filter on the key pointer itself
-            if (!args[0].equals(ptr(KEY_INSECURE_VA))) return;
-            this.hit = true;
+            this.hit = false;
+            // cheap path: identical pointer
+            if (args[0].equals(keyAddr)) { this.hit = true; }
+            else {
+                // safe path: compare the actual key text
+                try {
+                    const k = args[0].readUtf8String(args[1].toInt32());
+                    if (k === KEY_INSECURE) { this.hit = true; log('key text matched: ' + k); }
+                } catch (e) { /* not a readable key, ignore */ }
+            }
+            if (this.hit) matched++;
         },
         onLeave(retval) {
             if (this.hit) {
-                log(KEY_INSECURE + ' -> forcing 1 (plaintext gRPC)');
+                if (matched <= 3) log(KEY_INSECURE + ' -> forcing 1 (plaintext gRPC)');
                 retval.replace(ptr(1));
             }
         }
     });
+    rpc.exports.getterHits = function () { return matched; };
 }
 
 // ------------------------------------------------- capture plaintext frames
