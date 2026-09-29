@@ -4,17 +4,33 @@ name: kgs-capture
 # GitHub runner, force its gRPC channel to plaintext, and capture the exact
 # request bytes its own code produces.
 #
-# Why this works (all decoded from libUE4.so 11.0.1, which is byte-identical
-# to the build on the user's phone):
-#   * 0x7b101f8 (gRPC config loader) asks the int Def_ getter 0x2f0eaf0 for
-#     "Def_Online_gRPC_insecure" (literal at 0xc023be, len 0x18) and branches
-#     on it. Force it non-zero -> plaintext channel.
-#   * Plaintext channel -> gRPC writes HTTP/2 frames straight to the socket,
-#     so a libc send/write hook sees the request verbatim. No TLS to break.
+# Why this works -- decoded from libUE4.so 11.0.1 (byte-identical to the build
+# on the user's phone), every offset read from the file:
 #
-# Environment facts already proven on this runner (see kgs-login/ci-report):
+#   0x7b101f8  gRPC config loader
+#       0x7b10258  literal 0x0c023be "Def_Online_gRPC_insecure" (24)
+#       0x7b1027c  bl 0x2f0eaf0          ; int getter
+#       0x7b10280  cbnz w0, 0x7b105c8    ; non-zero => plaintext channel
+#
+#   The insecure branch resolves its own target, so all three must be supplied:
+#       0x0ba2aff "Def_Online_gRPC_server_address" (30) string -> host
+#       0x09c69c1 "Def_Online_gRPC_server_path"    (27) string -> RPC path
+#       0x0b68de6 "Def_Online_gRPC_server_port"    (27) int    -> 443
+#
+#   Plaintext channel => gRPC writes HTTP/2 frames straight to the socket, so a
+#   libc send/write hook sees the request verbatim. No TLS to break, so we
+#   never need SSL_write's address (it is stripped).
+#
+# Environment facts already measured on this runner (kgs-login/ci-report):
 #   CONFIG_ANDROID_BINDER_IPC=m, binderfs mounts, docker privileged OK,
 #   redroid 14 arm64 boots in ~10 s as root, 4 vCPU / 15 GiB.
+#
+# Environment traps, all learned the hard way:
+#   * the shell is `bash -e -o pipefail`: guard every optional command
+#   * the runner user is NOT root: /root is not writable, use $W
+#   * actions/checkout leaves a detached HEAD: push by refspec
+#   * binder_linux.ko is in linux-modules-extra-$(uname -r)
+#   * redroid_gpu_mode=swiftshader prevents boot entirely
 on:
   workflow_dispatch:
   push:
@@ -34,18 +50,15 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
-      # ---------------------------------------------------- binder + android
       - name: 01 binder + redroid
         run: |
           set +e
           set -x
-          exec > >(tee /root/step01.log) 2>&1
-          # NOTE: GitHub runs this shell with -e -o pipefail, so every optional
-          # command needs its own guard or the step dies on the first refusal.
-          #
-          # binder_linux.ko ships in linux-modules-extra-$(uname -r), NOT in the
-          # base runner image -- without this apt line modprobe has nothing to
-          # load and the "mount -t binder" below has no filesystem to mount.
+          W=/tmp/kgs; mkdir -p $W
+          exec > >(tee $W/step01.log) 2>&1
+          id
+          echo "whoami=$(whoami)  writable /root? $( [ -w /root ] && echo yes || echo no )"
+          # binder_linux.ko ships in linux-modules-extra, NOT the base image
           sudo apt-get update -qq
           sudo apt-get install -y -qq kmod "linux-modules-extra-$(uname -r)" 2>&1 | tail -2
           find /lib/modules/$(uname -r) -name 'binder*' 2>/dev/null
@@ -59,7 +72,6 @@ jobs:
             echo "=== BINDER DIAGNOSTICS ==="
             uname -r
             sudo grep -i ANDROID_BINDER /boot/config-$(uname -r) 2>/dev/null
-            sudo dmesg 2>/dev/null | tail -30
             ls -la /lib/modules/$(uname -r)/kernel/drivers/android/ 2>/dev/null
             echo "=== END DIAGNOSTICS ==="
             exit 1
@@ -67,11 +79,7 @@ jobs:
           mount | grep -i binder
           sudo mkdir -p /root/rd
           sudo docker rm -f redroid >/dev/null 2>&1 || true
-          # NOTE: do NOT add androidboot.redroid_gpu_mode here. Measured on this
-          # runner: with gpu_mode=swiftshader redroid never reaches
-          # boot_completed and the 180 s wait times out; with the plain
-          # invocation below it boots in ~10 s. If the game later turns out to
-          # need a GPU, deal with it then -- get to a booted Android first.
+          # do NOT add androidboot.redroid_gpu_mode: swiftshader blocks boot
           sudo docker run -d --name redroid --privileged \
             -v /root/rd:/data -p 5555:5555 -p 27042:27042 \
             redroid/redroid:14.0.0_64only-latest \
@@ -95,26 +103,26 @@ jobs:
           sudo docker exec redroid getprop ro.odm.product.cpu.abilist64
 
       # ------------------------------------------- fetch the package (slow)
-      # started in the background so it overlaps with the Frida setup
+      # backgrounded so the download overlaps with the Frida setup
       - name: 02 fetch eFootball package
         run: |
           set +e
           set -x
-          cd /root
-          # diagnose egress first, so a failure is never silent
+          W=/tmp/kgs; mkdir -p $W
+          cd $W
+          echo "whoami=$(whoami) cwd=$(pwd)"
+          touch $W/probe && echo "workdir writable" || echo "WORKDIR NOT WRITABLE"
           curl -sS -o /dev/null -w "github.com HTTP %{http_code}\n" \
             --max-time 30 https://github.com/ || echo "cannot reach github.com"
-          for tag in 1.0.0; do
-            for asset in apkeep-aarch64-unknown-linux-gnu \
-                         apkeep-aarch64-unknown-linux-gnu.static; do
-              url="https://github.com/EFForg/apkeep/releases/download/${tag}/${asset}"
-              echo "trying $url"
-              curl -fsSL --max-time 300 -o /root/apkeep "$url" && break
-              echo "  failed rc=$?"
-            done
-            [ -s /root/apkeep ] && break
+          got=""
+          for url in \
+            "https://github.com/EFForg/apkeep/releases/download/1.0.0/apkeep-aarch64-unknown-linux-gnu" \
+            "https://github.com/EFForg/apkeep/releases/download/1.0.0/apkeep-aarch64-unknown-linux-gnu.static" ; do
+            echo "trying $url"
+            curl -fsSL --max-time 300 -o $W/apkeep "$url" && { got="$url"; break; }
+            echo "  failed rc=$?"
           done
-          if [ ! -s /root/apkeep ]; then
+          if [ ! -s $W/apkeep ]; then
             echo "=== APKEEP DOWNLOAD FAILED ==="
             curl -sS --max-time 30 \
               https://api.github.com/repos/EFForg/apkeep/releases/tags/1.0.0 \
@@ -122,32 +130,32 @@ jobs:
             echo "=== END ==="
             exit 1
           fi
-          chmod +x /root/apkeep
-          ls -la /root/apkeep
-          /root/apkeep --version || true
-          /root/apkeep -a jp.konami.pesam -d apk-pure /root > /root/apkeep.log 2>&1 &
-          echo $! > /root/apkeep.pid
-          sleep 20
-          echo "apkeep running in background (pid $(cat /root/apkeep.pid))"
-          cat /root/apkeep.log || true
+          echo "got apkeep from $got"
+          chmod +x $W/apkeep
+          ls -la $W/apkeep
+          $W/apkeep --version || true
+          $W/apkeep -a jp.konami.pesam -d apk-pure $W > $W/apkeep.log 2>&1 &
+          echo $! > $W/apkeep.pid
+          sleep 25
+          echo "apkeep pid $(cat $W/apkeep.pid)"
+          cat $W/apkeep.log || true
+          ls -la $W/*.xapk 2>/dev/null || echo "(download still in progress)"
 
-      # ----------------------------------------------------------- frida
       - name: 03 frida
         run: |
           set +e
           set -x
+          W=/tmp/kgs; mkdir -p $W
           python3 -m pip install --quiet --break-system-packages frida-tools || \
-            { echo "PIP FAILED"; pip3 install --break-system-packages frida-tools; }
+            { echo "PIP FAILED, retrying verbose"; pip3 install --break-system-packages frida-tools; }
           FRIDA_VER=$(python3 -c "import frida; print(frida.__version__)" 2>/dev/null)
           echo "frida client version: ${FRIDA_VER:-<none>}"
           [ -n "$FRIDA_VER" ] || { echo "NO FRIDA PYTHON MODULE"; exit 1; }
           ok=0
-          for asset in "frida-server-${FRIDA_VER}-android-arm64.xz"; do
-            url="https://github.com/frida/frida/releases/download/${FRIDA_VER}/${asset}"
-            echo "trying $url"
-            curl -fsSL --max-time 300 -o /root/frida-server.xz "$url" && { ok=1; break; }
-            echo "  failed rc=$?"
-          done
+          url="https://github.com/frida/frida/releases/download/${FRIDA_VER}/frida-server-${FRIDA_VER}-android-arm64.xz"
+          echo "trying $url"
+          curl -fsSL --max-time 300 -o $W/frida-server.xz "$url" && ok=1
+          echo "curl rc=$? ok=$ok"
           if [ "$ok" != "1" ]; then
             echo "=== FRIDA SERVER DOWNLOAD FAILED ==="
             curl -sS --max-time 30 "https://api.github.com/repos/frida/frida/releases/latest" \
@@ -155,136 +163,121 @@ jobs:
             echo "=== END ==="
             exit 1
           fi
-          xz -d -f /root/frida-server.xz || { echo "XZ FAILED"; exit 1; }
-          ls -la /root/frida-server
-          sudo docker cp /root/frida-server redroid:/data/local/tmp/frida-server || exit 1
+          xz -d -f $W/frida-server.xz || { echo "XZ FAILED"; exit 1; }
+          ls -la $W/frida-server
+          sudo docker cp $W/frida-server redroid:/data/local/tmp/frida-server || exit 1
           sudo docker exec redroid chmod 755 /data/local/tmp/frida-server
           sudo docker exec redroid mkdir -p /data/local/tmp/kgs
           sudo docker exec -d redroid /data/local/tmp/frida-server
-          sleep 5
+          sleep 6
           sudo docker exec redroid sh -c 'ps -A | grep -i frida' || echo "frida-server not running"
           nc -zv 127.0.0.1 27042 && echo "frida-server REACHABLE" || echo "frida-server NOT reachable"
 
-      # ------------------------------------------------------- install game
       - name: 04 install eFootball
         run: |
           set +e
           set -x
+          W=/tmp/kgs; mkdir -p $W
           i=0
           while [ $i -lt 160 ]; do
-            if [ -f /root/jp.konami.pesam.xapk ]; then break; fi
-            if ! kill -0 "$(cat /root/apkeep.pid 2>/dev/null)" 2>/dev/null; then
-              if [ ! -f /root/jp.konami.pesam.xapk ]; then
-                echo "=== APKEEP EXITED WITHOUT A PACKAGE ==="
-                cat /root/apkeep.log 2>/dev/null
-                exit 1
-              fi
+            [ -f $W/jp.konami.pesam.xapk ] && break
+            if ! kill -0 "$(cat $W/apkeep.pid 2>/dev/null)" 2>/dev/null; then
+              [ -f $W/jp.konami.pesam.xapk ] || { echo "=== APKEEP EXITED, NO PACKAGE ==="; cat $W/apkeep.log 2>/dev/null; exit 1; }
             fi
             sleep 15
             i=$((i+1))
-            [ $((i % 4)) -eq 0 ] && { ls -la /root/*.xapk 2>/dev/null; tail -2 /root/apkeep.log 2>/dev/null; }
+            [ $((i % 4)) -eq 0 ] && { ls -la $W/*.xapk 2>/dev/null; tail -3 $W/apkeep.log 2>/dev/null; }
           done
-          ls -la /root/*.xapk || { echo "NO XAPK after $((i*15))s"; cat /root/apkeep.log 2>/dev/null; exit 1; }
-          cd /root
+          ls -la $W/*.xapk || { echo "NO XAPK after $((i*15))s"; cat $W/apkeep.log 2>/dev/null; exit 1; }
+          cd $W
           python3 - <<'PY'
           import json, zipfile, os
-          z = zipfile.ZipFile('/root/jp.konami.pesam.xapk')
+          W = '/tmp/kgs'
+          z = zipfile.ZipFile(os.path.join(W, 'jp.konami.pesam.xapk'))
           mf = json.loads(z.read('manifest.json'))
           print('version', mf['version_name'], mf['version_code'])
-          want = [e['file'] for e in mf['split_apks']
-                  if e.get('id') in ('base', 'config.arm64_v8a')]
-          for f in want:
-              with open('/root/' + f, 'wb') as o:
-                  o.write(z.read(f))
-              print('extracted', f, os.path.getsize('/root/' + f))
+          for e in mf['split_apks']:
+              if e.get('id') in ('base', 'config.arm64_v8a'):
+                  with open(os.path.join(W, e['file']), 'wb') as o:
+                      o.write(z.read(e['file']))
+                  print('extracted', e['file'], os.path.getsize(os.path.join(W, e['file'])))
           PY
-          sudo docker cp /root/jp.konami.pesam.apk redroid:/data/local/tmp/base.apk
-          sudo docker cp /root/config.arm64_v8a.apk redroid:/data/local/tmp/arm64.apk
+          sudo docker cp $W/jp.konami.pesam.apk redroid:/data/local/tmp/base.apk
+          sudo docker cp $W/config.arm64_v8a.apk redroid:/data/local/tmp/arm64.apk
           echo "--- install base + arm64 split ---"
           sudo docker exec redroid /system/bin/pm install-multiple -r -g \
             /data/local/tmp/base.apk /data/local/tmp/arm64.apk 2>&1 | tail -20
           if ! sudo docker exec redroid /system/bin/pm list packages | grep -qi konami; then
-            echo "--- install-multiple failed, retrying one at a time ---"
-            sudo docker exec redroid /system/bin/pm install -r -g \
-              /data/local/tmp/base.apk 2>&1 | tail -10
-            sudo docker exec redroid /system/bin/pm install -r -g \
-              /data/local/tmp/arm64.apk 2>&1 | tail -10
+            echo "--- install-multiple failed, one at a time ---"
+            sudo docker exec redroid /system/bin/pm install -r -g /data/local/tmp/base.apk 2>&1 | tail -10
+            sudo docker exec redroid /system/bin/pm install -r -g /data/local/tmp/arm64.apk 2>&1 | tail -10
           fi
           echo "--- final package state ---"
           sudo docker exec redroid /system/bin/pm list packages | grep -i konami
           sudo docker exec redroid /system/bin/pm path jp.konami.pesam
-          sudo docker exec redroid sh -c 'ls -la /data/app/*/lib/arm64/ 2>/dev/null | head' || true
 
-      # --------------------------------------------------------- capture
       - name: 05 capture plaintext gRPC
         run: |
           set +e
           set -x
+          W=/tmp/kgs; mkdir -p $W
+          sudo docker exec redroid /system/bin/pm list packages | grep -i konami
           sudo docker cp kgs-login/scripts/capture_insecure.js \
             redroid:/data/local/tmp/capture_insecure.js
-          # dismiss the package installer dialogs first
-          sudo docker exec redroid /system/bin/pm list packages | grep -i konami
-          timeout 600 frida -H 127.0.0.1:27042 -f jp.konami.pesam \
+          timeout 660 frida -H 127.0.0.1:27042 -f jp.konami.pesam \
             -l kgs-login/scripts/capture_insecure.js --runtime=v8 \
-            > /root/frida.log 2>&1 &
+            > $W/frida.log 2>&1 &
           FRIDA_PID=$!
-          echo "frida pid $FRIDA_PID; letting the game run..."
-          # The first launch shows a splash / terms-of-use screen. Nobody is
-          # there to tap it, so nudge the UI periodically -- without this the
-          # game may never reach the KGS login at all.
-          for i in $(seq 1 45); do
+          echo "frida pid $FRIDA_PID"
+          # the first launch shows a splash / terms screen and nobody is there
+          # to tap it, so nudge the UI periodically
+          for i in $(seq 1 60); do
             sleep 10
             n=$(sudo docker exec redroid sh -c 'ls /data/local/tmp/kgs 2>/dev/null | wc -l' 2>/dev/null | tr -d '\r')
             alive=$(sudo docker exec redroid sh -c 'ps -A | grep -c pesam' 2>/dev/null | tr -d '\r')
-            echo "  t=$((i*10))s  frames=${n:-?}  pesam_procs=${alive:-?}"
-            # tap centre, then ENTER, then BACK -- clears most first-run dialogs
-            sudo docker exec redroid /system/bin/input tap 360 640  >/dev/null 2>&1
+            echo "  t=$((i*10))s frames=${n:-?} pesam_procs=${alive:-?}"
+            sudo docker exec redroid /system/bin/input tap 360 640   >/dev/null 2>&1
             sudo docker exec redroid /system/bin/input keyevent 66 >/dev/null 2>&1
             sudo docker exec redroid /system/bin/input keyevent 4  >/dev/null 2>&1
             if [ "${n:-0}" -gt 0 ] 2>/dev/null; then
-              echo "frames appeared; letting it settle"
-              sleep 30; break
+              echo "frames appeared; letting it settle"; sleep 30; break
             fi
           done
           sudo docker exec redroid sh -c 'ls -la /data/local/tmp/kgs' || true
           echo "=== frida log ==="
-          tail -60 /root/frida.log || true
-          # if the game died, this is where the reason is
-          sudo docker exec redroid logcat -d -t 400 > /root/logcat.txt 2>&1 || true
-          echo "=== konami / crash lines from logcat ==="
-          grep -iE "konami|pesam|FATAL|AndroidRuntime|libUE4|Vulkan|EGL" /root/logcat.txt 2>/dev/null | tail -40 || true
-          echo "=== did the process stay alive? ==="
+          tail -80 $W/frida.log || true
+          sudo docker exec redroid logcat -d -t 500 > $W/logcat.txt 2>&1 || true
+          echo "=== logcat (filtered) ==="
+          grep -iE "konami|pesam|FATAL|AndroidRuntime|libUE4|Vulkan|EGL|ANR" $W/logcat.txt 2>/dev/null | tail -50 || true
+          echo "=== process alive? ==="
           sudo docker exec redroid sh -c 'ps -A | grep -i pesam' || echo "GAME PROCESS GONE"
 
       - name: 06 publish
         if: always()
         run: |
           set +e
+          W=/tmp/kgs
           R=kgs-login/ci-report
           mkdir -p "$R/capture"
-          sudo docker exec redroid sh -c 'ls /data/local/tmp/kgs' > "$R/capture/index.txt" 2>&1
+          { echo '## capture'; echo; echo '### step 01 (binder + android)';
+            echo '```text'; head -100 $W/step01.log 2>/dev/null; echo '```';
+            echo; echo '### apkeep'; echo '```text';
+            cat $W/apkeep.log 2>/dev/null | tail -20; echo '```';
+            echo; echo '### frida'; echo '```text';
+            head -120 $W/frida.log 2>/dev/null; echo '```';
+            echo; echo '### logcat (filtered)'; echo '```text';
+            grep -iE "konami|pesam|FATAL|AndroidRuntime|libUE4|Vulkan|EGL" \
+              $W/logcat.txt 2>/dev/null | tail -50; echo '```'; } > "$R/capture.md"
           sudo docker exec redroid sh -c 'cd /data/local/tmp && tar cf - kgs' \
             | sudo tar xf - -C "$R" 2>/dev/null
+          sudo docker exec redroid sh -c 'ls -la /data/local/tmp/kgs' > "$R/capture/index.txt" 2>&1
           for f in "$R"/kgs/*.bin; do
             [ -f "$f" ] && cp "$f" "$R/capture/$(basename "$f")"
           done
-          tail -80 /root/frida.log > "$R/frida-log.txt" 2>/dev/null
-          { echo '## capture'; echo; echo '### step 01 (binder + android)';
-            echo '```text'; head -120 /root/step01.log 2>/dev/null; echo '```';
-            echo; echo '### frida';
-            echo '```text'; cat /root/frida.log 2>/dev/null | head -100; echo '```';
-            echo; echo '### logcat (filtered)';
-            echo '```text';
-            grep -iE "konami|pesam|FATAL|AndroidRuntime|libUE4|Vulkan|EGL" \
-              /root/logcat.txt 2>/dev/null | tail -50; echo '```';
-            echo; echo '### frames'; echo '```text';
-            cat "$R/capture/index.txt"; echo '```'; } > "$R/capture.md"
           cp -f "$R/capture.md" "$R/latest.md"
           { echo '## capture'; echo; echo '```text';
-            head -80 /root/step01.log 2>/dev/null; echo;
-            cat /root/frida.log 2>/dev/null | head -40; echo;
-            grep -iE "FATAL|AndroidRuntime" /root/logcat.txt 2>/dev/null | tail -20;
-            echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+            head -60 $W/step01.log 2>/dev/null; echo;
+            head -60 $W/frida.log 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           git config user.name  "ci-bot"
           git config user.email "ci-bot@users.noreply.github.com"
           git add -f "$R"
