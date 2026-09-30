@@ -1,42 +1,8 @@
-cmd: exec sudo docker exec redroid sh -c "dumpsys window | grep mCurrentFocus; echo ---; dumpsys activity top | grep -iE \"ACTIVITY|View|Text|EditText|Button\" | head -30; echo ---UA---; uiautomator dump /data/local/tmp/ui.xml 2>&1; echo dumprc=$?; ls -la /data/local/tmp/ui.xml 2>&1; cat /data/local/tmp/ui.xml 2>&1 | head -c 2000"
-at: 15:14:08
-$ sudo docker exec redroid sh -c "dumpsys window | grep mCurrentFocus; echo ---; dumpsys activity top | grep -iE \"ACTIVITY|View|Text|EditText|Button\" | head -30; echo ---UA---; uiautomator dump /data/local/tmp/ui.xml 2>&1; echo dumprc=$?; ls -la /data/local/tmp/ui.xml 2>&1; cat /data/local/tmp/ui.xml 2>&1 | head -c 2000"
-  mCurrentFocus=Window{c67130d u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
----
-  ACTIVITY com.android.launcher3/.uioverrides.QuickstepLauncher 3591cf7 pid=852 userId=0 uid=10063 displayId=0(type=INTERNAL)
-    Local Activity 2943144 State:
-      mCurrentConfig={1.0 ?mcc0mnc [en_US] ldltr sw360dp w360dp h568dp 320dpi nrml port -touch -keyb/v/h -nav/h winConfig={ mBounds=Rect(0, 0 - 720, 1280) mAppBounds=Rect(0, 0 - 720, 1184) mMaxBounds=Rect(0, 0 - 720, 1280) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=home mAlwaysOnTop=undefined mRotation=ROTATION_0} as.1 s.2 fontWeightAdjustment=0}
-        #0: QsbFragment{1d7c5e5 #0 id=0xffffffff qsb_view}
-          mFragmentId=#ffffffff mContainerId=#7f09027c mTag=qsb_view
-          mHost=android.app.Activity$HostCallbacks@b4938ba
-          mView=android.widget.FrameLayout{752036b V.E...... ........ 0,0-688,235}
-              mHost=android.app.Activity$HostCallbacks@b4938ba
-              mParent=QsbFragment{1d7c5e5 #0 id=0xffffffff qsb_view}
-        #0: QsbFragment{1d7c5e5 #0 id=0xffffffff qsb_view}
-        mHost=android.app.Activity$HostCallbacks@b4938ba
-        mContainer=android.app.Activity$HostCallbacks@b4938ba
-    ViewRoot:
-      mLastReportedMergedConfiguration={mGlobalConfig={1.0 ?mcc0mnc [en_US] ldltr sw360dp w360dp h568dp 320dpi nrml port -touch -keyb/v/h -nav/h winConfig={ mBounds=Rect(0, 0 - 720, 1280) mAppBounds=Rect(0, 0 - 720, 1184) mMaxBounds=Rect(0, 0 - 720, 1280) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.1 s.35 fontWeightAdjustment=0} mOverrideConfig={1.0 ?mcc0mnc [en_US] ldltr sw360dp w360dp h568dp 320dpi nrml port -touch -keyb/v/h -nav/h winConfig={ mBounds=Rect(0, 0 - 720, 1280) mAppBounds=Rect(0, 0 - 720, 1184) mMaxBounds=Rect(0, 0 - 720, 1280) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=home mAlwaysOnTop=undefined mRotation=ROTATION_0} as.1 s.2 fontWeightAdjustment=0}}
-      mLastConfigurationFromResources={1.0 ?mcc0mnc [en_US] ldltr sw360dp w360dp h568dp 320dpi nrml port -touch -keyb/v/h -nav/h winConfig={ mBounds=Rect(0, 0 - 720, 1280) mAppBounds=Rect(0, 0 - 720, 1184) mMaxBounds=Rect(0, 0 - 720, 1280) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=home mAlwaysOnTop=undefined mRotation=ROTATION_0} as.1 s.2 fontWeightAdjustment=0}
-      android.view.ViewRootImpl$NativePreImeInputStage: mQueueLength=0
-      android.view.ViewRootImpl$ImeInputStage: mQueueLength=0
-      android.view.ViewRootImpl$NativePostImeInputStage: mQueueLength=0
-      android.view.ViewRootImpl$WindowInputEventReceiver
-        Top Callback: android.view.ViewRootImpl$$ExternalSyntheticLambda17@799b72f
-          Callback: android.view.ViewRootImpl$$ExternalSyntheticLambda17@799b72f Priority=0
-    View Hierarchy:
-      DecorView@9c22686[QuickstepLauncher]
-          android.view.ViewStub{c767f74 G.E...... ......I. 0,0-0,0 #10201ca android:id/action_mode_bar_stub}
-            com.android.launcher3.LauncherRootView{88a2512 V.E...... ........ 0,0-720,1280 #7f0901a9 app:id/launcher}
-                com.android.launcher3.views.AccessibilityActionsView{8361ee0 V.E...... ........ 0,48-720,1184}
-                      com.android.launcher3.qsb.QsbContainerView{48e490c V.E...... ........ 0,0-688,235 #7f09027c app:id/search_container_workspace}
-                          com.android.launcher3.qsb.QsbWidgetHostView{61ef255 VFE...... R....... 0,0-688,235 #7f090244 app:id/qsb_widget}
-                                android.widget.ImageView{85ce9f8 V.ED..C.. ........ 19,26-115,122 #7f080048 app:id/search_icon}
-                                android.widget.TextView{ca95ed1 VFED..C.. ........ 115,31-660,118 #7f08004c app:id/search_widget_text}
----UA---
-dumprc=0
-ls: /data/local/tmp/ui.xml: No such file or directory
-cat: /data/local/tmp/ui.xml: No such file or directory
+cmd: exec bash -c true; echo SE; adb -s 127.0.0.1:5555 shell am start -a android.intent.action.VIEW -d "market://search?q=cpuz" 2>&1 | tail -1; sleep 13; adb -s 127.0.0.1:5555 shell input tap 360 400; sleep 12; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+at: 22:33:22
+$ bash -c true; echo SE; adb -s 127.0.0.1:5555 shell am start -a android.intent.action.VIEW -d "market://search?q=cpuz" 2>&1 | tail -1; sleep 13; adb -s 127.0.0.1:5555 shell input tap 360 400; sleep 12; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+SE
+Warning: Activity not started, intent has been delivered to currently running top-most instance.
 rc=0
 gamepid: 
 flows: 0
