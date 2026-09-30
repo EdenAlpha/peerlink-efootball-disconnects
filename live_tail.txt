@@ -1,36 +1,31 @@
--efootball-disconnects
-   faf0841..0eb3ed4  HEAD -> live-res
+live: live control loop starting (poll 8s, max 1400 rounds)
+live: write commands to live-cmd/cmd.txt ; read live-res/results + status.txt
+live: ignoring the already-queued command (not re-running it): []
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   23e1750..30fcc5a  HEAD -> live-res
+live: probe published OK; live-res is live
 kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   0eb3ed4..31b48e3  HEAD -> live-res
+   30fcc5a..1275c93  HEAD -> live-res
 kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   31b48e3..d836291  HEAD -> live-res
+   1275c93..5e7cd71  HEAD -> live-res
 kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   d836291..e748284  HEAD -> live-res
+   5e7cd71..760bb45  HEAD -> live-res
 kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   e748284..1867e67  HEAD -> live-res
+   760bb45..2002e4c  HEAD -> live-res
 kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   1867e67..3a3818f  HEAD -> live-res
+   2002e4c..cd11f5f  HEAD -> live-res
 kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   3a3818f..037b287  HEAD -> live-res
+   cd11f5f..22d72da  HEAD -> live-res
 kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   037b287..61e8ec7  HEAD -> live-res
+   22d72da..c1ed0a3  HEAD -> live-res
 kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   61e8ec7..1bc55c5  HEAD -> live-res
-kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   1bc55c5..b1e005d  HEAD -> live-res
-kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   b1e005d..0d20503  HEAD -> live-res
-kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   0d20503..84bd278  HEAD -> live-res
+   c1ed0a3..b06ee62  HEAD -> live-res
 kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
