@@ -1,0 +1,8 @@
+cmd: exec bash -c true; echo MARK10; cp /tmp/kgs/m8.png /tmp/live-res/screen.png; ls -la /tmp/live-res/screen.png
+at: 19:57:53
+$ bash -c true; echo MARK10; cp /tmp/kgs/m8.png /tmp/live-res/screen.png; ls -la /tmp/live-res/screen.png
+MARK10
+-rw-r--r-- 1 runner runner 377489 Sep 30 19:57 /tmp/live-res/screen.png
+rc=0
+gamepid: 
+flows: 0
