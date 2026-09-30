@@ -498,8 +498,26 @@ jobs:
           # Launch normally instead, wait for the process, then attach to the
           # live pid. This also attaches only after startup checks have run.
           sudo docker exec redroid sh -c 'am force-stop jp.konami.pesam' 2>/dev/null
+          # Do NOT pipe monkey's output through tail. It did exactly that before
+          # and the two lines that survived were
+          #     bash arg: android.intent.category.LAUNCHER
+          #     bash arg: 1
+          # which is monkey's USAGE text -- it had rejected the invocation. The
+          # real error was discarded, the app never started, and 120 s of
+          # polling reported "GAME PROCESS NEVER APPEARED" for a launch that was
+          # never attempted. Show everything and check the exit code.
+          echo "--- launch attempt (full output) ---"
           sudo docker exec redroid sh -c \
-            'monkey -p jp.konami.pesam -c android.intent.category.LAUNCHER 1' 2>&1 | tail -2
+            'monkey -p jp.konami.pesam -c android.intent.category.LAUNCHER 1' 2>&1
+          echo "monkey rc=$?"
+          echo "--- what monkey thinks the package is ---"
+          sudo docker exec redroid sh -c 'pm path jp.konami.pesam' 2>&1
+          sudo docker exec redroid sh -c \
+            'cmd package resolve-activity --brief -c android.intent.category.LAUNCHER jp.konami.pesam' 2>&1 | tail -5
+          echo "--- direct am start as the fallback ---"
+          sudo docker exec redroid sh -c \
+            'am start -W -n jp.konami.pesam/com.unity3d.player.UnityPlayerActivity' 2>&1
+          echo "am start rc=$?"
           GPID=""
           for i in $(seq 1 24); do
             sleep 5
@@ -510,10 +528,18 @@ jobs:
           done
           if [ -z "$GPID" ]; then
             echo "=== GAME PROCESS NEVER APPEARED ==="
-            sudo docker exec redroid logcat -d -t 200 2>&1 | tail -40
+            echo "the launch output above is the diagnosis; read it before"
+            echo "concluding anything about routes."
+            sudo docker exec redroid sh -c 'ps -A | head -30' 2>&1
+            sudo docker exec redroid logcat -d -t 300 2>&1 \
+              | grep -iE "konami|pesam|unity|ActivityManager.*(START|crash|died)|FATAL|AndroidRuntime|libUE4|Vulkan|EGL|ANR" \
+              | tail -50 || echo "no konami/unity/crash lines in logcat"
             echo "=== graphics ==="
             sudo docker exec redroid sh -c 'ls /vendor/lib64/libvulkan.so /vendor/lib64/hw/vulkan.*.so 2>&1' | head
             echo "=== end ==="
+            # mark the step failed: this is an infrastructure failure, and it
+            # must never look like a scan that ran and found nothing
+            echo "GAME LAUNCH FAILED"
           else
             echo "--- is libUE4.so actually mapped? ---"
             sudo docker exec redroid sh -c \
