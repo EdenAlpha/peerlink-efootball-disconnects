@@ -1,1 +1,1 @@
-amstart jp.konami.pesam/com.epicgames.ue4.SplashActivity 2
+exec bash -c true; echo MARK7; sudo docker exec redroid /system/bin/pm list packages | grep -i konami; sudo docker exec redroid sh -c "am start -W -n jp.konami.pesam/com.epicgames.ue4.SplashActivity"
