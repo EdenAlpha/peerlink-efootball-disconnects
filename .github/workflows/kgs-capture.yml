@@ -50,7 +50,12 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['.github/workflows/kgs-capture.yml']
+    # Include the scripts the capture runs. Triggering only on changes to this
+    # file meant a fix to read_paths.py or scan_paths.js was pushed and then
+    # sat untested for two hours, because the workflow was never woken up.
+    paths:
+      - '.github/workflows/kgs-capture.yml'
+      - 'kgs-login/scripts/**'
 
 permissions:
   contents: write
