@@ -1,1 +1,1 @@
-exec bash -c true; echo SIGNOUT; adb connect 127.0.0.1:5555 >/dev/null 2>&1; adb -s 127.0.0.1:5555 shell dumpsys account 2>/dev/null | grep -c "peerlink.02"; adb -s 127.0.0.1:5555 shell am start -W -n com.android.vending/com.google.android.finsky.activities.MainActivity 2>&1 | tail -3; sleep 15; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+exec bash -c true; echo S2; adb -s 127.0.0.1:5555 shell input tap 360 907; sleep 15; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
