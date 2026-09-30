@@ -1,1 +1,1 @@
-exec bash kgs-login/live/pm_reinstall.sh redroid
+amstart jp.konami.pesam/com.epicgames.ue4.SplashActivity
