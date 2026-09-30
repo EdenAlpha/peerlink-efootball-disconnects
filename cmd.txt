@@ -1,1 +1,1 @@
-exec HOSTGW=$(ip -4 addr show docker0 2>/dev/null | grep -oE "inet [0-9.]+" | head -1 | cut -d" " -f2); echo hostgw=[$HOSTGW]; sudo docker exec redroid iptables -t nat -A OUTPUT -p tcp --dport 443 -j DNAT --to-destination $HOSTGW:8080; echo dnat_rc=$?; sudo docker exec redroid iptables -t nat -L OUTPUT -n -v | head -8
+exec sudo docker exec redroid sh -c "curl -s -o /dev/null -w probe_http=%{http_code} --max-time 20 https://accounts.google.com/ 2>&1"; echo; sleep 3; tail -6 /tmp/kgs/flows.log
