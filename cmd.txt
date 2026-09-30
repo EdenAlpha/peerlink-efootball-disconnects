@@ -1,1 +1,1 @@
-amstart com.aurora.store/.compose.ui.accounts.AccountsScreen
+tap 360 770
