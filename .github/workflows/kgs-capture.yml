@@ -561,7 +561,7 @@ jobs:
             sudo docker exec redroid sh -c \
               "grep libUE4 /proc/$GPID/maps 2>/dev/null | head -3" || true
 
-            # ---- READ MEMORY. Do not inject. ----
+            # ---- READ MEMORY. Do not inject, and do it from the HOST. ----
             # Both Frida injection paths are rejected identically by this game:
             #     Spawning `jp.konami.pesam`...
             #     Failed to spawn: error receiving data: Connection reset by peer
@@ -571,16 +571,22 @@ jobs:
             # it is being read: /proc/<pid>/mem reads another process's address
             # space with nothing injected, no thread created inside it, and no
             # memory written -- so there is no /proc/self/maps entry, no extra
-            # thread and no modified code for it to detect. redroid runs as root,
-            # so its own dd can do it.
+            # thread and no modified code for it to detect.
+            #
+            # The reader runs on the HOST, not in the container: redroid ships
+            # no interpreter, and
+            #     OCI runtime exec failed: exec: "python3": executable file not
+            #     found in $PATH
+            # is what that costs. The host reads the container's
+            # /proc/<pid>/mem over `docker exec ... dd`, because both share the
+            # same PID namespace view and redroid runs as root.
             # The game starts (SplashActivity, pid found in 5 s) and stays alive
             # the full 6 minutes, so there is a long window to read in.
-            sudo docker cp kgs-login/scripts/read_paths.py \
-              redroid:/data/local/tmp/read_paths.py
-            echo "--- reading the game's memory (no injection) ---"
-            timeout 400 sudo docker exec redroid \
-              python3 /data/local/tmp/read_paths.py \
-                --package jp.konami.pesam --seconds 300 --interval 3 \
+            echo "--- reading the game's memory from the host (no injection) ---"
+            GPID="$GPID" \
+            timeout 400 python3 kgs-login/scripts/read_paths.py \
+              --package jp.konami.pesam --seconds 300 --interval 3 \
+              --docker-exec "sudo docker exec redroid" \
               > $W/scan.log 2>&1 &
             SPID=$!
             echo "phase 3 reader pid $SPID"

@@ -56,10 +56,19 @@ MIN_REGION = 1 << 20     # skip tiny regions; routes are not in a 4 KB page
 CHUNK = 1 << 22          # 4 MiB per dd read
 
 
+# Command prefix used to reach the target. The reader runs on the HOST and the
+# game runs inside redroid, so every access goes through `docker exec`. redroid
+# ships no interpreter, which is why this cannot simply be run inside the
+# container -- that produced:
+#     OCI runtime exec failed: exec: "python3": executable file not found in $PATH
+DOCKER_EXEC = ["sudo", "docker", "exec", "redroid"]
+
+
 def sh(cmd, timeout=120):
-    """Run a shell command in the container and return stdout as bytes."""
-    r = subprocess.run(["sh", "-c", cmd], stdout=subprocess.PIPE,
-                       stderr=subprocess.DEVNULL, timeout=timeout)
+    """Run a shell command in the target and return stdout as bytes."""
+    r = subprocess.run(DOCKER_EXEC + ["sh", "-c", cmd],
+                       stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                       timeout=timeout)
     return r.stdout
 
 
@@ -248,7 +257,17 @@ def main() -> int:
     ap.add_argument("--package", default="jp.konami.pesam")
     ap.add_argument("--seconds", type=int, default=240)
     ap.add_argument("--interval", type=float, default=3.0)
+    ap.add_argument("--docker-exec", default=None,
+                    help="command prefix to reach the container, e.g. "
+                         "'sudo docker exec redroid'. Omit to run directly "
+                         "against the local pid namespace.")
     a = ap.parse_args()
+
+    global DOCKER_EXEC
+    if a.docker_exec:
+        DOCKER_EXEC = a.docker_exec.split()
+    print("[scan] reaching the target via: %s" % " ".join(DOCKER_EXEC),
+          flush=True)
 
     pid = pidof(a.package)
     if pid is None:
