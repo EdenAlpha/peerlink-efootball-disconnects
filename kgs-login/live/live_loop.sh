@@ -181,9 +181,14 @@ run_cmd() { # $1 = round dir, $2... = command words
       ;;
     exec)
       # shell on the HOST (proxy, CA, dumps). Logged verbatim for the audit.
+      # Nounset is OFF around the eval: operator commands are free-form text
+      # and a `$VAR` in them must fail the ROUND, never the session. (A typed
+      # `$S` once killed a 2-hour session instantly via `set -u`.)
       echo "\$ $*" >> "$out"
+      set +u
       eval "$*" >> "$out" 2>&1
       echo "rc=$?" >> "$out"
+      set -u
       ;;
     flows)
       tail -"${1:-40}" "$W/flows.log" >> "$out" 2>&1 \
