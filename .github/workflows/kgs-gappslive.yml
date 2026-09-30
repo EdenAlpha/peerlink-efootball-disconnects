@@ -276,6 +276,60 @@ jobs:
           sudo docker exec redroid sh -c 'ps -A | grep -i tcpdump' || echo "tcpdump NOT running"
           echo "RECORDER ARMED"
 
+      - name: 04c declare touchscreen.multitouch and stage sign-in credentials
+        env:
+          PEERLINK_GMAIL: ${{ secrets.PEERLINK_GMAIL }}
+          PEERLINK_GPASS: ${{ secrets.PEERLINK_GPASS }}
+        run: |
+          set +e
+          set -x
+          W=/tmp/kgs; mkdir -p $W
+
+          # The redroid GApps image declares only android.hardware.touchscreen and
+          # ships no android.hardware.touchscreen.multitouch*.xml, even though its
+          # own /vendor/etc/permissions/handheld_core_hardware.xml says one must be
+          # included. eFootball declares
+          #     <uses-feature android:name="android.hardware.touchscreen.multitouch"/>
+          # with android:required omitted, which the Android spec defines as
+          # required=true. With the feature absent, Play's device compatibility check
+          # refuses the app ("isn't compatible with your device") while apps that
+          # need no graphics feature (CPU-Z) install normally. This is a capability
+          # declaration, not an identity change.
+          adb -s 127.0.0.1:5555 shell su 0 mkdir -p /data/local/tmp/perm
+          adb -s 127.0.0.1:5555 push -q \
+            kgs-login/live/android.hardware.touchscreen.multitouch.xml \
+            /data/local/tmp/perm/mt.xml
+          adb -s 127.0.0.1:5555 shell su 0 cp /data/local/tmp/perm/mt.xml \
+            /vendor/etc/permissions/android.hardware.touchscreen.multitouch.xml
+          adb -s 127.0.0.1:5555 shell su 0 cp /data/local/tmp/perm/mt.xml \
+            /system/etc/permissions/android.hardware.touchscreen.multitouch.xml
+          echo "--- restarting the phone so PermissionManager re-reads ---"
+          sudo docker restart redroid
+          sleep 35
+          adb connect 127.0.0.1:5555 2>&1 | tail -1
+          for i in $(seq 1 40); do
+            [ "$(adb -s 127.0.0.1:5555 shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ] \
+              && { echo "phone back after $((i*5))s"; break; }
+            sleep 5
+          done
+          echo "--- touchscreen features the phone now advertises ---"
+          adb -s 127.0.0.1:5555 shell pm list features 2>/dev/null | grep -i touchscreen
+          adb -s 127.0.0.1:5555 shell pm list features 2>/dev/null \
+            | grep -q touchscreen.multitouch \
+            && echo "MULTITOUCH DECLARED" \
+            || { echo "=== MULTITOUCH STILL MISSING ==="; exit 1; }
+
+          # Sign-in credentials arrive as Actions secrets and are written to a
+          # root-only file on the runner. The live command channel is a file in a
+          # PUBLIC git branch, so a password must never be typed into cmd.txt --
+          # that is how the burner password leaked into history before. Commands
+          # read this file instead: PW=$(cat $W/creds/GPASS)
+          mkdir -p $W/creds
+          printf '%s' "$PEERLINK_GMAIL" > $W/creds/GMAIL
+          printf '%s' "$PEERLINK_GPASS" > $W/creds/GPASS
+          chmod 600 $W/creds/GMAIL $W/creds/GPASS
+          echo "creds staged: $(wc -c < $W/creds/GMAIL) byte email, $(wc -c < $W/creds/GPASS) byte password"
+
       - name: 05 live control loop
         run: |
           set +e
