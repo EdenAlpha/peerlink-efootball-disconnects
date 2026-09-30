@@ -1,1 +1,1 @@
-wait 20
+exec ps aux | grep -i mitmdump | grep -v grep | head -2; echo ---; sudo docker exec redroid sh -c "iptables -t nat -L OUTPUT -n 2>/dev/null | head -8"; echo ---; ls -la /tmp/kgs/flows.log /tmp/kgs/mitm.log 2>/dev/null; tail -5 /tmp/kgs/mitm.log 2>/dev/null
