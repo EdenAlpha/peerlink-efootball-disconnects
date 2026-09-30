@@ -13,11 +13,15 @@ set -uo pipefail
 CONTAINER="${1:?container required}"
 OUT="${2:-/tmp/kgs/ui.xml}"
 
+# NOTE: read the dump with `docker cp`, never `docker exec ... cat`. The
+# exec-based read silently produced an EMPTY file every time (the error went
+# to /dev/null), which is what made Aurora look like it was hiding its text
+# from automation. It was hiding nothing -- we were reading nothing.
 sudo docker exec "$CONTAINER" sh -c \
-  'uiautomator dump /data/local/tmp/ui.xml' >/dev/null 2>&1 \
-  || { echo "UIDUMP: dump failed"; exit 1; }
-sudo docker exec "$CONTAINER" cat /data/local/tmp/ui.xml > "$OUT" 2>/dev/null \
+  'uiautomator dump /data/local/tmp/ui.xml' 2>&1 | tail -2
+sudo docker cp "$CONTAINER:/data/local/tmp/ui.xml" "$OUT" 2>&1 \
   || { echo "UIDUMP: pull failed"; exit 1; }
+[ -s "$OUT" ] || { echo "UIDUMP: dump is EMPTY (uiautomator produced nothing)"; exit 1; }
 
 python3 - "$OUT" <<'PY'
 import re, sys, html

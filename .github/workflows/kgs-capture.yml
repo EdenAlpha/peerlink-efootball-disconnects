@@ -420,6 +420,20 @@ jobs:
           echo "--- full node dump after Skip (geometry, not text) ---"
           bash kgs-login/scripts/uidump.sh redroid $W/ui_after_skip.xml 2>&1 | head -60
           cp -f $W/ui_after_skip.xml "$R/capture/ui_after_skip.xml" 2>/dev/null || true
+          # --- THE tap that was missing, and the whole reason Aurora failed ---
+          # aurora_1.png (read, not guessed) is Aurora's login screen:
+          #   "Please log in to your Google Play account"
+          #   [ Google ] at (360,770)     [ Anonymous ] at (360,882)
+          # With no account every later screen dies with "getClass() on a null
+          # object reference" -- exactly what aurora_3.png and aurora_done.png
+          # show. Tap Anonymous, then PROVE the account exists before going on.
+          echo "--- tap Anonymous (no Google account on this box) ---"
+          sudo docker exec redroid /system/bin/input tap 360 882 >/dev/null 2>&1
+          sleep 10
+          A_PULL 1b
+          echo "--- accounts Aurora now holds ---"
+          sudo docker exec redroid sh -c \
+            'dumpsys account 2>/dev/null | grep -iE "Account \{|aurora|anonymous"' 2>&1 | head -20
           # --- open eFootball's Play page directly (skips search UI) ---
           echo "--- open market page ---"
           sudo docker exec redroid sh -c \
@@ -862,6 +876,16 @@ jobs:
           set +e
           W=/tmp/kgs
           R=kgs-login/ci-report
+          # SYNC TO MAIN *BEFORE* WRITING ANY REPORT. The publish step used to
+          # `git reset --soft origin/main` at the END and commit whatever the
+          # index held. The index came from THIS run's checkout, so every file
+          # committed to main after the checkout was silently DELETED by the
+          # report commit -- that is how kgs-login/live/live_loop.sh vanished
+          # from main while the run using it was still going. Hard-reset onto
+          # current main first, so the index holds all of main; the report
+          # files are then written on top of it.
+          git fetch origin "${{ github.ref_name }}" 2>&1 | tail -2 || true
+          git reset --hard "origin/${{ github.ref_name }}" 2>&1 | tail -1 || true
           mkdir -p "$R/capture"
           { echo '## capture'; echo; echo '### step 01 (binder + android)';
             echo '```text'; head -100 $W/step01.log 2>/dev/null; echo '```';
