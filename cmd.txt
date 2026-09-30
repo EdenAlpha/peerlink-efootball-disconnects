@@ -1,1 +1,1 @@
-intent market://details?id=jp.konami.pesam
+tap 670 1150
