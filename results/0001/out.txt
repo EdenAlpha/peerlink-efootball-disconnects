@@ -1,6 +1,10 @@
-cmd: exec sudo docker exec redroid sh -c "strings /data/local/tmp/game2.pcap 2>/dev/null | grep -iE konami | sort -u | head -20"
-at: 15:03:04
-$ sudo docker exec redroid sh -c "strings /data/local/tmp/game2.pcap 2>/dev/null | grep -iE konami | sort -u | head -20"
+cmd: exec bash kgs-login/live/pm_reinstall.sh redroid
+at: 19:25:51
+$ bash kgs-login/live/pm_reinstall.sh redroid
+session=631846844
+Success
+commit rc=0
+reinstall rc=0
 package:jp.konami.pesam
 rc=0
 gamepid: 
