@@ -1,1 +1,1 @@
-exec sudo modprobe nft_redir nf_nat xt_REDIRECT 2>&1; echo mp=$?; sudo iptables -t nat -A PREROUTING -i docker0 -p tcp --dport 443 -j REDIRECT --to-port 8080 2>&1; echo add=$?; sudo iptables -t nat -L PREROUTING -n | head -8
+exec which iptables-legacy; sudo iptables-legacy -t nat -A PREROUTING -i docker0 -p tcp --dport 443 -j REDIRECT --to-port 8080 2>&1; echo add=$?; sudo iptables-legacy -t nat -L PREROUTING -n -v 2>/dev/null | head -8
