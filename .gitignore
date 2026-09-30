@@ -1,0 +1,27 @@
+﻿# eFootball binary (KONAMI property, do not redistribute)
+efootball-apk/*.xapk
+efootball-apk/*.apk
+efootball-apk/xapk_out/
+efootball-apk/native/
+efootball-apk/dlpage.html
+efootball-apk/apkcombo.html
+efootball-apk/jadx-cli/
+efootball-apk/*.jar
+efootball-apk/*.zip
+efootball-apk/efootball-11.0.1-full.apk
+
+# generated analysis artefacts (regenerable, huge)
+efootball-apk/jadx_out/
+efootball-apk/apktool_out/
+efootball-apk/ghidra_*/
+efootball-apk/kaggle_*/
+efootball-apk/win_dump.txt
+efootball-apk/xref_dump.txt
+efootball-apk/quit_silence.txt
+
+# regenerable string dump (~10 MB) from strdump.py
+efootball-apk/ue4_strings.txt
+
+# python bytecode
+__pycache__/
+

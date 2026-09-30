@@ -1,0 +1,280 @@
+name: kgs-live
+
+# LIVE control session: a human drives the phone in near-real-time instead of
+# blind 35-minute batch runs.
+#
+# Why branches instead of a tunnel: GitHub runners accept no inbound
+# connections, so adb cannot be reached from outside. The two sides rendezvous
+# through two branches, each written by only one side, so they never conflict:
+#
+#   live-cmd  operator -> runner   (cmd.txt: one command, first line wins)
+#   live-res  runner   -> operator (results/NNNN/out.txt + shots + status.txt)
+#
+# A round trip takes 30-60 s. The operator cycle is: fetch live-res, view the
+# screenshot, write the next command to live-cmd/cmd.txt, push.
+#
+# Commands (see kgs-login/live/live_loop.sh for the full list):
+#   tap X Y | shot | uidump | uitap REGEX | amstart COMP | intent URI
+#   exec SH... | flows [N] | status | quit
+#
+# To start a session:
+#   1. create live-cmd with an initial command (git push origin live-cmd)
+#   2. gh workflow run kgs-live.yml
+#   3. wait for boot+install (~8 min), then drive via the two branches
+# To end: send `quit`, or let the 360-minute job timeout fire.
+#
+# Security: no public exposure at all (unlike an adb tunnel, which would hand
+# root to anyone guessing the URL). Only writers to this repo's branches can
+# inject commands, and every command is committed to live-res as an audit trail.
+#
+# Cost: public repos get unlimited Actions minutes, so a multi-hour session is
+# free. The loop caps itself well inside the job timeout regardless.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  live:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 360
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: 01 binder + redroid
+        run: |
+          set +e
+          set -x
+          W=/tmp/kgs; mkdir -p $W
+          exec >> >(tee -a $W/pipeline.log) 2>&1
+          exec > >(tee $W/step01.log) 2>&1
+          id
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq kmod "linux-modules-extra-$(uname -r)" 2>&1 | tail -2
+          find /lib/modules/$(uname -r) -name 'binder*' 2>/dev/null
+          sudo modprobe binder_linux devices="binder,hwbinder,vndbinder" || true
+          sudo modprobe binder_linux || true
+          lsmod | grep -i binder || true
+          sudo mkdir -p /dev/binderfs
+          sudo mount -t binder binder /dev/binderfs || \
+            sudo mount -t binder none /dev/binderfs || true
+          if ! mount | grep -qi binder; then
+            echo "=== BINDER DIAGNOSTICS ==="
+            uname -r
+            sudo grep -i ANDROID_BINDER /boot/config-$(uname -r) 2>/dev/null
+            ls -la /lib/modules/$(uname -r)/kernel/drivers/android/ 2>/dev/null
+            echo "=== END DIAGNOSTICS ==="
+            exit 1
+          fi
+          mount | grep -i binder
+          sudo mkdir -p /root/rd
+          sudo docker rm -f redroid >/dev/null 2>&1 || true
+          # do NOT add androidboot.redroid_gpu_mode: swiftshader blocks boot
+          sudo docker run -d --name redroid --privileged \
+            -v /root/rd:/data -p 5555:5555 -p 27042:27042 \
+            redroid/redroid:14.0.0_64only-latest \
+            androidboot.redroid_width=720 androidboot.redroid_height=1280 \
+            androidboot.redroid_dpi=320 androidboot.use_memfd=true || \
+            { echo "DOCKER RUN FAILED"; sudo docker logs redroid; exit 1; }
+          booted=0
+          for i in $(seq 1 36); do
+            if [ "$(sudo docker exec redroid getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
+              echo "BOOTED after $((i*5))s"; booted=1; break
+            fi
+            sleep 5
+          done
+          if [ "$booted" != "1" ]; then
+            echo "=== ANDROID DID NOT BOOT ==="
+            sudo docker ps -a
+            sudo docker logs --tail 60 redroid 2>&1
+            exit 1
+          fi
+          sudo docker exec redroid id
+          sudo docker exec redroid getprop ro.odm.product.cpu.abilist64
+
+      - name: 02 fetch eFootball package
+        uses: actions/cache@v4
+        with:
+          path: /tmp/kgs/jp.konami.pesam.xapk
+          key: pesam-311000101-${{ runner.os }}-${{ runner.arch }}
+
+      - name: 02b get eFootball package
+        run: |
+          set +e
+          set -x
+          W=/tmp/kgs; mkdir -p $W
+          exec >> >(tee -a $W/pipeline.log) 2>&1
+          cd $W
+          if [ -s $W/jp.konami.pesam.xapk ]; then
+            echo "cache hit: $(stat -c %s $W/jp.konami.pesam.xapk) bytes"
+            exit 0
+          fi
+          echo "cache miss, downloading"
+          got=""
+          for url in \
+            "https://github.com/EFForg/apkeep/releases/download/1.0.0/apkeep-aarch64-unknown-linux-gnu" \
+            "https://github.com/EFForg/apkeep/releases/download/1.0.0/apkeep-aarch64-unknown-linux-gnu.static" ; do
+            echo "trying $url"
+            curl -fsSL --max-time 300 -o $W/apkeep "$url" && { got="$url"; break; }
+            echo "  failed rc=$?"
+          done
+          if [ ! -s $W/apkeep ]; then
+            echo "=== APKEEP DOWNLOAD FAILED ==="
+            exit 1
+          fi
+          chmod +x $W/apkeep
+          $W/apkeep -a jp.konami.pesam -d apk-pure $W > $W/apkeep.log 2>&1 &
+          echo $! > $W/apkeep.pid
+          sleep 30
+          cat $W/apkeep.log || true
+          ls -la $W/ | head
+
+      - name: 04 install eFootball
+        run: |
+          set +e
+          set -x
+          W=/tmp/kgs; mkdir -p $W
+          exec >> >(tee -a $W/pipeline.log) 2>&1
+          i=0
+          while [ $i -lt 160 ]; do
+            [ -f $W/jp.konami.pesam.xapk ] && break
+            if ! kill -0 "$(cat $W/apkeep.pid 2>/dev/null)" 2>/dev/null; then
+              [ -f $W/jp.konami.pesam.xapk ] || { echo "=== APKEEP EXITED, NO PACKAGE ==="; cat $W/apkeep.log 2>/dev/null; exit 1; }
+            fi
+            sleep 15
+            i=$((i+1))
+            [ $((i % 4)) -eq 0 ] && { ls -la $W/*.xapk 2>/dev/null; tail -3 $W/apkeep.log 2>/dev/null; }
+          done
+          XAPK=$(ls -1 $W/*.xapk $W/*.apkm $W/*.apks 2>/dev/null | head -1)
+          if [ -z "$XAPK" ]; then echo "=== NO PACKAGE ARCHIVE ==="; ls -la $W/; exit 1; fi
+          SZ=$(stat -c %s "$XAPK")
+          echo "archive: $XAPK  ($SZ bytes)"
+          [ "$SZ" -gt 100000000 ] || { echo "=== ARCHIVE TOO SMALL ==="; cat $W/apkeep.log 2>/dev/null; exit 1; }
+          cd $W
+          XAPK="$XAPK" python3 - <<'PY'
+          import json, os, shutil, zipfile
+          W = '/tmp/kgs'
+          z = zipfile.ZipFile(os.environ['XAPK'])
+          names = z.namelist()
+          mf = json.loads(z.read('manifest.json')) if 'manifest.json' in names else {}
+          if not mf:
+              cand = [n for n in names if n.lower().endswith('manifest.json')]
+              mf = json.loads(z.read(cand[0])) if cand else {}
+          print('version', mf.get('version_name'), mf.get('version_code'))
+          splits = mf.get('split_apks') or [{'file': n, 'id': ''}
+                                            for n in names if n.endswith('.apk')]
+          print('%d splits in the bundle' % len(splits))
+          os.makedirs(os.path.join(W, 'out'), exist_ok=True)
+          for e in splits:
+              name = e['file']
+              with open(os.path.join(W, name), 'wb') as o:
+                  o.write(z.read(name))
+              dst = ('base.apk' if e.get('id') == 'base'
+                     else 'split_%s.apk' % name[:-4])
+              shutil.move(os.path.join(W, name),
+                          os.path.join(W, 'out', dst))
+              print('  %-30s -> %-32s %8.1f MB'
+                    % (name, dst, os.path.getsize(os.path.join(W, 'out', dst)) / 1e6))
+          open(os.path.join(W, 'out', '.ok'), 'w').write('ok')
+          PY
+          [ -f $W/out/.ok ] || { echo "=== EXTRACTION FAILED ==="; exit 1; }
+          echo "--- copying into the container ---"
+          sudo docker exec redroid mkdir -p /data/local/tmp/splits
+          sudo docker cp $W/out/. redroid:/data/local/tmp/splits/
+          echo "--- install adb on the host ---"
+          sudo apt-get install -y -qq adb 2>&1 | tail -2 || true
+          which adb || { echo "NO ADB"; exit 1; }
+          echo "--- connect to redroid ---"
+          adb connect 127.0.0.1:5555 2>&1 | tail -2
+          SERIAL=127.0.0.1:5555
+          adb -s $SERIAL wait-for-device
+          echo "--- push the splits ---"
+          adb -s $SERIAL shell mkdir -p /data/local/tmp/splits
+          for f in $W/out/*.apk; do
+            adb -s $SERIAL push "$f" /data/local/tmp/splits/ 2>&1 | tail -1
+          done
+          echo "--- adb install-multiple (base + arm64 lib) ---"
+          ok=0
+          timeout 900 adb -s $SERIAL install-multiple -r -g \
+              /data/local/tmp/splits/base.apk \
+              /data/local/tmp/splits/split_config.arm64_v8a.apk > $W/inst1.log 2>&1
+          rc=$?; tail -8 $W/inst1.log; echo "adb rc=$rc"
+          [ "$rc" = "0" ] && ok=1
+          if [ "$ok" != "1" ]; then
+            echo "--- retry with every split ---"
+            timeout 1800 adb -s $SERIAL install-multiple -r -g \
+              /data/local/tmp/splits/*.apk > $W/inst2.log 2>&1
+            rc=$?; tail -12 $W/inst2.log; echo "adb rc=$rc"
+            [ "$rc" = "0" ] && ok=1
+          fi
+          if [ "$ok" != "1" ]; then
+            echo "=== adb install failed; falling back to the pm session API ==="
+            timeout 1800 sudo docker exec redroid sh -c '
+              cd /data/local/tmp/splits || exit 1
+              RAW=$(pm install-create -r 2>&1 | tr -d "\r")
+              echo "install-create said: $RAW"
+              SESSION=$(echo "$RAW" | grep -oE "[0-9]+" | tail -1)
+              echo "session id=[$SESSION]"
+              if [ -z "$SESSION" ]; then
+                echo "could not extract a session id; install-create output was:"
+                echo "$RAW"
+                exit 1
+              fi
+              for f in ./*.apk; do
+                echo "  install-write $f"
+                pm install-write "$SESSION" "$(basename $f)" "$f" || echo "  write FAILED $f"
+              done
+              echo "  install-commit"
+              pm install-commit "$SESSION"
+            ' 2>&1 | tail -30
+          fi
+          echo "--- verify ---"
+          adb -s $SERIAL shell pm list packages 2>&1 | grep -i konami || true
+          sudo docker exec redroid /system/bin/pm list packages | grep -i konami \
+            || { echo "=== GAME NOT INSTALLED AT ALL ==="; exit 1; }
+          sudo docker exec redroid /system/bin/pm path jp.konami.pesam
+
+      - name: 05 live control loop
+        run: |
+          set +e
+          W=/tmp/kgs; mkdir -p $W
+          # git auth for the live branches WITHOUT ever echoing the token:
+          # the credential helper answers, the remote URL stays clean.
+          set +x
+          git config --global credential.helper store
+          echo "https://x-access-token:${GITHUB_TOKEN}@github.com" > ~/.git-credentials
+          chmod 600 ~/.git-credentials
+          set -x
+          rm -rf /tmp/live-res
+          git clone --depth 1 "https://github.com/${GITHUB_REPOSITORY}.git" /tmp/live-res 2>&1 | tail -1
+          cd /tmp/live-res
+          git fetch origin live-res 2>/dev/null && git checkout live-res 2>/dev/null || git checkout -b live-res
+          git fetch origin live-cmd 2>/dev/null || echo "live-cmd not present yet (send the first command)"
+          cd "${GITHUB_WORKSPACE}"
+          echo "=== entering the live loop; drive via live-cmd/cmd.txt ==="
+          W=/tmp/kgs LIVE_RES_DIR=/tmp/live-res \
+            bash kgs-login/live/live_loop.sh 2>&1 | tee -a $W/live.log
+          echo "live loop exited rc=$?"
+
+      - name: 06 upload session
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgs-live-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            /tmp/kgs/pipeline.log
+            /tmp/kgs/live.log
+            /tmp/kgs/flows.log
+            /tmp/kgs/flows.mitm
+            /tmp/kgs/mitm.log
+            /tmp/kgs/game2.pcap
+            /tmp/kgs/inst1.log
+            /tmp/kgs/inst2.log
+            /tmp/live-res/

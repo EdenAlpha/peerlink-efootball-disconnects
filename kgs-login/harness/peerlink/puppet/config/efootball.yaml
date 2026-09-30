@@ -1,0 +1,48 @@
+# roombot configuration — fill via calibrate.py, tune by hand afterwards.
+# Device orientation/resolution must match the captured references.
+
+device:
+  serial: emulator-5554        # adb serial of the emulator/device
+
+app:
+  package: jp.konami.pesam     # eFootball v11.0.1 (M15-confirmed build)
+
+first_run:
+  login: manual               # CONSTRAINT: owner logs in interactively —
+                               # the harness never types or stores credentials
+  tutorial: manual             # manual: owner plays onboarding once
+                               # (auto: scripted best-effort tap-through)
+
+identify:
+  phash_threshold: 0.80        # min similarity for a reference match (0-1)
+  marker_fallback: true        # OCR text markers when phash is unsure
+  poll_interval: 0.7           # seconds between screen identifications
+  miss_max: 6                  # unrecognized frames before abort
+  back_recovery: 3             # misses before a BACK-key nudge
+
+regions:
+  room_code: null              # [x, y, w, h] of the Match ID on the lobby
+                               # screen — record via calibrate.py; null =
+                               # full-frame OCR (works, slower)
+
+ocr:
+  lang: eng
+
+channel:                       # how the friend receives the Match ID
+  mode: console                # console | udp
+  udp:
+    host: null                 # friend's peerlink address (udp mode)
+    port: 42621                # 42620 belongs to the lockstep lobby
+
+match:
+  policy: idle                 # idle = milestone #1 (bot stands still);
+                               # the engine plugs into Policy/MatchStateSource
+  poll_hz: 2.0                 # in-match control rate (adb screencap-bound;
+                               # raise once a video/memory frame source lands)
+
+flow:
+  join_timeout_s: 600          # how long the room waits for the friend
+  rematch: false               # false: clean exit after one full match
+
+states: {}                     # calibrate.py fills: label -> {markers: [...]}
+actions: {}                    # calibrate.py fills: label -> {name: [x, y]}

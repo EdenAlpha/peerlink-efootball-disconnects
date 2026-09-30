@@ -1,0 +1,980 @@
+name: kgs-capture
+
+# Run the REAL eFootball 11.0.1 in a rooted arm64 Android on the free ARM64
+# GitHub runner, force its gRPC channel to plaintext, and capture the exact
+# request bytes its own code produces.
+#
+# The route that works -- no offsets, no plaintext, no TLS:
+#
+#   CommandRequest is a protobuf with `path` as field 4, and the game serialises
+#   it in its own heap before handing it to TLS. So scan the game's writable
+#   ranges for a byte sequence that decodes as a CommandRequest and read `path`
+#   out of it (scripts/scan_paths.js). This is immune to the TLS layer, immune to
+#   BoringSSL being stripped, and immune to the Def_ hook being wrong.
+#
+# Why the Def_ hook is not the primary route, having been tried first:
+#   0x7b101f8  gRPC config loader
+#       0x7b10258  literal 0x0c023be "Def_Online_gRPC_insecure" (24)
+#       0x7b1027c  bl 0x2f0eaf0
+#       0x7b10280  cbnz w0, 0x7b105c8    ; non-zero => plaintext channel
+#
+#   0x2f0eaf0 was recorded as "the int getter". It is not: it is a
+#   std::string constructor. So is 0x2f0e18c, which was recorded as the string
+#   getter. Both bodies contain the libc++ SSO compare at 0x17, the
+#   `lsl w9, w19, #1` + `strb w9` `2*len|is_long` size byte, the
+#   `orr x21, x19, #0xf` + `bl operator new` long-form allocation, and the
+#   `stp x19, x0` {size, ptr} store. Seven copies of that same shape exist
+#   (0x2f0b620, 0x2f0e044, 0x2f0e190, 0x2f0e47c, 0x2f0e6f4, 0x2f0eaf4,
+#   0x2f0eeec), which is why there is no single int accessor to hook: the
+#   accessors are inlined at their call sites. Forcing plaintext this way
+#   therefore cannot work, and phase 2 is kept only as a bonus.
+#
+#   The string keys are plain literals in a flat .rodata pool with no adjacent
+#   value table, and an adrp/add xref scan for all four gRPC keys found no
+#   reference, so the values are not reachable that way either.
+#       0x0ba2aff "Def_Online_gRPC_server_address" (30) string -> host
+#       0x09c69c1 "Def_Online_gRPC_server_path"    (27) string -> RPC path
+#       0x0b68de6 "Def_Online_gRPC_server_port"    (27) int    -> 443
+#
+# Environment facts already measured on this runner (kgs-login/ci-report):
+#   CONFIG_ANDROID_BINDER_IPC=m, binderfs mounts, docker privileged OK,
+#   redroid 14 arm64 boots in ~10 s as root, 4 vCPU / 15 GiB.
+#
+# Environment traps, all learned the hard way:
+#   * the shell is `bash -e -o pipefail`: guard every optional command
+#   * the runner user is NOT root: /root is not writable, use $W
+#   * actions/checkout leaves a detached HEAD: push by refspec
+#   * binder_linux.ko is in linux-modules-extra-$(uname -r)
+#   * redroid_gpu_mode=swiftshader prevents boot entirely
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/kgs-capture.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 90
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: 01 binder + redroid
+        run: |
+          set +e
+          set -x
+          W=/tmp/kgs; mkdir -p $W
+          # one continuous log for every step after boot: a failure in the
+          # middle of the pipeline used to publish an empty report
+          exec >> >(tee -a $W/pipeline.log) 2>&1
+          exec > >(tee $W/step01.log) 2>&1
+          id
+          echo "whoami=$(whoami)  writable /root? $( [ -w /root ] && echo yes || echo no )"
+          # binder_linux.ko ships in linux-modules-extra, NOT the base image
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq kmod "linux-modules-extra-$(uname -r)" 2>&1 | tail -2
+          find /lib/modules/$(uname -r) -name 'binder*' 2>/dev/null
+          sudo modprobe binder_linux devices="binder,hwbinder,vndbinder" || true
+          sudo modprobe binder_linux || true
+          lsmod | grep -i binder || true
+          sudo mkdir -p /dev/binderfs
+          sudo mount -t binder binder /dev/binderfs || \
+            sudo mount -t binder none /dev/binderfs || true
+          if ! mount | grep -qi binder; then
+            echo "=== BINDER DIAGNOSTICS ==="
+            uname -r
+            sudo grep -i ANDROID_BINDER /boot/config-$(uname -r) 2>/dev/null
+            ls -la /lib/modules/$(uname -r)/kernel/drivers/android/ 2>/dev/null
+            echo "=== END DIAGNOSTICS ==="
+            exit 1
+          fi
+          mount | grep -i binder
+          sudo mkdir -p /root/rd
+          sudo docker rm -f redroid >/dev/null 2>&1 || true
+          # do NOT add androidboot.redroid_gpu_mode: swiftshader blocks boot
+          sudo docker run -d --name redroid --privileged \
+            -v /root/rd:/data -p 5555:5555 -p 27042:27042 \
+            redroid/redroid:14.0.0_64only-latest \
+            androidboot.redroid_width=720 androidboot.redroid_height=1280 \
+            androidboot.redroid_dpi=320 androidboot.use_memfd=true || \
+            { echo "DOCKER RUN FAILED"; sudo docker logs redroid; exit 1; }
+          booted=0
+          for i in $(seq 1 36); do
+            if [ "$(sudo docker exec redroid getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
+              echo "BOOTED after $((i*5))s"; booted=1; break
+            fi
+            sleep 5
+          done
+          if [ "$booted" != "1" ]; then
+            echo "=== ANDROID DID NOT BOOT ==="
+            sudo docker ps -a
+            sudo docker logs --tail 60 redroid 2>&1
+            exit 1
+          fi
+          sudo docker exec redroid id
+          sudo docker exec redroid getprop ro.odm.product.cpu.abilist64
+          # eFootball references libvulkan.so AND libGLESv3.so, and this runner
+          # has no GPU. Record what Android can actually offer, so a graphics
+          # failure later is diagnosable in seconds instead of guessed at.
+          echo "--- graphics capability inside android ---"
+          sudo docker exec redroid sh -c 'ls /vendor/lib64/hw/ 2>/dev/null | head -20' || true
+          sudo docker exec redroid sh -c 'ls /system/lib64/libEGL.so /system/lib64/libGLESv3.so /system/lib64/libvulkan.so 2>&1' || true
+          sudo docker exec redroid sh -c 'ls /vendor/lib64/libvulkan.so /vendor/lib64/hw/vulkan.*.so 2>&1' || true
+          sudo docker exec redroid sh -c 'dumpsys SurfaceFlinger 2>/dev/null | grep -iE "GLES|Vulkan|EGL" | head -8' || true
+          sudo docker exec redroid sh -c 'getprop | grep -iE "gpu|egl|gles|vulkan|hardware"' || true
+
+      # ------------------------------------------- fetch the package (slow)
+      # backgrounded so the download overlaps with the Frida setup, and cached
+      # so only the first run pays the 822 MB
+      - name: 02 fetch eFootball package
+        uses: actions/cache@v4
+        with:
+          path: /tmp/kgs/jp.konami.pesam.xapk
+          key: pesam-311000101-${{ runner.os }}-${{ runner.arch }}
+
+      - name: 02b get eFootball package
+        run: |
+          set +e
+          set -x
+          W=/tmp/kgs; mkdir -p $W
+          # one continuous log for every step after boot: a failure in the
+          # middle of the pipeline used to publish an empty report
+          exec >> >(tee -a $W/pipeline.log) 2>&1
+          cd $W
+          echo "whoami=$(whoami) cwd=$(pwd)"
+          touch $W/probe && echo "workdir writable" || echo "WORKDIR NOT WRITABLE"
+          if [ -s $W/jp.konami.pesam.xapk ]; then
+            echo "cache hit: $(stat -c %s $W/jp.konami.pesam.xapk) bytes"
+            exit 0
+          fi
+          echo "cache miss, downloading"
+          curl -sS -o /dev/null -w "github.com HTTP %{http_code}\n" \
+            --max-time 30 https://github.com/ || echo "cannot reach github.com"
+          got=""
+          for url in \
+            "https://github.com/EFForg/apkeep/releases/download/1.0.0/apkeep-aarch64-unknown-linux-gnu" \
+            "https://github.com/EFForg/apkeep/releases/download/1.0.0/apkeep-aarch64-unknown-linux-gnu.static" ; do
+            echo "trying $url"
+            curl -fsSL --max-time 300 -o $W/apkeep "$url" && { got="$url"; break; }
+            echo "  failed rc=$?"
+          done
+          if [ ! -s $W/apkeep ]; then
+            echo "=== APKEEP DOWNLOAD FAILED ==="
+            exit 1
+          fi
+          chmod +x $W/apkeep
+          $W/apkeep -a jp.konami.pesam -d apk-pure $W > $W/apkeep.log 2>&1 &
+          echo $! > $W/apkeep.pid
+          sleep 30
+          cat $W/apkeep.log || true
+          ls -la $W/ | head
+
+      - name: 03 frida
+        run: |
+          set +e
+          set -x
+          W=/tmp/kgs; mkdir -p $W
+          # one continuous log for every step after boot: a failure in the
+          # middle of the pipeline used to publish an empty report
+          exec >> >(tee -a $W/pipeline.log) 2>&1
+          python3 -m pip install --quiet --break-system-packages frida-tools || \
+            { echo "PIP FAILED, retrying verbose"; pip3 install --break-system-packages frida-tools; }
+          FRIDA_VER=$(python3 -c "import frida; print(frida.__version__)" 2>/dev/null)
+          echo "frida client version: ${FRIDA_VER:-<none>}"
+          [ -n "$FRIDA_VER" ] || { echo "NO FRIDA PYTHON MODULE"; exit 1; }
+          ok=0
+          url="https://github.com/frida/frida/releases/download/${FRIDA_VER}/frida-server-${FRIDA_VER}-android-arm64.xz"
+          echo "trying $url"
+          curl -fsSL --max-time 300 -o $W/frida-server.xz "$url" && ok=1
+          echo "curl rc=$? ok=$ok"
+          if [ "$ok" != "1" ]; then
+            echo "=== FRIDA SERVER DOWNLOAD FAILED ==="
+            curl -sS --max-time 30 "https://api.github.com/repos/frida/frida/releases/latest" \
+              | grep -o '"name": *"frida-server-[^"]*android-arm64[^"]*"' || true
+            echo "=== END ==="
+            exit 1
+          fi
+          xz -d -f $W/frida-server.xz || { echo "XZ FAILED"; exit 1; }
+          ls -la $W/frida-server
+          sudo docker cp $W/frida-server redroid:/data/local/tmp/frida-server || exit 1
+          sudo docker exec redroid chmod 755 /data/local/tmp/frida-server
+          sudo docker exec redroid mkdir -p /data/local/tmp/kgs
+          # keep frida-server's stderr: Android 14 runs SELinux enforcing and
+          # exec from /data/local/tmp is a common failure, and `docker exec -d`
+          # throws that output away, which is why this step previously failed
+          # with an empty log.
+          sudo docker exec -d redroid sh -c \
+            '/data/local/tmp/frida-server > /data/local/tmp/frida.out 2>&1'
+          sleep 8
+          echo "--- frida-server output ---"
+          sudo docker exec redroid sh -c 'cat /data/local/tmp/frida.out 2>&1' || true
+          echo "--- process list ---"
+          sudo docker exec redroid sh -c 'ps -A | grep -i frida' || echo "frida-server NOT running"
+          echo "--- selinux ---"
+          sudo docker exec redroid sh -c 'getenforce 2>&1' || true
+          echo "--- port ---"
+          nc -zv 127.0.0.1 27042 && echo "frida-server REACHABLE" || echo "frida-server NOT reachable"
+          echo "--- host arch sanity (a wrong-arch binary fails exactly like this) ---"
+          file $W/frida-server 2>/dev/null || head -c 20 $W/frida-server | xxd | head -2
+
+      - name: 04 install eFootball
+        run: |
+          set +e
+          set -x
+          W=/tmp/kgs; mkdir -p $W
+          exec >> >(tee -a $W/pipeline.log) 2>&1
+          i=0
+          while [ $i -lt 160 ]; do
+            [ -f $W/jp.konami.pesam.xapk ] && break
+            if ! kill -0 "$(cat $W/apkeep.pid 2>/dev/null)" 2>/dev/null; then
+              [ -f $W/jp.konami.pesam.xapk ] || { echo "=== APKEEP EXITED, NO PACKAGE ==="; cat $W/apkeep.log 2>/dev/null; exit 1; }
+            fi
+            sleep 15
+            i=$((i+1))
+            [ $((i % 4)) -eq 0 ] && { ls -la $W/*.xapk 2>/dev/null; tail -3 $W/apkeep.log 2>/dev/null; }
+          done
+          XAPK=$(ls -1 $W/*.xapk $W/*.apkm $W/*.apks 2>/dev/null | head -1)
+          if [ -z "$XAPK" ]; then echo "=== NO PACKAGE ARCHIVE ==="; ls -la $W/; exit 1; fi
+          SZ=$(stat -c %s "$XAPK")
+          echo "archive: $XAPK  ($SZ bytes)"
+          [ "$SZ" -gt 100000000 ] || { echo "=== ARCHIVE TOO SMALL ==="; cat $W/apkeep.log 2>/dev/null; exit 1; }
+          cd $W
+          # Extract EVERY split. The base alone fails with
+          # INSTALL_FAILED_MISSING_SPLIT and a split alone fails with
+          # INSTALL_FAILED_INVALID_APK, so the set must be complete. The 18
+          # per-locale config.* splits are ~0 bytes each.
+          XAPK="$XAPK" python3 - <<'PY'
+          import json, os, shutil, zipfile
+          W = '/tmp/kgs'
+          z = zipfile.ZipFile(os.environ['XAPK'])
+          names = z.namelist()
+          mf = json.loads(z.read('manifest.json')) if 'manifest.json' in names else {}
+          if not mf:
+              cand = [n for n in names if n.lower().endswith('manifest.json')]
+              mf = json.loads(z.read(cand[0])) if cand else {}
+          print('version', mf.get('version_name'), mf.get('version_code'))
+          splits = mf.get('split_apks') or [{'file': n, 'id': ''}
+                                            for n in names if n.endswith('.apk')]
+          print('%d splits in the bundle' % len(splits))
+          os.makedirs(os.path.join(W, 'out'), exist_ok=True)
+          for e in splits:
+              name = e['file']
+              with open(os.path.join(W, name), 'wb') as o:
+                  o.write(z.read(name))
+              # pm decides which is the base BY FILENAME
+              dst = ('base.apk' if e.get('id') == 'base'
+                     else 'split_%s.apk' % name[:-4])
+              shutil.move(os.path.join(W, name),
+                          os.path.join(W, 'out', dst))
+              print('  %-30s -> %-32s %8.1f MB'
+                    % (name, dst, os.path.getsize(os.path.join(W, 'out', dst)) / 1e6))
+          open(os.path.join(W, 'out', '.ok'), 'w').write('ok')
+          PY
+          [ -f $W/out/.ok ] || { echo "=== EXTRACTION FAILED ==="; exit 1; }
+          echo "--- copying into the container ---"
+          sudo docker exec redroid mkdir -p /data/local/tmp/splits
+          sudo docker cp $W/out/. redroid:/data/local/tmp/splits/
+          sudo docker exec redroid sh -c 'ls /data/local/tmp/splits/*.apk | wc -l'
+          sudo docker exec redroid sh -c 'ls -la /data/local/tmp/splits/*.apk' | head -30
+          # The container's /system/bin/pm is a stripped build:
+          #     Unknown command: install-multiple
+          # and every install attempt so far died inside it. redroid exposes
+          # adb on 5555, and the host-side adb goes through the real package
+          # installer service -- a different code path entirely.
+          echo "--- what pm actually offers (for the record) ---"
+          sudo docker exec redroid sh -c 'pm help 2>&1 | head -20'
+          echo "--- install adb on the host ---"
+          sudo apt-get install -y -qq adb 2>&1 | tail -2 || true
+          which adb || { echo "NO ADB"; exit 1; }
+          adb version | head -2
+          echo "--- connect to redroid ---"
+          adb connect 127.0.0.1:5555 2>&1 | tail -2
+          SERIAL=127.0.0.1:5555
+          echo '--- adb devices ---'; adb devices -l
+          adb -s $SERIAL wait-for-device
+          adb -s $SERIAL shell getprop sys.boot_completed
+          echo "--- push the splits ---"
+          adb -s $SERIAL shell mkdir -p /data/local/tmp/splits
+          for f in $W/out/*.apk; do
+            adb -s $SERIAL push "$f" /data/local/tmp/splits/ 2>&1 | tail -1
+          done
+          adb -s $SERIAL shell ls -la /data/local/tmp/splits/ | head -30
+          echo "--- adb install-multiple (base first, then the rest) ---"
+          ok=0
+          echo "--- adb install-multiple (base + arm64 lib) ---"
+          timeout 900 adb -s $SERIAL install-multiple -r -g \
+              /data/local/tmp/splits/base.apk \
+              /data/local/tmp/splits/split_config.arm64_v8a.apk > $W/inst1.log 2>&1
+          rc=$?; tail -8 $W/inst1.log; echo "adb rc=$rc"
+          [ "$rc" = "0" ] && ok=1
+          if [ "$ok" != "1" ]; then
+            echo "--- retry with every split ---"
+            timeout 1800 adb -s $SERIAL install-multiple -r -g \
+              /data/local/tmp/splits/*.apk > $W/inst2.log 2>&1
+            rc=$?; tail -12 $W/inst2.log; echo "adb rc=$rc"
+            [ "$rc" = "0" ] && ok=1
+          fi
+          if [ "$ok" != "1" ]; then
+            echo "=== adb install failed; falling back to the pm session API ==="
+            timeout 1800 sudo docker exec redroid sh -c '
+              cd /data/local/tmp/splits || exit 1
+              # pm install-create prints a SENTENCE, not a bare id:
+              #   Success: created install session [1020103925]
+              # so the number has to be pulled out of it.
+              RAW=$(pm install-create -r 2>&1 | tr -d "\r")
+              echo "install-create said: $RAW"
+              SESSION=$(echo "$RAW" | grep -oE "[0-9]+" | tail -1)
+              echo "session id=[$SESSION]"
+              if [ -z "$SESSION" ]; then
+                echo "could not extract a session id; install-create output was:"
+                echo "$RAW"
+                exit 1
+              fi
+              for f in ./*.apk; do
+                echo "  install-write $f"
+                pm install-write "$SESSION" "$(basename $f)" "$f" || echo "  write FAILED $f"
+              done
+              echo "  install-commit"
+              pm install-commit "$SESSION"
+            ' 2>&1 | tail -30
+          fi
+          echo "--- verify ---"
+          adb -s $SERIAL shell pm list packages 2>&1 | grep -i konami || true
+          sudo docker exec redroid /system/bin/pm list packages | grep -i konami || true
+          echo "--- package state ---"
+          sudo docker exec redroid /system/bin/pm list packages | grep -i konami \
+            || { echo "=== GAME NOT INSTALLED AT ALL ===";
+                 sudo docker exec redroid sh -c 'ls -la /data/local/tmp/splits/';
+                 exit 1; }
+          sudo docker exec redroid /system/bin/pm path jp.konami.pesam
+          sudo docker exec redroid sh -c 'du -sh /data/app/*jp.konami.pesam* 2>/dev/null' || true
+
+      - name: 04b aurora + Play asset packs
+        run: |
+          set +e
+          set -x
+          W=/tmp/kgs; mkdir -p $W
+          exec >> >(tee -a $W/pipeline.log) 2>&1
+          # The game's 0% download is Play-delivered (playcore x357 in the
+          # binary, AssetPack x262, no CDN host anywhere). This box has no
+          # Play Store, so fetch the packs through Aurora Store instead: the
+          # same Google servers, no system changes, no account. Aurora is NOT
+          # the Play Store -- it is an independent client for the same files.
+          # If Aurora cannot deliver these packs either, the screenshots and
+          # the asset-dir sizes below prove it instead of another silent 0%.
+          SERIAL=127.0.0.1:5555
+          adb connect $SERIAL 2>&1 | tail -1
+          echo "--- fetch Aurora Store (pinned v4.8.4, F-Droid) ---"
+          curl -fsSL --max-time 300 -o $W/aurora.apk \
+            https://f-droid.org/repo/com.aurora.store_76.apk \
+            && echo "aurora apk $(stat -c %s $W/aurora.apk) bytes" \
+            || echo "AURORA DOWNLOAD FAILED"
+          [ -f $W/aurora.apk ] || { echo "=== no aurora apk, skipping ==="; exit 0; }
+          adb -s $SERIAL install -r $W/aurora.apk 2>&1 | tail -2
+          adb -s $SERIAL shell pm list packages 2>/dev/null | grep -i aurora \
+            || echo "AURORA NOT INSTALLED"
+          # helpers: screenshot + visible-text dump. Every tap below is
+          # verified by the pair -- never tap blind twice in a row.
+          A_SHOT() { sudo docker exec redroid sh -c \
+            "screencap -p /data/local/tmp/aurora_$1.png" >/dev/null 2>&1; }
+          A_TEXT() { sudo docker exec redroid sh -c \
+            'uiautomator dump /data/local/tmp/ui.xml' >/dev/null 2>&1;
+            sudo docker exec redroid cat /data/local/tmp/ui.xml 2>/dev/null \
+              | grep -oE '(text|content-desc)="[^"]+"' | sort -u | head -40; }
+          A_PULL() { sudo docker exec redroid sh -c \
+            "screencap -p /data/local/tmp/aurora_$1.png" >/dev/null 2>&1;
+            sudo docker cp redroid:/data/local/tmp/aurora_$1.png \
+              $W/aurora_$1.png 2>/dev/null || true; }
+          echo "--- launch Aurora ---"
+          AACT=$(sudo docker exec redroid sh -c \
+            'cmd package resolve-activity --brief -c android.intent.category.LAUNCHER com.aurora.store' 2>/dev/null \
+            | tr -d '\r' | grep -E '^com\.aurora\.store/' | tail -1)
+          echo "aurora launcher: [$AACT]"
+          [ -n "$AACT" ] && sudo docker exec redroid sh -c \
+            "am start -W -n $AACT" 2>&1 | tail -3
+          sleep 8
+          A_SHOT 0; echo "--- aurora screen 0 texts ---"; A_TEXT
+          # --- permissions first, by command, so no dialog can appear later ---
+          # Aurora needs the installer permission; granting it by shell kills
+          # a whole class of prompts before they exist.
+          echo "--- pre-grant installer + storage ---"
+          adb -s $SERIAL shell pm grant com.aurora.store android.permission.REQUEST_INSTALL_PACKAGES 2>&1 || true
+          adb -s $SERIAL shell appops set com.aurora.store REQUEST_INSTALL_PACKAGES allow 2>&1 || true
+          adb -s $SERIAL shell pm grant com.aurora.store android.permission.READ_EXTERNAL_STORAGE 2>&1 || true
+          adb -s $SERIAL shell pm grant com.aurora.store android.permission.WRITE_EXTERNAL_STORAGE 2>&1 || true
+          # --- onboarding: ONE tap, proven by source, not guessed ---
+          # Aurora's own code (OnboardingScreen.kt): on page 0 the left button
+          # is Skip and it calls finishOnboarding() immediately. Tapping Next
+          # would walk Permissions/MicroG pages for nothing. Skip at (160,1105)
+          # on the 720x1280 Welcome screen seen in aurora_0.png.
+          echo "--- tap Skip (finishes onboarding per Aurora's source) ---"
+          sudo docker exec redroid /system/bin/input tap 160 1105 >/dev/null 2>&1
+          sleep 5
+          A_PULL 1
+          echo "--- full node dump after Skip (geometry, not text) ---"
+          bash kgs-login/scripts/uidump.sh redroid $W/ui_after_skip.xml 2>&1 | head -60
+          cp -f $W/ui_after_skip.xml "$R/capture/ui_after_skip.xml" 2>/dev/null || true
+          # --- open eFootball's Play page directly (skips search UI) ---
+          echo "--- open market page ---"
+          sudo docker exec redroid sh -c \
+            "am start -a android.intent.action.VIEW -d 'market://details?id=jp.konami.pesam'" 2>&1 | tail -3
+          sleep 8
+          A_PULL 2
+          echo "--- full node dump on market dialog ---"
+          bash kgs-login/scripts/uidump.sh redroid $W/ui_market.xml 2>&1 | head -40
+          # "Continue to Aurora Store?" dialog: Open was at (662,1158) on the
+          # 720x1280 screenshot. Tap it, then dump what Aurora shows.
+          echo "--- tap Open on the Continue dialog ---"
+          sudo docker exec redroid /system/bin/input tap 662 1158 >/dev/null 2>&1
+          sleep 8
+          A_PULL 3
+          echo "--- full node dump on the app page ---"
+          bash kgs-login/scripts/uidump.sh redroid $W/ui_apppage.xml 2>&1 | head -80
+          cp -f $W/ui_apppage.xml "$R/capture/ui_apppage.xml" 2>/dev/null || true
+          # --- install / update with asset packs ---
+          # Positions come from the dumps above on the NEXT run; this run
+          # tries the text taps (harmless if they miss) plus one center tap.
+          for pat in '^Install$' '^Update$' '^OK$' '^Allow$' 'Retry'; do
+            echo "--- try [$pat] ---"
+            bash kgs-login/scripts/uitap.sh redroid "$pat" 2>&1 || true
+            sleep 5
+          done
+          A_PULL 4
+          VER0=$(adb -s $SERIAL shell dumpsys package jp.konami.pesam 2>/dev/null | grep -m1 versionName | tr -d '\r')
+          echo "game version before wait: [$VER0]"
+          echo "--- wait for packs (15 min): asset dirs + screenshots ---"
+          for i in $(seq 1 15); do
+            sleep 60
+            echo "== aurora wait t=${i}m =="
+            sudo docker exec redroid sh -c \
+              'du -sh /storage/emulated/0/Android/obb/jp.konami.pesam /storage/emulated/0/Android/data/jp.konami.pesam /data/data/jp.konami.pesam 2>&1' | head -6
+            # prompts (installer permission, confirmations) appear mid-flow;
+            # answer the safe ones as they come, by words not pixels
+            for pat in '^Allow$' '^Install$' '^OK$'; do
+              bash kgs-login/scripts/uitap.sh redroid "$pat" 2>/dev/null || true
+            done
+            # early exit: a version change means Aurora replaced the app
+            VER=$(adb -s $SERIAL shell dumpsys package jp.konami.pesam 2>/dev/null | grep -m1 versionName | tr -d '\r')
+            if [ -n "$VER" ] && [ "$VER" != "$VER0" ]; then
+              echo "VERSION CHANGED [$VER0] -> [$VER]; install happened, stopping wait"
+              break
+            fi
+            [ $((i % 3)) -eq 0 ] && A_PULL w$i
+          done
+          A_PULL done
+          echo "--- final asset state ---"
+          sudo docker exec redroid sh -c \
+            'du -sh /storage/emulated/0/Android/obb/jp.konami.pesam /storage/emulated/0/Android/data/jp.konami.pesam 2>&1'
+          sudo docker exec redroid sh -c \
+            'ls -la /storage/emulated/0/Android/obb/jp.konami.pesam/ 2>&1' | head -12
+          for f in $W/aurora_*.png; do
+            [ -f "$f" ] && cp -f "$f" "$R/capture/$(basename "$f")" 2>/dev/null
+          done
+          echo "AURORA PHASE DONE (screenshots + sizes above are the verdict)"
+
+      - name: 05 capture plaintext gRPC
+        run: |
+          set +e
+          set -x
+          W=/tmp/kgs; mkdir -p $W
+          # one continuous log for every step after boot: a failure in the
+          # middle of the pipeline used to publish an empty report
+          exec >> >(tee -a $W/pipeline.log) 2>&1
+          # do not burn ten minutes if step 04 never installed anything
+          if ! sudo docker exec redroid /system/bin/pm list packages 2>/dev/null \
+               | grep -qi konami; then
+            echo "=== GAME NOT INSTALLED - bailing out early ==="
+            sudo docker exec redroid sh -c 'ls -la /data/local/tmp/' 2>&1 | head -30
+            sudo docker exec redroid /system/bin/pm list packages 2>&1 | head -5
+            echo "=== BAIL ==="
+            exit 1
+          fi
+          echo "game is installed"
+          sudo docker exec redroid /system/bin/pm path jp.konami.pesam
+          # Independent route to the key evidence: capture the game's own TLS
+          # ClientHello off the device's interface. This needs no Frida at all,
+          # so it still produces the one thing a proxy cannot substitute for.
+          sudo docker exec redroid sh -c \
+            'rm -f /data/local/tmp/game.pcap; tcpdump -i any -s 0 -w /data/local/tmp/game.pcap tcp port 443 >/data/local/tmp/tcpdump.out 2>&1 &'
+          sleep 3
+          sudo docker exec redroid sh -c 'ps -A | grep -i tcpdump' \
+            || echo "NOTE: tcpdump not running (capture will be empty)"
+          sudo docker exec redroid /system/bin/pm list packages | grep -i konami
+          sudo docker cp kgs-login/scripts/capture_insecure.js \
+            redroid:/data/local/tmp/capture_insecure.js
+          timeout 660 frida -H 127.0.0.1:27042 -f jp.konami.pesam \
+            -l kgs-login/scripts/capture_insecure.js --runtime=v8 \
+            > $W/frida.log 2>&1 &
+          FRIDA_PID=$!
+          echo "frida pid $FRIDA_PID"
+          sleep 15
+          if ! kill -0 $FRIDA_PID 2>/dev/null; then
+            echo "=== FRIDA UNAVAILABLE in phase 2 (frida-server likely down) ==="
+            cat $W/frida.log
+          fi
+
+          # ============ PHASE 1: normal launch, real TLS, no frida ============
+          # Given the ALB finding (502 with content-length 0, nginx healthy
+          # behind it) the shape of the game's own ClientHello is the leading
+          # remaining suspect. This phase needs no instrumentation at all, so
+          # it works even while frida-server is broken.
+          echo "########## PHASE 1: normal launch, capture the real ClientHello"
+          sudo docker exec redroid sh -c 'am force-stop jp.konami.pesam' 2>/dev/null
+          sudo docker exec redroid sh -c \
+            'monkey -p jp.konami.pesam -c android.intent.category.LAUNCHER 1' 2>&1 | tail -2
+          for i in $(seq 1 18); do
+            sleep 10
+            sz=$(sudo docker exec redroid sh -c \
+                  'ls -la /data/local/tmp/game.pcap 2>/dev/null | awk "{print \$5}"' 2>/dev/null | tr -d '\r')
+            alive=$(sudo docker exec redroid sh -c 'ps -A | grep -c pesam' 2>/dev/null | tr -d '\r')
+            echo "  phase1 t=$((i*10))s pcap=${sz:-?}B pesam_procs=${alive:-?}"
+            sudo docker exec redroid /system/bin/input tap 360 640   >/dev/null 2>&1
+            sudo docker exec redroid /system/bin/input keyevent 66 >/dev/null 2>&1
+          done
+          sudo docker exec redroid sh -c 'pkill -f tcpdump' 2>/dev/null
+          sudo docker exec redroid sh -c 'ls -la /data/local/tmp/game.pcap' 2>&1
+          sudo docker exec redroid sh -c 'cat /data/local/tmp/tcpdump.out 2>&1' | tail -3 || true
+          sudo docker exec redroid logcat -d -t 300 > $W/logcat-phase1.txt 2>&1 || true
+          echo "--- phase 1 konami / crash lines ---"
+          grep -iE "konami|pesam|FATAL|AndroidRuntime|libUE4|Vulkan|EGL" \
+            $W/logcat-phase1.txt 2>/dev/null | tail -30 || true
+          sudo docker cp redroid:/data/local/tmp/game.pcap $W/game.pcap 2>&1 \
+            || echo "no pcap to copy"
+          ls -la $W/game.pcap 2>/dev/null && echo "PHASE 1 PCAP CAPTURED" \
+            || echo "PHASE 1: no pcap"
+          if [ -s $W/game.pcap ]; then
+            python3 kgs-login/scripts/summarise_pcap.py $W/game.pcap || true
+          fi
+
+          # ============ PHASE 2: frida, force plaintext gRPC ============
+          echo "########## PHASE 2: frida, force Def_Online_gRPC_insecure=1"
+          sudo docker exec redroid sh -c 'am force-stop jp.konami.pesam' 2>/dev/null
+          sudo docker exec redroid sh -c \
+            'rm -rf /data/local/tmp/kgs; mkdir -p /data/local/tmp/kgs' 2>/dev/null
+          timeout 420 frida -H 127.0.0.1:27042 -f jp.konami.pesam \
+            -l kgs-login/scripts/capture_insecure.js --runtime=v8 \
+            > $W/frida2.log 2>&1 &
+          FRIDA2_PID=$!
+          echo "phase 2 frida pid $FRIDA2_PID"
+          sleep 20
+          if ! kill -0 $FRIDA2_PID 2>/dev/null; then
+            echo "=== frida exited; the game was still launched by -f, watching anyway"
+            cat $W/frida2.log
+          fi
+          # the first launch shows a splash / terms screen and nobody is there
+          # to tap it, so nudge the UI periodically
+          for i in $(seq 1 36); do
+            sleep 10
+            n=$(sudo docker exec redroid sh -c 'ls /data/local/tmp/kgs 2>/dev/null | wc -l' 2>/dev/null | tr -d '\r')
+            alive=$(sudo docker exec redroid sh -c 'ps -A | grep -c pesam' 2>/dev/null | tr -d '\r')
+            echo "  phase2 t=$((i*10))s frames=${n:-?} pesam_procs=${alive:-?}"
+            sudo docker exec redroid /system/bin/input tap 360 640   >/dev/null 2>&1
+            sudo docker exec redroid /system/bin/input keyevent 66 >/dev/null 2>&1
+            sudo docker exec redroid /system/bin/input keyevent 4  >/dev/null 2>&1
+            if [ "${n:-0}" -gt 0 ] 2>/dev/null; then
+              echo "frames appeared; letting it settle"; sleep 30; break
+            fi
+          done
+          sudo docker exec redroid sh -c 'ls -la /data/local/tmp/kgs' || true
+          echo "=== frida log ==="
+          tail -80 $W/frida.log || true
+          sudo docker exec redroid logcat -d -t 500 > $W/logcat.txt 2>&1 || true
+          echo "=== logcat (filtered) ==="
+          grep -iE "konami|pesam|FATAL|AndroidRuntime|libUE4|Vulkan|EGL|ANR" $W/logcat.txt 2>/dev/null | tail -50 || true
+          echo "=== process alive? ==="
+          sudo docker exec redroid sh -c 'ps -A | grep -i pesam' || echo "GAME PROCESS GONE"
+
+          # ---- PHASE 3: read `path` out of memory -- PRIMARY, not a fallback --
+          # Phase 2 forces plaintext via the Def_ getter hook, and that hook is
+          # known to be wrong: the offsets recorded for the int and string
+          # getters (0x2f0eaf0, 0x2f0e18c) are both std::string constructors,
+          # each with the libc++ SSO compare at 0x17, the `2*len|is_long` size
+          # byte, an `operator new` and a {size,ptr} store, so neither can
+          # override an int. Seven copies of the same string getter exist, so
+          # the accessors are inlined at their call sites and there is no
+          # single int getter to hook. Phase 2 therefore stays as a bonus.
+          # This phase needs no offset and no plaintext: the game serialises
+          # CommandRequest in its own heap before handing it to TLS, so a scan
+          # of the writable ranges finds `path` either way. It runs
+          # unconditionally so it cannot be skipped by phase 2's condition.
+          echo "########## PHASE 3: memory scan for CommandRequest.path"
+          sudo docker cp kgs-login/scripts/scan_paths.js \
+            redroid:/data/local/tmp/scan_paths.js
+
+          # ATTACH, do not spawn. `frida -f` starts the process suspended and
+          # injects before its first instruction; eFootball 11.0.1 tears that
+          # down and the previous run died exactly here:
+          #     Connected to 127.0.0.1:27042 (id=socket@127.0.0.1:27042)
+          #     Spawning `jp.konami.pesam`...
+          #     Failed to spawn: error receiving data: Connection reset by peer
+          # so scan.log was empty, 0 passes, 0 paths -- an infrastructure
+          # failure that looked identical to "the game never built a request".
+          # The heartbeat in scan_paths.js exists to tell those apart, and it is
+          # what made this diagnosable.
+          #
+          # Launch normally instead, wait for the process, then attach to the
+          # live pid. This also attaches only after startup checks have run.
+          sudo docker exec redroid sh -c 'am force-stop jp.konami.pesam' 2>/dev/null
+          # Do NOT pipe monkey's output through tail. It did exactly that before
+          # and the two lines that survived were
+          #     bash arg: android.intent.category.LAUNCHER
+          #     bash arg: 1
+          # which is monkey's USAGE text -- it had rejected the invocation. The
+          # real error was discarded, the app never started, and 120 s of
+          # polling reported "GAME PROCESS NEVER APPEARED" for a launch that was
+          # never attempted. Show everything and check the exit code.
+          echo "--- launch attempt (full output) ---"
+          sudo docker exec redroid sh -c \
+            'monkey -p jp.konami.pesam -c android.intent.category.LAUNCHER 1' 2>&1
+          echo "monkey rc=$?"
+          echo "--- what monkey thinks the package is ---"
+          sudo docker exec redroid sh -c 'pm path jp.konami.pesam' 2>&1
+          sudo docker exec redroid sh -c \
+            'cmd package resolve-activity --brief -c android.intent.category.LAUNCHER jp.konami.pesam' 2>&1 | tail -5
+          echo "--- direct am start as the fallback ---"
+          # Resolve the activity, do not assume it. eFootball 11.0.1 is an
+          # UNREAL title, and its launcher is:
+          #     jp.konami.pesam/com.epicgames.ue4.SplashActivity
+          # not Unity's UnityPlayerActivity, which does not exist here. Also
+          # note this redroid `monkey` returns rc=0 while printing only
+          # "bash arg: ..." lines and injects nothing, so its exit status is
+          # not evidence that anything started.
+          ACT=$(sudo docker exec redroid sh -c \
+            'cmd package resolve-activity --brief -c android.intent.category.LAUNCHER jp.konami.pesam' 2>/dev/null \
+            | tr -d '\r' | grep -E '^jp\.konami\.pesam/' | tail -1)
+          echo "resolved launcher: [$ACT]"
+          if [ -n "$ACT" ]; then
+            sudo docker exec redroid sh -c "am start -W -n $ACT" 2>&1
+            echo "am start rc=$?"
+          else
+            echo "could not resolve the launcher activity"
+          fi
+          GPID=""
+          for i in $(seq 1 24); do
+            sleep 5
+            GPID=$(sudo docker exec redroid sh -c \
+              'pidof jp.konami.pesam 2>/dev/null' 2>/dev/null | tr -d '\r' | awk '{print $1}')
+            if [ -n "$GPID" ]; then echo "game pid=$GPID after $((i*5))s"; break; fi
+            echo "  waiting for game process t=$((i*5))s"
+          done
+          if [ -z "$GPID" ]; then
+            echo "=== GAME PROCESS NEVER APPEARED ==="
+            echo "the launch output above is the diagnosis; read it before"
+            echo "concluding anything about routes."
+            sudo docker exec redroid sh -c 'ps -A | head -30' 2>&1
+            sudo docker exec redroid logcat -d -t 300 2>&1 \
+              | grep -iE "konami|pesam|unity|ActivityManager.*(START|crash|died)|FATAL|AndroidRuntime|libUE4|Vulkan|EGL|ANR" \
+              | tail -50 || echo "no konami/unity/crash lines in logcat"
+            echo "=== graphics ==="
+            sudo docker exec redroid sh -c 'ls /vendor/lib64/libvulkan.so /vendor/lib64/hw/vulkan.*.so 2>&1' | head
+            echo "=== end ==="
+            # mark the step failed: this is an infrastructure failure, and it
+            # must never look like a scan that ran and found nothing
+            echo "GAME LAUNCH FAILED"
+          else
+            echo "--- is libUE4.so actually mapped? ---"
+            sudo docker exec redroid sh -c \
+              "grep -c libUE4 /proc/$GPID/maps 2>/dev/null" || echo "cannot read maps"
+            sudo docker exec redroid sh -c \
+              "grep libUE4 /proc/$GPID/maps 2>/dev/null | head -3" || true
+
+            # ---- FULL DECRYPTED CAPTURE: transparent proxy with our CA ----
+            # A CA in the system store alone captures nothing -- the previous
+            # run proved that by producing a live game and zero data. TLS must
+            # be TERMINATED somewhere, its plaintext logged, and the bytes
+            # re-encrypted upstream. That somewhere is mitmdump on the HOST:
+            #
+            #   game -(TLS, trusts our CA)-> mitmdump:8080 -(TLS, real Konami)-> Konami
+            #
+            # The phone reaches the proxy by an iptables DNAT on its own port
+            # 443, so no per-app proxy setting is needed and nothing is
+            # injected into the game. mitmproxy signs its leaf certificates
+            # with OUR ca.key, which is why the phone must trust our ca.crt.
+            echo "########## PHASE 4: transparent intercept, full decrypted capture"
+            # The CA attempt NEVER gates the rest of the phase. Rationale: even a
+            # phone that rejects our CA still yields the ClientHello, the
+            # destinations, and the handshake errors -- and a silent game still
+            # yields screenshots of what it shows. Gating everything on the CA
+            # reproduced the old trap: one silent failure deleting all evidence.
+            bash kgs-login/scripts/setup_ca.sh redroid "$W/ca" 2>&1
+            CA_OK=$?
+            echo "CA setup exit code: $CA_OK (0 means the phone trusts our CA)"
+            if true; then
+              cp -f "$W/ca/ca.crt" "$R/intercept-ca.crt" 2>/dev/null || true
+              echo "--- proxy on the host, signing with OUR ca.key ---"
+              python3 -m pip install --quiet --break-system-packages \
+                mitmproxy || echo "MITMPROXY INSTALL FAILED (see below)"
+              mkdir -p $W/mitm
+              if [ -f "$W/ca/ca.key" ]; then
+                cat "$W/ca/ca.key" "$W/ca/ca.crt" > $W/mitm/mitmproxy-ca.pem
+                cp -f "$W/ca/ca.crt" $W/mitm/mitmproxy-ca-cert.pem
+              else
+                echo "no ca.key was generated; mitmproxy will use its own CA"
+                echo "(the phone will NOT trust it; failed handshakes still"
+                echo "prove the game attempted TLS, which is evidence too)"
+              fi
+              FLOWS_LOG=$W/flows.log \
+              timeout 600 mitmdump --mode transparent --listen-port 8080 \
+                --set confdir=$W/mitm -s kgs-login/scripts/mitm_addon.py \
+                -w $W/flows.mitm > $W/mitm.log 2>&1 &
+              MITM_PID=$!
+              echo "mitmdump pid $MITM_PID"
+              sleep 10
+              if grep -q ADDON-READY $W/flows.log 2>/dev/null; then
+                echo "proxy up, addon loaded"
+              else
+                echo "=== PROXY OR ADDON DID NOT START ==="
+                head -40 $W/mitm.log || true
+              fi
+              echo "--- route the phone's 443 through the proxy ---"
+              sudo docker exec redroid iptables --version 2>&1 \
+                || echo "NO IPTABLES IN THE CONTAINER"
+              GW=$(sudo docker exec redroid sh -c \
+                'ip route show default 2>/dev/null' 2>/dev/null \
+                | awk '{for(i=1;i<=NF;i++) if($i=="via") print $(i+1)}' \
+                | tr -d '\r' | head -1)
+              # The older parse took $3 blindly and got "eth0" when the route
+              # line has no "via" (rc=2 on the DNAT, redirect silently absent).
+              # Take the field AFTER "via", and validate it looks like an IP.
+              if ! echo "$GW" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'; then
+                echo "no 'via' route (got [$GW]); reading /proc/net/route instead"
+                HEXGW=$(sudo docker exec redroid cat /proc/net/route \
+                  2>/dev/null | awk '$2=="00000000" {print $3}' | head -1)
+                GW=$(python3 -c "import socket,struct,sys; h='$HEXGW'.strip(); print(socket.inet_ntoa(struct.pack('<L', int(h,16))))" 2>/dev/null)
+              fi
+              echo "host gateway as seen from the phone: [$GW]"
+              if [ -n "$GW" ]; then
+                sudo docker exec redroid sh -c \
+                  "iptables -t nat -C OUTPUT -p tcp --dport 443 -j DNAT --to-destination $GW:8080 2>/dev/null || iptables -t nat -A OUTPUT -p tcp --dport 443 -j DNAT --to-destination $GW:8080" 2>&1
+                echo "iptables rc=$?"
+                sudo docker exec redroid sh -c \
+                  'iptables -t nat -L OUTPUT -n -v 2>/dev/null | head -12'
+              else
+                echo "=== NO GATEWAY FOUND - cannot redirect; capture impossible ==="
+              fi
+              echo "--- ground-truth capture, restarted so it overlaps the LIVE window ---"
+              echo "--- (the phase-1 pcap was killed at line ~822, before the game"
+              echo "---  ever ran at line ~1521; that empty file proved nothing) ---"
+              sudo docker exec redroid sh -c \
+                'rm -f /data/local/tmp/game2.pcap; tcpdump -i any -s 0 -w /data/local/tmp/game2.pcap tcp >/data/local/tmp/tcpdump2.out 2>&1 &'
+              sleep 2
+              sudo docker exec redroid sh -c 'ps -A | grep -i tcpdump' \
+                || echo "tcpdump2 NOT running"
+              sudo docker exec redroid sh -c 'am force-stop jp.konami.pesam' 2>/dev/null
+              echo "--- restarting the game INTO the intercept ---"
+              LAUNCH="${ACT:-jp.konami.pesam/com.epicgames.ue4.SplashActivity}"
+              echo "launching [$LAUNCH]"
+              sudo docker exec redroid sh -c "am start -W -n $LAUNCH" 2>&1
+              for i in $(seq 1 36); do
+                sleep 10
+                alive=$(sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null' 2>/dev/null | tr -d '\r' | awk '{print $1}')
+                echo "  phase4 t=$((i*10))s gamepid=${alive:-GONE} flows=$(grep -c '^### ' $W/flows.log 2>/dev/null || echo 0)"
+                # Dismiss the "Viewing full screen / GOT IT" system dialog that
+                # covers the game: its button sits at ~(915,405) in landscape
+                # and the old center tap (360,640) never touched it -- five
+                # screenshots across six minutes are pixel-identical, dialog up,
+                # download at 0%. One blind tap visibly highlighted the button
+                # without dismissing it. So tap the button deliberately.
+                #
+                # Do NOT send BACK (keyevent 4): it summons the game's own
+                # "Quit eFootball? Cancel/Quit" dialog, which then covers the
+                # screen instead -- the run ended with the quit dialog up.
+                # Cancel sits at ~(500,435); tap it as well in case a quit
+                # dialog is showing from an earlier BACK press.
+                sudo docker exec redroid /system/bin/input tap 915 405 >/dev/null 2>&1
+                sudo docker exec redroid /system/bin/input tap 500 435 >/dev/null 2>&1
+                sudo docker exec redroid /system/bin/input tap 360 640 >/dev/null 2>&1
+                sudo docker exec redroid /system/bin/input keyevent 66 >/dev/null 2>&1
+                # screenshot the actual screen: no more inventing what it shows
+                sudo docker exec redroid sh -c \
+                  "screencap -p /data/local/tmp/screen_$i.png" >/dev/null 2>&1
+                [ -n "$alive" ] || { echo "game died at t=$((i*10))s"; break; }
+              done
+              kill $MITM_PID 2>/dev/null
+              echo "--- diagnostic ladder: each layer proves the next ---"
+              echo "CA trusted by phone: $([ "$CA_OK" = "0" ] && echo YES || echo NO)"
+              echo "1. SYNs at all (game2.pcap size / syn count):"
+              sudo docker exec redroid sh -c \
+                'ls -la /data/local/tmp/game2.pcap 2>/dev/null; tcpdump -r /data/local/tmp/game2.pcap -c 2000 2>/dev/null | grep -c "S "' || echo "no syns read"
+              echo "2. proxy saw handshakes (mitm.log tail):"
+              tail -15 $W/mitm.log || true
+              echo "3. destinations the game contacted:"
+              grep -h '^HOST-SEEN:' $W/flows.log 2>/dev/null | sort -u | head -20 \
+                || echo "no HOST-SEEN lines"
+              echo "4. decrypted Konami requests/responses:"
+              grep -c '^### ' $W/flows.log 2>/dev/null || echo 0
+              grep '^### ' $W/flows.log 2>/dev/null | head -30 || true
+              echo "--- pull the evidence ---"
+              sudo docker cp redroid:/data/local/tmp/game2.pcap $W/game2.pcap 2>&1 \
+                || echo "no game2.pcap to copy"
+              for i in $(seq 1 36); do
+                sudo docker cp redroid:/data/local/tmp/screen_$i.png \
+                  $W/screen_$i.png 2>/dev/null || true
+              done
+              ls -la $W/screen_*.png 2>/dev/null | head -8 || echo "no screenshots"
+              cp -f $W/flows.log "$R/flows-decrypted.log" 2>/dev/null || true
+              cp -f $W/mitm.log "$R/mitm.log" 2>/dev/null || true
+            fi
+            if [ "$CA_OK" != "0" ]; then
+              echo "=== CA NOT TRUSTED: expect handshake failures, not plaintext;"
+              echo "=== SYNs + HOST-SEEN still prove whether the game tried ==="
+            fi
+
+            # ---- MEMORY SCAN RETIRED. ----
+            # read_paths.py stays in the repo, but it no longer runs: the fast
+            # version managed 8 passes in 300 s and found nothing, and the pass
+            # cost is dominated by copying bytes, so no tuning beats a
+            # microsecond-lived message. Traffic interception above replaces it.
+            echo "--- memory scan retired; the intercept above is the capture ---"
+          fi
+          echo "--- decrypted flows (the actual result) ---"
+          grep -c '^### ' $W/flows.log 2>/dev/null || echo 0
+          grep '^### ' $W/flows.log 2>/dev/null | head -40 || true
+          echo "--- destinations contacted ---"
+          grep -h '^HOST-SEEN:' $W/flows.log 2>/dev/null | sort -u | head -20 \
+            || echo "no HOST-SEEN lines"
+          echo "--- proxy errors (pinning/trust failures show here) ---"
+          grep -iE "error|warn|tls|handshake|certificate" $W/mitm.log \
+            2>/dev/null | tail -20 || true
+          sudo docker exec redroid logcat -d -t 400 > $W/logcat-p3.txt 2>&1 || true
+          echo "=== logcat phase 3 (filtered) ==="
+          grep -iE "konami|pesam|FATAL|AndroidRuntime|libUE4|Vulkan|EGL" \
+            $W/logcat-p3.txt 2>/dev/null | tail -40 || true
+          # stop the capture and pull the game's own ClientHello off the wire
+          sudo docker exec redroid sh -c \
+            'pkill -f tcpdump; ls -la /data/local/tmp/game.pcap' 2>&1 || true
+          sudo docker exec redroid sh -c 'cat /data/local/tmp/tcpdump.out 2>&1' | tail -5 || true
+          sudo docker cp redroid:/data/local/tmp/game.pcap $W/game.pcap 2>&1 \
+            || echo "no pcap to copy"
+          ls -la $W/game.pcap 2>/dev/null \
+            && echo "GAME PCAP CAPTURED: $W/game.pcap" \
+            || echo "no pcap captured"
+
+      - name: 06 publish
+        if: always()
+        run: |
+          set +e
+          W=/tmp/kgs
+          R=kgs-login/ci-report
+          mkdir -p "$R/capture"
+          { echo '## capture'; echo; echo '### step 01 (binder + android)';
+            echo '```text'; head -100 $W/step01.log 2>/dev/null; echo '```';
+            echo; echo '### pipeline (apkeep, frida, install, capture)';
+            echo '```text'; tail -250 $W/pipeline.log 2>/dev/null; echo '```';
+            echo; echo '### frida'; echo '```text';
+            head -120 $W/frida.log 2>/dev/null; echo '```';
+            echo; echo '### logcat (filtered)'; echo '```text';
+            grep -iE "konami|pesam|FATAL|AndroidRuntime|libUE4|Vulkan|EGL" \
+              $W/logcat.txt 2>/dev/null | tail -50; echo '```'; } > "$R/capture.md"
+          sudo docker exec redroid sh -c 'cd /data/local/tmp && tar cf - kgs' \
+            | sudo tar xf - -C "$R" 2>/dev/null
+          sudo docker exec redroid sh -c 'ls -la /data/local/tmp/kgs' > "$R/capture/index.txt" 2>&1
+          for f in "$R"/kgs/*.bin; do
+            [ -f "$f" ] && cp "$f" "$R/capture/$(basename "$f")"
+          done
+          # the game's own ClientHello: gzip it, and only if it is small enough
+          # to be worth committing
+          if [ -f $W/game.pcap ]; then
+            SZ=$(stat -c %s $W/game.pcap)
+            echo "game.pcap is $SZ bytes"
+            if [ "$SZ" -lt 20000000 ]; then
+              gzip -c $W/game.pcap > "$R/capture/game.pcap.gz"
+              echo "published game.pcap.gz"
+            else
+              echo "pcap too large to commit; extracting ClientHellos only"
+              sudo docker exec redroid sh -c \
+                'tcpdump -r /data/local/tmp/game.pcap -s 0 -X "tcp[tcpflags] & tcp-syn != 0" 2>/dev/null | head -400' \
+                > "$R/capture/syn-dump.txt" 2>&1
+            fi
+          fi
+          cp -f "$R/capture.md" "$R/latest.md"
+          { echo '## capture'; echo; echo '```text';
+            head -60 $W/step01.log 2>/dev/null; echo;
+            head -60 $W/frida.log 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          git config user.name  "ci-bot"
+          git config user.email "ci-bot@users.noreply.github.com"
+          # A timestamped copy under a name nothing else writes, so no report is
+          # ever lost even if every push below fails.
+          cp -f "$R/capture.md" "$R/report-$(date -u +%Y%m%d-%H%M%S).md" 2>/dev/null
+          # Do NOT rebase: the bot and the author both write latest.md, so a
+          # rebase conflicts on it every time and the push never happens.
+          # --soft moves the branch pointer without merging, so it cannot
+          # conflict, and the push is then a fast-forward by construction.
+          # The push to the author's branch is best-effort, and it has already
+          # lost a full run's capture: a commit landing between this run's
+          # checkout and its publish makes the push non-fast-forward, and the
+          # step still reported success -- so the 591 s capture produced nothing
+          # retrievable. Therefore the report is force-pushed FIRST to a branch
+          # nobody else writes, which cannot conflict, and the lot is uploaded
+          # as an artifact in step 07. Losing a publish must never again mean
+          # losing the capture.
+          echo "--- force-push to ci-capture (cannot conflict) ---"
+          git push --force origin "HEAD:refs/heads/ci-capture" 2>&1 | tail -3
+          ok=0
+          for attempt in 1 2 3; do
+            git fetch origin "${{ github.ref_name }}" || true
+            git reset --soft "origin/${{ github.ref_name }}" || true
+            git add -f "$R"
+            git commit -m "ci: ARM64 capture report" 2>&1 | tail -1
+            if git push origin "HEAD:refs/heads/${{ github.ref_name }}" 2>&1 | tail -2; then
+              ok=1; break
+            fi
+            echo "push attempt $attempt failed; retrying"
+            sleep 5
+          done
+          echo "PUBLISH main ok=$ok"
+          if [ "$ok" != "1" ]; then
+            echo "=== PUBLISH TO MAIN FAILED - not fatal: the report is on ci-capture and in the artifact ==="
+          fi
+          # make the step summary self-contained, so a run is readable even if
+          # every git operation failed
+          { echo '## capture'; echo;
+            echo '### decrypted Konami flows (the thing being hunted)'; echo '```text';
+            grep '^### ' $W/flows.log 2>/dev/null | head -60 \
+              || echo 'no decrypted flows';
+            echo '```';
+            echo '### destinations contacted'; echo '```text';
+            grep -h '^HOST-SEEN:' $W/flows.log 2>/dev/null | sort -u | head -20 \
+              || echo 'no HOST-SEEN lines';
+            echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          # the decrypted flows are small text: commit them, not just the report
+          cp -f $W/flows.log "$R/flows-decrypted.log" 2>/dev/null || true
+
+      # The git push above is best-effort and has already silently lost one
+      # full run's capture. An artifact is the retrieval path that cannot fail
+      # for branch-protection or concurrency reasons, so upload everything the
+      # run produced, raw, whatever happened to the push.
+      - name: 07 upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgs-capture-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            kgs-login/ci-report/capture.md
+            kgs-login/ci-report/scan-paths.log
+            kgs-login/ci-report/flows-decrypted.log
+            kgs-login/ci-report/capture/
+            /tmp/kgs/scan.log
+            /tmp/kgs/flows.log
+            /tmp/kgs/flows.mitm
+            /tmp/kgs/mitm.log
+            /tmp/kgs/screen_*.png
+            /tmp/kgs/aurora_*.png
+            /tmp/kgs/frida.log
+            /tmp/kgs/frida2.log
+            /tmp/kgs/pipeline.log
+            /tmp/kgs/step01.log
+            /tmp/kgs/logcat*.txt
+            /tmp/kgs/apkeep.log
+            /tmp/kgs/inst1.log
+            /tmp/kgs/inst2.log
+            /tmp/kgs/game.pcap
+            /tmp/kgs/game2.pcap

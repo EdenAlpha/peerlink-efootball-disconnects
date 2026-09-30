@@ -1,0 +1,29 @@
+syntax = "proto3";
+package command_service;
+
+// Exact schema extracted from the game's own binary
+// (FileDescriptorProto for command_service.proto @0xc95b00 in libUE4.so).
+message CommandRequest {
+  string id = 1;
+  PackMode packMode = 2;
+  // descriptor says `string`, but the game puts raw MessagePack bytes here;
+  // `bytes` is wire-identical and Python-friendly.
+  bytes req = 3;
+  string path = 4;
+}
+
+message CommandResponse {
+  string id = 1;
+  PackMode packMode = 2;
+  bytes res = 3;
+}
+
+enum PackMode {
+  PACK_MODE_JSON = 0;
+  PACK_MODE_MSGPACK = 1;
+}
+
+service CommandService {
+  // streaming type read from the descriptor (see extract_proto.py output)
+  rpc CommandStream(stream CommandRequest) returns (stream CommandResponse);
+}
