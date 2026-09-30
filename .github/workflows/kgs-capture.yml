@@ -515,9 +515,23 @@ jobs:
           sudo docker exec redroid sh -c \
             'cmd package resolve-activity --brief -c android.intent.category.LAUNCHER jp.konami.pesam' 2>&1 | tail -5
           echo "--- direct am start as the fallback ---"
-          sudo docker exec redroid sh -c \
-            'am start -W -n jp.konami.pesam/com.unity3d.player.UnityPlayerActivity' 2>&1
-          echo "am start rc=$?"
+          # Resolve the activity, do not assume it. eFootball 11.0.1 is an
+          # UNREAL title, and its launcher is:
+          #     jp.konami.pesam/com.epicgames.ue4.SplashActivity
+          # not Unity's UnityPlayerActivity, which does not exist here. Also
+          # note this redroid `monkey` returns rc=0 while printing only
+          # "bash arg: ..." lines and injects nothing, so its exit status is
+          # not evidence that anything started.
+          ACT=$(sudo docker exec redroid sh -c \
+            'cmd package resolve-activity --brief -c android.intent.category.LAUNCHER jp.konami.pesam' 2>/dev/null \
+            | tr -d '\r' | grep -E '^jp\.konami\.pesam/' | tail -1)
+          echo "resolved launcher: [$ACT]"
+          if [ -n "$ACT" ]; then
+            sudo docker exec redroid sh -c "am start -W -n $ACT" 2>&1
+            echo "am start rc=$?"
+          else
+            echo "could not resolve the launcher activity"
+          fi
           GPID=""
           for i in $(seq 1 24); do
             sleep 5
