@@ -1,1 +1,1 @@
-uidump
+exec bash kgs-login/scripts/uidump.sh redroid /tmp/kgs/ui_now.xml
