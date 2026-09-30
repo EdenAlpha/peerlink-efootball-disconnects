@@ -40,7 +40,7 @@ bbb77fa6888e: Download complete
 bbb77fa6888e: Pull complete
 Digest: sha256:0a611199ba2e0b5d60af39b3327a517f6407231f4352114ed3bd3cbfe2be69aa
 Status: Downloaded newer image for redroid/redroid:14.0.0_64only-latest
-3f283a68522a9f5f59f84e971694fceef342784e07a9c7c2483727dcf6fe1ca8
+8041483d6630e7b30df90d8cd9c3227a8dc6ab2afedb4060c8e0ea8789027e3c
 + booted=0
 ++ seq 1 36
 + for i in $(seq 1 36)
@@ -106,256 +106,256 @@ ls: /vendor/lib64/libvulkan.so: No such file or directory
 
 ### pipeline (apkeep, frida, install, capture)
 ```text
-package:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/split_config.en.apk
-package:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/split_config.es.apk
-package:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/split_config.fr.apk
-package:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/split_config.hi.apk
-package:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/split_config.in.apk
-package:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/split_config.it.apk
-package:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/split_config.ja.apk
-package:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/split_config.ko.apk
-package:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/split_config.my.apk
-package:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/split_config.pt.apk
-package:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/split_config.ru.apk
-package:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/split_config.th.apk
-package:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/split_config.tr.apk
-package:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/split_config.vi.apk
-package:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/split_config.xxxhdpi.apk
-package:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/split_config.zh.apk
-package:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/split_pad_it_0.apk
-package:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/split_pad_it_1.apk
-+ sudo docker exec redroid sh -c 'cmd package resolve-activity --brief -c android.intent.category.LAUNCHER jp.konami.pesam'
-+ tail -5
-priority=0 preferredOrder=0 match=0x108000 specificIndex=-1 isDefault=false
-jp.konami.pesam/com.epicgames.ue4.SplashActivity
-+ echo '--- direct am start as the fallback ---'
---- direct am start as the fallback ---
-++ sudo docker exec redroid sh -c 'cmd package resolve-activity --brief -c android.intent.category.LAUNCHER jp.konami.pesam'
-++ tr -d '\r'
-++ grep -E '^jp\.konami\.pesam/'
-++ tail -1
-+ ACT=jp.konami.pesam/com.epicgames.ue4.SplashActivity
-+ echo 'resolved launcher: [jp.konami.pesam/com.epicgames.ue4.SplashActivity]'
-resolved launcher: [jp.konami.pesam/com.epicgames.ue4.SplashActivity]
-+ '[' -n jp.konami.pesam/com.epicgames.ue4.SplashActivity ']'
-+ sudo docker exec redroid sh -c 'am start -W -n jp.konami.pesam/com.epicgames.ue4.SplashActivity'
-Starting: Intent { cmp=jp.konami.pesam/com.epicgames.ue4.SplashActivity }
-Status: ok
-LaunchState: COLD
-Activity: jp.konami.pesam/com.epicgames.ue4.GameActivity
-TotalTime: 471
-WaitTime: 477
-Complete
-+ echo 'am start rc=0'
-am start rc=0
-+ GPID=
-++ seq 1 24
-+ for i in $(seq 1 24)
-+ sleep 5
++ alive=4865
+++ grep -c '^### ' /tmp/kgs/flows.log
+++ echo 0
++ echo '  phase4 t=310s gamepid=4865 flows=0
+0'
+  phase4 t=310s gamepid=4865 flows=0
+0
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
++ sudo docker exec redroid sh -c 'screencap -p /data/local/tmp/screen_31.png'
++ '[' -n 4865 ']'
++ for i in $(seq 1 36)
++ sleep 10
 ++ tr -d '\r'
 ++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
 ++ awk '{print $1}'
-+ GPID=4564
-+ '[' -n 4564 ']'
-+ echo 'game pid=4564 after 5s'
-game pid=4564 after 5s
-+ break
-+ '[' -z 4564 ']'
-+ echo '--- is libUE4.so actually mapped? ---'
---- is libUE4.so actually mapped? ---
-+ sudo docker exec redroid sh -c 'grep -c libUE4 /proc/4564/maps 2>/dev/null'
-4
-+ sudo docker exec redroid sh -c 'grep libUE4 /proc/4564/maps 2>/dev/null | head -3'
-e3dc1ec51000-e3dc21477000 r--p 00000000 08:01 6291554                    /data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/lib/arm64/libUE4.so
-e3dc2147a000-e3dc277c3000 r-xp 02825000 08:01 6291554                    /data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/lib/arm64/libUE4.so
-e3dc277c6000-e3dc28554000 r--p 08b6d000 08:01 6291554                    /data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/lib/arm64/libUE4.so
-+ echo '--- reading the game'\''s memory from the host (no injection) ---'
---- reading the game's memory from the host (no injection) ---
-+ GPID=4564
-+ timeout 400 python3 kgs-login/scripts/read_paths.py --package jp.konami.pesam --seconds 300 --interval 3 --docker-exec 'sudo docker exec redroid'
-+ SPID=22398
-+ echo 'phase 3 reader pid 22398'
-phase 3 reader pid 22398
++ alive=4865
+++ grep -c '^### ' /tmp/kgs/flows.log
+++ echo 0
++ echo '  phase4 t=320s gamepid=4865 flows=0
+0'
+  phase4 t=320s gamepid=4865 flows=0
+0
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
++ sudo docker exec redroid sh -c 'screencap -p /data/local/tmp/screen_32.png'
++ '[' -n 4865 ']'
++ for i in $(seq 1 36)
++ sleep 10
+++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
+++ tr -d '\r'
+++ awk '{print $1}'
++ alive=4865
+++ grep -c '^### ' /tmp/kgs/flows.log
+++ echo 0
++ echo '  phase4 t=330s gamepid=4865 flows=0
+0'
+  phase4 t=330s gamepid=4865 flows=0
+0
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
++ sudo docker exec redroid sh -c 'screencap -p /data/local/tmp/screen_33.png'
++ '[' -n 4865 ']'
++ for i in $(seq 1 36)
++ sleep 10
+++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
+++ tr -d '\r'
+++ awk '{print $1}'
++ alive=4865
+++ grep -c '^### ' /tmp/kgs/flows.log
+++ echo 0
++ echo '  phase4 t=340s gamepid=4865 flows=0
+0'
+  phase4 t=340s gamepid=4865 flows=0
+0
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
++ sudo docker exec redroid sh -c 'screencap -p /data/local/tmp/screen_34.png'
++ '[' -n 4865 ']'
++ for i in $(seq 1 36)
++ sleep 10
+++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
+++ tr -d '\r'
+++ awk '{print $1}'
++ alive=4865
+++ grep -c '^### ' /tmp/kgs/flows.log
+++ echo 0
++ echo '  phase4 t=350s gamepid=4865 flows=0
+0'
+  phase4 t=350s gamepid=4865 flows=0
+0
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
++ sudo docker exec redroid sh -c 'screencap -p /data/local/tmp/screen_35.png'
++ '[' -n 4865 ']'
++ for i in $(seq 1 36)
++ sleep 10
+++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
+++ tr -d '\r'
+++ awk '{print $1}'
++ alive=4865
+++ grep -c '^### ' /tmp/kgs/flows.log
+++ echo 0
++ echo '  phase4 t=360s gamepid=4865 flows=0
+0'
+  phase4 t=360s gamepid=4865 flows=0
+0
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
++ sudo docker exec redroid sh -c 'screencap -p /data/local/tmp/screen_36.png'
++ '[' -n 4865 ']'
++ kill 22495
++ echo '--- diagnostic ladder: each layer proves the next ---'
+--- diagnostic ladder: each layer proves the next ---
+++ '[' 0 = 0 ']'
+++ echo YES
++ echo 'CA trusted by phone: YES'
+CA trusted by phone: YES
++ echo '1. SYNs at all (game2.pcap size / syn count):'
+1. SYNs at all (game2.pcap size / syn count):
++ sudo docker exec redroid sh -c 'ls -la /data/local/tmp/game2.pcap 2>/dev/null; tcpdump -r /data/local/tmp/game2.pcap -c 2000 2>/dev/null | grep -c "S "'
+-rw-r--r-- 1 root root 32768 2026-09-30 05:59 /data/local/tmp/game2.pcap
+130
++ echo '2. proxy saw handshakes (mitm.log tail):'
+2. proxy saw handshakes (mitm.log tail):
++ tail -15 /tmp/kgs/mitm.log
+[05:54:42.291] Loading script kgs-login/scripts/mitm_addon.py
+[05:54:42.293] Transparent Proxy listening at *:8080.
++ echo '3. destinations the game contacted:'
+3. destinations the game contacted:
++ grep -h '^HOST-SEEN:' /tmp/kgs/flows.log
++ sort -u
++ head -20
++ echo '4. decrypted Konami requests/responses:'
+4. decrypted Konami requests/responses:
++ grep -c '^### ' /tmp/kgs/flows.log
+0
++ echo 0
+0
++ grep '^### ' /tmp/kgs/flows.log
++ head -30
++ echo '--- pull the evidence ---'
+--- pull the evidence ---
++ sudo docker cp redroid:/data/local/tmp/game2.pcap /tmp/kgs/game2.pcap
 ++ seq 1 36
 + for i in $(seq 1 36)
-+ sleep 10
-++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
-++ tr -d '\r'
-++ awk '{print $1}'
-+ alive=4564
-++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
-++ echo 0
-+ echo '  phase3 t=10s passes=0
-0 gamepid=4564'
-  phase3 t=10s passes=0
-0 gamepid=4564
-+ sudo docker exec redroid /system/bin/input tap 360 640
-+ sudo docker exec redroid /system/bin/input keyevent 66
-+ '[' -n 4564 ']'
++ sudo docker cp redroid:/data/local/tmp/screen_1.png /tmp/kgs/screen_1.png
 + for i in $(seq 1 36)
-+ sleep 10
-++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
-++ tr -d '\r'
-++ awk '{print $1}'
-+ alive=4564
-++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
-++ echo 0
-+ echo '  phase3 t=20s passes=0
-0 gamepid=4564'
-  phase3 t=20s passes=0
-0 gamepid=4564
-+ sudo docker exec redroid /system/bin/input tap 360 640
-+ sudo docker exec redroid /system/bin/input keyevent 66
-+ '[' -n 4564 ']'
++ sudo docker cp redroid:/data/local/tmp/screen_2.png /tmp/kgs/screen_2.png
 + for i in $(seq 1 36)
-+ sleep 10
-++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
-++ tr -d '\r'
-++ awk '{print $1}'
-+ alive=4564
-++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
-++ echo 0
-+ echo '  phase3 t=30s passes=0
-0 gamepid=4564'
-  phase3 t=30s passes=0
-0 gamepid=4564
-+ sudo docker exec redroid /system/bin/input tap 360 640
-+ sudo docker exec redroid /system/bin/input keyevent 66
-+ '[' -n 4564 ']'
++ sudo docker cp redroid:/data/local/tmp/screen_3.png /tmp/kgs/screen_3.png
 + for i in $(seq 1 36)
-+ sleep 10
-++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
-++ tr -d '\r'
-++ awk '{print $1}'
-+ alive=4564
-++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
-++ echo 0
-+ echo '  phase3 t=40s passes=0
-0 gamepid=4564'
-  phase3 t=40s passes=0
-0 gamepid=4564
-+ sudo docker exec redroid /system/bin/input tap 360 640
-+ sudo docker exec redroid /system/bin/input keyevent 66
-+ '[' -n 4564 ']'
++ sudo docker cp redroid:/data/local/tmp/screen_4.png /tmp/kgs/screen_4.png
 + for i in $(seq 1 36)
-+ sleep 10
-++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
-++ tr -d '\r'
-++ awk '{print $1}'
-+ alive=4564
-++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
-++ echo 0
-+ echo '  phase3 t=50s passes=0
-0 gamepid=4564'
-  phase3 t=50s passes=0
-0 gamepid=4564
-+ sudo docker exec redroid /system/bin/input tap 360 640
-+ sudo docker exec redroid /system/bin/input keyevent 66
-+ '[' -n 4564 ']'
++ sudo docker cp redroid:/data/local/tmp/screen_5.png /tmp/kgs/screen_5.png
 + for i in $(seq 1 36)
-+ sleep 10
-++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
-++ awk '{print $1}'
-++ tr -d '\r'
-+ alive=4564
-++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
-++ echo 0
-+ echo '  phase3 t=60s passes=0
-0 gamepid=4564'
-  phase3 t=60s passes=0
-0 gamepid=4564
-+ sudo docker exec redroid /system/bin/input tap 360 640
-+ sudo docker exec redroid /system/bin/input keyevent 66
-+ '[' -n 4564 ']'
++ sudo docker cp redroid:/data/local/tmp/screen_6.png /tmp/kgs/screen_6.png
 + for i in $(seq 1 36)
-+ sleep 10
-++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
-++ tr -d '\r'
-++ awk '{print $1}'
-+ alive=4564
-++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
-++ echo 0
-+ echo '  phase3 t=70s passes=0
-0 gamepid=4564'
-  phase3 t=70s passes=0
-0 gamepid=4564
-+ sudo docker exec redroid /system/bin/input tap 360 640
-+ sudo docker exec redroid /system/bin/input keyevent 66
-+ '[' -n 4564 ']'
++ sudo docker cp redroid:/data/local/tmp/screen_7.png /tmp/kgs/screen_7.png
 + for i in $(seq 1 36)
-+ sleep 10
-++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
-++ tr -d '\r'
-++ awk '{print $1}'
-+ alive=4564
-++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
-+ echo '  phase3 t=80s passes=1 gamepid=4564'
-  phase3 t=80s passes=1 gamepid=4564
-+ sudo docker exec redroid /system/bin/input tap 360 640
-+ sudo docker exec redroid /system/bin/input keyevent 66
-+ '[' -n 4564 ']'
++ sudo docker cp redroid:/data/local/tmp/screen_8.png /tmp/kgs/screen_8.png
 + for i in $(seq 1 36)
-+ sleep 10
-++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
-++ tr -d '\r'
-++ awk '{print $1}'
-+ alive=4564
-++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
-+ echo '  phase3 t=90s passes=1 gamepid=4564'
-  phase3 t=90s passes=1 gamepid=4564
-+ sudo docker exec redroid /system/bin/input tap 360 640
-+ sudo docker exec redroid /system/bin/input keyevent 66
-+ '[' -n 4564 ']'
++ sudo docker cp redroid:/data/local/tmp/screen_9.png /tmp/kgs/screen_9.png
 + for i in $(seq 1 36)
-+ sleep 10
-++ tr -d '\r'
-++ awk '{print $1}'
-++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
-+ alive=4564
-++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
-+ echo '  phase3 t=100s passes=1 gamepid=4564'
-  phase3 t=100s passes=1 gamepid=4564
-+ sudo docker exec redroid /system/bin/input tap 360 640
-+ sudo docker exec redroid /system/bin/input keyevent 66
-+ '[' -n 4564 ']'
++ sudo docker cp redroid:/data/local/tmp/screen_10.png /tmp/kgs/screen_10.png
 + for i in $(seq 1 36)
-+ sleep 10
-++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
-++ tr -d '\r'
-++ awk '{print $1}'
-+ alive=4564
-++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
-+ echo '  phase3 t=110s passes=1 gamepid=4564'
-  phase3 t=110s passes=1 gamepid=4564
-+ sudo docker exec redroid /system/bin/input tap 360 640
-+ sudo docker exec redroid /system/bin/input keyevent 66
-+ '[' -n 4564 ']'
++ sudo docker cp redroid:/data/local/tmp/screen_11.png /tmp/kgs/screen_11.png
 + for i in $(seq 1 36)
-+ sleep 10
-++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
-++ tr -d '\r'
-++ awk '{print $1}'
-+ alive=4564
-++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
-+ echo '  phase3 t=120s passes=2 gamepid=4564'
-  phase3 t=120s passes=2 gamepid=4564
-+ sudo docker exec redroid /system/bin/input tap 360 640
-+ sudo docker exec redroid /system/bin/input keyevent 66
-+ '[' -n 4564 ']'
++ sudo docker cp redroid:/data/local/tmp/screen_12.png /tmp/kgs/screen_12.png
 + for i in $(seq 1 36)
-+ sleep 10
-++ tr -d '\r'
-++ awk '{print $1}'
-++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
-+ alive=4564
-++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
-+ echo '  phase3 t=130s passes=2 gamepid=4564'
-  phase3 t=130s passes=2 gamepid=4564
-+ sudo docker exec redroid /system/bin/input tap 360 640
-+ sudo docker exec redroid /system/bin/input keyevent 66
-+ '[' -n 4564 ']'
++ sudo docker cp redroid:/data/local/tmp/screen_13.png /tmp/kgs/screen_13.png
 + for i in $(seq 1 36)
-+ sleep 10
++ sudo docker cp redroid:/data/local/tmp/screen_14.png /tmp/kgs/screen_14.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_15.png /tmp/kgs/screen_15.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_16.png /tmp/kgs/screen_16.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_17.png /tmp/kgs/screen_17.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_18.png /tmp/kgs/screen_18.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_19.png /tmp/kgs/screen_19.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_20.png /tmp/kgs/screen_20.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_21.png /tmp/kgs/screen_21.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_22.png /tmp/kgs/screen_22.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_23.png /tmp/kgs/screen_23.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_24.png /tmp/kgs/screen_24.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_25.png /tmp/kgs/screen_25.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_26.png /tmp/kgs/screen_26.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_27.png /tmp/kgs/screen_27.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_28.png /tmp/kgs/screen_28.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_29.png /tmp/kgs/screen_29.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_30.png /tmp/kgs/screen_30.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_31.png /tmp/kgs/screen_31.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_32.png /tmp/kgs/screen_32.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_33.png /tmp/kgs/screen_33.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_34.png /tmp/kgs/screen_34.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_35.png /tmp/kgs/screen_35.png
++ for i in $(seq 1 36)
++ sudo docker cp redroid:/data/local/tmp/screen_36.png /tmp/kgs/screen_36.png
++ ls -la /tmp/kgs/screen_1.png /tmp/kgs/screen_10.png /tmp/kgs/screen_11.png /tmp/kgs/screen_12.png /tmp/kgs/screen_13.png /tmp/kgs/screen_14.png /tmp/kgs/screen_15.png /tmp/kgs/screen_16.png /tmp/kgs/screen_17.png /tmp/kgs/screen_18.png /tmp/kgs/screen_19.png /tmp/kgs/screen_2.png /tmp/kgs/screen_20.png /tmp/kgs/screen_21.png /tmp/kgs/screen_22.png /tmp/kgs/screen_23.png /tmp/kgs/screen_24.png /tmp/kgs/screen_25.png /tmp/kgs/screen_26.png /tmp/kgs/screen_27.png /tmp/kgs/screen_28.png /tmp/kgs/screen_29.png /tmp/kgs/screen_3.png /tmp/kgs/screen_30.png /tmp/kgs/screen_31.png /tmp/kgs/screen_32.png /tmp/kgs/screen_33.png /tmp/kgs/screen_34.png /tmp/kgs/screen_35.png /tmp/kgs/screen_36.png /tmp/kgs/screen_4.png /tmp/kgs/screen_5.png /tmp/kgs/screen_6.png /tmp/kgs/screen_7.png /tmp/kgs/screen_8.png /tmp/kgs/screen_9.png
++ head -8
+-rw-r--r-- 1 root root 501712 Sep 30 05:55 /tmp/kgs/screen_1.png
+-rw-r--r-- 1 root root 374405 Sep 30 05:56 /tmp/kgs/screen_10.png
+-rw-r--r-- 1 root root 374405 Sep 30 05:56 /tmp/kgs/screen_11.png
+-rw-r--r-- 1 root root 374405 Sep 30 05:57 /tmp/kgs/screen_12.png
+-rw-r--r-- 1 root root 374405 Sep 30 05:57 /tmp/kgs/screen_13.png
+-rw-r--r-- 1 root root 374405 Sep 30 05:57 /tmp/kgs/screen_14.png
+-rw-r--r-- 1 root root 374405 Sep 30 05:57 /tmp/kgs/screen_15.png
+-rw-r--r-- 1 root root 374405 Sep 30 05:57 /tmp/kgs/screen_16.png
++ cp -f /tmp/kgs/flows.log /flows-decrypted.log
++ true
++ cp -f /tmp/kgs/mitm.log /mitm.log
++ true
++ '[' 0 '!=' 0 ']'
++ echo '--- memory scan retired; the intercept above is the capture ---'
+--- memory scan retired; the intercept above is the capture ---
++ echo '--- decrypted flows (the actual result) ---'
+--- decrypted flows (the actual result) ---
++ grep -c '^### ' /tmp/kgs/flows.log
+0
++ echo 0
+0
++ grep '^### ' /tmp/kgs/flows.log
++ head -40
++ echo '--- destinations contacted ---'
+--- destinations contacted ---
++ grep -h '^HOST-SEEN:' /tmp/kgs/flows.log
++ sort -u
++ head -20
++ echo '--- proxy errors (pinning/trust failures show here) ---'
+--- proxy errors (pinning/trust failures show here) ---
++ tail -20
++ grep -iE 'error|warn|tls|handshake|certificate' /tmp/kgs/mitm.log
++ sudo docker exec redroid logcat -d -t 400
++ echo '=== logcat phase 3 (filtered) ==='
+=== logcat phase 3 (filtered) ===
++ tail -40
++ grep -iE 'konami|pesam|FATAL|AndroidRuntime|libUE4|Vulkan|EGL' /tmp/kgs/logcat-p3.txt
++ sudo docker exec redroid sh -c 'pkill -f tcpdump; ls -la /data/local/tmp/game.pcap'
++ true
++ sudo docker exec redroid sh -c 'cat /data/local/tmp/tcpdump.out 2>&1'
++ tail -5
+tcpdump: data link type LINUX_SLL2
+tcpdump: listening on any, link-type LINUX_SLL2 (Linux cooked v2), snapshot length 262144 bytes
+0 packets captured
+0 packets received by filter
+0 packets dropped by kernel
++ sudo docker cp redroid:/data/local/tmp/game.pcap /tmp/kgs/game.pcap
++ ls -la /tmp/kgs/game.pcap
+-rw-r--r-- 1 root root 24 Sep 30 05:48 /tmp/kgs/game.pcap
++ echo 'GAME PCAP CAPTURED: /tmp/kgs/game.pcap'
+GAME PCAP CAPTURED: /tmp/kgs/game.pcap
 ```
 
 ### frida
@@ -378,27 +378,27 @@ Failed to spawn: error receiving data: Connection reset by peer
 
 ### logcat (filtered)
 ```text
-09-30 05:00:53.220  1179  1754 D MediaGrants: Removed 0 media_grants for 0 user for jp.konami.pesam. Reason: Mode changed: android:read_external_storage
-09-30 05:00:53.221  1179  1754 D MediaGrants: Removed 0 media_grants for 0 user for jp.konami.pesam. Reason: Mode changed: android:read_external_storage
-09-30 05:00:53.222  1179  1754 D MediaGrants: Removed 0 media_grants for 0 user for jp.konami.pesam. Reason: Mode changed: android:read_external_storage
-09-30 05:00:53.244  2162  2163 W ziparchive: Unable to open '/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/base.dm': No such file or directory
-09-30 05:00:53.244  2162  2163 W ziparchive: Unable to open '/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/base.dm': No such file or directory
-09-30 05:00:53.247  2162  2163 I artd    : Running dex2oat: /apex/com.android.art/bin/art_exec --drop-capabilities --set-task-profile=Dex2OatBootComplete --set-priority=background --keep-fds=6:7:8:9:10 -- /apex/com.android.art/bin/dex2oat64 --zip-fd=6 --zip-location=/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/base.apk --oat-fd=7 --oat-location=/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/oat/arm64/base.odex --output-vdex-fd=8 --swap-fd=9 --class-loader-context-fds=10 --class-loader-context=PCL[]{PCL[/system/framework/org.apache.http.legacy.jar]} --classpath-dir=/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA== --instruction-set=arm64 --instruction-set-features=default --instruction-set-variant=generic --compiler-filter=verify --compilation-reason=install --compact-dex-level=none --max-image-block-size=524288 --resolve-startup-const-strings=true --generate-mini-debug-info --runtime-arg -Xdeny-art-apex-data-files --runtime-arg -Xtarget-sdk-version:36 --runtime-arg -Xhidden-api-policy:enabled --runtime-arg -Xms64m --runtime-arg -Xmx512m --comments=app-version-name:11.0.1,app-version-code:311000101,art-version:-1
-09-30 05:00:53.247  2162  2163 I artd    : Opened FDs: 6:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/base.apk 7:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/oat/arm64/base.odex.nF9szO.tmp 8:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/oat/arm64/base.vdex.jpccuY.tmp 9:/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/oat/arm64/base.odex.swap.XXiGN5.tmp 10:/system/framework/org.apache.http.legacy.jar 
-09-30 05:00:53.265  2164  2164 W dex2oat64: /apex/com.android.art/bin/dex2oat64 --zip-fd=6 --zip-location=/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/base.apk --oat-fd=7 --oat-location=/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/oat/arm64/base.odex --output-vdex-fd=8 --swap-fd=9 --class-loader-context-fds=10 --class-loader-context=PCL[]{PCL[/system/framework/org.apache.http.legacy.jar]} --classpath-dir=/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA== --instruction-set=arm64 --instruction-set-features=default --instruction-set-variant=generic --compiler-filter=verify --compilation-reason=install --compact-dex-level=none --max-image-block-size=524288 --resolve-startup-const-strings=true --generate-mini-debug-info --runtime-arg -Xdeny-art-apex-data-files --runtime-arg -Xtarget-sdk-version:36 --runtime-arg -Xhidden-api-policy:enabled --runtime-arg -Xms64m --runtime-arg -Xmx512m --comments=app-version-name:11.0.1,app-version-code:311000101,art-version:-1
-09-30 05:00:53.265  2164  2164 I dex2oat64: /apex/com.android.art/bin/dex2oat64 --output-vdex-fd=8 --class-loader-context-fds=10 --class-loader-context=PCL[]{PCL[/system/framework/org.apache.http.legacy.jar]} --classpath-dir=/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA== --compiler-filter=verify --compilation-reason=install --compact-dex-level=none --max-image-block-size=524288 --resolve-startup-const-strings=true --generate-mini-debug-info --comments=app-version-name:11.0.1,app-version-code:311000101,art-version:-1
-09-30 05:00:53.665   234   281 I ArtService: Dexopt result: [packageName = jp.konami.pesam] DexContainerFileDexoptResult{dexContainerFile=/data/app/~~rNe16zSwXM08fZkJxWXi4Q==/jp.konami.pesam-iylSK8mkvrCqf1RPwrLjuA==/base.apk, primaryAbi=true, abi=arm64-v8a, actualCompilerFilter=verify, status=PERFORMED, dex2oatWallTimeMillis=424, dex2oatCpuTimeMillis=1140, sizeBytes=682616, sizeBeforeBytes=0}
-09-30 05:00:53.668   234   281 V BackupManagerService: [UserID:0] restoreAtInstall pkg=jp.konami.pesam token=1 restoreSet=0
-09-30 05:00:53.681   234   234 V GameManagerService_GamePackageConfiguration: No android.game_mode_config meta-data found for package jp.konami.pesam
-09-30 05:00:53.681   854   906 D SessionCommitReceiver: Removing PromiseIcon for package: jp.konami.pesam, install reason: 0, alreadyAddedPromiseIcon: false
-09-30 05:00:53.681   820   820 D CarrierSvcBindHelper: onPackageAdded: jp.konami.pesam
-09-30 05:00:53.681   234   575 I SdkSandboxManager: No SDKs used. Skipping SDK data reconcilation for CallingInfo{mUid=10087, mPackageName='jp.konami.pesam, mAppProcessToken='null'}
-09-30 05:00:53.681   234   234 V GameManagerService: Package configuration not found for jp.konami.pesam
-09-30 05:00:53.686   605   605 I SafetyLabelChangedBroadcastReceiver: received broadcast packageName: jp.konami.pesam, current user: UserHandle{0}, packageChangeEvent: NEW_INSTALL, intent user: UserHandle{0}
-09-30 05:00:53.696   820   820 D CarrierSvcBindHelper: onPackageModified: jp.konami.pesam
-09-30 05:01:12.221   234   696 I ActivityManager: Force stopping jp.konami.pesam appid=10087 user=0: from pid 2270
-09-30 05:01:12.223   820   820 D CarrierSvcBindHelper: onHandleForceStop: [jp.konami.pesam]
-09-30 05:01:12.308  2273  2273 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
-09-30 05:04:15.909   234  1022 I ActivityManager: Force stopping jp.konami.pesam appid=10087 user=0: from pid 2929
-09-30 05:04:15.911   820   820 D CarrierSvcBindHelper: onHandleForceStop: [jp.konami.pesam]
+09-30 05:44:38.450  1168  1181 D MediaGrants: Removed 0 media_grants for 0 user for jp.konami.pesam. Reason: Mode changed: android:read_external_storage
+09-30 05:44:38.451  1168  1181 D MediaGrants: Removed 0 media_grants for 0 user for jp.konami.pesam. Reason: Mode changed: android:read_external_storage
+09-30 05:44:38.452  1168  1181 D MediaGrants: Removed 0 media_grants for 0 user for jp.konami.pesam. Reason: Mode changed: android:read_external_storage
+09-30 05:44:38.468  2148  2149 W ziparchive: Unable to open '/data/app/~~mbTs4gSTpFYOUJ9P-43W3Q==/jp.konami.pesam-ZchDPB6MSoTAGY1RrKh1uQ==/base.dm': No such file or directory
+09-30 05:44:38.468  2148  2149 W ziparchive: Unable to open '/data/app/~~mbTs4gSTpFYOUJ9P-43W3Q==/jp.konami.pesam-ZchDPB6MSoTAGY1RrKh1uQ==/base.dm': No such file or directory
+09-30 05:44:38.472  2148  2149 I artd    : Running dex2oat: /apex/com.android.art/bin/art_exec --drop-capabilities --set-task-profile=Dex2OatBootComplete --set-priority=background --keep-fds=6:7:8:9:10 -- /apex/com.android.art/bin/dex2oat64 --zip-fd=6 --zip-location=/data/app/~~mbTs4gSTpFYOUJ9P-43W3Q==/jp.konami.pesam-ZchDPB6MSoTAGY1RrKh1uQ==/base.apk --oat-fd=7 --oat-location=/data/app/~~mbTs4gSTpFYOUJ9P-43W3Q==/jp.konami.pesam-ZchDPB6MSoTAGY1RrKh1uQ==/oat/arm64/base.odex --output-vdex-fd=8 --swap-fd=9 --class-loader-context-fds=10 --class-loader-context=PCL[]{PCL[/system/framework/org.apache.http.legacy.jar]} --classpath-dir=/data/app/~~mbTs4gSTpFYOUJ9P-43W3Q==/jp.konami.pesam-ZchDPB6MSoTAGY1RrKh1uQ== --instruction-set=arm64 --instruction-set-features=default --instruction-set-variant=generic --compiler-filter=verify --compilation-reason=install --compact-dex-level=none --max-image-block-size=524288 --resolve-startup-const-strings=true --generate-mini-debug-info --runtime-arg -Xdeny-art-apex-data-files --runtime-arg -Xtarget-sdk-version:36 --runtime-arg -Xhidden-api-policy:enabled --runtime-arg -Xms64m --runtime-arg -Xmx512m --comments=app-version-name:11.0.1,app-version-code:311000101,art-version:-1
+09-30 05:44:38.472  2148  2149 I artd    : Opened FDs: 6:/data/app/~~mbTs4gSTpFYOUJ9P-43W3Q==/jp.konami.pesam-ZchDPB6MSoTAGY1RrKh1uQ==/base.apk 7:/data/app/~~mbTs4gSTpFYOUJ9P-43W3Q==/jp.konami.pesam-ZchDPB6MSoTAGY1RrKh1uQ==/oat/arm64/base.odex.6vsN9D.tmp 8:/data/app/~~mbTs4gSTpFYOUJ9P-43W3Q==/jp.konami.pesam-ZchDPB6MSoTAGY1RrKh1uQ==/oat/arm64/base.vdex.MT6j3q.tmp 9:/data/app/~~mbTs4gSTpFYOUJ9P-43W3Q==/jp.konami.pesam-ZchDPB6MSoTAGY1RrKh1uQ==/oat/arm64/base.odex.swap.zGbhyT.tmp 10:/system/framework/org.apache.http.legacy.jar 
+09-30 05:44:38.489  2150  2150 W dex2oat64: /apex/com.android.art/bin/dex2oat64 --zip-fd=6 --zip-location=/data/app/~~mbTs4gSTpFYOUJ9P-43W3Q==/jp.konami.pesam-ZchDPB6MSoTAGY1RrKh1uQ==/base.apk --oat-fd=7 --oat-location=/data/app/~~mbTs4gSTpFYOUJ9P-43W3Q==/jp.konami.pesam-ZchDPB6MSoTAGY1RrKh1uQ==/oat/arm64/base.odex --output-vdex-fd=8 --swap-fd=9 --class-loader-context-fds=10 --class-loader-context=PCL[]{PCL[/system/framework/org.apache.http.legacy.jar]} --classpath-dir=/data/app/~~mbTs4gSTpFYOUJ9P-43W3Q==/jp.konami.pesam-ZchDPB6MSoTAGY1RrKh1uQ== --instruction-set=arm64 --instruction-set-features=default --instruction-set-variant=generic --compiler-filter=verify --compilation-reason=install --compact-dex-level=none --max-image-block-size=524288 --resolve-startup-const-strings=true --generate-mini-debug-info --runtime-arg -Xdeny-art-apex-data-files --runtime-arg -Xtarget-sdk-version:36 --runtime-arg -Xhidden-api-policy:enabled --runtime-arg -Xms64m --runtime-arg -Xmx512m --comments=app-version-name:11.0.1,app-version-code:311000101,art-version:-1
+09-30 05:44:38.489  2150  2150 I dex2oat64: /apex/com.android.art/bin/dex2oat64 --output-vdex-fd=8 --class-loader-context-fds=10 --class-loader-context=PCL[]{PCL[/system/framework/org.apache.http.legacy.jar]} --classpath-dir=/data/app/~~mbTs4gSTpFYOUJ9P-43W3Q==/jp.konami.pesam-ZchDPB6MSoTAGY1RrKh1uQ== --compiler-filter=verify --compilation-reason=install --compact-dex-level=none --max-image-block-size=524288 --resolve-startup-const-strings=true --generate-mini-debug-info --comments=app-version-name:11.0.1,app-version-code:311000101,art-version:-1
+09-30 05:44:38.857   231   278 I ArtService: Dexopt result: [packageName = jp.konami.pesam] DexContainerFileDexoptResult{dexContainerFile=/data/app/~~mbTs4gSTpFYOUJ9P-43W3Q==/jp.konami.pesam-ZchDPB6MSoTAGY1RrKh1uQ==/base.apk, primaryAbi=true, abi=arm64-v8a, actualCompilerFilter=verify, status=PERFORMED, dex2oatWallTimeMillis=385, dex2oatCpuTimeMillis=1050, sizeBytes=682616, sizeBeforeBytes=0}
+09-30 05:44:38.859   231   278 V BackupManagerService: [UserID:0] restoreAtInstall pkg=jp.konami.pesam token=1 restoreSet=0
+09-30 05:44:38.865   231   567 I SdkSandboxManager: No SDKs used. Skipping SDK data reconcilation for CallingInfo{mUid=10087, mPackageName='jp.konami.pesam, mAppProcessToken='null'}
+09-30 05:44:38.866   850   899 D SessionCommitReceiver: Removing PromiseIcon for package: jp.konami.pesam, install reason: 0, alreadyAddedPromiseIcon: false
+09-30 05:44:38.867   815   815 D CarrierSvcBindHelper: onPackageAdded: jp.konami.pesam
+09-30 05:44:38.869   231   231 V GameManagerService_GamePackageConfiguration: No android.game_mode_config meta-data found for package jp.konami.pesam
+09-30 05:44:38.871   598   598 I SafetyLabelChangedBroadcastReceiver: received broadcast packageName: jp.konami.pesam, current user: UserHandle{0}, packageChangeEvent: NEW_INSTALL, intent user: UserHandle{0}
+09-30 05:44:38.872   231   231 V GameManagerService: Package configuration not found for jp.konami.pesam
+09-30 05:44:38.879   815   815 D CarrierSvcBindHelper: onPackageModified: jp.konami.pesam
+09-30 05:44:57.376   231   291 I ActivityManager: Force stopping jp.konami.pesam appid=10087 user=0: from pid 2257
+09-30 05:44:57.382   815   815 D CarrierSvcBindHelper: onHandleForceStop: [jp.konami.pesam]
+09-30 05:44:57.464  2260  2260 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+09-30 05:48:00.802   231   291 I ActivityManager: Force stopping jp.konami.pesam appid=10087 user=0: from pid 2918
+09-30 05:48:00.805   815   815 D CarrierSvcBindHelper: onHandleForceStop: [jp.konami.pesam]
 ```
