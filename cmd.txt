@@ -1,1 +1,1 @@
-exec bash -c true; echo UQ; adb -s 127.0.0.1:5555 shell input tap 1055 640; sleep 15; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+exec bash -c true; echo UR; adb -s 127.0.0.1:5555 shell input tap 853 401; sleep 3; adb -s 127.0.0.1:5555 shell input tap 1139 677; sleep 12; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
