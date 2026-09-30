@@ -1,5 +1,5 @@
 cmd: exec sudo docker exec redroid sh -c "strings /data/local/tmp/game2.pcap 2>/dev/null | grep -iE konami | sort -u | head -20"
-at: 10:52:03
+at: 13:49:48
 $ sudo docker exec redroid sh -c "strings /data/local/tmp/game2.pcap 2>/dev/null | grep -iE konami | sort -u | head -20"
 package:jp.konami.pesam
 rc=0
