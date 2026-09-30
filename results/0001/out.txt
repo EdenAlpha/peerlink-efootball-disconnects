@@ -1,11 +1,11 @@
-cmd: exec bash -c true; echo GAPPSCHECK; hostname; sudo docker exec redroid /system/bin/pm list packages 2>/dev/null | grep -iE "vending|android.gms|gsf" || echo NO_GOOGLE_SERVICES
-at: 20:42:29
-$ bash -c true; echo GAPPSCHECK; hostname; sudo docker exec redroid /system/bin/pm list packages 2>/dev/null | grep -iE "vending|android.gms|gsf" || echo NO_GOOGLE_SERVICES
-GAPPSCHECK
-runnervmoyp6c
-package:com.google.android.gsf
-package:com.android.vending
-package:com.google.android.gms
+cmd: exec bash -c true; echo SIGNOUT; adb connect 127.0.0.1:5555 >/dev/null 2>&1; adb -s 127.0.0.1:5555 shell dumpsys account 2>/dev/null | grep -c "peerlink.02"; adb -s 127.0.0.1:5555 shell am start -W -n com.android.vending/com.google.android.finsky.activities.MainActivity 2>&1 | tail -3; sleep 15; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+at: 22:19:29
+$ bash -c true; echo SIGNOUT; adb connect 127.0.0.1:5555 >/dev/null 2>&1; adb -s 127.0.0.1:5555 shell dumpsys account 2>/dev/null | grep -c "peerlink.02"; adb -s 127.0.0.1:5555 shell am start -W -n com.android.vending/com.google.android.finsky.activities.MainActivity 2>&1 | tail -3; sleep 15; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+SIGNOUT
+0
+TotalTime: 244
+WaitTime: 246
+Complete
 rc=0
 gamepid: 
 flows: 0
