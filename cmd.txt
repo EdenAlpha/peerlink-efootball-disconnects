@@ -1,1 +1,1 @@
-wait 25
+intent market://details?id=jp.konami.pesam
