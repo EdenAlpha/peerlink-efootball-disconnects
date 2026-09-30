@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The redroid arm64 GApps image declares only:
+
+      /vendor/etc/permissions/android.hardware.touchscreen.xml
+
+  and ships no android.hardware.touchscreen.multitouch*.xml at all, even though
+  its own /vendor/etc/permissions/handheld_core_hardware.xml says:
+
+      "devices that support multitouch must include the most appropriate one of
+       these files: android.hardware.touchscreen.multitouch.xml /
+       .multitouch.distinct.xml / .multitouch.jazzhand.xml
+       ONLY ONE of the above should be included."
+
+  eFootball (jp.konami.pesam 11.0.1) declares:
+
+      <uses-feature android:name="android.hardware.touchscreen.multitouch"/>
+
+  android:required is omitted, which the Android spec defines as required=true.
+  With the feature absent from `pm list features`, Google Play's device
+  compatibility check refuses the app with "This app isn't compatible with your
+  device" while unrelated apps (CPU-Z) install normally.
+
+  Adding the missing declaration is a capability declaration, not an identity
+  change: redroid's input pipeline is a stock Android InputReader attached to a
+  virtual touchscreen and does dispatch multi-pointer MotionEvents.
+
+  Android's own spec file for exactly this case is the basic (non-independent)
+  variant, so that is what is installed here.
+-->
+<permissions>
+    <feature name="android.hardware.touchscreen.multitouch" />
+</permissions>
