@@ -41,7 +41,7 @@ bbb77fa6888e: Download complete
 bbb77fa6888e: Pull complete
 Digest: sha256:0a611199ba2e0b5d60af39b3327a517f6407231f4352114ed3bd3cbfe2be69aa
 Status: Downloaded newer image for redroid/redroid:14.0.0_64only-latest
-f1cb698f0ecf4f8c1968a481882c7ad04379257af4de9ba968f311a15c01bbda
+9e8adce375a2019b0e9034cfcf4229969f05b1811201435b9797b5ff0060b7a2
 + booted=0
 ++ seq 1 36
 + for i in $(seq 1 36)
@@ -106,68 +106,6 @@ ls: /vendor/lib64/libvulkan.so: No such file or directory
 
 ### pipeline (apkeep, frida, install, capture)
 ```text
-bbb77fa6888e: Verifying Checksum
-bbb77fa6888e: Download complete
-bbb77fa6888e: Pull complete
-Digest: sha256:0a611199ba2e0b5d60af39b3327a517f6407231f4352114ed3bd3cbfe2be69aa
-Status: Downloaded newer image for redroid/redroid:14.0.0_64only-latest
-f1cb698f0ecf4f8c1968a481882c7ad04379257af4de9ba968f311a15c01bbda
-+ booted=0
-++ seq 1 36
-+ for i in $(seq 1 36)
-++ sudo docker exec redroid getprop sys.boot_completed
-++ tr -d '\r'
-+ '[' '' = 1 ']'
-+ sleep 5
-+ for i in $(seq 1 36)
-++ sudo docker exec redroid getprop sys.boot_completed
-++ tr -d '\r'
-+ '[' '' = 1 ']'
-+ sleep 5
-+ for i in $(seq 1 36)
-++ sudo docker exec redroid getprop sys.boot_completed
-++ tr -d '\r'
-+ '[' 1 = 1 ']'
-+ echo 'BOOTED after 15s'
-BOOTED after 15s
-+ booted=1
-+ break
-+ '[' 1 '!=' 1 ']'
-+ sudo docker exec redroid id
-uid=0(root) gid=0(root) groups=0(root)
-+ sudo docker exec redroid getprop ro.odm.product.cpu.abilist64
-arm64-v8a
-+ echo '--- graphics capability inside android ---'
---- graphics capability inside android ---
-+ sudo docker exec redroid sh -c 'ls /vendor/lib64/hw/ 2>/dev/null | head -20'
-android.hardware.audio.effect@7.0-impl.so
-android.hardware.audio@7.0-impl.so
-android.hardware.graphics.allocator@2.0-impl.so
-android.hardware.graphics.mapper@2.0-impl-2.1.so
-audio.primary.default.so
-audio.r_submix.default.so
-gralloc.cros.so
-gralloc.default.so
-gralloc.gbm.so
-gralloc.redroid.so
-hwcomposer.redroid.so
-local_time.default.so
-power.default.so
-vibrator.default.so
-vulkan.broadcom.so
-vulkan.freedreno.so
-vulkan.lvp.so
-vulkan.nouveau.so
-vulkan.panfrost.so
-vulkan.pastel.so
-+ sudo docker exec redroid sh -c 'ls /system/lib64/libEGL.so /system/lib64/libGLESv3.so /system/lib64/libvulkan.so 2>&1'
-/system/lib64/libEGL.so
-/system/lib64/libGLESv3.so
-/system/lib64/libvulkan.so
-+ sudo docker exec redroid sh -c 'ls /vendor/lib64/libvulkan.so /vendor/lib64/hw/vulkan.*.so 2>&1'
-ls: /vendor/lib64/libvulkan.so: No such file or directory
-/vendor/lib64/hw/vulkan.broadcom.so
-/vendor/lib64/hw/vulkan.freedreno.so
 /vendor/lib64/hw/vulkan.lvp.so
 /vendor/lib64/hw/vulkan.nouveau.so
 /vendor/lib64/hw/vulkan.panfrost.so
@@ -184,10 +122,10 @@ GL_AMD_performance_monitor GL_ANGLE_base_vertex_base_instance GL_ANGLE_base_vert
 + sudo docker exec redroid sh -c 'getprop | grep -iE "gpu|egl|gles|vulkan|hardware"'
 [debug.renderengine.backend]: [gles]
 [init.svc.gpu]: [running]
-[init.svc_debug_pid.gpu]: [115]
+[init.svc_debug_pid.gpu]: [112]
 [persist.graphics.egl]: []
 [ro.boot.hardware]: [redroid]
-[ro.boottime.gpu]: [1022695426347]
+[ro.boottime.gpu]: [62995286556]
 [ro.hardware]: [redroid]
 [ro.hardware.egl]: [angle]
 [ro.hardware.gralloc]: [redroid]
@@ -216,24 +154,24 @@ trying https://github.com/EFForg/apkeep/releases/download/1.0.0/apkeep-aarch64-u
 + break
 + '[' '!' -s /tmp/kgs/apkeep ']'
 + chmod +x /tmp/kgs/apkeep
-+ echo 11597
++ echo 11670
 + /tmp/kgs/apkeep -a jp.konami.pesam -d apk-pure /tmp/kgs
 + sleep 30
 + cat /tmp/kgs/apkeep.log
 Downloading jp.konami.pesam...
 jp.konami.pesam downloaded successfully!
-+ head
 + ls -la /tmp/kgs/
-total 856480
-drwxr-xr-x  2 runner runner      4096 Sep 29 23:30 .
-drwxrwxrwt 14 root   root        4096 Sep 29 23:30 ..
--rwxr-xr-x  1 runner runner  14690688 Sep 29 23:30 apkeep
--rw-r--r--  1 runner runner        72 Sep 29 23:30 apkeep.log
--rw-r--r--  1 runner runner         6 Sep 29 23:30 apkeep.pid
--rw-r--r--  1 runner runner 862294575 Sep 29 23:30 jp.konami.pesam.xapk
--rw-r--r--  1 runner runner     11215 Sep 29 23:31 pipeline.log
--rw-r--r--  1 runner runner         0 Sep 29 23:30 probe
--rw-r--r--  1 runner runner      9886 Sep 29 23:30 step01.log
++ head
+total 856476
+drwxr-xr-x  2 runner runner      4096 Sep 30 00:00 .
+drwxrwxrwt 14 root   root        4096 Sep 30 00:00 ..
+-rwxr-xr-x  1 runner runner  14690688 Sep 30 00:00 apkeep
+-rw-r--r--  1 runner runner        72 Sep 30 00:00 apkeep.log
+-rw-r--r--  1 runner runner         6 Sep 30 00:00 apkeep.pid
+-rw-r--r--  1 runner runner 862294575 Sep 30 00:00 jp.konami.pesam.xapk
+-rw-r--r--  1 runner runner     11213 Sep 30 00:00 pipeline.log
+-rw-r--r--  1 runner runner         0 Sep 30 00:00 probe
+-rw-r--r--  1 runner runner      9884 Sep 30 00:00 step01.log
 + python3 -m pip install --quiet --break-system-packages frida-tools
 ++ python3 -c 'import frida; print(frida.__version__)'
 + FRIDA_VER=17.19.0
@@ -251,7 +189,7 @@ curl rc=0 ok=1
 + '[' 1 '!=' 1 ']'
 + xz -d -f /tmp/kgs/frida-server.xz
 + ls -la /tmp/kgs/frida-server
--rw-r--r-- 1 runner runner 59071912 Sep 29 23:31 /tmp/kgs/frida-server
+-rw-r--r-- 1 runner runner 59071912 Sep 30 00:00 /tmp/kgs/frida-server
 + sudo docker cp /tmp/kgs/frida-server redroid:/data/local/tmp/frida-server
 + sudo docker exec redroid chmod 755 /data/local/tmp/frida-server
 + sudo docker exec redroid mkdir -p /data/local/tmp/kgs
@@ -284,77 +222,139 @@ frida-server REACHABLE
 + '[' 0 -lt 160 ']'
 + '[' -f /tmp/kgs/jp.konami.pesam.xapk ']'
 + break
-+ head -20
-+ ls -la /tmp/kgs/
-total 914020
-drwxr-xr-x  2 runner runner      4096 Sep 29 23:31 .
-drwxrwxrwt 14 root   root        4096 Sep 29 23:31 ..
--rwxr-xr-x  1 runner runner  14690688 Sep 29 23:30 apkeep
--rw-r--r--  1 runner runner        72 Sep 29 23:30 apkeep.log
--rw-r--r--  1 runner runner         6 Sep 29 23:30 apkeep.pid
--rw-r--r--  1 runner runner  59071912 Sep 29 23:31 frida-server
--rw-r--r--  1 runner runner 862294575 Sep 29 23:30 jp.konami.pesam.xapk
--rw-r--r--  1 runner runner     14018 Sep 29 23:31 pipeline.log
--rw-r--r--  1 runner runner         0 Sep 29 23:30 probe
--rw-r--r--  1 runner runner      9886 Sep 29 23:30 step01.log
-++ ls -1 /tmp/kgs/jp.konami.pesam.xapk '/tmp/kgs/*.apkm' '/tmp/kgs/*.apks'
 ++ head -1
+++ ls -1 /tmp/kgs/jp.konami.pesam.xapk '/tmp/kgs/*.apkm' '/tmp/kgs/*.apks'
 + XAPK=/tmp/kgs/jp.konami.pesam.xapk
 + '[' -z /tmp/kgs/jp.konami.pesam.xapk ']'
 ++ stat -c %s /tmp/kgs/jp.konami.pesam.xapk
++ SZ=862294575
 + echo 'archive: /tmp/kgs/jp.konami.pesam.xapk  (862294575 bytes)'
 archive: /tmp/kgs/jp.konami.pesam.xapk  (862294575 bytes)
-++ stat -c %s /tmp/kgs/jp.konami.pesam.xapk
-+ '[' 862294575 -lt 100000000 ']'
++ '[' 862294575 -gt 100000000 ']'
 + cd /tmp/kgs
 + XAPK=/tmp/kgs/jp.konami.pesam.xapk
 + python3 -
-archive /tmp/kgs/jp.konami.pesam.xapk
-version ('11.0.1', '311000101')
-split candidates ['jp.konami.pesam.apk', 'pad_it_0.apk', 'pad_it_1.apk', 'config.arm64_v8a.apk']
-  extracted jp.konami.pesam.apk            22.3 MB
-  extracted pad_it_0.apk                  386.4 MB
-  extracted pad_it_1.apk                  395.4 MB
-  extracted config.arm64_v8a.apk           57.1 MB
-+ '[' '!' -f /tmp/kgs/extracted.ok ']'
-+ for f in jp.konami.pesam.apk config.arm64_v8a.apk pad_it_0.apk pad_it_1.apk
-+ '[' -f /tmp/kgs/jp.konami.pesam.apk ']'
-+ sudo docker cp /tmp/kgs/jp.konami.pesam.apk redroid:/data/local/tmp/jp.konami.pesam.apk
-+ for f in jp.konami.pesam.apk config.arm64_v8a.apk pad_it_0.apk pad_it_1.apk
-+ '[' -f /tmp/kgs/config.arm64_v8a.apk ']'
-+ sudo docker cp /tmp/kgs/config.arm64_v8a.apk redroid:/data/local/tmp/config.arm64_v8a.apk
-+ for f in jp.konami.pesam.apk config.arm64_v8a.apk pad_it_0.apk pad_it_1.apk
-+ '[' -f /tmp/kgs/pad_it_0.apk ']'
-+ sudo docker cp /tmp/kgs/pad_it_0.apk redroid:/data/local/tmp/pad_it_0.apk
-+ for f in jp.konami.pesam.apk config.arm64_v8a.apk pad_it_0.apk pad_it_1.apk
-+ '[' -f /tmp/kgs/pad_it_1.apk ']'
-+ sudo docker cp /tmp/kgs/pad_it_1.apk redroid:/data/local/tmp/pad_it_1.apk
-+ sudo docker exec redroid sh -c 'ls -la /data/local/tmp/*.apk'
--rw-r--r-- 1 radio radio  57148181 2026-09-29 23:31 /data/local/tmp/config.arm64_v8a.apk
--rw-r--r-- 1 radio radio  22347497 2026-09-29 23:31 /data/local/tmp/jp.konami.pesam.apk
--rw-r--r-- 1 radio radio 386375435 2026-09-29 23:31 /data/local/tmp/pad_it_0.apk
--rw-r--r-- 1 radio radio 395420368 2026-09-29 23:31 /data/local/tmp/pad_it_1.apk
-+ echo '--- install base + arm64 split (small, fast) ---'
---- install base + arm64 split (small, fast) ---
-+ sudo docker exec redroid /system/bin/pm install-multiple -r -g /data/local/tmp/jp.konami.pesam.apk /data/local/tmp/config.arm64_v8a.apk
-+ tail -20
-Unknown command: install-multiple
-+ echo '--- minimal package state ---'
---- minimal package state ---
-+ sudo docker exec redroid /system/bin/pm list packages
-+ grep -qi konami
-+ echo '=== MINIMAL INSTALL FAILED, retrying one at a time ==='
-=== MINIMAL INSTALL FAILED, retrying one at a time ===
-+ sudo docker exec redroid /system/bin/pm install -r -g /data/local/tmp/jp.konami.pesam.apk
-+ tail -10
-Failure [INSTALL_FAILED_MISSING_SPLIT: Missing split for jp.konami.pesam]
-+ sudo docker exec redroid /system/bin/pm install -r -g /data/local/tmp/config.arm64_v8a.apk
-+ tail -10
-Failure [INSTALL_FAILED_INVALID_APK: Full install must include a base package]
+version 11.0.1 311000101
+22 splits in the bundle
+  jp.konami.pesam.apk            -> base.apk                             22.3 MB
+  config.de.apk                  -> split_config.de.apk                   0.0 MB
+  config.fr.apk                  -> split_config.fr.apk                   0.0 MB
+  config.my.apk                  -> split_config.my.apk                   0.0 MB
+  pad_it_0.apk                   -> split_pad_it_0.apk                  386.4 MB
+  pad_it_1.apk                   -> split_pad_it_1.apk                  395.4 MB
+  config.hi.apk                  -> split_config.hi.apk                   0.0 MB
+  config.th.apk                  -> split_config.th.apk                   0.0 MB
+  config.tr.apk                  -> split_config.tr.apk                   0.0 MB
+  config.vi.apk                  -> split_config.vi.apk                   0.0 MB
+  config.ar.apk                  -> split_config.ar.apk                   0.0 MB
+  config.en.apk                  -> split_config.en.apk                   0.0 MB
+  config.in.apk                  -> split_config.in.apk                   0.0 MB
+  config.ja.apk                  -> split_config.ja.apk                   0.0 MB
+  config.ru.apk                  -> split_config.ru.apk                   0.0 MB
+  config.arm64_v8a.apk           -> split_config.arm64_v8a.apk           57.1 MB
+  config.es.apk                  -> split_config.es.apk                   0.0 MB
+  config.it.apk                  -> split_config.it.apk                   0.0 MB
+  config.ko.apk                  -> split_config.ko.apk                   0.0 MB
+  config.pt.apk                  -> split_config.pt.apk                   0.0 MB
+  config.xxxhdpi.apk             -> split_config.xxxhdpi.apk              0.2 MB
+  config.zh.apk                  -> split_config.zh.apk                   0.0 MB
++ '[' -f /tmp/kgs/out/.ok ']'
++ echo '--- copying into the container ---'
+--- copying into the container ---
++ sudo docker exec redroid mkdir -p /data/local/tmp/splits
++ sudo docker cp /tmp/kgs/out/. redroid:/data/local/tmp/splits/
++ sudo docker exec redroid sh -c 'ls /data/local/tmp/splits/*.apk | wc -l'
+22
++ sudo docker exec redroid sh -c 'ls -la /data/local/tmp/splits/*.apk'
++ head -30
+-rw-r--r-- 1 radio radio  22347497 2026-09-30 00:01 /data/local/tmp/splits/base.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.ar.apk
+-rw-r--r-- 1 radio radio  57148181 2026-09-30 00:01 /data/local/tmp/splits/split_config.arm64_v8a.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.de.apk
+-rw-r--r-- 1 radio radio     37074 2026-09-30 00:01 /data/local/tmp/splits/split_config.en.apk
+-rw-r--r-- 1 radio radio     24786 2026-09-30 00:01 /data/local/tmp/splits/split_config.es.apk
+-rw-r--r-- 1 radio radio     24786 2026-09-30 00:01 /data/local/tmp/splits/split_config.fr.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.hi.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.in.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.it.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.ja.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.ko.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.my.apk
+-rw-r--r-- 1 radio radio     24786 2026-09-30 00:01 /data/local/tmp/splits/split_config.pt.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.ru.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.th.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.tr.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.vi.apk
+-rw-r--r-- 1 radio radio    198371 2026-09-30 00:01 /data/local/tmp/splits/split_config.xxxhdpi.apk
+-rw-r--r-- 1 radio radio     28882 2026-09-30 00:01 /data/local/tmp/splits/split_config.zh.apk
+-rw-r--r-- 1 radio radio 386375435 2026-09-30 00:01 /data/local/tmp/splits/split_pad_it_0.apk
+-rw-r--r-- 1 radio radio 395420368 2026-09-30 00:01 /data/local/tmp/splits/split_pad_it_1.apk
++ echo '--- pm subcommands available ---'
+--- pm subcommands available ---
++ sudo docker exec redroid sh -c 'pm help 2>&1 | grep -iE "install" | head -12'
+      -i: see the installer for the packages
+      -u: also include uninstalled packages
+  install [-rtfdg] [-i PACKAGE] [--user USER_ID|all|current]
+       [-p INHERIT_PACKAGE] [--install-location 0/1/2]
+       [--install-reason 0/1/2/3/4] [--originating-uri URI]
+    Install an application.  Must provide the apk data to install, either as
+      -i: specify package name of installer owning the app
+      -f: install application on internal flash
+      -p: partial application install (new split on top of existing pkg)
+      --user: install under the given user.
+      --dont-kill: installing a new feature split, don't kill running app
+      --restrict-permissions: don't whitelist restricted permissions at install
++ echo '--- install via session api ---'
+--- install via session api ---
++ timeout 1800 sudo docker exec redroid sh -c '
+  cd /data/local/tmp/splits || exit 1
+  SESSION=$(pm install-create -r | tr -d "\r")
+  echo "session=[$SESSION]"
+  case "$SESSION" in
+    ""|*[!0-9]*) echo "could not create a session"; exit 1 ;;
+  esac
+  for f in ./*.apk; do
+    echo "  write $f"
+    pm install-write "$SESSION" "$(basename $f)" "$f" || echo "  write FAILED $f"
+  done
+  pm install-commit "$SESSION"
+'
++ tail -40
+session=[Success: created install session [1020103925]]
+could not create a session
++ echo '--- package state ---'
+--- package state ---
 + sudo docker exec redroid /system/bin/pm list packages
 + grep -i konami
 + echo '=== GAME NOT INSTALLED AT ALL ==='
 === GAME NOT INSTALLED AT ALL ===
++ sudo docker exec redroid sh -c 'ls -la /data/local/tmp/splits/'
+total 841768
+drwxr-xr-x 2 root  root       4096 2026-09-30 00:01 .
+drwxrwx--x 4 shell shell      4096 2026-09-30 00:01 ..
+-rw-r--r-- 1 radio radio         2 2026-09-30 00:01 .ok
+-rw-r--r-- 1 radio radio  22347497 2026-09-30 00:01 base.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.ar.apk
+-rw-r--r-- 1 radio radio  57148181 2026-09-30 00:01 split_config.arm64_v8a.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.de.apk
+-rw-r--r-- 1 radio radio     37074 2026-09-30 00:01 split_config.en.apk
+-rw-r--r-- 1 radio radio     24786 2026-09-30 00:01 split_config.es.apk
+-rw-r--r-- 1 radio radio     24786 2026-09-30 00:01 split_config.fr.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.hi.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.in.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.it.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.ja.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.ko.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.my.apk
+-rw-r--r-- 1 radio radio     24786 2026-09-30 00:01 split_config.pt.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.ru.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.th.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.tr.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.vi.apk
+-rw-r--r-- 1 radio radio    198371 2026-09-30 00:01 split_config.xxxhdpi.apk
+-rw-r--r-- 1 radio radio     28882 2026-09-30 00:01 split_config.zh.apk
+-rw-r--r-- 1 radio radio 386375435 2026-09-30 00:01 split_pad_it_0.apk
+-rw-r--r-- 1 radio radio 395420368 2026-09-30 00:01 split_pad_it_1.apk
 + exit 1
 ```
 

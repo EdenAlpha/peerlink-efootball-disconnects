@@ -1,3 +1,3 @@
 total 8
-drwxr-xr-x 2 root  root  4096 2026-09-29 23:31 .
-drwxrwx--x 3 shell shell 4096 2026-09-29 23:31 ..
+drwxr-xr-x 2 root  root  4096 2026-09-30 00:00 .
+drwxrwx--x 4 shell shell 4096 2026-09-30 00:01 ..
