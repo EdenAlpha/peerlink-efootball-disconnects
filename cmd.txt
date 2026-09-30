@@ -1,1 +1,1 @@
-amstart com.aurora.store/.ComposeActivity
+tap 160 1105
