@@ -1,4 +1,1 @@
-time=20:00:00
-gamepid=none
-flows=0
-round=240
+probe 20:08:48
