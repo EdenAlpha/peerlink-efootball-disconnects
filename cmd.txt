@@ -1,1 +1,1 @@
-exec sudo docker exec redroid sh -c "dumpsys activity top | grep -iE \"TextView|Button|EditText|text=|mText|contentDescription\" | head -50"
+exec sudo docker exec redroid sh -c "am start -n com.aurora.store/.ComposeActivity >/dev/null 2>&1; sleep 8; dumpsys activity top | grep -oE \"(mText|text|contentDescription)=.[^\\\"]*.\" | sort -u | head -40; echo ---; dumpsys window | grep mCurrentFocus"
