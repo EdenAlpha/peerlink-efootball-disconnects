@@ -1,1 +1,1 @@
-exec bash -c true; echo SC; adb -s 127.0.0.1:5555 shell am start -a android.intent.action.VIEW -d "market://details?id=cpuz.cpu_z" 2>&1 | tail -1; sleep 13; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+exec bash -c true; echo SD; adb -s 127.0.0.1:5555 shell am start -a android.intent.action.VIEW -d "market://details?id=com.cpuz.cpu_z" 2>&1 | tail -1; sleep 13; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
