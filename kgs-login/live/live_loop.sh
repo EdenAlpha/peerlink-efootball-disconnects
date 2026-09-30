@@ -67,7 +67,7 @@ LAST_PUSH=0
 
 push_res() { # commit + push whatever is staged in LIVE_RES_DIR
   local label="$1" attempt
-  if [ ! -d "$LIVE_RES_DIR/.git" ]; then
+  if [ ! -e "$LIVE_RES_DIR/.git" ]; then
     echo "live: FATAL no git repo at $LIVE_RES_DIR -- cannot publish results"
     return 2
   fi
