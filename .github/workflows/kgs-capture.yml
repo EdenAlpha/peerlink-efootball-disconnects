@@ -451,6 +451,35 @@ jobs:
           grep -iE "konami|pesam|FATAL|AndroidRuntime|libUE4|Vulkan|EGL|ANR" $W/logcat.txt 2>/dev/null | tail -50 || true
           echo "=== process alive? ==="
           sudo docker exec redroid sh -c 'ps -A | grep -i pesam' || echo "GAME PROCESS GONE"
+
+          # ---- PHASE 3: fallback, read `path` out of memory, TLS-independent --
+          # Phase 2 depends on the Def_ hook landing; if it missed, the frames
+          # are inside TLS and nothing was captured. This does not: it scans the
+          # game's writable ranges for a decodable CommandRequest.
+          if [ ! -s $W/frames_found ] || [ "$(cat $W/frames_found 2>/dev/null || echo 0)" = "0" ]; then
+            echo "########## PHASE 3: memory scan for CommandRequest.path"
+            sudo docker cp kgs-login/scripts/scan_paths.js \
+              redroid:/data/local/tmp/scan_paths.js
+            sudo docker exec redroid sh -c 'am force-stop jp.konami.pesam' 2>/dev/null
+            timeout 600 frida -H 127.0.0.1:27042 -f jp.konami.pesam \
+              -l kgs-login/scripts/scan_paths.js --runtime=v8 \
+              > $W/scan.log 2>&1 &
+            SPID=$!
+            echo "phase 3 frida pid $SPID"
+            for i in $(seq 1 40); do
+              sleep 10
+              sudo docker exec redroid /system/bin/input tap 360 640   >/dev/null 2>&1
+              sudo docker exec redroid /system/bin/input keyevent 66 >/dev/null 2>&1
+              echo "  phase3 t=$((i*10))s"
+            done
+            kill $SPID 2>/dev/null
+            echo "--- scan log ---"
+            grep -E "^\[scan\]|path=" $W/scan.log | head -60 || true
+            tail -20 $W/scan.log || true
+            cp -f $W/scan.log "$R/scan-paths.log" 2>/dev/null || true
+          else
+            echo "phase 2 produced frames; phase 3 not needed"
+          fi
           # stop the capture and pull the game's own ClientHello off the wire
           sudo docker exec redroid sh -c \
             'pkill -f tcpdump; ls -la /data/local/tmp/game.pcap' 2>&1 || true
