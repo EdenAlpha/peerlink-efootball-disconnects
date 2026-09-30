@@ -1202,3 +1202,72 @@ So the route table exists and the dispatcher validates against it, but its
 entries are not derivable from anything in the shipped artifacts, and they are
 not short or single-segment. Every wordlist approach has been exhausted; the
 remaining source is the game's own request bytes.
+
+## RETRACTION (2026-09-30): both "getter" offsets are STRING getters
+
+Earlier notes recorded:
+- `0x2f0eaf0(x0=key,w1=len) -> w0` -- "int getter"
+- `0x2f0e18c(x0=key,x1=len) -> x0 = std::string*` -- "string getter"
+
+**Both are `std::string` constructors.** The labels were wrong, not merely
+swapped: neither can override an *int* config value, so `capture_insecure.js`
+was hooking the wrong function and `Def_Online_gRPC_insecure` was never set.
+Phase 2 could never have produced a plaintext channel.
+
+Evidence, from each body:
+
+| instruction | meaning |
+|---|---|
+| `cmn x1, #0x10` / `b.hs` | size_t underflow check on the incoming length |
+| `cmp x19, #0x17` | vs 23 -- the libc++ SSO limit |
+| `lsl w9, w19, #1` + `strb w9` | size byte is `2*len`, low bit = `__is_long_` |
+| `orr x0, x8, #1` | sets `__is_long_` on the long path |
+| `orr x21, x19, #0xf` + `bl operator new` | round length up to 16, allocate |
+| `stp x19, x0, [sp, #0x38]` | libc++ long layout `{size, ptr}` |
+| `ldp q0,q1` / `stp q0,q1` loop | 32-byte vectorised copy |
+
+### There is no single int getter to hook
+
+A prologue sweep of `0x2f0a000..0x2f11000` found 24 functions, **seven** of
+which are that same string constructor:
+
+    0x2f0b620  0x2f0e044  0x2f0e190  0x2f0e47c
+    0x2f0e6f4  0x2f0eaf4  0x2f0eeec
+
+Seven copies of one shape means the accessor is **inlined at each call site**
+rather than shared behind a single function, so there is no one int accessor to
+hook. That is the structural reason the plaintext route cannot be rescued.
+
+### The keys are not reachable by xref either
+
+The four `Def_Online_gRPC_*` strings are plain literals in a flat `.rodata`
+pool with **no adjacent value table** -- each sits among unrelated strings
+(`CMD_AUTH_XSTS`, `CustomStadium2.bin`, `gate/gate_`, ...). An `adrp`+`add`
+byte-pattern scan for all four found no code reference.
+
+## Consequence: the memory scan is the PRIMARY route
+
+`scripts/scan_paths.js` depends on none of this. `CommandRequest` is a protobuf
+with `path` as field 4, and the game serialises it in its own heap *before*
+handing it to TLS, so scanning the writable ranges finds `path` regardless of
+TLS, of BoringSSL being stripped, and of whether the `Def_` hook lands. It is
+now unconditional in the workflow rather than gated on phase 2.
+
+It also no longer requires a leading `/`. Only `/` is confirmed, but nothing
+establishes that routes *must* be slash-prefixed, and enforcing that would
+discard the candidates being hunted.
+
+## A silent publish failure cost one run its capture
+
+Run `36648749164` succeeded end to end -- install 14 s, capture 591 s, all steps
+green -- and produced **nothing retrievable**. The publish step pushes to the
+author's branch, and a commit landing between the run's checkout and its publish
+makes that push non-fast-forward; the step still reported `success`.
+
+Fixed three ways, since a lost publish must not cost a capture again:
+1. force-push the report to a `ci-capture` branch nobody else writes
+2. `actions/upload-artifact` the raw report, scan log, frida logs, pcap, logcat
+3. put the scan result in the step summary, readable with no git involved
+
+This is the recurring trap on this workflow: a step that swallows a failure and
+reports success. `set +e` at the top of the step is what let it pass.

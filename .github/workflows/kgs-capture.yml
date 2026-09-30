@@ -4,22 +4,37 @@ name: kgs-capture
 # GitHub runner, force its gRPC channel to plaintext, and capture the exact
 # request bytes its own code produces.
 #
-# Why this works -- decoded from libUE4.so 11.0.1 (byte-identical to the build
-# on the user's phone), every offset read from the file:
+# The route that works -- no offsets, no plaintext, no TLS:
 #
+#   CommandRequest is a protobuf with `path` as field 4, and the game serialises
+#   it in its own heap before handing it to TLS. So scan the game's writable
+#   ranges for a byte sequence that decodes as a CommandRequest and read `path`
+#   out of it (scripts/scan_paths.js). This is immune to the TLS layer, immune to
+#   BoringSSL being stripped, and immune to the Def_ hook being wrong.
+#
+# Why the Def_ hook is not the primary route, having been tried first:
 #   0x7b101f8  gRPC config loader
 #       0x7b10258  literal 0x0c023be "Def_Online_gRPC_insecure" (24)
-#       0x7b1027c  bl 0x2f0eaf0          ; int getter
+#       0x7b1027c  bl 0x2f0eaf0
 #       0x7b10280  cbnz w0, 0x7b105c8    ; non-zero => plaintext channel
 #
-#   The insecure branch resolves its own target, so all three must be supplied:
+#   0x2f0eaf0 was recorded as "the int getter". It is not: it is a
+#   std::string constructor. So is 0x2f0e18c, which was recorded as the string
+#   getter. Both bodies contain the libc++ SSO compare at 0x17, the
+#   `lsl w9, w19, #1` + `strb w9` `2*len|is_long` size byte, the
+#   `orr x21, x19, #0xf` + `bl operator new` long-form allocation, and the
+#   `stp x19, x0` {size, ptr} store. Seven copies of that same shape exist
+#   (0x2f0b620, 0x2f0e044, 0x2f0e190, 0x2f0e47c, 0x2f0e6f4, 0x2f0eaf4,
+#   0x2f0eeec), which is why there is no single int accessor to hook: the
+#   accessors are inlined at their call sites. Forcing plaintext this way
+#   therefore cannot work, and phase 2 is kept only as a bonus.
+#
+#   The string keys are plain literals in a flat .rodata pool with no adjacent
+#   value table, and an adrp/add xref scan for all four gRPC keys found no
+#   reference, so the values are not reachable that way either.
 #       0x0ba2aff "Def_Online_gRPC_server_address" (30) string -> host
 #       0x09c69c1 "Def_Online_gRPC_server_path"    (27) string -> RPC path
 #       0x0b68de6 "Def_Online_gRPC_server_port"    (27) int    -> 443
-#
-#   Plaintext channel => gRPC writes HTTP/2 frames straight to the socket, so a
-#   libc send/write hook sees the request verbatim. No TLS to break, so we
-#   never need SSL_write's address (it is stripped).
 #
 # Environment facts already measured on this runner (kgs-login/ci-report):
 #   CONFIG_ANDROID_BINDER_IPC=m, binderfs mounts, docker privileged OK,
@@ -452,34 +467,47 @@ jobs:
           echo "=== process alive? ==="
           sudo docker exec redroid sh -c 'ps -A | grep -i pesam' || echo "GAME PROCESS GONE"
 
-          # ---- PHASE 3: fallback, read `path` out of memory, TLS-independent --
-          # Phase 2 depends on the Def_ hook landing; if it missed, the frames
-          # are inside TLS and nothing was captured. This does not: it scans the
-          # game's writable ranges for a decodable CommandRequest.
-          if [ ! -s $W/frames_found ] || [ "$(cat $W/frames_found 2>/dev/null || echo 0)" = "0" ]; then
-            echo "########## PHASE 3: memory scan for CommandRequest.path"
-            sudo docker cp kgs-login/scripts/scan_paths.js \
-              redroid:/data/local/tmp/scan_paths.js
-            sudo docker exec redroid sh -c 'am force-stop jp.konami.pesam' 2>/dev/null
-            timeout 600 frida -H 127.0.0.1:27042 -f jp.konami.pesam \
-              -l kgs-login/scripts/scan_paths.js --runtime=v8 \
-              > $W/scan.log 2>&1 &
-            SPID=$!
-            echo "phase 3 frida pid $SPID"
-            for i in $(seq 1 40); do
-              sleep 10
-              sudo docker exec redroid /system/bin/input tap 360 640   >/dev/null 2>&1
-              sudo docker exec redroid /system/bin/input keyevent 66 >/dev/null 2>&1
-              echo "  phase3 t=$((i*10))s"
-            done
-            kill $SPID 2>/dev/null
-            echo "--- scan log ---"
-            grep -E "^\[scan\]|path=" $W/scan.log | head -60 || true
-            tail -20 $W/scan.log || true
-            cp -f $W/scan.log "$R/scan-paths.log" 2>/dev/null || true
-          else
-            echo "phase 2 produced frames; phase 3 not needed"
-          fi
+          # ---- PHASE 3: read `path` out of memory -- PRIMARY, not a fallback --
+          # Phase 2 forces plaintext via the Def_ getter hook, and that hook is
+          # known to be wrong: the offsets recorded for the int and string
+          # getters (0x2f0eaf0, 0x2f0e18c) are both std::string constructors,
+          # each with the libc++ SSO compare at 0x17, the `2*len|is_long` size
+          # byte, an `operator new` and a {size,ptr} store, so neither can
+          # override an int. Seven copies of the same string getter exist, so
+          # the accessors are inlined at their call sites and there is no
+          # single int getter to hook. Phase 2 therefore stays as a bonus.
+          # This phase needs no offset and no plaintext: the game serialises
+          # CommandRequest in its own heap before handing it to TLS, so a scan
+          # of the writable ranges finds `path` either way. It runs
+          # unconditionally so it cannot be skipped by phase 2's condition.
+          echo "########## PHASE 3: memory scan for CommandRequest.path"
+          sudo docker cp kgs-login/scripts/scan_paths.js \
+            redroid:/data/local/tmp/scan_paths.js
+          sudo docker exec redroid sh -c 'am force-stop jp.konami.pesam' 2>/dev/null
+          timeout 420 frida -H 127.0.0.1:27042 -f jp.konami.pesam \
+            -l kgs-login/scripts/scan_paths.js --runtime=v8 \
+            > $W/scan.log 2>&1 &
+          SPID=$!
+          echo "phase 3 frida pid $SPID"
+          for i in $(seq 1 36); do
+            sleep 10
+            # the first launch shows a splash / terms screen and nobody is
+            # there to tap it, so nudge the UI
+            sudo docker exec redroid /system/bin/input tap 360 640   >/dev/null 2>&1
+            sudo docker exec redroid /system/bin/input keyevent 66 >/dev/null 2>&1
+            echo "  phase3 t=$((i*10))s  $(grep -c '^\[scan\] pass' $W/scan.log 2>/dev/null || echo 0) pass(es) logged"
+          done
+          kill $SPID 2>/dev/null
+          echo "--- scan log ---"
+          grep -E "^\[scan\]|path=" $W/scan.log | head -80 || true
+          echo "--- any path= line at all? ---"
+          grep -c 'path=' $W/scan.log 2>/dev/null || echo 0
+          tail -20 $W/scan.log || true
+          cp -f $W/scan.log "$R/scan-paths.log" 2>/dev/null || true
+          sudo docker exec redroid logcat -d -t 400 > $W/logcat-p3.txt 2>&1 || true
+          echo "=== logcat phase 3 (filtered) ==="
+          grep -iE "konami|pesam|FATAL|AndroidRuntime|libUE4|Vulkan|EGL" \
+            $W/logcat-p3.txt 2>/dev/null | tail -40 || true
           # stop the capture and pull the game's own ClientHello off the wire
           sudo docker exec redroid sh -c \
             'pkill -f tcpdump; ls -la /data/local/tmp/game.pcap' 2>&1 || true
@@ -540,6 +568,16 @@ jobs:
           # rebase conflicts on it every time and the push never happens.
           # --soft moves the branch pointer without merging, so it cannot
           # conflict, and the push is then a fast-forward by construction.
+          # The push to the author's branch is best-effort, and it has already
+          # lost a full run's capture: a commit landing between this run's
+          # checkout and its publish makes the push non-fast-forward, and the
+          # step still reported success -- so the 591 s capture produced nothing
+          # retrievable. Therefore the report is force-pushed FIRST to a branch
+          # nobody else writes, which cannot conflict, and the lot is uploaded
+          # as an artifact in step 07. Losing a publish must never again mean
+          # losing the capture.
+          echo "--- force-push to ci-capture (cannot conflict) ---"
+          git push --force origin "HEAD:refs/heads/ci-capture" 2>&1 | tail -3
           ok=0
           for attempt in 1 2 3; do
             git fetch origin "${{ github.ref_name }}" || true
@@ -552,8 +590,40 @@ jobs:
             echo "push attempt $attempt failed; retrying"
             sleep 5
           done
-          echo "PUBLISH ok=$ok"
+          echo "PUBLISH main ok=$ok"
           if [ "$ok" != "1" ]; then
-            echo "=== PUBLISH FAILED - report follows inline so it is not lost ==="
-            cat "$R/capture.md"
+            echo "=== PUBLISH TO MAIN FAILED - not fatal: the report is on ci-capture and in the artifact ==="
           fi
+          # make the step summary self-contained, so a run is readable even if
+          # every git operation failed
+          { echo '## capture'; echo;
+            echo '### scan result (the thing being hunted)'; echo '```text';
+            grep -E "^\[scan\]|path=" $W/scan.log 2>/dev/null | head -60 \
+              || echo 'no scan log';
+            echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      # The git push above is best-effort and has already silently lost one
+      # full run's capture. An artifact is the retrieval path that cannot fail
+      # for branch-protection or concurrency reasons, so upload everything the
+      # run produced, raw, whatever happened to the push.
+      - name: 07 upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgs-capture-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            kgs-login/ci-report/capture.md
+            kgs-login/ci-report/scan-paths.log
+            kgs-login/ci-report/capture/
+            /tmp/kgs/scan.log
+            /tmp/kgs/frida.log
+            /tmp/kgs/frida2.log
+            /tmp/kgs/pipeline.log
+            /tmp/kgs/step01.log
+            /tmp/kgs/logcat*.txt
+            /tmp/kgs/apkeep.log
+            /tmp/kgs/inst1.log
+            /tmp/kgs/inst2.log
+            /tmp/kgs/game.pcap

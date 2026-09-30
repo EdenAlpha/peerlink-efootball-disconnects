@@ -1,21 +1,27 @@
 // Fallback capture: if forcing plaintext does not take effect, read the
 // command `path` straight out of the game's memory instead.
 //
-// Why this exists: the primary path in capture_insecure.js hooks the Def_
-// getters to set Def_Online_gRPC_insecure = 1, which makes the gRPC channel
-// plaintext so a send() hook can read the HTTP/2 frames. If that hook misses --
-// wrong offset, relocated module, or the key never looked up -- nothing is
-// captured, because the frames are inside TLS.
+// Why this exists, and why it is now the PRIMARY route: the plan was to hook
+// the Def_ getter for Def_Online_gRPC_insecure and make the gRPC channel
+// plaintext so a send() hook could read the HTTP/2 frames. That hook is wrong.
+// The offsets recorded for the int and string getters (0x2f0eaf0 and
+// 0x2f0e18c) are *both* std::string constructors -- each has the libc++ SSO
+// compare at 0x17, the `2*len|is_long` size byte, an `operator new` for the
+// long form and a {size, ptr} store. Neither can be overriding an int config
+// value, and there are seven copies of the same string getter, so the accessors
+// look inlined at their call sites rather than shared, which leaves no single
+// int getter to hook. Forcing plaintext that way is not going to work.
 //
-// The fallback does not care about TLS. CommandRequest is a protobuf with
-// `path` as field 4, and the game builds it in its own heap before handing it
-// to TLS. So: scan the writable ranges of the game process for byte sequences
-// that decode as a CommandRequest, and report the `path` of any that look real.
+// This route does not care about TLS or about any of those offsets.
+// CommandRequest is a protobuf with `path` as field 4, and the game builds it
+// in its own heap before handing it to TLS. So: scan the writable ranges of the
+// game process for byte sequences that decode as a CommandRequest, and report
+// the `path` of any that parse cleanly.
 //
-// A valid CommandRequest ends with field 4 (tag 0x22) holding an ASCII path
-// that starts with '/'. That signature is specific enough to search for
-// directly, and it is checked by fully decoding the candidate before reporting
-// it, so a false positive has to survive a real parse.
+// A valid candidate ends at field 4 (tag 0x22) holding a short printable ASCII
+// string. That is specific enough to search for directly, and every candidate
+// is fully decoded before being reported, so a false positive has to survive a
+// real parse.
 
 'use strict';
 
@@ -81,11 +87,16 @@ function latin(buf) {
 }
 
 function looksLikePath(s) {
+    // Deliberately does NOT require a leading '/'. The one route confirmed so
+    // far is "/", but a route need not be slash-prefixed, and rejecting
+    // candidates on that assumption would discard the thing being hunted.
     return s !== null && s.length >= MIN_PATH && s.length <= MAX_PATH
-        && s.charAt(0) === '/' && s.indexOf('\u0000') === -1;
+        && s.indexOf('\u0000') === -1;
 }
 
 const found = Object.create(null);
+let bytesScanned = 0;
+let passes = 0;
 
 function scan() {
     const ranges = Process.enumerateRanges('rw-');
@@ -145,25 +156,27 @@ function scan() {
 
 function main() {
     const base = Module.findBaseAddress('libUE4.so');
-    if (base === null) {
-        console.log('[scan] libUE4.so not loaded yet');
-        return;
-    }
-    console.log('[scan] libUE4.so at ' + base + ' - scanning rw- ranges');
-    const t0 = Date.now();
-    const hits = scan();
-    console.log('[scan] done in ' + (Date.now() - t0) + ' ms, ' + hits
-        + ' distinct path(s)');
-    rpc.exports.scanPaths = function () {
-        return Object.keys(found);
-    };
-    // keep re-scanning, since the path only exists briefly at request time
-    let n = 0;
+    const total = Process.enumerateRanges('rw-')
+        .reduce(function (a, r) { return a + r.size; }, 0);
+    console.log('[scan] libUE4.so at ' + base);
+    console.log('[scan] rw- ranges: ' + total + ' bytes total');
+    // Keep re-scanning: the serialized request only exists for the moment it
+    // takes to hand it to the transport, so a single pass can easily miss the
+    // bootstrap commands. A heartbeat per pass makes an empty result
+    // distinguishable from a scanner that never ran at all.
     const t = setInterval(function () {
-        n++;
+        passes++;
+        const t0 = Date.now();
         scan();
-        if (n >= 30) clearInterval(t);
-    }, 2000);
+        console.log('[scan] pass ' + passes + ' in ' + (Date.now() - t0)
+            + ' ms, ' + (bytesScanned / 1048576).toFixed(1)
+            + ' MB scanned, ' + Object.keys(found).length + ' distinct path(s)');
+        if (passes >= 24) {
+            clearInterval(t);
+            console.log('[scan] finished; paths: '
+                + JSON.stringify(Object.keys(found)));
+        }
+    }, 1500);
 }
 
 setImmediate(main);
