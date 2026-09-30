@@ -1,5 +1,7 @@
-cmd: tap 360 625
-at: 09:03:19
-tapped (360,625)
+cmd: exec bash -c true; echo SA; adb -s 127.0.0.1:5555 shell input tap 578 1113; sleep 12; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+at: 22:30:02
+$ bash -c true; echo SA; adb -s 127.0.0.1:5555 shell input tap 578 1113; sleep 12; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+SA
+rc=0
 gamepid: 
 flows: 0
