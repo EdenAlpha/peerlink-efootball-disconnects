@@ -1,0 +1,14 @@
+cmd: exec bash -c true; echo SDK; adb -s 127.0.0.1:5555 shell getprop ro.build.version.release; adb -s 127.0.0.1:5555 shell getprop ro.build.version.sdk; adb -s 127.0.0.1:5555 shell dumpsys package jp.konami.pesam 2>/dev/null | grep -iE "versionName|minSdk|targetSdk|primaryCpuAbi|legacyNativeLibraryDir" | head -8; adb -s 127.0.0.1:5555 shell pm list features 2>/dev/null | grep -icE "vulkan|opengles"
+at: 21:52:41
+$ bash -c true; echo SDK; adb -s 127.0.0.1:5555 shell getprop ro.build.version.release; adb -s 127.0.0.1:5555 shell getprop ro.build.version.sdk; adb -s 127.0.0.1:5555 shell dumpsys package jp.konami.pesam 2>/dev/null | grep -iE "versionName|minSdk|targetSdk|primaryCpuAbi|legacyNativeLibraryDir" | head -8; adb -s 127.0.0.1:5555 shell pm list features 2>/dev/null | grep -icE "vulkan|opengles"
+SDK
+14
+34
+    legacyNativeLibraryDir=/data/app/~~LLVerGLOZswj_S4qM2aUlg==/jp.konami.pesam-KbfPXcAiEyak5xZ3KmBi2w==/lib
+    primaryCpuAbi=arm64-v8a
+    versionCode=311000101 minSdk=29 targetSdk=36
+    versionName=11.0.1
+4
+rc=0
+gamepid: 
+flows: 0
