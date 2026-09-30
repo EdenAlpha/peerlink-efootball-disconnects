@@ -296,9 +296,13 @@ jobs:
           # need no graphics feature (CPU-Z) install normally. This is a capability
           # declaration, not an identity change.
           adb -s 127.0.0.1:5555 shell su 0 mkdir -p /data/local/tmp/perm
-          adb -s 127.0.0.1:5555 push -q \
+          # NB: `adb push` has no -q flag; passing one fails and silently leaves
+          # the file on the host, which is how the first attempt at this step
+          # died. Verify the copy landed before trusting it.
+          adb -s 127.0.0.1:5555 push \
             kgs-login/live/android.hardware.touchscreen.multitouch.xml \
             /data/local/tmp/perm/mt.xml
+          adb -s 127.0.0.1:5555 shell wc -c /data/local/tmp/perm/mt.xml
           adb -s 127.0.0.1:5555 shell su 0 cp /data/local/tmp/perm/mt.xml \
             /vendor/etc/permissions/android.hardware.touchscreen.multitouch.xml
           adb -s 127.0.0.1:5555 shell su 0 cp /data/local/tmp/perm/mt.xml \
