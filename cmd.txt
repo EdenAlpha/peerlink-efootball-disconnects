@@ -1,1 +1,1 @@
-tap 660 1140
+amstart jp.konami.pesam/com.epicgames.ue4.SplashActivity
