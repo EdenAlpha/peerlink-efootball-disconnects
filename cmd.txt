@@ -1,1 +1,1 @@
-exec sudo docker exec redroid sh -c "strings /data/local/tmp/game2.pcap 2>/dev/null | grep -iE konami | sort -u | head -20"
+exec sudo docker exec redroid sh -c "am start -a android.settings.ADD_ACCOUNT_SETTINGS -d com.google --es account_type com.google"; sleep 5; sudo docker exec redroid sh -c "screencap -p /data/local/tmp/login_0.png"; sudo docker cp redroid:/data/local/tmp/login_0.png C:/Users/Administrator/AppData/Local/Temp/2/login_0.png
