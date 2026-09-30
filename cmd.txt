@@ -1,1 +1,1 @@
-exec bash -c true; echo S4; adb -s 127.0.0.1:5555 shell input tap 360 907; sleep 12; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+exec bash -c true; echo S5; adb -s 127.0.0.1:5555 shell input tap 360 631; sleep 2; adb -s 127.0.0.1:5555 shell input text "$PEERLINK_GMAIL"; sleep 2; adb -s 127.0.0.1:5555 shell input keyevent 66; sleep 12; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
