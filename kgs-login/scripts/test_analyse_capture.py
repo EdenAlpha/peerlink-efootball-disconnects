@@ -62,16 +62,25 @@ def main() -> int:
     r3 = command_request("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
                          "/", "{}", 0)
 
-    hdrs = (b"\x00" + bytes([5]) + b"POST "
-            + b"\x00" + bytes([6]) + b"https "
-            + b"\x00" + bytes([5]) + b"path "
-            + b"\x00" + bytes([29]) + b"/command_service.CommandService/Stream"
-            + b"\x00" + bytes([10]) + b"authority ")
+    # A real HPACK block, encoded by the same library the decoder uses. The
+    # hand-rolled version of this was deliberately invalid, which meant header
+    # extraction was never actually covered -- and the :path is the one header
+    # that identifies which of the three commands is being called.
+    import hpack
+    enc = hpack.Encoder()
+    hdrs = enc.encode([
+        (":method", "POST"),
+        (":scheme", "https"),
+        (":path", "/command_service.CommandService/CommandStream"),
+        (":authority", "kgs.konami.net"),
+        ("content-type", "application/grpc"),
+        ("te", "trailers"),
+        ("user-agent", "grpc-python/1.0"),
+    ])
 
     blob = (b"PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n"
             + frame(4, 0, 0, b"")
-            + frame(1, 0x4, 1, hdrs + bytes([44])
-                    + b"/command_service.CommandService/CommandStream")
+            + frame(1, 0x4, 1, hdrs)
             + frame(0, 0x0, 1, gRPC(r1))
             + frame(0, 0x0, 1, gRPC(r2))
             + frame(0, 0x1, 1, gRPC(r3)))
@@ -90,6 +99,9 @@ def main() -> int:
         print("STDERR:", r.stderr[-500:])
     ok = ("/session/get" in r.stdout and "/room/create" in r.stdout
           and '"token":"abc"' in r.stdout and '"roomType":"1"' in r.stdout)
+    # the HPACK path must work too, and must report no hpack error
+    ok = ok and ":path /command_service.CommandService/CommandStream" in r.stdout
+    ok = ok and "hpack:" not in r.stdout
     print("SELF-TEST:", "PASS" if ok else "FAIL")
     return 0 if ok else 1
 
