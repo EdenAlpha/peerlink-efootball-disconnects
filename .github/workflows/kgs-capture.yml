@@ -614,9 +614,13 @@ jobs:
                 || echo "NO IPTABLES IN THE CONTAINER"
               GW=$(sudo docker exec redroid sh -c \
                 'ip route show default 2>/dev/null' 2>/dev/null \
-                | awk '{print $3}' | tr -d '\r')
-              if [ -z "$GW" ]; then
-                echo "no 'ip' route; reading /proc/net/route instead"
+                | awk '{for(i=1;i<=NF;i++) if($i=="via") print $(i+1)}' \
+                | tr -d '\r' | head -1)
+              # The older parse took $3 blindly and got "eth0" when the route
+              # line has no "via" (rc=2 on the DNAT, redirect silently absent).
+              # Take the field AFTER "via", and validate it looks like an IP.
+              if ! echo "$GW" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'; then
+                echo "no 'via' route (got [$GW]); reading /proc/net/route instead"
                 HEXGW=$(sudo docker exec redroid cat /proc/net/route \
                   2>/dev/null | awk '$2=="00000000" {print $3}' | head -1)
                 GW=$(python3 -c "import socket,struct,sys; h='$HEXGW'.strip(); print(socket.inet_ntoa(struct.pack('<L', int(h,16))))" 2>/dev/null)
@@ -648,7 +652,16 @@ jobs:
                 sleep 10
                 alive=$(sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null' 2>/dev/null | tr -d '\r' | awk '{print $1}')
                 echo "  phase4 t=$((i*10))s gamepid=${alive:-GONE} flows=$(grep -c '^### ' $W/flows.log 2>/dev/null || echo 0)"
+                # Dismiss the "Viewing full screen / GOT IT" system dialog that
+                # covers the game: its button sits at ~(915,405) in landscape
+                # and the old center tap (360,640) never touched it -- five
+                # screenshots across six minutes are pixel-identical, dialog up,
+                # download at 0%. One blind tap visibly highlighted the button
+                # without dismissing it. So tap the button deliberately, and
+                # send BACK too, which dismisses system dialogs.
+                sudo docker exec redroid /system/bin/input tap 915 405 >/dev/null 2>&1
                 sudo docker exec redroid /system/bin/input tap 360 640 >/dev/null 2>&1
+                sudo docker exec redroid /system/bin/input keyevent 4 >/dev/null 2>&1
                 sudo docker exec redroid /system/bin/input keyevent 66 >/dev/null 2>&1
                 # screenshot the actual screen: no more inventing what it shows
                 sudo docker exec redroid sh -c \
