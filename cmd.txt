@@ -1,1 +1,1 @@
-tap 540 445
+exec sudo docker exec redroid sh -c "pm list packages 2>/dev/null | grep -i konami; ls -la /storage/emulated/0/Download/ 2>/dev/null | head; ls /data/local/tmp/ 2>/dev/null"
