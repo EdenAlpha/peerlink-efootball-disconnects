@@ -1,0 +1,15 @@
+cmd: exec bash -c true; echo PLAY1; adb connect 127.0.0.1:5555 >/dev/null 2>&1; adb -s 127.0.0.1:5555 shell am start -W -n com.android.vending/com.google.android.finsky.activities.MainActivity; sleep 10; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; ls -la /tmp/live-res/screen.png
+at: 20:45:17
+$ bash -c true; echo PLAY1; adb connect 127.0.0.1:5555 >/dev/null 2>&1; adb -s 127.0.0.1:5555 shell am start -W -n com.android.vending/com.google.android.finsky.activities.MainActivity; sleep 10; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; ls -la /tmp/live-res/screen.png
+PLAY1
+Starting: Intent { cmp=com.android.vending/com.google.android.finsky.activities.MainActivity }
+Status: ok
+LaunchState: WARM
+Activity: com.android.vending/com.google.android.finsky.unauthenticated.activity.UnauthenticatedMainActivity
+TotalTime: 154
+WaitTime: 158
+Complete
+-rw-r--r-- 1 runner runner 41146 Sep 30 20:45 /tmp/live-res/screen.png
+rc=0
+gamepid: 
+flows: 0
