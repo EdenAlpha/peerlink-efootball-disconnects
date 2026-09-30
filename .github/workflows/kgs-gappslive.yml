@@ -109,6 +109,20 @@ jobs:
             | grep -iE "vending|com.google.android.gms|gsf" || \
             echo "=== NO PLAY STORE - THIS IMAGE IS NOT WHAT WE NEED ==="
           sudo docker exec redroid /system/bin/pm path com.android.vending 2>&1
+          # adb over TCP must be (re)established explicitly, and the boot can
+          # finish before the port is actually accepting. Keep connecting
+          # until it answers, so every later step has a working device.
+          sudo apt-get install -y -qq adb 2>&1 | tail -2 || true
+          for i in $(seq 1 30); do
+            adb connect 127.0.0.1:5555 >/dev/null 2>&1 || true
+            if adb -s 127.0.0.1:5555 shell getprop sys.boot_completed 2>/dev/null \
+                 | tr -d '\r' | grep -q '^1$'; then
+              echo "adb answering after $((i*5))s"
+              break
+            fi
+            sleep 5
+          done
+          adb -s 127.0.0.1:5555 shell getprop ro.product.model | tr -d '\r'
 
       - name: 02 fetch eFootball package
         uses: actions/cache@v4
