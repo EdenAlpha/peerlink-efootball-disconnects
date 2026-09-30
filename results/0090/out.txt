@@ -1,8 +1,7 @@
-cmd: exec bash -c true; echo SI; adb -s 127.0.0.1:5555 shell am start -a android.intent.action.VIEW -d "market://details?id=jp.konami.pesam" 2>&1 | tail -1; sleep 13; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
-at: 22:36:14
-$ bash -c true; echo SI; adb -s 127.0.0.1:5555 shell am start -a android.intent.action.VIEW -d "market://details?id=jp.konami.pesam" 2>&1 | tail -1; sleep 13; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
-SI
-Starting: Intent { act=android.intent.action.VIEW dat=market://details/... }
+cmd: exec bash -c true; echo UH; adb -s 127.0.0.1:5555 shell input tap 591 1113; sleep 9; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+at: 23:41:45
+$ bash -c true; echo UH; adb -s 127.0.0.1:5555 shell input tap 591 1113; sleep 9; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+UH
 rc=0
 gamepid: 
 flows: 0
