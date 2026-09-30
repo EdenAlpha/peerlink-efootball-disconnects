@@ -86,11 +86,18 @@ jobs:
           set -x
           W=/tmp/wd; mkdir -p $W
           exec >> >(tee -a $W/fetch.log) 2>&1
-          # container daemon: systemd if present, manual if not
-          sudo systemctl start waydroid-container 2>/dev/null \
-            || sudo nohup waydroid container start > $W/container.log 2>&1 &
-          sleep 8
-          sudo waydroid container status 2>&1 | head -4 || tail -5 $W/container.log
+          # container daemon: systemd if present, manual if not -- and PROVE it
+          sudo systemctl start waydroid-container 2>&1 | tail -2 || true
+          sleep 5
+          systemctl is-active waydroid-container 2>&1 || true
+          journalctl -u waydroid-container --no-pager 2>/dev/null | tail -25 || true
+          if [ "$(systemctl is-active waydroid-container 2>/dev/null)" != "active" ]; then
+            echo "--- systemd did not start it; manual start with logging ---"
+            sudo nohup waydroid container start > $W/container.log 2>&1 &
+            sleep 12
+            cat $W/container.log 2>/dev/null | head -30 || true
+          fi
+          sudo waydroid status 2>&1 | head -8 || true
           # headless compositor for the session
           export XDG_RUNTIME_DIR=/run/user/$(id -u)
           mkdir -p "$XDG_RUNTIME_DIR"; chmod 700 "$XDG_RUNTIME_DIR"
@@ -101,22 +108,24 @@ jobs:
           waydroid session start > $W/session.log 2>&1 &
           sleep 10
           cat $W/session.log 2>/dev/null | head -10 || true
-          booted=0
-          for i in $(seq 1 60); do
-            if [ "$(sudo waydroid shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
-              echo "BOOTED after $((i*30))s"; booted=1; break
-            fi
-            sleep 30
-            [ $((i % 10)) -eq 0 ] && { echo "--- waiting t=$((i/2))m ---"; sudo waydroid status 2>&1 | head -6; }
-          done
-          [ "$booted" = "1" ] || { echo "=== PHONE DID NOT BOOT ==="; sudo waydroid logcat -d 2>&1 | tail -20; exit 1; }
-          sudo waydroid shell getprop ro.build.fingerprint 2>/dev/null | tr -d '\r'
-          sudo waydroid shell pm list packages 2>/dev/null | grep -i -E "vending|gms" | head -6
+          sudo waydroid shell getprop ro.build.fingerprint 2>&1 | tr -d '\r' | head -2
+          sudo waydroid shell pm list packages 2>&1 | grep -i -E "vending|gms" | head -6
           # helpers used by every later step
           cat > $W/wd.sh <<'EOF'
           # usage: bash wd.sh <shot|tap-words...>: defined per step instead
           EOF
-          echo "PHONE UP"
+          echo "--- boot loop (shell errors shown, not hidden) ---"
+          booted=0
+          for i in $(seq 1 60); do
+            OUT=$(sudo waydroid shell getprop sys.boot_completed 2>&1 | tr -d '\r' | head -2)
+            if [ "$OUT" = "1" ]; then
+              echo "BOOTED after $((i*30))s"; booted=1; break
+            fi
+            [ $((i % 5)) -eq 0 ] && { echo "t=$((i/2))m shell says: [$OUT]"; sudo waydroid status 2>&1 | head -5; }
+            sleep 30
+            [ $((i % 10)) -eq 0 ] && { echo "--- waiting t=$((i/2))m ---"; sudo waydroid status 2>&1 | head -6; }
+          done
+          [ "$booted" = "1" ] || { echo "=== PHONE DID NOT BOOT ==="; timeout 10 sudo waydroid logcat > $W/logcat.txt 2>&1 || true; tail -20 $W/logcat.txt; journalctl -u waydroid-container --no-pager 2>/dev/null | tail -15; exit 1; }
 
       - name: 04 sign in to Play
         run: |
