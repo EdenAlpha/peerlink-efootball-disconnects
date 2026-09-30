@@ -1,0 +1,11 @@
+cmd: amstart com.aurora.store/.ComposeActivity
+at: 08:54:45
+Starting: Intent { cmp=com.aurora.store/.ComposeActivity }
+Status: ok
+LaunchState: COLD
+Activity: com.aurora.store/.ComposeActivity
+TotalTime: 520
+WaitTime: 523
+Complete
+gamepid: 
+flows: 0
