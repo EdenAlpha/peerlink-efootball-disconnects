@@ -1,1 +1,1 @@
-exec bash -c true; echo UT; sleep 20; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+exec bash -c true; echo UU; adb -s 127.0.0.1:5555 shell input tap 1139 677; sleep 10; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== app data size =="; adb -s 127.0.0.1:5555 shell su 0 du -sh /data/data/jp.konami.pesam 2>/dev/null; echo "== logcat =="; adb -s 127.0.0.1:5555 shell su 0 logcat -d -t 400 2>/dev/null | grep -iE "pad|asset|AssetManager|assetdelivery|konami|FATAL|ANR|Download" | tail -20
