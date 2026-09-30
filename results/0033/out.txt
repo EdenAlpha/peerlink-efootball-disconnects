@@ -1,0 +1,4 @@
+cmd: amstart com.aurora.store/.compose.ui.accounts.AccountsScreen
+at: 15:07:40
+gamepid: 
+flows: 0
