@@ -1,7 +1,7 @@
-cmd: exec bash -c true; echo SF; adb -s 127.0.0.1:5555 shell input tap 360 553; sleep 16; adb -s 127.0.0.1:5555 shell pm list packages 2>/dev/null | grep -i cpuz; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
-at: 22:34:05
-$ bash -c true; echo SF; adb -s 127.0.0.1:5555 shell input tap 360 553; sleep 16; adb -s 127.0.0.1:5555 shell pm list packages 2>/dev/null | grep -i cpuz; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
-SF
+cmd: exec bash -c true; echo UE; sleep 5; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+at: 23:39:46
+$ bash -c true; echo UE; sleep 5; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+UE
 rc=0
 gamepid: 
 flows: 0
