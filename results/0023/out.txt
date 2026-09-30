@@ -1,0 +1,9 @@
+cmd: exec sudo docker exec redroid sh -c "am start -a android.settings.ADD_ACCOUNT_SETTINGS -d com.google --es account_type com.google"; sleep 5; sudo docker exec redroid sh -c "screencap -p /data/local/tmp/login_0.png"; sudo docker cp redroid:/data/local/tmp/login_0.png C:/Users/Administrator/AppData/Local/Temp/2/login_0.png
+at: 15:06:10
+$ sudo docker exec redroid sh -c "am start -a android.settings.ADD_ACCOUNT_SETTINGS -d com.google --es account_type com.google"; sleep 5; sudo docker exec redroid sh -c "screencap -p /data/local/tmp/login_0.png"; sudo docker cp redroid:/data/local/tmp/login_0.png C:/Users/Administrator/AppData/Local/Temp/2/login_0.png
+Starting: Intent { act=android.settings.ADD_ACCOUNT_SETTINGS dat= (has extras) }
+Error: Activity not started, unable to resolve Intent { act=android.settings.ADD_ACCOUNT_SETTINGS dat= flg=0x10000000 (has extras) }
+copying between containers is not supported
+rc=1
+gamepid: 
+flows: 0
