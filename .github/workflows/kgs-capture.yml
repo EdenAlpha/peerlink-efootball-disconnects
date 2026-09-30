@@ -574,15 +574,28 @@ jobs:
             # injected into the game. mitmproxy signs its leaf certificates
             # with OUR ca.key, which is why the phone must trust our ca.crt.
             echo "########## PHASE 4: transparent intercept, full decrypted capture"
-            if bash kgs-login/scripts/setup_ca.sh redroid "$W/ca" 2>&1; then
-              echo "CA installed"
+            # The CA attempt NEVER gates the rest of the phase. Rationale: even a
+            # phone that rejects our CA still yields the ClientHello, the
+            # destinations, and the handshake errors -- and a silent game still
+            # yields screenshots of what it shows. Gating everything on the CA
+            # reproduced the old trap: one silent failure deleting all evidence.
+            bash kgs-login/scripts/setup_ca.sh redroid "$W/ca" 2>&1
+            CA_OK=$?
+            echo "CA setup exit code: $CA_OK (0 means the phone trusts our CA)"
+            if true; then
               cp -f "$W/ca/ca.crt" "$R/intercept-ca.crt" 2>/dev/null || true
               echo "--- proxy on the host, signing with OUR ca.key ---"
               python3 -m pip install --quiet --break-system-packages \
                 mitmproxy || echo "MITMPROXY INSTALL FAILED (see below)"
               mkdir -p $W/mitm
-              cat "$W/ca/ca.key" "$W/ca/ca.crt" > $W/mitm/mitmproxy-ca.pem
-              cp -f "$W/ca/ca.crt" $W/mitm/mitmproxy-ca-cert.pem
+              if [ -f "$W/ca/ca.key" ]; then
+                cat "$W/ca/ca.key" "$W/ca/ca.crt" > $W/mitm/mitmproxy-ca.pem
+                cp -f "$W/ca/ca.crt" $W/mitm/mitmproxy-ca-cert.pem
+              else
+                echo "no ca.key was generated; mitmproxy will use its own CA"
+                echo "(the phone will NOT trust it; failed handshakes still"
+                echo "prove the game attempted TLS, which is evidence too)"
+              fi
               FLOWS_LOG=$W/flows.log \
               timeout 600 mitmdump --mode transparent --listen-port 8080 \
                 --set confdir=$W/mitm -s kgs-login/scripts/mitm_addon.py \
@@ -628,7 +641,9 @@ jobs:
                 || echo "tcpdump2 NOT running"
               sudo docker exec redroid sh -c 'am force-stop jp.konami.pesam' 2>/dev/null
               echo "--- restarting the game INTO the intercept ---"
-              sudo docker exec redroid sh -c "am start -W -n $ACT" 2>&1
+              LAUNCH="${ACT:-jp.konami.pesam/com.epicgames.ue4.SplashActivity}"
+              echo "launching [$LAUNCH]"
+              sudo docker exec redroid sh -c "am start -W -n $LAUNCH" 2>&1
               for i in $(seq 1 36); do
                 sleep 10
                 alive=$(sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null' 2>/dev/null | tr -d '\r' | awk '{print $1}')
@@ -642,6 +657,7 @@ jobs:
               done
               kill $MITM_PID 2>/dev/null
               echo "--- diagnostic ladder: each layer proves the next ---"
+              echo "CA trusted by phone: $([ "$CA_OK" = "0" ] && echo YES || echo NO)"
               echo "1. SYNs at all (game2.pcap size / syn count):"
               sudo docker exec redroid sh -c \
                 'ls -la /data/local/tmp/game2.pcap 2>/dev/null; tcpdump -r /data/local/tmp/game2.pcap -c 2000 2>/dev/null | grep -c "S "' || echo "no syns read"
@@ -663,10 +679,10 @@ jobs:
               ls -la $W/screen_*.png 2>/dev/null | head -8 || echo "no screenshots"
               cp -f $W/flows.log "$R/flows-decrypted.log" 2>/dev/null || true
               cp -f $W/mitm.log "$R/mitm.log" 2>/dev/null || true
-            else
-              echo "=== CA INSTALL FAILED - the interception route is unavailable ==="
-              echo "the staged CA is at /data/local/tmp/cacerts in the container"
-              sudo docker exec redroid sh -c 'ls -la /data/local/tmp/cacerts/' 2>&1
+            fi
+            if [ "$CA_OK" != "0" ]; then
+              echo "=== CA NOT TRUSTED: expect handshake failures, not plaintext;"
+              echo "=== SYNs + HOST-SEEN still prove whether the game tried ==="
             fi
 
             # ---- MEMORY SCAN RETIRED. ----
