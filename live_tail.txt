@@ -7,3 +7,6 @@ kgs-login/live/live_loop.sh: line 64: echo: write error: Broken pipe
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    bd140e2..80fb275  HEAD -> live-res
 kgs-login/live/live_loop.sh: line 64: echo: write error: Broken pipe
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   80fb275..f2de350  HEAD -> live-res
+kgs-login/live/live_loop.sh: line 64: echo: write error: Broken pipe
