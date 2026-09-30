@@ -220,22 +220,51 @@ def read_region(pid, start, end):
 
 
 def scan_buffer(buf, found):
-    """Find CommandRequests in a buffer, skipping across region boundaries."""
+    """Find CommandRequests in a buffer.
+
+    Candidate location is done with bytes.find, which runs at C speed, and only
+    the handful of bytes around each 0x22 are handed to the strict decoder.
+
+    This matters enormously and was the reason a whole run found nothing: a
+    per-byte Python loop over 2 GB took 152 s per pass, so only two passes fit
+    in the 300 s window. A request that lives for about a millisecond has
+    roughly a 0.001% chance of being sampled that way. The message was not
+    absent -- it was never looked at. Locating candidates with find() drops a
+    pass to a couple of seconds, which makes continuous coverage possible.
+    """
     hits = 0
     if not buf:
         return hits
-    for i in range(len(buf) - 2):
-        if buf[i] != TAG_PATH:
-            continue
+    needle = bytes([TAG_PATH])
+    # Prefilters, cheapest first. Both only discard work; the strict decoder
+    # still decides every survivor, so correctness never depends on them.
+    #
+    #   1. the length byte must be 1..96
+    #   2. the byte after it must be printable ASCII
+    #
+    # Measured on 8 MB of random bytes: 32765 x 0x22, 12154 pass (1), 4564 pass
+    # (2). Heap data is mostly zeroes and pointers with long printable runs, so
+    # (2) removes far less than the raw-byte arithmetic suggests -- which is why
+    # the sampling rate, not the filter, is what makes this practical.
+    printable = bytes(range(0x20, 0x7F))
+    pos = 0
+    while True:
+        i = buf.find(needle, pos)
+        if i < 0 or i + 3 > len(buf):
+            break
+        pos = i + 1
         plen = buf[i + 1]
         if plen < 1 or plen > MAX_PATH:
             continue
-        for back in range(96, 1, -1):
-            if i - back < 0:
-                back = i
-                if back <= 0:
-                    break
-            cr = decode_command_request(buf, i - back, back + 2 + plen)
+        if buf[i + 2:i + 3] not in printable:
+            continue
+        lo = max(0, i - 96)
+        seg = buf[lo:i + 2 + plen]
+        for back in range(min(96, i), 1, -1):
+            off = i - lo - back
+            if off < 0:
+                break
+            cr = decode_command_request(seg, off, back + 2 + plen)
             if cr and cr["path"]:
                 key = cr["path"]
                 if key not in found:
@@ -252,11 +281,65 @@ def scan_buffer(buf, found):
     return hits
 
 
+class DirtySet:
+    """Track which pages changed since the last pass.
+
+    The problem this solves is sampling, not parsing. A serialised
+    CommandRequest lives for roughly a millisecond, so re-reading 2 GB in 152 s
+    and doing it twice in the whole window cannot catch one. But a page of a
+    live process changes only where it is actually being written, and the gRPC
+    stack's serialisation buffer is a small, busy region. Comparing against the
+    previous snapshot means the hot regions are re-scanned every pass at a small
+    cost, while the 2 GB of quiet heap is read once and then skipped.
+
+    Pages are keyed by region so a shrinking or growing region does not compare
+    against the wrong bytes.
+    """
+
+    def __init__(self, page=4096):
+        self.page = page
+        self.prev = {}          # (start, end) -> {page_index: bytes}
+
+    def changed(self, start, end, buf):
+        """Yield only the byte ranges of `buf` that differ from last pass."""
+        key = (start, end)
+        old = self.prev.get(key)
+        n = self.page
+        cur = {}
+        out = []
+        if old is None or len(old) != (len(buf) + n - 1) // n:
+            out.append((0, len(buf)))
+        else:
+            for pi in range((len(buf) + n - 1) // n):
+                page = buf[pi * n:(pi + 1) * n]
+                cur[pi] = page
+                if old.get(pi) != page:
+                    lo = pi * n
+                    # widen by a page on each side: a message can straddle a
+                    # boundary and the decoder needs the preceding fields
+                    lo2 = max(0, lo - 128)
+                    hi2 = min(len(buf), lo + n + 128)
+                    out.append((lo2, hi2))
+            self.prev[key] = cur
+            return out
+        for pi in range((len(buf) + n - 1) // n):
+            cur[pi] = buf[pi * n:(pi + 1) * n]
+        self.prev[key] = cur
+        return out
+
+    def forget(self, key):
+        self.prev.pop(key, None)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--package", default="jp.konami.pesam")
     ap.add_argument("--seconds", type=int, default=240)
-    ap.add_argument("--interval", type=float, default=3.0)
+    ap.add_argument("--interval", type=float, default=0.2)
+    ap.add_argument("--huge-mb", type=int, default=96,
+                    help="regions larger than this are read only once, early; "
+                         "the 537 MB reservations are mostly untouched and cost "
+                         "150 s each to walk")
     ap.add_argument("--docker-exec", default=None,
                     help="command prefix to reach the container, e.g. "
                          "'sudo docker exec redroid'. Omit to run directly "
@@ -276,40 +359,88 @@ def main() -> int:
     print("[scan] pid=%d, reading /proc/%d/mem for %ds (no injection)"
           % (pid, pid, a.seconds), flush=True)
     regs = readable_regions(pid)
-    total = sum(e - s for s, e in regs)
-    print("[scan] %d writable anonymous region(s), %.1f MB total"
-          % (len(regs), total / 1e6), flush=True)
-    for s, e in regs[:12]:
-        print("        %#018x-%#018x  %.1f MB" % (s, e, (e - s) / 1e6), flush=True)
+    hot_limit = a.huge_mb * 1000 * 1000
+    hot = [(s, e) for s, e in regs if (e - s) <= hot_limit]
+    cold = [(s, e) for s, e in regs if (e - s) > hot_limit]
+    print("[scan] %d region(s): %d frequent (%.1f MB) + %d large (%.1f MB)"
+          % (len(regs), len(hot), sum(e - s for s, e in hot) / 1e6,
+             len(cold), sum(e - s for s, e in cold) / 1e6), flush=True)
+    for s, e in (hot[:8] + cold[:4]):
+        print("        %#018x-%#018x  %.1f MB%s"
+              % (s, e, (e - s) / 1e6, "  (large)" if (e - s) > hot_limit else ""),
+              flush=True)
     if not regs:
         print("[scan] no usable regions; check the maps output above")
         return 2
 
     found = {}
     deadline = time.time() + a.seconds
+
+    # The large reservations are walked once, up front. A freshly serialised
+    # message is a small malloc chunk in a busy region; spending 150 s per pass
+    # to cover two untouched 537 MB reservations would leave two samples of the
+    # whole process in the entire window, which cannot catch something that
+    # lives for a millisecond.
+    if cold:
+        t0 = time.time()
+        got = 0
+        for s, e in cold:
+            buf, _ = read_region(pid, s, e)
+            got += len(buf)
+            if buf:
+                scan_buffer(buf, found)
+        print("[scan] large regions: %.1f MB in %.1fs, %d path(s)"
+              % (got / 1e6, time.time() - t0, len(found)), flush=True)
+        if found:
+            print(json.dumps(found, indent=2, sort_keys=True))
+            return 0
+
     passes = 0
+    last_maps = 0.0
+    dirty = DirtySet()
+    scan_mb = 0.0
+    t_start = time.time()
     while time.time() < deadline:
         passes += 1
         t0 = time.time()
         got = 0
-        for s, e in regs:
-            buf, want = read_region(pid, s, e)
+        scanned = 0
+        # re-read the maps periodically: new regions appear as the game allocates
+        if time.time() - last_maps > 5.0:
+            last_maps = time.time()
+            fresh = readable_regions(pid)
+            known = set(hot) | set(cold)
+            added = [(s, e) for s, e in fresh
+                     if (e - s) <= hot_limit and (s, e) not in known]
+            if added:
+                hot += added
+                print("[scan] +%d new region(s), now %d frequent"
+                      % (len(added), len(hot)), flush=True)
+        for s, e in hot:
+            buf, _ = read_region(pid, s, e)
             got += len(buf)
-            if buf:
-                scan_buffer(buf, found)
+            if not buf:
+                continue
+            for lo, hi in dirty.changed(s, e, buf):
+                chunk = buf[lo:hi]
+                scanned += len(chunk)
+                scan_buffer(chunk, found)
             if found:
-                # one confirming pass over everything is enough to be sure
                 break
+        scan_mb += scanned / 1e6
         alive = pidof(a.package)
-        print("[scan] pass %d: %.1f MB in %.1fs, %d distinct path(s)%s"
-              % (passes, got / 1e6, time.time() - t0, len(found),
-                 "" if alive else "  [game exited]"), flush=True)
+        dt = max(1e-6, time.time() - t0)
+        print("[scan] pass %d: read %.1f MB, rescanned %.2f MB in %.2fs "
+              "(%d passes, %.1f MB rescanned total), %d path(s)%s"
+              % (passes, got / 1e6, scanned / 1e6, dt, passes, scan_mb,
+                 len(found), "" if alive else "  [game exited]"), flush=True)
         if found:
             print("[scan] paths: %s" % json.dumps(sorted(found)), flush=True)
             print(json.dumps(found, indent=2, sort_keys=True))
             return 0
         if alive is None:
             print("[scan] game exited before any CommandRequest was seen")
+            print("PASSES=%d PATHS=0" % passes)
             return 1
         time.sleep(a.interval)
 
