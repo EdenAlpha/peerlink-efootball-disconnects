@@ -355,6 +355,98 @@ jobs:
           sudo docker exec redroid /system/bin/pm path jp.konami.pesam
           sudo docker exec redroid sh -c 'du -sh /data/app/*jp.konami.pesam* 2>/dev/null' || true
 
+      - name: 04b aurora + Play asset packs
+        run: |
+          set +e
+          set -x
+          W=/tmp/kgs; mkdir -p $W
+          exec >> >(tee -a $W/pipeline.log) 2>&1
+          # The game's 0% download is Play-delivered (playcore x357 in the
+          # binary, AssetPack x262, no CDN host anywhere). This box has no
+          # Play Store, so fetch the packs through Aurora Store instead: the
+          # same Google servers, no system changes, no account. Aurora is NOT
+          # the Play Store -- it is an independent client for the same files.
+          # If Aurora cannot deliver these packs either, the screenshots and
+          # the asset-dir sizes below prove it instead of another silent 0%.
+          SERIAL=127.0.0.1:5555
+          adb connect $SERIAL 2>&1 | tail -1
+          echo "--- fetch Aurora Store (pinned v4.8.4, F-Droid) ---"
+          curl -fsSL --max-time 300 -o $W/aurora.apk \
+            https://f-droid.org/repo/com.aurora.store_76.apk \
+            && echo "aurora apk $(stat -c %s $W/aurora.apk) bytes" \
+            || echo "AURORA DOWNLOAD FAILED"
+          [ -f $W/aurora.apk ] || { echo "=== no aurora apk, skipping ==="; exit 0; }
+          adb -s $SERIAL install -r $W/aurora.apk 2>&1 | tail -2
+          adb -s $SERIAL shell pm list packages 2>/dev/null | grep -i aurora \
+            || echo "AURORA NOT INSTALLED"
+          # helpers: screenshot + visible-text dump. Every tap below is
+          # verified by the pair -- never tap blind twice in a row.
+          A_SHOT() { sudo docker exec redroid sh -c \
+            "screencap -p /data/local/tmp/aurora_$1.png" >/dev/null 2>&1; }
+          A_TEXT() { sudo docker exec redroid sh -c \
+            'uiautomator dump /data/local/tmp/ui.xml' >/dev/null 2>&1;
+            sudo docker exec redroid cat /data/local/tmp/ui.xml 2>/dev/null \
+              | grep -oE '(text|content-desc)="[^"]+"' | sort -u | head -40; }
+          A_PULL() { sudo docker exec redroid sh -c \
+            "screencap -p /data/local/tmp/aurora_$1.png" >/dev/null 2>&1;
+            sudo docker cp redroid:/data/local/tmp/aurora_$1.png \
+              $W/aurora_$1.png 2>/dev/null || true; }
+          echo "--- launch Aurora ---"
+          AACT=$(sudo docker exec redroid sh -c \
+            'cmd package resolve-activity --brief -c android.intent.category.LAUNCHER com.aurora.store' 2>/dev/null \
+            | tr -d '\r' | grep -E '^com\.aurora\.store/' | tail -1)
+          echo "aurora launcher: [$AACT]"
+          [ -n "$AACT" ] && sudo docker exec redroid sh -c \
+            "am start -W -n $AACT" 2>&1 | tail -3
+          sleep 8
+          A_SHOT 0; echo "--- aurora screen 0 texts ---"; A_TEXT
+          # --- onboarding: tap through by WORDS, screenshotting each step ---
+          # First launch is some order of welcome / permissions / login choice.
+          # "Anonymous" is the goal; the rest are doors on the way there.
+          for pat in 'Anonymous' '^Next$' '^Allow$' 'Get Started' '^Skip$' \
+                     '^Continue$' '^OK$' 'Agree' 'Accept'; do
+            echo "--- try [$pat] ---"
+            bash kgs-login/scripts/uitap.sh redroid "$pat" 2>&1 || true
+            sleep 4
+          done
+          A_PULL 1; echo "--- aurora screen 1 texts ---"; A_TEXT
+          # --- open eFootball's Play page directly (skips search UI) ---
+          echo "--- open market page ---"
+          sudo docker exec redroid sh -c \
+            "am start -a android.intent.action.VIEW -d 'market://details?id=jp.konami.pesam'" 2>&1 | tail -3
+          sleep 8
+          A_PULL 2; echo "--- market page texts ---"; A_TEXT
+          # --- install / update with asset packs ---
+          for pat in '^Install$' '^Update$' '^OK$' '^Allow$' 'Retry'; do
+            echo "--- try [$pat] ---"
+            bash kgs-login/scripts/uitap.sh redroid "$pat" 2>&1 || true
+            sleep 5
+          done
+          A_PULL 3
+          echo "--- wait for packs (15 min): asset dirs + screenshots ---"
+          for i in $(seq 1 15); do
+            sleep 60
+            echo "== aurora wait t=${i}m =="
+            sudo docker exec redroid sh -c \
+              'du -sh /storage/emulated/0/Android/obb/jp.konami.pesam /storage/emulated/0/Android/data/jp.konami.pesam /data/data/jp.konami.pesam 2>&1' | head -6
+            # prompts (installer permission, confirmations) appear mid-flow;
+            # answer the safe ones as they come, by words not pixels
+            for pat in '^Allow$' '^Install$' '^OK$'; do
+              bash kgs-login/scripts/uitap.sh redroid "$pat" 2>/dev/null || true
+            done
+            [ $((i % 3)) -eq 0 ] && A_PULL w$i
+          done
+          A_PULL done
+          echo "--- final asset state ---"
+          sudo docker exec redroid sh -c \
+            'du -sh /storage/emulated/0/Android/obb/jp.konami.pesam /storage/emulated/0/Android/data/jp.konami.pesam 2>&1'
+          sudo docker exec redroid sh -c \
+            'ls -la /storage/emulated/0/Android/obb/jp.konami.pesam/ 2>&1' | head -12
+          for f in $W/aurora_*.png; do
+            [ -f "$f" ] && cp -f "$f" "$R/capture/$(basename "$f")" 2>/dev/null
+          done
+          echo "AURORA PHASE DONE (screenshots + sizes above are the verdict)"
+
       - name: 05 capture plaintext gRPC
         run: |
           set +e
@@ -844,6 +936,7 @@ jobs:
             /tmp/kgs/flows.mitm
             /tmp/kgs/mitm.log
             /tmp/kgs/screen_*.png
+            /tmp/kgs/aurora_*.png
             /tmp/kgs/frida.log
             /tmp/kgs/frida2.log
             /tmp/kgs/pipeline.log
