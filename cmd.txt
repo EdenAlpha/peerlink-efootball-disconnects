@@ -1,1 +1,1 @@
-shot
+intent market://details?id=jp.konami.pesam
