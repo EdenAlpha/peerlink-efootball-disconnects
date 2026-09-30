@@ -1,1 +1,1 @@
-exec ls /data/local/tmp/splits/ 2>/dev/null | head -30
+exec sudo docker exec redroid ls -la /data/local/tmp/splits/ 2>&1 | head -30; ls /tmp/kgs/out/ 2>/dev/null | head -30
