@@ -1,15 +1,9 @@
 live: live control loop starting (poll 8s, max 1400 rounds)
 live: write commands to live-cmd/cmd.txt ; read live-res/results + status.txt
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   a7e2ec6..f3d6eff  HEAD -> live-res
+   180315c..bd140e2  HEAD -> live-res
 live: probe published OK; live-res is live
 kgs-login/live/live_loop.sh: line 64: echo: write error: Broken pipe
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   f3d6eff..53bb142  HEAD -> live-res
-kgs-login/live/live_loop.sh: line 64: echo: write error: Broken pipe
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   53bb142..b879ed0  HEAD -> live-res
-kgs-login/live/live_loop.sh: line 64: echo: write error: Broken pipe
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   b879ed0..791d0ea  HEAD -> live-res
+   bd140e2..80fb275  HEAD -> live-res
 kgs-login/live/live_loop.sh: line 64: echo: write error: Broken pipe
