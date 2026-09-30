@@ -561,6 +561,52 @@ jobs:
             sudo docker exec redroid sh -c \
               "grep libUE4 /proc/$GPID/maps 2>/dev/null | head -3" || true
 
+            # ---- TRUST OUR OWN CA, THEN READ THE TRAFFIC ----
+            # The memory scan had to be abandoned. It works -- 2 GB was read
+            # cleanly from the live process -- but the cost is transferring
+            # bytes, and a serialised request only exists for about a
+            # microsecond:
+            #     pass 1: read 715.9 MB, rescanned 715.94 MB in 36.10s
+            #     pass 2: read 715.9 MB, rescanned  10.03 MB in 30.22s
+            #     8 pass(es) over 300s, no CommandRequest found
+            # Dirty-page tracking worked (10 MB instead of 2 GB on an unchanged
+            # pass) and it still found nothing, because only 8 samples fit.
+            # No sampling interval can catch a microsecond; the approach was
+            # wrong, not the implementation.
+            #
+            # Traffic has none of that problem: a command that is sent is
+            # captured whole, every time. And TLS is only opaque because the
+            # game trusts a CA it was built to trust -- so give the phone a CA
+            # of ours in the SYSTEM store (user-added CAs are not trusted by
+            # apps on modern Android) and the game will complete the handshake
+            # with us in the clear.
+            echo "########## PHASE 4: intercept the traffic instead of reading memory"
+            if bash kgs-login/scripts/setup_ca.sh redroid "$W/ca" 2>&1; then
+              echo "CA installed"
+              cp -f "$W/ca/ca.crt" "$R/intercept-ca.crt" 2>/dev/null || true
+              cp -f "$W/ca/leaf.crt" "$R/intercept-leaf.crt" 2>/dev/null || true
+              echo "--- proof the phone trusts it: what the store now holds ---"
+              sudo docker exec redroid sh -c \
+                'ls /system/etc/security/cacerts/ | wc -l'
+              sudo docker exec redroid sh -c \
+                "ls -la /system/etc/security/cacerts/ | tail -3" || true
+              sudo docker exec redroid sh -c 'am force-stop jp.konami.pesam' 2>/dev/null
+              echo "--- restarting the game so it reads the trust store ---"
+              sudo docker exec redroid sh -c \
+                'am start -W -n jp.konami.pesam/com.epicgames.ue4.SplashActivity' 2>&1
+              for i in $(seq 1 12); do
+                sleep 10
+                alive=$(sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null' 2>/dev/null | tr -d '\r' | awk '{print $1}')
+                echo "  phase4 t=$((i*10))s gamepid=${alive:-GONE}"
+                sudo docker exec redroid /system/bin/input tap 360 640 >/dev/null 2>&1
+                [ -n "$alive" ] || break
+              done
+            else
+              echo "=== CA INSTALL FAILED - the interception route is unavailable ==="
+              echo "the staged CA is at /data/local/tmp/cacerts in the container"
+              sudo docker exec redroid sh -c 'ls -la /data/local/tmp/cacerts/' 2>&1
+            fi
+
             # ---- READ MEMORY. Do not inject, and do it from the HOST. ----
             # Both Frida injection paths are rejected identically by this game:
             #     Spawning `jp.konami.pesam`...
