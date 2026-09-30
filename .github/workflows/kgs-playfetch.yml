@@ -1,0 +1,213 @@
+name: kgs-playfetch
+
+# Fetch the FULL 3 GB eFootball data through the REAL Play Store, so the game
+# on the capture phone stops sitting at 0%.
+#
+# Why a different phone: redroid has no Google services, and the missing ~2 GB
+# only flows through Play's own delivery (Aurora was refused at install with
+# "App not supported", anonymous sessions are blocked from this network, and
+# the recorder's certificate is rejected by the phone). The real Play Store
+# inside Google's own phone image handles device compatibility itself -- there
+# is nothing to select by hand: the ARM64 Play image only gets offered builds
+# that fit it, which is exactly the "compatible, no install error" requirement.
+#
+# What this produces: a data bundle (obb + app data dirs) uploaded as an
+# artifact. The capture phone (rooted redroid) then gets those files pushed
+# into place, and the game should boot to login where the recorder/Frida
+# capture the KGS conversation.
+#
+# Needs: KVM on the runner (fails loudly in step 01 if absent) and the burner
+# Google account (PEERLINK_GMAIL/PEERLINK_GPASS secrets). The number-match
+# approval is done by the account owner when the sign-in screen shows a number.
+#
+# Cost: public repos get unlimited Actions minutes.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 330
+    env:
+      PEERLINK_GMAIL: ${{ secrets.PEERLINK_GMAIL }}
+      PEERLINK_GPASS: ${{ secrets.PEERLINK_GPASS }}
+      ANDROID_SDK_ROOT: ${{ github.workspace }}/Android/Sdk
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: 01 KVM + tools
+        run: |
+          set +e
+          set -x
+          W=/tmp/play; mkdir -p $W
+          exec >> >(tee -a $W/fetch.log) 2>&1
+          # No KVM = the emulator crawls and the game never boots. Fail in
+          # minute 2, not hour 3.
+          ls -la /dev/kvm 2>&1
+          [ -e /dev/kvm ] || { echo "=== NO KVM - emulator unusable, ABORT ==="; exit 1; }
+          id; free -g | head -3
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq unzip openjdk-17-jdk adb 2>&1 | tail -2
+          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+          cd "$ANDROID_SDK_ROOT/cmdline-tools"
+          curl -fsSL --max-time 300 -o tools.zip \
+            https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip \
+            || { echo "=== CMDLINE TOOLS DOWNLOAD FAILED ==="; exit 1; }
+          unzip -q -o tools.zip
+          mv cmdline-tools latest
+          export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          # Play Store ARM64 image for API 34. The playstore variant is the
+          # whole point: real Play, real account, real asset delivery.
+          sdkmanager "platform-tools" "emulator" \
+            "system-images;android-34;google_apis_playstore;arm64-v8a" 2>&1 | tail -3
+          echo "--- installed packages ---"
+          sdkmanager --list_installed 2>&1 | tail -8
+
+      - name: 02 create + boot Play phone
+        run: |
+          set +e
+          set -x
+          W=/tmp/play; mkdir -p $W
+          exec >> >(tee -a $W/fetch.log) 2>&1
+          export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/emulator:$PATH"
+          echo no | avdmanager create avd -n play -k \
+            "system-images;android-34;google_apis_playstore;arm64-v8a" \
+            -d "pixel_7" --force 2>&1 | tail -3
+          avdmanager list avd 2>&1 | head -8
+          # First boot of a Play image is slow; swiftshader for the headless GPU.
+          nohup emulator -avd play -no-window -no-audio -no-boot-anim \
+            -gpu swiftshader_indirect -memory 2560 -no-snapshot -read-only \
+            > $W/emu.log 2>&1 &
+          echo "emulator pid $!"
+          booted=0
+          for i in $(seq 1 120); do
+            if [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
+              echo "BOOTED after $((i*30))s"; booted=1; break
+            fi
+            sleep 30
+            [ $((i % 10)) -eq 0 ] && { echo "--- still waiting t=$((i/2))m ---"; tail -3 $W/emu.log; }
+          done
+          [ "$booted" = "1" ] || { echo "=== EMULATOR DID NOT BOOT ==="; tail -30 $W/emu.log; exit 1; }
+          adb shell getprop ro.build.fingerprint | tr -d '\r'
+          adb shell pm list packages 2>/dev/null | grep -i -E "vending|gms|play" | head -8
+
+      - name: 03 sign in to Play
+        run: |
+          set +e
+          set -x
+          W=/tmp/play; mkdir -p $W
+          exec >> >(tee -a $W/fetch.log) 2>&1
+          export PATH="$ANDROID_SDK_ROOT/platform-tools:$PATH"
+          # Open Play Store; it walks into sign-in by itself on a fresh phone.
+          adb shell am start -a android.intent.action.VIEW \
+            -d 'market://details?id=jp.konami.pesam' 2>&1 | tail -2
+          sleep 20
+          adb exec-out screencap -p > $W/play_0.png 2>/dev/null || true
+          # Play's UI is native text, so tap by words. The email+password go
+          # through secret env vars -- values never appear here.
+          for pat in 'Next' 'Sign in' '^OK$' 'Accept' 'I agree' 'Got it' 'Skip' 'No thanks' 'Not now'; do
+            echo "--- try [$pat] ---"
+            bash kgs-login/scripts/uitap.sh emulator-5554 "$pat" 2>&1 || true
+            sleep 6
+          done
+          adb exec-out screencap -p > $W/play_1.png 2>/dev/null || true
+          # If an email field is showing, type the burner address + Next.
+          adb shell input tap 360 600 >/dev/null 2>&1; sleep 2
+          adb shell input text "$PEERLINK_GMAIL" >/dev/null 2>&1
+          adb exec-out screencap -p > $W/play_2.png 2>/dev/null || true
+          echo "PLAY SIGN-IN STEP DONE (screenshots above show where it stands)"
+
+      - name: 04 install eFootball from Play
+        run: |
+          set +e
+          set -x
+          W=/tmp/play; mkdir -p $W
+          exec >> >(tee -a $W/fetch.log) 2>&1
+          export PATH="$ANDROID_SDK_ROOT/platform-tools:$PATH"
+          # Password for the burner account if Play asks (secret, never shown).
+          adb shell input text "$PEERLINK_GPASS" >/dev/null 2>&1 || true
+          sleep 5
+          for pat in 'Next' 'I agree' 'Accept' '^Install$' '^OK$' 'Got it' 'Allow' 'Verify'; do
+            echo "--- try [$pat] ---"
+            bash kgs-login/scripts/uitap.sh emulator-5554 "$pat" 2>&1 || true
+            sleep 8
+          done
+          adb exec-out screencap -p > $W/play_3.png 2>/dev/null || true
+          adb shell pm list packages 2>/dev/null | grep -i konami || echo "GAME NOT INSTALLED YET"
+          echo "--- waiting for Play to deliver (~2 GB, up to 60 min) ---"
+          for i in $(seq 1 60); do
+            sleep 60
+            INST=$(adb shell pm list packages 2>/dev/null | grep -i konami | tr -d '\r')
+            SZ=$(adb shell du -sh /storage/emulated/0/Android/obb/jp.konami.pesam 2>/dev/null | tr -d '\r' | head -1)
+            echo "t=${i}m installed=[${INST:-no}] obb=[${SZ:-none}]"
+            for pat in '^Install$' 'Accept' '^OK$' 'Update'; do
+              bash kgs-login/scripts/uitap.sh emulator-5554 "$pat" 2>/dev/null || true
+            done
+            [ $((i % 5)) -eq 0 ] && adb exec-out screencap -p > $W/play_w$i.png 2>/dev/null || true
+            if [ -n "$INST" ]; then
+              echo "INSTALLED, stopping wait"
+              break
+            fi
+          done
+          adb shell pm list packages 2>/dev/null | grep -i konami \
+            || { echo "=== PLAY NEVER INSTALLED IT ==="; exit 1; }
+
+      - name: 05 launch, download data, pull bundle
+        run: |
+          set +e
+          set -x
+          W=/tmp/play; mkdir -p $W
+          exec >> >(tee -a $W/fetch.log) 2>&1
+          export PATH="$ANDROID_SDK_ROOT/platform-tools:$PATH"
+          adb shell monkey -p jp.konami.pesam -c android.intent.category.LAUNCHER 1 2>&1 | tail -2 || \
+            adb shell am start -n jp.konami.pesam/com.epicgames.ue4.SplashActivity 2>&1 | tail -2
+          echo "--- game running, waiting for its data download (up to 90 min) ---"
+          mkdir -p $W/bundle
+          for i in $(seq 1 90); do
+            sleep 60
+            PID=$(adb shell pidof jp.konami.pesam 2>/dev/null | tr -d '\r' | awk '{print $1}')
+            OBB=$(adb shell du -sb /storage/emulated/0/Android/obb/jp.konami.pesam 2>/dev/null | tr -d '\r' | awk '{print $1}')
+            DAT=$(adb shell du -sb /storage/emulated/0/Android/data/jp.konami.pesam 2>/dev/null | tr -d '\r' | awk '{print $1}')
+            echo "t=${i}m gamepid=${PID:-GONE} obb=${OBB:-0}B data=${DAT:-0}B"
+            # nudge past splash/terms screens; never BACK (summons Quit dialog)
+            adb shell input tap 915 405 >/dev/null 2>&1
+            [ $((i % 5)) -eq 0 ] && adb exec-out screencap -p > $W/game_w$i.png 2>/dev/null || true
+            TOTAL=$(( ${OBB:-0} + ${DAT:-0} ))
+            # ~2.5 GB on disk means the full data arrived; stop early
+            if [ "$TOTAL" -gt 2500000000 ]; then
+              echo "DATA COMPLETE (${TOTAL}B), stopping wait"
+              break
+            fi
+            [ -z "$PID" ] && echo "WARNING: game process gone"
+          done
+          adb exec-out screencap -p > $W/game_done.png 2>/dev/null || true
+          echo "--- pulling the data bundle ---"
+          adb pull /storage/emulated/0/Android/obb/jp.konami.pesam $W/bundle/obb 2>&1 | tail -2 || true
+          adb pull /storage/emulated/0/Android/data/jp.konami.pesam $W/bundle/appdata 2>&1 | tail -2 || true
+          du -sh $W/bundle 2>/dev/null
+          find $W/bundle -type f | head -10
+          [ -d $W/bundle/obb ] || [ -d $W/bundle/appdata ] \
+            || { echo "=== NOTHING PULLED ==="; exit 1; }
+          echo "BUNDLE READY"
+
+      - name: 06 upload bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgs-playdata-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            /tmp/play/fetch.log
+            /tmp/play/emu.log
+            /tmp/play/play_*.png
+            /tmp/play/game_*.png
+            /tmp/play/bundle/
