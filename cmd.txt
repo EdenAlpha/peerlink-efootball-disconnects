@@ -1,1 +1,1 @@
-exec bash -c true; echo T9; adb -s 127.0.0.1:5555 shell am start -a android.settings.ADD_ACCOUNT_SETTINGS 2>&1 | tail -1; sleep 13; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+exec bash -c true; echo TA; adb -s 127.0.0.1:5555 shell input tap 360 467; sleep 15; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
