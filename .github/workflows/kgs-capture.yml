@@ -560,12 +560,30 @@ jobs:
               "grep -c libUE4 /proc/$GPID/maps 2>/dev/null" || echo "cannot read maps"
             sudo docker exec redroid sh -c \
               "grep libUE4 /proc/$GPID/maps 2>/dev/null | head -3" || true
-            echo "--- attaching to live pid $GPID ---"
-            timeout 420 frida -H 127.0.0.1:27042 -p "$GPID" \
-              -l kgs-login/scripts/scan_paths.js --runtime=v8 \
+
+            # ---- READ MEMORY. Do not inject. ----
+            # Both Frida injection paths are rejected identically by this game:
+            #     Spawning `jp.konami.pesam`...
+            #     Failed to spawn: error receiving data: Connection reset by peer
+            #     Attaching...
+            #     Failed to attach: error receiving data: Connection reset by peer
+            # It kills itself rather than be read. But it does not need to know
+            # it is being read: /proc/<pid>/mem reads another process's address
+            # space with nothing injected, no thread created inside it, and no
+            # memory written -- so there is no /proc/self/maps entry, no extra
+            # thread and no modified code for it to detect. redroid runs as root,
+            # so its own dd can do it.
+            # The game starts (SplashActivity, pid found in 5 s) and stays alive
+            # the full 6 minutes, so there is a long window to read in.
+            sudo docker cp kgs-login/scripts/read_paths.py \
+              redroid:/data/local/tmp/read_paths.py
+            echo "--- reading the game's memory (no injection) ---"
+            timeout 400 sudo docker exec redroid \
+              python3 /data/local/tmp/read_paths.py \
+                --package jp.konami.pesam --seconds 300 --interval 3 \
               > $W/scan.log 2>&1 &
             SPID=$!
-            echo "phase 3 frida pid $SPID"
+            echo "phase 3 reader pid $SPID"
             for i in $(seq 1 36); do
               sleep 10
               alive=$(sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null' 2>/dev/null | tr -d '\r' | awk '{print $1}')
