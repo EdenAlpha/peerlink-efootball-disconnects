@@ -41,7 +41,7 @@ jobs:
           ram-size: 4096M
           heap-size: 576M
           disk-size: 8192M
-          emulator-boot-timeout-seconds: 1800
+          emulator-boot-timeout: 1800
           script: |
             set +e
             W=/tmp/macplay; mkdir -p $W
