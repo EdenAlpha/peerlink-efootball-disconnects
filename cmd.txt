@@ -1,1 +1,1 @@
-tap 640 940
+exec adb -s 127.0.0.1:5555 shell input swipe 360 300 360 800 500; sleep 12; sudo docker exec redroid iptables -t nat -L OUTPUT -n -v | head -5; tail -3 /tmp/kgs/flows.log
