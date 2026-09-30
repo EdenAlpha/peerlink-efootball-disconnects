@@ -1,1 +1,1 @@
-exec bash -c true; echo GAPPSCHECK; hostname; sudo docker exec redroid /system/bin/pm list packages 2>/dev/null | grep -iE "vending|android.gms|gsf" || echo NO_GOOGLE_SERVICES
+amstart com.android.vending/com.google.android.finsky.activities.MainActivity
