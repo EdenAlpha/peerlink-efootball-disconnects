@@ -26,6 +26,7 @@
 'use strict';
 
 const CMD_REQ_PATH_TAG = 0x22;      // field 4, wire type 2 (length-delimited)
+const MIN_PATH = 2;
 const MAX_PATH = 96;
 
 function uvarint(p) {
@@ -39,34 +40,17 @@ function uvarint(p) {
     return null;
 }
 
-// Field order the game actually emits: id=1 string, packMode=2 enum,
-// req=3 string, path=4 string. Required as a strict ascending run, because
-// the scanner finds candidates by spotting a field-4 tag and then guessing
-// where the message began -- so it will happily decode a valid *suffix* of
-// some unrelated message as if it were a whole one. Requiring the run to start
-// at field 1 and to contain all four fields is what makes a hit trustworthy.
-const EXPECTED_FIELDS = [1, 2, 3, 4];
-
 // Fully decode a candidate CommandRequest. Returns {id, packMode, req, path} or
-// null if it does not parse as exactly one complete CommandRequest.
+// null if it does not parse cleanly as one.
 function decodeCommandRequest(p, len) {
     const out = { id: null, packMode: null, req: null, path: null };
     let i = 0;
-    let seen = 0;
     while (i < len) {
         const k = uvarint(p.add(i));
         if (!k) return null;
         i += k.length;
         const fn = k.value >> 3, wt = k.value & 7;
-        // fields must appear exactly once, in order, and nothing else may
-        if (seen >= EXPECTED_FIELDS.length) return null;
-        if (fn !== EXPECTED_FIELDS[seen]) return null;
-        if (fn === 2) {
-            if (wt !== 0) return null;              // packMode is an enum
-        } else if (wt !== 2) {
-            return null;                            // the rest are strings
-        }
-        seen++;
+        if (fn < 1 || fn > 4) return null;
         if (wt === 2) {
             const l = uvarint(p.add(i));
             if (!l) return null;
@@ -75,21 +59,20 @@ function decodeCommandRequest(p, len) {
             const bytes = p.add(i).readByteArray(l.value);
             if (bytes === null) return null;
             const s = latin(bytes);
-            if (s === null) return null;            // non-printable => not a route
             if (fn === 1) out.id = s;
             else if (fn === 3) out.req = s;
             else if (fn === 4) out.path = s;
             i += l.value;
-        } else {
+        } else if (wt === 0) {
             const v = uvarint(p.add(i));
             if (!v) return null;
             if (fn === 2) out.packMode = v.value;
             i += v.length;
+        } else {
+            return null;
         }
     }
-    // a complete message, not a prefix of one
-    if (seen !== EXPECTED_FIELDS.length) return null;
-    return out;
+    return out.path !== null ? out : null;
 }
 
 function latin(buf) {
@@ -107,11 +90,7 @@ function looksLikePath(s) {
     // Deliberately does NOT require a leading '/'. The one route confirmed so
     // far is "/", but a route need not be slash-prefixed, and rejecting
     // candidates on that assumption would discard the thing being hunted.
-    // The floor is 1 character, not MIN_PATH=2: "/" is a single character and
-    // it is the one route confirmed to resolve, so a length-2 minimum would
-    // discard exactly the case that proves the scanner works. Non-printable
-    // bytes are already rejected by latin() during the decode.
-    return s !== null && s.length >= 1 && s.length <= MAX_PATH
+    return s !== null && s.length >= MIN_PATH && s.length <= MAX_PATH
         && s.indexOf('\u0000') === -1;
 }
 
@@ -145,18 +124,10 @@ function scan() {
                     const cand = addr.add(i);
                     // the length byte follows the tag
                     const plen = a[i + 1];
-                    // 1 is the minimum: the confirmed route "/" is one byte.
-                    if (plen < 1 || plen > MAX_PATH) continue;
-                    // Walk back to find where the message began. Longest span
-                    // first: a short span can start mid-message and still parse,
-                    // so trying it before the true start would report a suffix
-                    // instead of the whole request.
-                    // Clamp to the start of the chunk rather than giving up: the
-                    // walk is longest-first, so a message near the beginning of
-                    // memory would otherwise bail out on the first iteration
-                    // and never be examined at all.
-                    for (let back = 96; back >= 2; back--) {
-                        if (i - back < 0) back = i;
+                    if (plen < MIN_PATH || plen > MAX_PATH) continue;
+                    // walk back over the preceding fields to find the start
+                    for (let back = 2; back <= 96; back++) {
+                        if (i - back < 0) break;
                         const start = addr.add(i - back);
                         const cr = decodeCommandRequest(start, back + 2 + plen);
                         if (cr && looksLikePath(cr.path)) {

@@ -41,12 +41,12 @@ bbb77fa6888e: Download complete
 bbb77fa6888e: Pull complete
 Digest: sha256:0a611199ba2e0b5d60af39b3327a517f6407231f4352114ed3bd3cbfe2be69aa
 Status: Downloaded newer image for redroid/redroid:14.0.0_64only-latest
-8bfadb77703fc2a15f76c5af052112f7b58c81db2ba736b3b532386b9ea2269b
+9e3b0ebe3e5846ff709572ad9f2c3ff7c22810003693922dd82e446871f65ef2
 + booted=0
 ++ seq 1 36
 + for i in $(seq 1 36)
-++ sudo docker exec redroid getprop sys.boot_completed
 ++ tr -d '\r'
+++ sudo docker exec redroid getprop sys.boot_completed
 + '[' '' = 1 ']'
 + sleep 5
 + for i in $(seq 1 36)
@@ -106,262 +106,299 @@ ls: /vendor/lib64/libvulkan.so: No such file or directory
 
 ### pipeline (apkeep, frida, install, capture)
 ```text
-+ '[' 862294575 -gt 100000000 ']'
-+ cd /tmp/kgs
-+ XAPK=/tmp/kgs/jp.konami.pesam.xapk
-+ python3 -
-version 11.0.1 311000101
-22 splits in the bundle
-  jp.konami.pesam.apk            -> base.apk                             22.3 MB
-  config.de.apk                  -> split_config.de.apk                   0.0 MB
-  config.fr.apk                  -> split_config.fr.apk                   0.0 MB
-  config.my.apk                  -> split_config.my.apk                   0.0 MB
-  pad_it_0.apk                   -> split_pad_it_0.apk                  386.4 MB
-  pad_it_1.apk                   -> split_pad_it_1.apk                  395.4 MB
-  config.hi.apk                  -> split_config.hi.apk                   0.0 MB
-  config.th.apk                  -> split_config.th.apk                   0.0 MB
-  config.tr.apk                  -> split_config.tr.apk                   0.0 MB
-  config.vi.apk                  -> split_config.vi.apk                   0.0 MB
-  config.ar.apk                  -> split_config.ar.apk                   0.0 MB
-  config.en.apk                  -> split_config.en.apk                   0.0 MB
-  config.in.apk                  -> split_config.in.apk                   0.0 MB
-  config.ja.apk                  -> split_config.ja.apk                   0.0 MB
-  config.ru.apk                  -> split_config.ru.apk                   0.0 MB
-  config.arm64_v8a.apk           -> split_config.arm64_v8a.apk           57.1 MB
-  config.es.apk                  -> split_config.es.apk                   0.0 MB
-  config.it.apk                  -> split_config.it.apk                   0.0 MB
-  config.ko.apk                  -> split_config.ko.apk                   0.0 MB
-  config.pt.apk                  -> split_config.pt.apk                   0.0 MB
-  config.xxxhdpi.apk             -> split_config.xxxhdpi.apk              0.2 MB
-  config.zh.apk                  -> split_config.zh.apk                   0.0 MB
-+ '[' -f /tmp/kgs/out/.ok ']'
-+ echo '--- copying into the container ---'
---- copying into the container ---
-+ sudo docker exec redroid mkdir -p /data/local/tmp/splits
-+ sudo docker cp /tmp/kgs/out/. redroid:/data/local/tmp/splits/
-+ sudo docker exec redroid sh -c 'ls /data/local/tmp/splits/*.apk | wc -l'
-22
-+ sudo docker exec redroid sh -c 'ls -la /data/local/tmp/splits/*.apk'
-+ head -30
--rw-r--r-- 1 radio radio  22347497 2026-09-30 00:05 /data/local/tmp/splits/base.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.ar.apk
--rw-r--r-- 1 radio radio  57148181 2026-09-30 00:05 /data/local/tmp/splits/split_config.arm64_v8a.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.de.apk
--rw-r--r-- 1 radio radio     37074 2026-09-30 00:05 /data/local/tmp/splits/split_config.en.apk
--rw-r--r-- 1 radio radio     24786 2026-09-30 00:05 /data/local/tmp/splits/split_config.es.apk
--rw-r--r-- 1 radio radio     24786 2026-09-30 00:05 /data/local/tmp/splits/split_config.fr.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.hi.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.in.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.it.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.ja.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.ko.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.my.apk
--rw-r--r-- 1 radio radio     24786 2026-09-30 00:05 /data/local/tmp/splits/split_config.pt.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.ru.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.th.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.tr.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.vi.apk
--rw-r--r-- 1 radio radio    198371 2026-09-30 00:05 /data/local/tmp/splits/split_config.xxxhdpi.apk
--rw-r--r-- 1 radio radio     28882 2026-09-30 00:05 /data/local/tmp/splits/split_config.zh.apk
--rw-r--r-- 1 radio radio 386375435 2026-09-30 00:05 /data/local/tmp/splits/split_pad_it_0.apk
--rw-r--r-- 1 radio radio 395420368 2026-09-30 00:05 /data/local/tmp/splits/split_pad_it_1.apk
-+ echo '--- what pm actually offers (for the record) ---'
---- what pm actually offers (for the record) ---
-+ sudo docker exec redroid sh -c 'pm help 2>&1 | head -20'
-Package manager (package) commands:
-  help
-    Print this help text.
-
-  path [--user USER_ID] PACKAGE
-    Print the path to the .apk of the given PACKAGE.
-
-  dump PACKAGE
-    Print various system state associated with the given PACKAGE.
-
-  has-feature FEATURE_NAME [version]
-    Prints true and returns exit status 0 when system has a FEATURE_NAME,
-    otherwise prints false and returns exit status 1
-
-  list features
-    Prints all features of the system.
-
-  list instrumentation [-f] [TARGET-PACKAGE]
-    Prints all test packages; optionally only those targeting TARGET-PACKAGE
-    Options:
-+ echo '--- install adb on the host ---'
---- install adb on the host ---
-+ sudo apt-get install -y -qq adb
-+ tail -2
-
-No VM guests are running outdated hypervisor (qemu) binaries on this host.
-+ which adb
-/usr/bin/adb
-+ adb version
-+ head -2
-Android Debug Bridge version 1.0.41
-Version 34.0.4-debian
-+ echo '--- connect to redroid ---'
---- connect to redroid ---
-+ adb connect 127.0.0.1:5555
-+ tail -2
-* daemon started successfully
-connected to 127.0.0.1:5555
-+ adb wait-for-device
-error: more than one device/emulator
-+ adb shell getprop sys.boot_completed
-adb: more than one device/emulator
-+ echo '--- push the splits ---'
---- push the splits ---
-+ adb shell mkdir -p /data/local/tmp/splits
-adb: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/base.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_config.ar.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_config.arm64_v8a.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_config.de.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_config.en.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_config.es.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_config.fr.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_config.hi.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_config.in.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_config.it.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_config.ja.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_config.ko.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_config.my.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_config.pt.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_config.ru.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_config.th.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_config.tr.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_config.vi.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ tail -1
-+ adb push /tmp/kgs/out/split_config.xxxhdpi.apk /data/local/tmp/splits/
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_config.zh.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_pad_it_0.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ for f in $W/out/*.apk
-+ adb push /tmp/kgs/out/split_pad_it_1.apk /data/local/tmp/splits/
-+ tail -1
-adb: error: failed to get feature set: more than one device/emulator
-+ adb shell ls -la /data/local/tmp/splits/
-+ head -30
-adb: more than one device/emulator
-+ echo '--- adb install-multiple (base first, then the rest) ---'
---- adb install-multiple (base first, then the rest) ---
-+ ok=0
-+ adb install-multiple -r -g /data/local/tmp/splits/base.apk /data/local/tmp/splits/split_config.arm64_v8a.apk
-+ tail -8
-adb: more than one device/emulator
-+ ok=1
-+ '[' 1 '!=' 1 ']'
-+ '[' 1 '!=' 1 ']'
-+ echo '--- verify ---'
---- verify ---
-+ adb shell pm list packages
-+ grep -i konami
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=170s  0
+0 pass(es) logged'
+  phase3 t=170s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=180s  0
+0 pass(es) logged'
+  phase3 t=180s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=190s  0
+0 pass(es) logged'
+  phase3 t=190s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=200s  0
+0 pass(es) logged'
+  phase3 t=200s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=210s  0
+0 pass(es) logged'
+  phase3 t=210s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=220s  0
+0 pass(es) logged'
+  phase3 t=220s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=230s  0
+0 pass(es) logged'
+  phase3 t=230s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=240s  0
+0 pass(es) logged'
+  phase3 t=240s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=250s  0
+0 pass(es) logged'
+  phase3 t=250s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=260s  0
+0 pass(es) logged'
+  phase3 t=260s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=270s  0
+0 pass(es) logged'
+  phase3 t=270s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=280s  0
+0 pass(es) logged'
+  phase3 t=280s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=290s  0
+0 pass(es) logged'
+  phase3 t=290s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=300s  0
+0 pass(es) logged'
+  phase3 t=300s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=310s  0
+0 pass(es) logged'
+  phase3 t=310s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=320s  0
+0 pass(es) logged'
+  phase3 t=320s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=330s  0
+0 pass(es) logged'
+  phase3 t=330s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=340s  0
+0 pass(es) logged'
+  phase3 t=340s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=350s  0
+0 pass(es) logged'
+  phase3 t=350s  0
+0 pass(es) logged
++ for i in $(seq 1 36)
++ sleep 10
++ sudo docker exec redroid /system/bin/input tap 360 640
++ sudo docker exec redroid /system/bin/input keyevent 66
+++ grep -c '^\[scan\] pass' /tmp/kgs/scan.log
+++ echo 0
++ echo '  phase3 t=360s  0
+0 pass(es) logged'
+  phase3 t=360s  0
+0 pass(es) logged
++ kill 21859
++ echo '--- scan log ---'
+--- scan log ---
++ grep -E '^\[scan\]|path=' /tmp/kgs/scan.log
++ head -80
++ echo '--- any path= line at all? ---'
+--- any path= line at all? ---
++ grep -c path= /tmp/kgs/scan.log
+0
++ echo 0
+0
++ tail -20 /tmp/kgs/scan.log
+     ____
+    / _  |   Frida 17.19.0 - A world-class dynamic instrumentation toolkit
+   | (_| |
+    > _  |   Commands:
+   /_/ |_|       help      -> Displays the help system
+   . . . .       object?   -> Display information about 'object'
+   . . . .       exit/quit -> Exit
+   . . . .
+   . . . .   Prefer a GUI? Luma is the official Frida app, with a live REPL,
+   . . . .   persistent sessions & collaboration. https://luma.frida.re/
+   . . . .
+   . . . .   Connected to 127.0.0.1:27042 (id=socket@127.0.0.1:27042)
+Spawning `jp.konami.pesam`...
+Failed to spawn: error receiving data: Connection reset by peer
++ cp -f /tmp/kgs/scan.log /scan-paths.log
 + true
-+ grep -i konami
-+ sudo docker exec redroid /system/bin/pm list packages
++ sudo docker exec redroid logcat -d -t 400
++ echo '=== logcat phase 3 (filtered) ==='
+=== logcat phase 3 (filtered) ===
++ grep -iE 'konami|pesam|FATAL|AndroidRuntime|libUE4|Vulkan|EGL' /tmp/kgs/logcat-p3.txt
++ tail -40
+09-30 00:40:03.062   231   657 I ActivityManager: Force stopping jp.konami.pesam appid=10087 user=0: from pid 4512
+09-30 00:40:03.065   816   816 D CarrierSvcBindHelper: onHandleForceStop: [jp.konami.pesam]
++ sudo docker exec redroid sh -c 'pkill -f tcpdump; ls -la /data/local/tmp/game.pcap'
 + true
-+ echo '--- package state ---'
---- package state ---
-+ sudo docker exec redroid /system/bin/pm list packages
-+ grep -i konami
-+ echo '=== GAME NOT INSTALLED AT ALL ==='
-=== GAME NOT INSTALLED AT ALL ===
-+ sudo docker exec redroid sh -c 'ls -la /data/local/tmp/splits/'
-total 841772
-drwxr-xr-x 2 root  root       4096 2026-09-30 00:05 .
-drwxrwx--x 4 shell shell      4096 2026-09-30 00:05 ..
--rw-r--r-- 1 radio radio         2 2026-09-30 00:05 .ok
--rw-r--r-- 1 radio radio  22347497 2026-09-30 00:05 base.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.ar.apk
--rw-r--r-- 1 radio radio  57148181 2026-09-30 00:05 split_config.arm64_v8a.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.de.apk
--rw-r--r-- 1 radio radio     37074 2026-09-30 00:05 split_config.en.apk
--rw-r--r-- 1 radio radio     24786 2026-09-30 00:05 split_config.es.apk
--rw-r--r-- 1 radio radio     24786 2026-09-30 00:05 split_config.fr.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.hi.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.in.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.it.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.ja.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.ko.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.my.apk
--rw-r--r-- 1 radio radio     24786 2026-09-30 00:05 split_config.pt.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.ru.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.th.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.tr.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.vi.apk
--rw-r--r-- 1 radio radio    198371 2026-09-30 00:05 split_config.xxxhdpi.apk
--rw-r--r-- 1 radio radio     28882 2026-09-30 00:05 split_config.zh.apk
--rw-r--r-- 1 radio radio 386375435 2026-09-30 00:05 split_pad_it_0.apk
--rw-r--r-- 1 radio radio 395420368 2026-09-30 00:05 split_pad_it_1.apk
-+ exit 1
++ sudo docker exec redroid sh -c 'cat /data/local/tmp/tcpdump.out 2>&1'
++ tail -5
+tcpdump: data link type LINUX_SLL2
+tcpdump: listening on any, link-type LINUX_SLL2 (Linux cooked v2), snapshot length 262144 bytes
+0 packets captured
+0 packets received by filter
+0 packets dropped by kernel
++ sudo docker cp redroid:/data/local/tmp/game.pcap /tmp/kgs/game.pcap
++ ls -la /tmp/kgs/game.pcap
+-rw-r--r-- 1 root root 24 Sep 30 00:33 /tmp/kgs/game.pcap
++ echo 'GAME PCAP CAPTURED: /tmp/kgs/game.pcap'
+GAME PCAP CAPTURED: /tmp/kgs/game.pcap
 ```
 
 ### frida
 ```text
+     ____
+    / _  |   Frida 17.19.0 - A world-class dynamic instrumentation toolkit
+   | (_| |
+    > _  |   Commands:
+   /_/ |_|       help      -> Displays the help system
+   . . . .       object?   -> Display information about 'object'
+   . . . .       exit/quit -> Exit
+   . . . .
+   . . . .   Prefer a GUI? Luma is the official Frida app, with a live REPL,
+   . . . .   persistent sessions & collaboration. https://luma.frida.re/
+   . . . .
+   . . . .   Connected to 127.0.0.1:27042 (id=socket@127.0.0.1:27042)
+Spawning `jp.konami.pesam`...
+Failed to spawn: error receiving data: Connection reset by peer
 ```
 
 ### logcat (filtered)
 ```text
+09-30 00:30:13.024  1169  1237 D MediaGrants: Removed 0 media_grants for 0 user for jp.konami.pesam. Reason: Mode changed: android:read_external_storage
+09-30 00:30:13.024  1169  1237 D MediaGrants: Removed 0 media_grants for 0 user for jp.konami.pesam. Reason: Mode changed: android:read_external_storage
+09-30 00:30:13.025  1169  1237 D MediaGrants: Removed 0 media_grants for 0 user for jp.konami.pesam. Reason: Mode changed: android:read_external_storage
+09-30 00:30:13.042  2149  2150 W ziparchive: Unable to open '/data/app/~~S0MuLmj1cwQrzIRjaa-JEA==/jp.konami.pesam-w7wspHDc12yHyEtNMtQbAA==/base.dm': No such file or directory
+09-30 00:30:13.043  2149  2150 W ziparchive: Unable to open '/data/app/~~S0MuLmj1cwQrzIRjaa-JEA==/jp.konami.pesam-w7wspHDc12yHyEtNMtQbAA==/base.dm': No such file or directory
+09-30 00:30:13.046  2149  2150 I artd    : Running dex2oat: /apex/com.android.art/bin/art_exec --drop-capabilities --set-task-profile=Dex2OatBootComplete --set-priority=background --keep-fds=6:7:8:9:10 -- /apex/com.android.art/bin/dex2oat64 --zip-fd=6 --zip-location=/data/app/~~S0MuLmj1cwQrzIRjaa-JEA==/jp.konami.pesam-w7wspHDc12yHyEtNMtQbAA==/base.apk --oat-fd=7 --oat-location=/data/app/~~S0MuLmj1cwQrzIRjaa-JEA==/jp.konami.pesam-w7wspHDc12yHyEtNMtQbAA==/oat/arm64/base.odex --output-vdex-fd=8 --swap-fd=9 --class-loader-context-fds=10 --class-loader-context=PCL[]{PCL[/system/framework/org.apache.http.legacy.jar]} --classpath-dir=/data/app/~~S0MuLmj1cwQrzIRjaa-JEA==/jp.konami.pesam-w7wspHDc12yHyEtNMtQbAA== --instruction-set=arm64 --instruction-set-features=default --instruction-set-variant=generic --compiler-filter=verify --compilation-reason=install --compact-dex-level=none --max-image-block-size=524288 --resolve-startup-const-strings=true --generate-mini-debug-info --runtime-arg -Xdeny-art-apex-data-files --runtime-arg -Xtarget-sdk-version:36 --runtime-arg -Xhidden-api-policy:enabled --runtime-arg -Xms64m --runtime-arg -Xmx512m --comments=app-version-name:11.0.1,app-version-code:311000101,art-version:-1
+09-30 00:30:13.046  2149  2150 I artd    : Opened FDs: 6:/data/app/~~S0MuLmj1cwQrzIRjaa-JEA==/jp.konami.pesam-w7wspHDc12yHyEtNMtQbAA==/base.apk 7:/data/app/~~S0MuLmj1cwQrzIRjaa-JEA==/jp.konami.pesam-w7wspHDc12yHyEtNMtQbAA==/oat/arm64/base.odex.wzm39A.tmp 8:/data/app/~~S0MuLmj1cwQrzIRjaa-JEA==/jp.konami.pesam-w7wspHDc12yHyEtNMtQbAA==/oat/arm64/base.vdex.gSClGQ.tmp 9:/data/app/~~S0MuLmj1cwQrzIRjaa-JEA==/jp.konami.pesam-w7wspHDc12yHyEtNMtQbAA==/oat/arm64/base.odex.swap.JYkSeA.tmp 10:/system/framework/org.apache.http.legacy.jar 
+09-30 00:30:13.061  2151  2151 W dex2oat64: /apex/com.android.art/bin/dex2oat64 --zip-fd=6 --zip-location=/data/app/~~S0MuLmj1cwQrzIRjaa-JEA==/jp.konami.pesam-w7wspHDc12yHyEtNMtQbAA==/base.apk --oat-fd=7 --oat-location=/data/app/~~S0MuLmj1cwQrzIRjaa-JEA==/jp.konami.pesam-w7wspHDc12yHyEtNMtQbAA==/oat/arm64/base.odex --output-vdex-fd=8 --swap-fd=9 --class-loader-context-fds=10 --class-loader-context=PCL[]{PCL[/system/framework/org.apache.http.legacy.jar]} --classpath-dir=/data/app/~~S0MuLmj1cwQrzIRjaa-JEA==/jp.konami.pesam-w7wspHDc12yHyEtNMtQbAA== --instruction-set=arm64 --instruction-set-features=default --instruction-set-variant=generic --compiler-filter=verify --compilation-reason=install --compact-dex-level=none --max-image-block-size=524288 --resolve-startup-const-strings=true --generate-mini-debug-info --runtime-arg -Xdeny-art-apex-data-files --runtime-arg -Xtarget-sdk-version:36 --runtime-arg -Xhidden-api-policy:enabled --runtime-arg -Xms64m --runtime-arg -Xmx512m --comments=app-version-name:11.0.1,app-version-code:311000101,art-version:-1
+09-30 00:30:13.061  2151  2151 I dex2oat64: /apex/com.android.art/bin/dex2oat64 --output-vdex-fd=8 --class-loader-context-fds=10 --class-loader-context=PCL[]{PCL[/system/framework/org.apache.http.legacy.jar]} --classpath-dir=/data/app/~~S0MuLmj1cwQrzIRjaa-JEA==/jp.konami.pesam-w7wspHDc12yHyEtNMtQbAA== --compiler-filter=verify --compilation-reason=install --compact-dex-level=none --max-image-block-size=524288 --resolve-startup-const-strings=true --generate-mini-debug-info --comments=app-version-name:11.0.1,app-version-code:311000101,art-version:-1
+09-30 00:30:13.435   231   279 I ArtService: Dexopt result: [packageName = jp.konami.pesam] DexContainerFileDexoptResult{dexContainerFile=/data/app/~~S0MuLmj1cwQrzIRjaa-JEA==/jp.konami.pesam-w7wspHDc12yHyEtNMtQbAA==/base.apk, primaryAbi=true, abi=arm64-v8a, actualCompilerFilter=verify, status=PERFORMED, dex2oatWallTimeMillis=391, dex2oatCpuTimeMillis=1060, sizeBytes=682616, sizeBeforeBytes=0}
+09-30 00:30:13.438   231   279 V BackupManagerService: [UserID:0] restoreAtInstall pkg=jp.konami.pesam token=1 restoreSet=0
+09-30 00:30:13.444   850   893 D SessionCommitReceiver: Removing PromiseIcon for package: jp.konami.pesam, install reason: 0, alreadyAddedPromiseIcon: false
+09-30 00:30:13.448   231   571 I SdkSandboxManager: No SDKs used. Skipping SDK data reconcilation for CallingInfo{mUid=10087, mPackageName='jp.konami.pesam, mAppProcessToken='null'}
+09-30 00:30:13.449   231   231 V GameManagerService_GamePackageConfiguration: No android.game_mode_config meta-data found for package jp.konami.pesam
+09-30 00:30:13.449   816   816 D CarrierSvcBindHelper: onPackageAdded: jp.konami.pesam
+09-30 00:30:13.449   231   231 V GameManagerService: Package configuration not found for jp.konami.pesam
+09-30 00:30:13.459   605   605 I SafetyLabelChangedBroadcastReceiver: received broadcast packageName: jp.konami.pesam, current user: UserHandle{0}, packageChangeEvent: NEW_INSTALL, intent user: UserHandle{0}
+09-30 00:30:13.460   816   816 D CarrierSvcBindHelper: onPackageModified: jp.konami.pesam
+09-30 00:30:31.937   231   657 I ActivityManager: Force stopping jp.konami.pesam appid=10087 user=0: from pid 2257
+09-30 00:30:31.940   816   816 D CarrierSvcBindHelper: onHandleForceStop: [jp.konami.pesam]
+09-30 00:30:32.020  2260  2260 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+09-30 00:33:35.246   231   245 I ActivityManager: Force stopping jp.konami.pesam appid=10087 user=0: from pid 2917
+09-30 00:33:35.250   816   816 D CarrierSvcBindHelper: onHandleForceStop: [jp.konami.pesam]
 ```
