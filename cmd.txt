@@ -1,1 +1,1 @@
-exec bash -c true; echo SZ; adb -s 127.0.0.1:5555 push -q /tmp/base.apk /data/local/tmp/base.apk; adb -s 127.0.0.1:5555 push -q /tmp/cfg.apk /data/local/tmp/cfg.apk; echo "-- push done --"; adb -s 127.0.0.1:5555 shell pm install-multiple -r /data/local/tmp/base.apk /data/local/tmp/cfg.apk 2>&1 | tail -5
+exec bash -c true; echo T1; adb -s 127.0.0.1:5555 shell ls -1 /data/local/tmp/splits/ | head -30; echo "== install-multiple =="; adb -s 127.0.0.1:5555 install-multiple /data/local/tmp/splits/base.apk /data/local/tmp/splits/split_config.arm64_v8a.apk 2>&1 | tail -6
