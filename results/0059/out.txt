@@ -1,0 +1,8 @@
+cmd: exec bash kgs-login/scripts/uidump.sh redroid /tmp/kgs/ui_now.xml
+at: 15:11:27
+$ bash kgs-login/scripts/uidump.sh redroid /tmp/kgs/ui_now.xml
+Error response from daemon: Could not find the file /data/local/tmp/ui.xml in container redroid
+UIDUMP: pull failed
+rc=1
+gamepid: 
+flows: 0
