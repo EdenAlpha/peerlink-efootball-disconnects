@@ -606,10 +606,7 @@ jobs:
                 echo "no 'ip' route; reading /proc/net/route instead"
                 HEXGW=$(sudo docker exec redroid cat /proc/net/route \
                   2>/dev/null | awk '$2=="00000000" {print $3}' | head -1)
-                GW=$(python3 -c "
-import socket, struct, sys
-h = '$HEXGW'.strip()
-print(socket.inet_ntoa(struct.pack('<L', int(h, 16))))" 2>/dev/null)
+                GW=$(python3 -c "import socket,struct,sys; h='$HEXGW'.strip(); print(socket.inet_ntoa(struct.pack('<L', int(h,16))))" 2>/dev/null)
               fi
               echo "host gateway as seen from the phone: [$GW]"
               if [ -n "$GW" ]; then
