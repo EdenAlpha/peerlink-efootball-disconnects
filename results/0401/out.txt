@@ -1,0 +1,11 @@
+cmd: exec HOSTGW=$(ip -4 addr show docker0 2>/dev/null | grep -oE "inet [0-9.]+" | head -1 | cut -d" " -f2); echo hostgw=[$HOSTGW]; sudo docker exec redroid iptables -t nat -A OUTPUT -p tcp --dport 443 -j DNAT --to-destination $HOSTGW:8080; echo dnat_rc=$?; sudo docker exec redroid iptables -t nat -L OUTPUT -n -v | head -8
+at: 09:53:19
+$ HOSTGW=$(ip -4 addr show docker0 2>/dev/null | grep -oE "inet [0-9.]+" | head -1 | cut -d" " -f2); echo hostgw=[$HOSTGW]; sudo docker exec redroid iptables -t nat -A OUTPUT -p tcp --dport 443 -j DNAT --to-destination $HOSTGW:8080; echo dnat_rc=$?; sudo docker exec redroid iptables -t nat -L OUTPUT -n -v | head -8
+hostgw=[172.17.0.1]
+dnat_rc=0
+Chain OUTPUT (policy ACCEPT 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+    0     0 DNAT       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpt:443 to:172.17.0.1:8080
+rc=0
+gamepid: 
+flows: 0
