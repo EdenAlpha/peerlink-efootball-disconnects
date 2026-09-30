@@ -1,0 +1,7 @@
+cmd: exec adb -s 127.0.0.1:5555 shell am force-stop jp.konami.pesam; adb -s 127.0.0.1:5555 uninstall jp.konami.pesam
+at: 09:34:24
+$ adb -s 127.0.0.1:5555 shell am force-stop jp.konami.pesam; adb -s 127.0.0.1:5555 uninstall jp.konami.pesam
+Success
+rc=0
+gamepid: 
+flows: 0
