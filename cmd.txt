@@ -1,1 +1,1 @@
-exec bash -c true; echo SP; adb -s 127.0.0.1:5555 shell am start -W -n com.android.vending/com.google.android.finsky.activities.MainActivity 2>&1 | tail -1; sleep 12; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+exec bash -c true; echo SQ; adb -s 127.0.0.1:5555 shell input tap 360 721; sleep 13; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
