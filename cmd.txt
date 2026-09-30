@@ -1,1 +1,1 @@
-exec bash -c true; echo TA; adb -s 127.0.0.1:5555 shell input tap 360 467; sleep 15; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+exec bash -c true; echo U1; adb -s 127.0.0.1:5555 shell pm list features 2>/dev/null | grep -i multitouch; echo "-- creds staged --"; wc -c /tmp/kgs/creds/GMAIL /tmp/kgs/creds/GPASS; echo "-- game present --"; adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
