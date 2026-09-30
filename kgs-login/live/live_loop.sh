@@ -211,6 +211,13 @@ main() {
   say "live control loop starting (poll ${POLL_SECS}s, max ${MAX_ROUNDS} rounds)"
   say "write commands to live-cmd/cmd.txt ; read live-res/results + status.txt"
   local last="" round=0 since_hb=0 rc=0 prc=0
+  # Treat whatever is already queued as ALREADY SEEN. A command left over from
+  # a previous session must never fire in a new one: that is how a stale
+  # `adb reboot` wedged two sessions in a row, each hanging forever on
+  # wait-for-device with no way to recover from outside. New pushes still
+  # execute normally.
+  last=$(timeout 60 git show origin/live-cmd:cmd.txt 2>/dev/null | head -1 | tr -d '\r')
+  say "ignoring the already-queued command (not re-running it): [$last]"
   # Start the watchdog clock NOW, not at the first successful push: the failure
   # that matters most is the one where nothing was EVER published, and a
   # watchdog keyed on the last push can never fire in exactly that case.
