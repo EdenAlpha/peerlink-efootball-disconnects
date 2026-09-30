@@ -1,0 +1,11 @@
+cmd: exec bash -c true; echo GSFID; adb -s 127.0.0.1:5555 shell settings get secure android_id; adb -s 127.0.0.1:5555 shell su 0 sqlite3 /data/data/com.google.android.gms/shared_prefs/com.google.android.gms_preferences.xml . 2>/dev/null | head -2; adb -s 127.0.0.1:5555 shell getprop ro.product.model; adb -s 127.0.0.1:5555 shell getprop ro.product.brand; adb -s 127.0.0.1:5555 shell getprop ro.build.fingerprint
+at: 21:54:14
+$ bash -c true; echo GSFID; adb -s 127.0.0.1:5555 shell settings get secure android_id; adb -s 127.0.0.1:5555 shell su 0 sqlite3 /data/data/com.google.android.gms/shared_prefs/com.google.android.gms_preferences.xml . 2>/dev/null | head -2; adb -s 127.0.0.1:5555 shell getprop ro.product.model; adb -s 127.0.0.1:5555 shell getprop ro.product.brand; adb -s 127.0.0.1:5555 shell getprop ro.build.fingerprint
+GSFID
+95d8f589e8690e5b
+redroid14_arm64_only
+redroid
+redroid/redroid_arm64_only/redroid_arm64_only:14/UD2A.240505.001.W1/eng.edward.20240814.090735:userdebug/test-keys
+rc=0
+gamepid: 
+flows: 0
