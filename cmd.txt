@@ -1,1 +1,1 @@
-exec adb -s 127.0.0.1:5555 shell am force-stop com.aurora.store; adb -s 127.0.0.1:5555 shell am start -n com.aurora.store/.ComposeActivity; sleep 18; tail -8 /tmp/kgs/mitm.log; sudo iptables-legacy -t nat -L PREROUTING -n -v 2>/dev/null | head -5
+exec grep ca-setup /tmp/kgs/pipeline.log | head -12; echo ---; openssl x509 -in /tmp/kgs/mitm/mitmproxy-ca-cert.pem -noout -subject_hash_old -subject_hash; echo ---; sudo docker exec redroid sh -c "ls /system/etc/security/cacerts/ | tail -4"
