@@ -1,0 +1,11 @@
+cmd: exec ps aux | grep -i mitmdump | grep -v grep | head -2; echo ---; sudo docker exec redroid sh -c "iptables -t nat -L OUTPUT -n 2>/dev/null | head -8"; echo ---; ls -la /tmp/kgs/flows.log /tmp/kgs/mitm.log 2>/dev/null; tail -5 /tmp/kgs/mitm.log 2>/dev/null
+at: 09:49:06
+$ ps aux | grep -i mitmdump | grep -v grep | head -2; echo ---; sudo docker exec redroid sh -c "iptables -t nat -L OUTPUT -n 2>/dev/null | head -8"; echo ---; ls -la /tmp/kgs/flows.log /tmp/kgs/mitm.log 2>/dev/null; tail -5 /tmp/kgs/mitm.log 2>/dev/null
+runner     12363  0.0  0.4 179080 71652 ?        Ssl  08:54   0:01 /usr/bin/python3 /home/runner/.local/bin/mitmdump --mode transparent --listen-port 8080 --set confdir=/tmp/kgs/mitm -s kgs-login/scripts/mitm_addon.py -w /tmp/kgs/flows.mitm
+---
+---
+-rw-r--r-- 1 runner runner 41 Sep 30 08:54 /tmp/kgs/flows.log
+-rw-r--r-- 1 runner runner  0 Sep 30 08:54 /tmp/kgs/mitm.log
+rc=0
+gamepid: 
+flows: 0
