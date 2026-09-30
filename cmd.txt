@@ -1,1 +1,1 @@
-exec bash kgs-login/scripts/uidump.sh redroid /tmp/kgs/ui_now.xml
+exec sudo docker exec redroid sh -c "dumpsys window | grep mCurrentFocus; echo ---; dumpsys activity top | grep -iE \"ACTIVITY|View|Text|EditText|Button\" | head -30; echo ---UA---; uiautomator dump /data/local/tmp/ui.xml 2>&1; echo dumprc=$?; ls -la /data/local/tmp/ui.xml 2>&1; cat /data/local/tmp/ui.xml 2>&1 | head -c 2000"
