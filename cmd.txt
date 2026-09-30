@@ -1,1 +1,1 @@
-exec sudo docker exec redroid sh -c "am start -n com.aurora.store/.ComposeActivity >/dev/null 2>&1; sleep 8; dumpsys activity top | grep -oE \"(mText|text|contentDescription)=.[^\\\"]*.\" | sort -u | head -40; echo ---; dumpsys window | grep mCurrentFocus"
+exec sudo docker exec redroid sh -c "uiautomator dump /data/local/tmp/u.xml 2>&1; echo rc=$?; cat /data/local/tmp/u.xml 2>&1 | head -c 4000"
