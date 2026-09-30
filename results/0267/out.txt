@@ -1,0 +1,12 @@
+cmd: exec bash -c true; echo T2; adb -s 127.0.0.1:5555 shell ls -1 /data/local/tmp/splits/ | grep -E "base|arm64"; echo "== count =="; adb -s 127.0.0.1:5555 shell ls -1 /data/local/tmp/splits/ | wc -l; echo "== installed? =="; adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam
+at: 23:04:16
+$ bash -c true; echo T2; adb -s 127.0.0.1:5555 shell ls -1 /data/local/tmp/splits/ | grep -E "base|arm64"; echo "== count =="; adb -s 127.0.0.1:5555 shell ls -1 /data/local/tmp/splits/ | wc -l; echo "== installed? =="; adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam
+T2
+base.apk
+split_config.arm64_v8a.apk
+== count ==
+22
+== installed? ==
+rc=1
+gamepid: 
+flows: 0
