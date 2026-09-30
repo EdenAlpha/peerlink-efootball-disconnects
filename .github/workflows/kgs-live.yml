@@ -303,6 +303,39 @@ jobs:
             || echo "tcpdump NOT running"
           echo "RECORDER ARMED"
 
+      - name: 04c install Aurora Store
+        run: |
+          set +e
+          set -x
+          W=/tmp/kgs; mkdir -p $W
+          exec >> >(tee -a $W/pipeline.log) 2>&1
+          # The game's data is Play-delivered and this box has no Play Store.
+          # Aurora Store is an independent client for the same Google servers
+          # and needs no account of ours. Installed up front so the session
+          # starts ready to drive instead of spending round trips on setup.
+          SERIAL=127.0.0.1:5555
+          adb connect $SERIAL 2>&1 | tail -1
+          if ! adb -s $SERIAL shell pm list packages 2>/dev/null | grep -qi aurora; then
+            curl -fsSL --max-time 300 -o $W/aurora.apk \
+              https://f-droid.org/repo/com.aurora.store_76.apk \
+              && echo "aurora apk $(stat -c %s $W/aurora.apk) bytes" \
+              || echo "AURORA DOWNLOAD FAILED"
+            [ -s $W/aurora.apk ] && adb -s $SERIAL install -r $W/aurora.apk 2>&1 | tail -2
+          fi
+          adb -s $SERIAL shell pm list packages 2>/dev/null | grep -i aurora \
+            || echo "AURORA NOT INSTALLED"
+          # Installer permission granted by command, so no popup can ambush the
+          # session halfway through the install.
+          for p in REQUEST_INSTALL_PACKAGES READ_EXTERNAL_STORAGE WRITE_EXTERNAL_STORAGE; do
+            adb -s $SERIAL shell pm grant com.aurora.store "android.permission.$p" 2>&1 || true
+          done
+          adb -s $SERIAL shell appops set com.aurora.store REQUEST_INSTALL_PACKAGES allow 2>&1 || true
+          AACT=$(sudo docker exec redroid sh -c \
+            'cmd package resolve-activity --brief -c android.intent.category.LAUNCHER com.aurora.store' 2>/dev/null \
+            | tr -d '\r' | grep -E '^com\.aurora\.store/' | tail -1)
+          echo "aurora launcher: [$AACT]"
+          echo "$AACT" > $W/aurora.activity
+
       - name: 05 live control loop
         run: |
           set +e
