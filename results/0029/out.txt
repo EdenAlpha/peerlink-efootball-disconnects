@@ -1,0 +1,8 @@
+cmd: exec bash -c true; echo PLAY2; adb -s 127.0.0.1:5555 shell input tap 360 907; sleep 12; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; ls -la /tmp/live-res/screen.png
+at: 20:46:44
+$ bash -c true; echo PLAY2; adb -s 127.0.0.1:5555 shell input tap 360 907; sleep 12; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; ls -la /tmp/live-res/screen.png
+PLAY2
+-rw-r--r-- 1 runner runner 36154 Sep 30 20:46 /tmp/live-res/screen.png
+rc=0
+gamepid: 
+flows: 0
