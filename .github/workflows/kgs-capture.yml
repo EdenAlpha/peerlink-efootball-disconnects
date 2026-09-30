@@ -657,11 +657,16 @@ jobs:
                 # and the old center tap (360,640) never touched it -- five
                 # screenshots across six minutes are pixel-identical, dialog up,
                 # download at 0%. One blind tap visibly highlighted the button
-                # without dismissing it. So tap the button deliberately, and
-                # send BACK too, which dismisses system dialogs.
+                # without dismissing it. So tap the button deliberately.
+                #
+                # Do NOT send BACK (keyevent 4): it summons the game's own
+                # "Quit eFootball? Cancel/Quit" dialog, which then covers the
+                # screen instead -- the run ended with the quit dialog up.
+                # Cancel sits at ~(500,435); tap it as well in case a quit
+                # dialog is showing from an earlier BACK press.
                 sudo docker exec redroid /system/bin/input tap 915 405 >/dev/null 2>&1
+                sudo docker exec redroid /system/bin/input tap 500 435 >/dev/null 2>&1
                 sudo docker exec redroid /system/bin/input tap 360 640 >/dev/null 2>&1
-                sudo docker exec redroid /system/bin/input keyevent 4 >/dev/null 2>&1
                 sudo docker exec redroid /system/bin/input keyevent 66 >/dev/null 2>&1
                 # screenshot the actual screen: no more inventing what it shows
                 sudo docker exec redroid sh -c \
