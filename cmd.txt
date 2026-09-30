@@ -1,1 +1,1 @@
-status
+amstart com.aurora.store/.ComposeActivity
