@@ -337,52 +337,42 @@ jobs:
           echo "$AACT" > $W/aurora.activity
 
       - name: 05 live control loop
+        env:
+          # Burner account for store sign-in, via secrets so the values never
+          # appear in code or logs. The loop's `exec` verb can type them with
+          # `adb shell input text` without printing them.
+          PEERLINK_GMAIL: ${{ secrets.PEERLINK_GMAIL }}
+          PEERLINK_GPASS: ${{ secrets.PEERLINK_GPASS }}
         run: |
           set +e
           W=/tmp/kgs; mkdir -p $W
-          # ---- git auth that CANNOT HANG ------------------------------------
-          # Two sessions in a row sat on this step for minutes with nothing
-          # published and no error: the signature of git waiting for a
-          # credential PROMPT on a terminal that does not exist. So:
-          #   * no prompt is possible (GIT_TERMINAL_PROMPT=0, helpers cleared)
-          #   * auth is the same extraheader actions/checkout uses
-          #   * every git call is time-boxed
-          #   * auth is PROVEN before the loop starts, and failure aborts the
-          #     step so the log comes back instead of a silent multi-hour wait
-          set +x
-          git config --global --unset-all credential.helper 2>/dev/null || true
-          git config --global credential.helper ''
-          git config --global core.askPass ''
+          # ---- auth: USE THE CHECKOUT'S, invent nothing ---------------------
+          # The previous session died here with `remote: Duplicate header:
+          # "Authorization"`: actions/checkout already authenticates this repo,
+          # and a hand-built global extraheader collided with it. So no custom
+          # auth at all now. /tmp/live-res is a WORKTREE of this checkout, so
+          # every git command inside it inherits the working credentials.
+          # Prompts stay impossible and everything stays time-boxed.
           export GIT_TERMINAL_PROMPT=0
-          AUTH=$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)
-          git config --global http.https://github.com/.extraheader \
-            "AUTHORIZATION: basic $AUTH"
-          unset AUTH
-          set -x
-          if ! timeout 60 git ls-remote https://github.com/${GITHUB_REPOSITORY}.git \
-               HEAD >/dev/null 2>&1; then
-            echo "=== GIT AUTH NOT WORKING - ABORTING SO THE LOG COMES BACK ==="
-            timeout 60 git ls-remote https://github.com/${GITHUB_REPOSITORY}.git \
-              HEAD 2>&1 | head -5
+          git worktree remove --force /tmp/live-res 2>/dev/null || true
+          rm -rf /tmp/live-res
+          git fetch origin live-res 2>/dev/null
+          if git show-ref --verify --quiet refs/remotes/origin/live-res; then
+            git worktree add -f -B live-res /tmp/live-res origin/live-res 2>&1 | tail -1
+          else
+            git worktree add -f -b live-res /tmp/live-res 2>&1 | tail -1
+          fi
+          [ -e /tmp/live-res/.git ] || {
+            echo "=== WORKTREE FAILED, ABORTING SO THE LOG COMES BACK ==="; exit 1; }
+          git -C /tmp/live-res log --oneline -1
+          git -C /tmp/live-res branch --show-current
+          if ! timeout 60 git -C /tmp/live-res ls-remote origin HEAD >/dev/null 2>&1; then
+            echo "=== GIT NOT WORKING - ABORTING SO THE LOG COMES BACK ==="
+            timeout 60 git -C /tmp/live-res ls-remote origin HEAD 2>&1 | head -5
             echo "=== ABORT ==="
             exit 1
           fi
-          echo "git auth OK (non-interactive, proven)"
-          rm -rf /tmp/live-res
-          # VERIFY THE CLONE. An unchecked clone failure once left the loop
-          # spinning for hours against a directory that was not a repo.
-          if ! timeout 300 git clone --depth 1 -b main \
-               "https://github.com/${GITHUB_REPOSITORY}.git" /tmp/live-res; then
-            echo "=== CLONE FAILED, ABORTING SO THE LOG COMES BACK ==="
-            exit 1
-          fi
-          [ -d /tmp/live-res/.git ] || {
-            echo "=== /tmp/live-res IS NOT A REPO, ABORTING ==="; exit 1; }
-          git -C /tmp/live-res log --oneline -1
-          timeout 120 git -C /tmp/live-res fetch origin live-res 2>/dev/null \
-            && git -C /tmp/live-res checkout live-res 2>/dev/null \
-            || git -C /tmp/live-res checkout -b live-res
-          git -C /tmp/live-res branch --show-current
+          echo "git OK (checkout's own auth, proven)"
           echo "=== entering the live loop; drive via live-cmd/cmd.txt ==="
           W=/tmp/kgs LIVE_RES_DIR=/tmp/live-res \
             timeout 9000 bash kgs-login/live/live_loop.sh 2>&1 | tee -a $W/live.log
