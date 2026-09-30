@@ -41,7 +41,7 @@ bbb77fa6888e: Download complete
 bbb77fa6888e: Pull complete
 Digest: sha256:0a611199ba2e0b5d60af39b3327a517f6407231f4352114ed3bd3cbfe2be69aa
 Status: Downloaded newer image for redroid/redroid:14.0.0_64only-latest
-9e8adce375a2019b0e9034cfcf4229969f05b1811201435b9797b5ff0060b7a2
+8bfadb77703fc2a15f76c5af052112f7b58c81db2ba736b3b532386b9ea2269b
 + booted=0
 ++ seq 1 36
 + for i in $(seq 1 36)
@@ -106,130 +106,6 @@ ls: /vendor/lib64/libvulkan.so: No such file or directory
 
 ### pipeline (apkeep, frida, install, capture)
 ```text
-/vendor/lib64/hw/vulkan.lvp.so
-/vendor/lib64/hw/vulkan.nouveau.so
-/vendor/lib64/hw/vulkan.panfrost.so
-/vendor/lib64/hw/vulkan.pastel.so
-/vendor/lib64/hw/vulkan.radeon.so
-/vendor/lib64/hw/vulkan.virtio.so
-+ true
-+ sudo docker exec redroid sh -c 'dumpsys SurfaceFlinger 2>/dev/null | grep -iE "GLES|Vulkan|EGL" | head -8'
-Sync configuration: [using: EGL_KHR_fence_sync EGL_KHR_wait_sync]
-EGL implementation : 1.5 Android META-EGL
-EGL_ANDROID_front_buffer_auto_refresh EGL_ANDROID_get_native_client_buffer EGL_ANDROID_presentation_time EGL_EXT_surface_CTA861_3_metadata EGL_EXT_surface_SMPTE2086_metadata EGL_KHR_get_all_proc_addresses EGL_KHR_swap_buffers_with_damage EGL_ANDROID_image_native_buffer EGL_ANDROID_recordable EGL_EXT_buffer_age EGL_EXT_create_context_robustness EGL_EXT_image_gl_colorspace EGL_EXT_pixel_format_float EGL_IMG_context_priority EGL_KHR_create_context EGL_KHR_fence_sync EGL_KHR_gl_colorspace EGL_KHR_gl_renderbuffer_image EGL_KHR_gl_texture_2D_image EGL_KHR_gl_texture_cubemap_image EGL_KHR_image EGL_KHR_image_base EGL_KHR_no_config_context EGL_KHR_partial_update EGL_KHR_reusable_sync EGL_KHR_surfaceless_context EGL_KHR_wait_sync 
-GLES: Google Inc. (Google), ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver-5.0.0), OpenGL ES 3.1.0 (ANGLE 2.1.1 git hash: 35552d8fca88)
-GL_AMD_performance_monitor GL_ANGLE_base_vertex_base_instance GL_ANGLE_base_vertex_base_instance_shader_builtin GL_ANGLE_client_arrays GL_ANGLE_clip_cull_distance GL_ANGLE_compressed_texture_etc GL_ANGLE_copy_texture_3d GL_ANGLE_depth_texture GL_ANGLE_framebuffer_blit GL_ANGLE_framebuffer_multisample GL_ANGLE_get_image GL_ANGLE_get_serialized_context_string GL_ANGLE_get_tex_level_parameter GL_ANGLE_instanced_arrays GL_ANGLE_memory_object_flags GL_ANGLE_memory_size GL_ANGLE_multi_draw GL_ANGLE_pack_reverse_row_order GL_ANGLE_polygon_mode GL_ANGLE_program_cache_control GL_ANGLE_read_only_depth_stencil_feedback_loops GL_ANGLE_relaxed_vertex_attribute_type GL_ANGLE_renderability_validation GL_ANGLE_request_extension GL_ANGLE_rgbx_internal_format GL_ANGLE_robust_client_memory GL_ANGLE_robust_fragment_shader_output GL_ANGLE_shader_pixel_local_storage GL_ANGLE_shader_pixel_local_storage_coherent GL_ANGLE_stencil_texturing GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_ANGLE_texture_multisample GL_ANGLE_texture_usage GL_ANGLE_vulkan_image GL_ANGLE_yuv_internal_format GL_APPLE_clip_distance GL_ARM_shader_framebuffer_fetch GL_CHROMIUM_bind_generates_resource GL_CHROMIUM_bind_uniform_location GL_CHROMIUM_copy_compressed_texture GL_CHROMIUM_copy_texture GL_CHROMIUM_lose_context GL_EXT_EGL_image_array GL_EXT_EGL_image_external_wrap_modes GL_EXT_EGL_image_storage GL_EXT_base_instance GL_EXT_blend_minmax GL_EXT_buffer_storage GL_EXT_clip_control GL_EXT_clip_cull_distance GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_conservative_depth GL_EXT_copy_image GL_EXT_debug_label GL_EXT_debug_marker GL_EXT_depth_clamp GL_EXT_discard_framebuffer GL_EXT_disjoint_timer_query GL_EXT_draw_buffers GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_external_buffer GL_EXT_float_blend GL_EXT_frag_depth GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_memory_object GL_EXT_multi_draw_indirect GL_EXT_multisample_compatibility GL_EXT_occlusion_query_boolean GL_EXT_polygon_offset_clamp GL_EXT_primitive_bounding_box GL_EXT_read_format_bgra GL_EXT_robustness GL_EXT_sRGB GL_EXT_sRGB_write_control GL_EXT_semaphore GL_EXT_semaphore_fd GL_EXT_separate_shader_objects GL_EXT_shader_framebuffer_fetch GL_EXT_shader_framebuffer_fetch_non_coherent GL_EXT_shader_io_blocks GL_EXT_shader_non_constant_global_initializers GL_EXT_shader_texture_lod GL_EXT_shadow_samplers GL_EXT_texture_border_clamp GL_EXT_texture_buffer GL_EXT_texture_compression_bptc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_compression_s3tc_srgb GL_EXT_texture_cube_map_array GL_EXT_texture_filter_anisotropic GL_EXT_texture_format_BGRA8888 GL_EXT_texture_mirror_clamp_to_edge GL_EXT_texture_norm16 GL_EXT_texture_rg GL_EXT_texture_sRGB_R8 GL_EXT_texture_sRGB_RG8 GL_EXT_texture_sRGB_decode GL_EXT_texture_storage GL_EXT_texture_type_2_10_10_10_REV GL_EXT_unpack_subimage GL_KHR_blend_equation_advanced GL_KHR_debug GL_KHR_texture_compression_astc_ldr GL_NV_depth_buffer_float2 GL_NV_fence GL_NV_framebuffer_blit GL_NV_pack_subimage GL_NV_pixel_buffer_object GL_NV_polygon_mode GL_NV_read_depth GL_NV_read_depth_stencil GL_NV_read_stencil GL_NV_shader_noperspective_interpolation GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_EGL_image_external_essl3 GL_OES_EGL_sync GL_OES_compressed_EAC_R11_signed_texture GL_OES_compressed_EAC_R11_unsigned_texture GL_OES_compressed_EAC_RG11_signed_texture GL_OES_compressed_EAC_RG11_unsigned_texture GL_OES_compressed_ETC1_RGB8_texture GL_OES_compressed_ETC2_RGB8_texture GL_OES_compressed_ETC2_RGBA8_texture GL_OES_compressed_ETC2_punchthroughA_RGBA8_texture GL_OES_compressed_ETC2_punchthroughA_sRGB8_alpha_texture GL_OES_compressed_ETC2_sRGB8_alpha8_texture GL_OES_compressed_ETC2_sRGB8_texture GL_OES_depth24 GL_OES_depth32 GL_OES_depth_texture GL_OES_depth_texture_cube_map GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_get_program_binary GL_OES_mapbuffer GL_OES_packed_depth_stencil GL_OES_primitive_bounding_box GL_OES_rgb8_rgba8 GL_OES_sample_shading GL_OES_sample_variables GL_OES_shader_image_atomic GL_OES_shader_io_blocks GL_OES_shader_multisample_interpolation GL_OES_standard_derivatives GL_OES_surfaceless_context GL_OES_texture_3D GL_OES_texture_border_clamp GL_OES_texture_buffer GL_OES_texture_cube_map_array GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_texture_stencil8 GL_OES_texture_storage_multisample_2d_array GL_OES_vertex_array_object GL_OES_vertex_half_float GL_OES_vertex_type_10_10_10_2 GL_OVR_multiview GL_OVR_multiview2 
-+ sudo docker exec redroid sh -c 'getprop | grep -iE "gpu|egl|gles|vulkan|hardware"'
-[debug.renderengine.backend]: [gles]
-[init.svc.gpu]: [running]
-[init.svc_debug_pid.gpu]: [112]
-[persist.graphics.egl]: []
-[ro.boot.hardware]: [redroid]
-[ro.boottime.gpu]: [62995286556]
-[ro.hardware]: [redroid]
-[ro.hardware.egl]: [angle]
-[ro.hardware.gralloc]: [redroid]
-[ro.hardware.vulkan]: [pastel]
-[ro.hwui.use_vulkan]: []
-[ro.opengles.version]: [196610]
-+ cd /tmp/kgs
-++ whoami
-++ pwd
-+ echo 'whoami=runner cwd=/tmp/kgs'
-whoami=runner cwd=/tmp/kgs
-+ touch /tmp/kgs/probe
-+ echo 'workdir writable'
-workdir writable
-+ '[' -s /tmp/kgs/jp.konami.pesam.xapk ']'
-+ echo 'cache miss, downloading'
-cache miss, downloading
-+ curl -sS -o /dev/null -w 'github.com HTTP %{http_code}\n' --max-time 30 https://github.com/
-github.com HTTP 200
-+ got=
-+ for url in "https://github.com/EFForg/apkeep/releases/download/1.0.0/apkeep-aarch64-unknown-linux-gnu" "https://github.com/EFForg/apkeep/releases/download/1.0.0/apkeep-aarch64-unknown-linux-gnu.static"
-+ echo 'trying https://github.com/EFForg/apkeep/releases/download/1.0.0/apkeep-aarch64-unknown-linux-gnu'
-trying https://github.com/EFForg/apkeep/releases/download/1.0.0/apkeep-aarch64-unknown-linux-gnu
-+ curl -fsSL --max-time 300 -o /tmp/kgs/apkeep https://github.com/EFForg/apkeep/releases/download/1.0.0/apkeep-aarch64-unknown-linux-gnu
-+ got=https://github.com/EFForg/apkeep/releases/download/1.0.0/apkeep-aarch64-unknown-linux-gnu
-+ break
-+ '[' '!' -s /tmp/kgs/apkeep ']'
-+ chmod +x /tmp/kgs/apkeep
-+ echo 11670
-+ /tmp/kgs/apkeep -a jp.konami.pesam -d apk-pure /tmp/kgs
-+ sleep 30
-+ cat /tmp/kgs/apkeep.log
-Downloading jp.konami.pesam...
-jp.konami.pesam downloaded successfully!
-+ ls -la /tmp/kgs/
-+ head
-total 856476
-drwxr-xr-x  2 runner runner      4096 Sep 30 00:00 .
-drwxrwxrwt 14 root   root        4096 Sep 30 00:00 ..
--rwxr-xr-x  1 runner runner  14690688 Sep 30 00:00 apkeep
--rw-r--r--  1 runner runner        72 Sep 30 00:00 apkeep.log
--rw-r--r--  1 runner runner         6 Sep 30 00:00 apkeep.pid
--rw-r--r--  1 runner runner 862294575 Sep 30 00:00 jp.konami.pesam.xapk
--rw-r--r--  1 runner runner     11213 Sep 30 00:00 pipeline.log
--rw-r--r--  1 runner runner         0 Sep 30 00:00 probe
--rw-r--r--  1 runner runner      9884 Sep 30 00:00 step01.log
-+ python3 -m pip install --quiet --break-system-packages frida-tools
-++ python3 -c 'import frida; print(frida.__version__)'
-+ FRIDA_VER=17.19.0
-+ echo 'frida client version: 17.19.0'
-frida client version: 17.19.0
-+ '[' -n 17.19.0 ']'
-+ ok=0
-+ url=https://github.com/frida/frida/releases/download/17.19.0/frida-server-17.19.0-android-arm64.xz
-+ echo 'trying https://github.com/frida/frida/releases/download/17.19.0/frida-server-17.19.0-android-arm64.xz'
-trying https://github.com/frida/frida/releases/download/17.19.0/frida-server-17.19.0-android-arm64.xz
-+ curl -fsSL --max-time 300 -o /tmp/kgs/frida-server.xz https://github.com/frida/frida/releases/download/17.19.0/frida-server-17.19.0-android-arm64.xz
-+ ok=1
-+ echo 'curl rc=0 ok=1'
-curl rc=0 ok=1
-+ '[' 1 '!=' 1 ']'
-+ xz -d -f /tmp/kgs/frida-server.xz
-+ ls -la /tmp/kgs/frida-server
--rw-r--r-- 1 runner runner 59071912 Sep 30 00:00 /tmp/kgs/frida-server
-+ sudo docker cp /tmp/kgs/frida-server redroid:/data/local/tmp/frida-server
-+ sudo docker exec redroid chmod 755 /data/local/tmp/frida-server
-+ sudo docker exec redroid mkdir -p /data/local/tmp/kgs
-+ sudo docker exec -d redroid sh -c '/data/local/tmp/frida-server > /data/local/tmp/frida.out 2>&1'
-+ sleep 8
-+ echo '--- frida-server output ---'
---- frida-server output ---
-+ sudo docker exec redroid sh -c 'cat /data/local/tmp/frida.out 2>&1'
-Aborted (core dumped) 
-+ echo '--- process list ---'
---- process list ---
-+ sudo docker exec redroid sh -c 'ps -A | grep -i frida'
-+ echo 'frida-server NOT running'
-frida-server NOT running
-+ echo '--- selinux ---'
---- selinux ---
-+ sudo docker exec redroid sh -c 'getenforce 2>&1'
-Disabled
-+ echo '--- port ---'
---- port ---
-+ nc -zv 127.0.0.1 27042
-Connection to 127.0.0.1 27042 port [tcp/*] succeeded!
-+ echo 'frida-server REACHABLE'
-frida-server REACHABLE
-+ echo '--- host arch sanity (a wrong-arch binary fails exactly like this) ---'
---- host arch sanity (a wrong-arch binary fails exactly like this) ---
-+ file /tmp/kgs/frida-server
-/tmp/kgs/frida-server: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /system/bin/linker64, stripped
-+ i=0
-+ '[' 0 -lt 160 ']'
-+ '[' -f /tmp/kgs/jp.konami.pesam.xapk ']'
-+ break
-++ head -1
-++ ls -1 /tmp/kgs/jp.konami.pesam.xapk '/tmp/kgs/*.apkm' '/tmp/kgs/*.apks'
-+ XAPK=/tmp/kgs/jp.konami.pesam.xapk
-+ '[' -z /tmp/kgs/jp.konami.pesam.xapk ']'
-++ stat -c %s /tmp/kgs/jp.konami.pesam.xapk
-+ SZ=862294575
-+ echo 'archive: /tmp/kgs/jp.konami.pesam.xapk  (862294575 bytes)'
-archive: /tmp/kgs/jp.konami.pesam.xapk  (862294575 bytes)
 + '[' 862294575 -gt 100000000 ']'
 + cd /tmp/kgs
 + XAPK=/tmp/kgs/jp.konami.pesam.xapk
@@ -267,61 +143,185 @@ version 11.0.1 311000101
 22
 + sudo docker exec redroid sh -c 'ls -la /data/local/tmp/splits/*.apk'
 + head -30
--rw-r--r-- 1 radio radio  22347497 2026-09-30 00:01 /data/local/tmp/splits/base.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.ar.apk
--rw-r--r-- 1 radio radio  57148181 2026-09-30 00:01 /data/local/tmp/splits/split_config.arm64_v8a.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.de.apk
--rw-r--r-- 1 radio radio     37074 2026-09-30 00:01 /data/local/tmp/splits/split_config.en.apk
--rw-r--r-- 1 radio radio     24786 2026-09-30 00:01 /data/local/tmp/splits/split_config.es.apk
--rw-r--r-- 1 radio radio     24786 2026-09-30 00:01 /data/local/tmp/splits/split_config.fr.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.hi.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.in.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.it.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.ja.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.ko.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.my.apk
--rw-r--r-- 1 radio radio     24786 2026-09-30 00:01 /data/local/tmp/splits/split_config.pt.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.ru.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.th.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.tr.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 /data/local/tmp/splits/split_config.vi.apk
--rw-r--r-- 1 radio radio    198371 2026-09-30 00:01 /data/local/tmp/splits/split_config.xxxhdpi.apk
--rw-r--r-- 1 radio radio     28882 2026-09-30 00:01 /data/local/tmp/splits/split_config.zh.apk
--rw-r--r-- 1 radio radio 386375435 2026-09-30 00:01 /data/local/tmp/splits/split_pad_it_0.apk
--rw-r--r-- 1 radio radio 395420368 2026-09-30 00:01 /data/local/tmp/splits/split_pad_it_1.apk
-+ echo '--- pm subcommands available ---'
---- pm subcommands available ---
-+ sudo docker exec redroid sh -c 'pm help 2>&1 | grep -iE "install" | head -12'
-      -i: see the installer for the packages
-      -u: also include uninstalled packages
-  install [-rtfdg] [-i PACKAGE] [--user USER_ID|all|current]
-       [-p INHERIT_PACKAGE] [--install-location 0/1/2]
-       [--install-reason 0/1/2/3/4] [--originating-uri URI]
-    Install an application.  Must provide the apk data to install, either as
-      -i: specify package name of installer owning the app
-      -f: install application on internal flash
-      -p: partial application install (new split on top of existing pkg)
-      --user: install under the given user.
-      --dont-kill: installing a new feature split, don't kill running app
-      --restrict-permissions: don't whitelist restricted permissions at install
-+ echo '--- install via session api ---'
---- install via session api ---
-+ timeout 1800 sudo docker exec redroid sh -c '
-  cd /data/local/tmp/splits || exit 1
-  SESSION=$(pm install-create -r | tr -d "\r")
-  echo "session=[$SESSION]"
-  case "$SESSION" in
-    ""|*[!0-9]*) echo "could not create a session"; exit 1 ;;
-  esac
-  for f in ./*.apk; do
-    echo "  write $f"
-    pm install-write "$SESSION" "$(basename $f)" "$f" || echo "  write FAILED $f"
-  done
-  pm install-commit "$SESSION"
-'
-+ tail -40
-session=[Success: created install session [1020103925]]
-could not create a session
+-rw-r--r-- 1 radio radio  22347497 2026-09-30 00:05 /data/local/tmp/splits/base.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.ar.apk
+-rw-r--r-- 1 radio radio  57148181 2026-09-30 00:05 /data/local/tmp/splits/split_config.arm64_v8a.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.de.apk
+-rw-r--r-- 1 radio radio     37074 2026-09-30 00:05 /data/local/tmp/splits/split_config.en.apk
+-rw-r--r-- 1 radio radio     24786 2026-09-30 00:05 /data/local/tmp/splits/split_config.es.apk
+-rw-r--r-- 1 radio radio     24786 2026-09-30 00:05 /data/local/tmp/splits/split_config.fr.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.hi.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.in.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.it.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.ja.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.ko.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.my.apk
+-rw-r--r-- 1 radio radio     24786 2026-09-30 00:05 /data/local/tmp/splits/split_config.pt.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.ru.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.th.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.tr.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 /data/local/tmp/splits/split_config.vi.apk
+-rw-r--r-- 1 radio radio    198371 2026-09-30 00:05 /data/local/tmp/splits/split_config.xxxhdpi.apk
+-rw-r--r-- 1 radio radio     28882 2026-09-30 00:05 /data/local/tmp/splits/split_config.zh.apk
+-rw-r--r-- 1 radio radio 386375435 2026-09-30 00:05 /data/local/tmp/splits/split_pad_it_0.apk
+-rw-r--r-- 1 radio radio 395420368 2026-09-30 00:05 /data/local/tmp/splits/split_pad_it_1.apk
++ echo '--- what pm actually offers (for the record) ---'
+--- what pm actually offers (for the record) ---
++ sudo docker exec redroid sh -c 'pm help 2>&1 | head -20'
+Package manager (package) commands:
+  help
+    Print this help text.
+
+  path [--user USER_ID] PACKAGE
+    Print the path to the .apk of the given PACKAGE.
+
+  dump PACKAGE
+    Print various system state associated with the given PACKAGE.
+
+  has-feature FEATURE_NAME [version]
+    Prints true and returns exit status 0 when system has a FEATURE_NAME,
+    otherwise prints false and returns exit status 1
+
+  list features
+    Prints all features of the system.
+
+  list instrumentation [-f] [TARGET-PACKAGE]
+    Prints all test packages; optionally only those targeting TARGET-PACKAGE
+    Options:
++ echo '--- install adb on the host ---'
+--- install adb on the host ---
++ sudo apt-get install -y -qq adb
++ tail -2
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
++ which adb
+/usr/bin/adb
++ adb version
++ head -2
+Android Debug Bridge version 1.0.41
+Version 34.0.4-debian
++ echo '--- connect to redroid ---'
+--- connect to redroid ---
++ adb connect 127.0.0.1:5555
++ tail -2
+* daemon started successfully
+connected to 127.0.0.1:5555
++ adb wait-for-device
+error: more than one device/emulator
++ adb shell getprop sys.boot_completed
+adb: more than one device/emulator
++ echo '--- push the splits ---'
+--- push the splits ---
++ adb shell mkdir -p /data/local/tmp/splits
+adb: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/base.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_config.ar.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_config.arm64_v8a.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_config.de.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_config.en.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_config.es.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_config.fr.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_config.hi.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_config.in.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_config.it.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_config.ja.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_config.ko.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_config.my.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_config.pt.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_config.ru.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_config.th.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_config.tr.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_config.vi.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ tail -1
++ adb push /tmp/kgs/out/split_config.xxxhdpi.apk /data/local/tmp/splits/
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_config.zh.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_pad_it_0.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ for f in $W/out/*.apk
++ adb push /tmp/kgs/out/split_pad_it_1.apk /data/local/tmp/splits/
++ tail -1
+adb: error: failed to get feature set: more than one device/emulator
++ adb shell ls -la /data/local/tmp/splits/
++ head -30
+adb: more than one device/emulator
++ echo '--- adb install-multiple (base first, then the rest) ---'
+--- adb install-multiple (base first, then the rest) ---
++ ok=0
++ adb install-multiple -r -g /data/local/tmp/splits/base.apk /data/local/tmp/splits/split_config.arm64_v8a.apk
++ tail -8
+adb: more than one device/emulator
++ ok=1
++ '[' 1 '!=' 1 ']'
++ '[' 1 '!=' 1 ']'
++ echo '--- verify ---'
+--- verify ---
++ adb shell pm list packages
++ grep -i konami
++ true
++ grep -i konami
++ sudo docker exec redroid /system/bin/pm list packages
++ true
 + echo '--- package state ---'
 --- package state ---
 + sudo docker exec redroid /system/bin/pm list packages
@@ -329,32 +329,32 @@ could not create a session
 + echo '=== GAME NOT INSTALLED AT ALL ==='
 === GAME NOT INSTALLED AT ALL ===
 + sudo docker exec redroid sh -c 'ls -la /data/local/tmp/splits/'
-total 841768
-drwxr-xr-x 2 root  root       4096 2026-09-30 00:01 .
-drwxrwx--x 4 shell shell      4096 2026-09-30 00:01 ..
--rw-r--r-- 1 radio radio         2 2026-09-30 00:01 .ok
--rw-r--r-- 1 radio radio  22347497 2026-09-30 00:01 base.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.ar.apk
--rw-r--r-- 1 radio radio  57148181 2026-09-30 00:01 split_config.arm64_v8a.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.de.apk
--rw-r--r-- 1 radio radio     37074 2026-09-30 00:01 split_config.en.apk
--rw-r--r-- 1 radio radio     24786 2026-09-30 00:01 split_config.es.apk
--rw-r--r-- 1 radio radio     24786 2026-09-30 00:01 split_config.fr.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.hi.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.in.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.it.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.ja.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.ko.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.my.apk
--rw-r--r-- 1 radio radio     24786 2026-09-30 00:01 split_config.pt.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.ru.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.th.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.tr.apk
--rw-r--r-- 1 radio radio     20690 2026-09-30 00:01 split_config.vi.apk
--rw-r--r-- 1 radio radio    198371 2026-09-30 00:01 split_config.xxxhdpi.apk
--rw-r--r-- 1 radio radio     28882 2026-09-30 00:01 split_config.zh.apk
--rw-r--r-- 1 radio radio 386375435 2026-09-30 00:01 split_pad_it_0.apk
--rw-r--r-- 1 radio radio 395420368 2026-09-30 00:01 split_pad_it_1.apk
+total 841772
+drwxr-xr-x 2 root  root       4096 2026-09-30 00:05 .
+drwxrwx--x 4 shell shell      4096 2026-09-30 00:05 ..
+-rw-r--r-- 1 radio radio         2 2026-09-30 00:05 .ok
+-rw-r--r-- 1 radio radio  22347497 2026-09-30 00:05 base.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.ar.apk
+-rw-r--r-- 1 radio radio  57148181 2026-09-30 00:05 split_config.arm64_v8a.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.de.apk
+-rw-r--r-- 1 radio radio     37074 2026-09-30 00:05 split_config.en.apk
+-rw-r--r-- 1 radio radio     24786 2026-09-30 00:05 split_config.es.apk
+-rw-r--r-- 1 radio radio     24786 2026-09-30 00:05 split_config.fr.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.hi.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.in.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.it.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.ja.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.ko.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.my.apk
+-rw-r--r-- 1 radio radio     24786 2026-09-30 00:05 split_config.pt.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.ru.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.th.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.tr.apk
+-rw-r--r-- 1 radio radio     20690 2026-09-30 00:05 split_config.vi.apk
+-rw-r--r-- 1 radio radio    198371 2026-09-30 00:05 split_config.xxxhdpi.apk
+-rw-r--r-- 1 radio radio     28882 2026-09-30 00:05 split_config.zh.apk
+-rw-r--r-- 1 radio radio 386375435 2026-09-30 00:05 split_pad_it_0.apk
+-rw-r--r-- 1 radio radio 395420368 2026-09-30 00:05 split_pad_it_1.apk
 + exit 1
 ```
 
