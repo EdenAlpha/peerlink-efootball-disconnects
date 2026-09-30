@@ -1,0 +1,6 @@
+cmd: exec adb -s 127.0.0.1:5555 shell input text $PEERLINK_GPASS
+at: 09:11:16
+$ adb -s 127.0.0.1:5555 shell input text $PEERLINK_GPASS
+rc=0
+gamepid: 
+flows: 0
