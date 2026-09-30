@@ -73,24 +73,27 @@ push_res() { # commit + push whatever is staged in LIVE_RES_DIR
   fi
   cd "$LIVE_RES_DIR" || return 2
   for attempt in 1 2 3; do
-    git add -A >/dev/null 2>&1
-    if git diff --cached --quiet >/dev/null 2>&1; then
+    timeout 60 git add -A >/dev/null 2>&1
+    if timeout 60 git diff --cached --quiet >/dev/null 2>&1; then
       cd - >/dev/null 2>&1 || true
       return 0                      # nothing new: success, but not a push
     fi
-    if git -c user.name="live-bot" \
+    if timeout 60 git -c user.name="live-bot" \
            -c user.email="live-bot@users.noreply.github.com" \
            commit -qm "live: $label" >/dev/null 2>&1; then
-      if git push origin "HEAD:refs/heads/$BRANCH" 2>&1 | tail -2; then
+      # EVERY git call is time-boxed. An unbounded `git push` on a machine
+      # that wants a credential prompt hangs forever, and a hung loop looks
+      # exactly like a slow one from the outside.
+      if timeout 120 git push origin "HEAD:refs/heads/$BRANCH" 2>&1 | tail -2; then
         LAST_PUSH=$(now)
         cd - >/dev/null 2>&1 || true
         return 0
       fi
     fi
     echo "live: push attempt $attempt failed for [$label]; rebasing onto $BRANCH"
-    git fetch origin "$BRANCH" >/dev/null 2>&1 || true
-    git rebase "origin/$BRANCH" >/dev/null 2>&1 || \
-      git reset --hard "origin/$BRANCH" >/dev/null 2>&1 || true
+    timeout 120 git fetch origin "$BRANCH" >/dev/null 2>&1 || true
+    timeout 60 git rebase "origin/$BRANCH" >/dev/null 2>&1 || \
+      timeout 60 git reset --hard "origin/$BRANCH" >/dev/null 2>&1 || true
     sleep 3
   done
   cd - >/dev/null 2>&1 || true
@@ -207,12 +210,16 @@ main() {
   say "live control loop starting (poll ${POLL_SECS}s, max ${MAX_ROUNDS} rounds)"
   say "write commands to live-cmd/cmd.txt ; read live-res/results + status.txt"
   local last="" round=0 since_hb=0 rc=0 prc=0
+  # Start the watchdog clock NOW, not at the first successful push: the failure
+  # that matters most is the one where nothing was EVER published, and a
+  # watchdog keyed on the last push can never fire in exactly that case.
+  LAST_PUSH=$(now)
   probe || return 3
   while [ "$round" -lt "$MAX_ROUNDS" ]; do
     round=$((round + 1))
     since_hb=$((since_hb + 1))
-    git fetch origin live-cmd >/dev/null 2>&1 || true
-    cmd=$(git show origin/live-cmd:cmd.txt 2>/dev/null | head -1 | tr -d '\r')
+    timeout 60 git fetch origin live-cmd >/dev/null 2>&1 || true
+    cmd=$(timeout 60 git show origin/live-cmd:cmd.txt 2>/dev/null | head -1 | tr -d '\r')
     if [ -n "$cmd" ] && [ "$cmd" != "$last" ]; then
       last="$cmd"
       dir="$LIVE_RES_DIR/results/$(printf %04d "$round")"

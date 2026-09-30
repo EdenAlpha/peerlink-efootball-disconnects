@@ -340,18 +340,38 @@ jobs:
         run: |
           set +e
           W=/tmp/kgs; mkdir -p $W
-          # git auth for the live branches WITHOUT ever echoing the token:
-          # the credential helper answers, the remote URL stays clean.
+          # ---- git auth that CANNOT HANG ------------------------------------
+          # Two sessions in a row sat on this step for minutes with nothing
+          # published and no error: the signature of git waiting for a
+          # credential PROMPT on a terminal that does not exist. So:
+          #   * no prompt is possible (GIT_TERMINAL_PROMPT=0, helpers cleared)
+          #   * auth is the same extraheader actions/checkout uses
+          #   * every git call is time-boxed
+          #   * auth is PROVEN before the loop starts, and failure aborts the
+          #     step so the log comes back instead of a silent multi-hour wait
           set +x
-          git config --global credential.helper store
-          echo "https://x-access-token:${GITHUB_TOKEN}@github.com" > ~/.git-credentials
-          chmod 600 ~/.git-credentials
+          git config --global --unset-all credential.helper 2>/dev/null || true
+          git config --global credential.helper ''
+          git config --global core.askPass ''
+          export GIT_TERMINAL_PROMPT=0
+          AUTH=$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)
+          git config --global http.https://github.com/.extraheader \
+            "AUTHORIZATION: basic $AUTH"
+          unset AUTH
           set -x
+          if ! timeout 60 git ls-remote https://github.com/${GITHUB_REPOSITORY}.git \
+               HEAD >/dev/null 2>&1; then
+            echo "=== GIT AUTH NOT WORKING - ABORTING SO THE LOG COMES BACK ==="
+            timeout 60 git ls-remote https://github.com/${GITHUB_REPOSITORY}.git \
+              HEAD 2>&1 | head -5
+            echo "=== ABORT ==="
+            exit 1
+          fi
+          echo "git auth OK (non-interactive, proven)"
           rm -rf /tmp/live-res
           # VERIFY THE CLONE. An unchecked clone failure once left the loop
-          # spinning for hours against a directory that was not a repo: no
-          # results, no error, and the step's log only readable at the end.
-          if ! git clone --depth 1 -b main \
+          # spinning for hours against a directory that was not a repo.
+          if ! timeout 300 git clone --depth 1 -b main \
                "https://github.com/${GITHUB_REPOSITORY}.git" /tmp/live-res; then
             echo "=== CLONE FAILED, ABORTING SO THE LOG COMES BACK ==="
             exit 1
@@ -359,13 +379,13 @@ jobs:
           [ -d /tmp/live-res/.git ] || {
             echo "=== /tmp/live-res IS NOT A REPO, ABORTING ==="; exit 1; }
           git -C /tmp/live-res log --oneline -1
-          git -C /tmp/live-res fetch origin live-res 2>/dev/null \
+          timeout 120 git -C /tmp/live-res fetch origin live-res 2>/dev/null \
             && git -C /tmp/live-res checkout live-res 2>/dev/null \
             || git -C /tmp/live-res checkout -b live-res
           git -C /tmp/live-res branch --show-current
           echo "=== entering the live loop; drive via live-cmd/cmd.txt ==="
           W=/tmp/kgs LIVE_RES_DIR=/tmp/live-res \
-            bash kgs-login/live/live_loop.sh 2>&1 | tee -a $W/live.log
+            timeout 9000 bash kgs-login/live/live_loop.sh 2>&1 | tee -a $W/live.log
           rc=${PIPESTATUS[0]}
           echo "live loop exited rc=$rc"
           exit $rc
