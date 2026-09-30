@@ -1,0 +1,133 @@
+name: kgs-macplay
+
+# The phone that others actually use: Google's ARM64 emulator on Apple Silicon.
+#
+# Why this exists: /dev/kvm does not exist on Linux ARM runners (emulator
+# path dead) and Waydroid's container will not start there (open issue, no
+# fix). The community-standard android-emulator-runner on macos-14 (M1)
+# hardware-accelerates ARM64 guests, and the google_apis_playstore image is
+# the real Play Store: compatibility decided by Play, asset delivery included.
+#
+# Plan: boot, sign in with the burner account, install eFootball from Play,
+# launch it, pull the full data bundle as an artifact. The number-match
+# approval is done by the account owner if sign-in asks for it.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: macos-14
+    timeout-minutes: 330
+    env:
+      PEERLINK_GMAIL: ${{ secrets.PEERLINK_GMAIL }}
+      PEERLINK_GPASS: ${{ secrets.PEERLINK_GPASS }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: boot ARM64 Play phone
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: arm64-v8a
+          target: google_apis_playstore
+          profile: pixel_7
+          ram-size: 4096M
+          heap-size: 576M
+          disk-size: 8192M
+          emulator-boot-timeout-seconds: 1800
+          script: |
+            set +e
+            W=/tmp/macplay; mkdir -p $W
+            exec >> >(tee -a $W/fetch.log) 2>&1
+            adb shell getprop ro.build.fingerprint | tr -d '\r'
+            adb shell getprop ro.product.cpu.abi | tr -d '\r'
+            adb shell pm list packages 2>/dev/null | grep -i -E "vending|gms" | head -6
+            echo EMULATOR-UP
+
+      - name: sign in + install + pull data
+        run: |
+          set +e
+          set -x
+          W=/tmp/macplay; mkdir -p $W
+          exec >> >(tee -a $W/fetch.log) 2>&1
+          export PATH="$ANDROID_SDK_ROOT/platform-tools:$PATH"
+          which adb
+          # open eFootball's Play page; Play walks into sign-in on its own
+          adb shell am start -a android.intent.action.VIEW \
+            -d 'market://details?id=jp.konami.pesam' 2>&1 | tail -2
+          sleep 25
+          adb exec-out screencap -p > $W/mp_0.png 2>/dev/null || true
+          # Play UI is native text: tap by words
+          for pat in 'Skip' 'Sign in' 'Next' 'Got it' 'No thanks' 'Not now' '^OK$' 'Accept' 'I agree' 'Turn on' 'No, thanks'; do
+            echo "--- try [$pat] ---"
+            bash kgs-login/scripts/uitap_mac.sh "$pat" 2>&1 || true
+            sleep 6
+          done
+          adb exec-out screencap -p > $W/mp_1.png 2>/dev/null || true
+          # burner email if a field shows (secret env, never printed)
+          adb shell input tap 360 600 >/dev/null 2>&1; sleep 2
+          adb shell input text "$PEERLINK_GMAIL" >/dev/null 2>&1
+          sleep 3
+          adb exec-out screencap -p > $W/mp_2.png 2>/dev/null || true
+          adb shell input text "$PEERLINK_GPASS" >/dev/null 2>&1 || true
+          sleep 5
+          for pat in 'Next' 'I agree' 'Accept' '^Install$' '^OK$' 'Got it' 'Allow' 'Verify' 'Update' 'Not now'; do
+            echo "--- try [$pat] ---"
+            bash kgs-login/scripts/uitap_mac.sh "$pat" 2>&1 || true
+            sleep 8
+          done
+          adb exec-out screencap -p > $W/mp_3.png 2>/dev/null || true
+          adb shell pm list packages 2>/dev/null | grep -i konami || echo "NOT INSTALLED YET"
+          echo "--- waiting for Play to deliver (up to 60 min) ---"
+          for i in $(seq 1 60); do
+            sleep 60
+            INST=$(adb shell pm list packages 2>/dev/null | grep -i konami | tr -d '\r')
+            OBB=$(adb shell du -sb /storage/emulated/0/Android/obb/jp.konami.pesam 2>/dev/null | tr -d '\r' | awk '{print $1}')
+            echo "t=${i}m installed=[${INST:-no}] obb=${OBB:-0}"
+            for pat in '^Install$' 'Accept' '^OK$' 'Update'; do
+              bash kgs-login/scripts/uitap_mac.sh "$pat" 2>/dev/null || true
+            done
+            [ $((i % 5)) -eq 0 ] && adb exec-out screencap -p > $W/mp_w$i.png 2>/dev/null || true
+            [ -n "$INST" ] && { echo INSTALLED; break; }
+          done
+          adb shell pm list packages 2>/dev/null | grep -i konami \
+            || { echo "=== PLAY NEVER INSTALLED IT ==="; exit 1; }
+          # launch and let the ~2 GB come down
+          adb shell monkey -p jp.konami.pesam -c android.intent.category.LAUNCHER 1 2>&1 | tail -2
+          mkdir -p $W/bundle
+          for i in $(seq 1 90); do
+            sleep 60
+            PID=$(adb shell pidof jp.konami.pesam 2>/dev/null | tr -d '\r' | awk '{print $1}')
+            OBB=$(adb shell du -sb /storage/emulated/0/Android/obb/jp.konami.pesam 2>/dev/null | tr -d '\r' | awk '{print $1}')
+            DAT=$(adb shell du -sb /storage/emulated/0/Android/data/jp.konami.pesam 2>/dev/null | tr -d '\r' | awk '{print $1}')
+            echo "t=${i}m gamepid=${PID:-GONE} obb=${OBB:-0} data=${DAT:-0}"
+            adb shell input tap 915 405 >/dev/null 2>&1
+            [ $((i % 5)) -eq 0 ] && adb exec-out screencap -p > $W/mg_$i.png 2>/dev/null || true
+            TOTAL=$(( ${OBB:-0} + ${DAT:-0} ))
+            [ "$TOTAL" -gt 2500000000 ] && { echo "DATA COMPLETE (${TOTAL}B)"; break; }
+          done
+          adb exec-out screencap -p > $W/mg_done.png 2>/dev/null || true
+          echo "--- pull bundle ---"
+          adb pull /storage/emulated/0/Android/obb/jp.konami.pesam $W/bundle/obb 2>&1 | tail -2 || true
+          adb pull /storage/emulated/0/Android/data/jp.konami.pesam $W/bundle/appdata 2>&1 | tail -2 || true
+          du -sh $W/bundle 2>/dev/null; echo BUNDLE-STAGE-DONE
+
+      - name: upload
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgs-macplay-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            /tmp/macplay/fetch.log
+            /tmp/macplay/mp_*.png
+            /tmp/macplay/mg_*.png
+            /tmp/macplay/bundle/
