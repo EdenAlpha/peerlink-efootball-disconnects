@@ -1,1 +1,1 @@
-exec bash -c true; echo SE; adb -s 127.0.0.1:5555 shell am start -a android.intent.action.VIEW -d "market://search?q=cpuz" 2>&1 | tail -1; sleep 13; adb -s 127.0.0.1:5555 shell input tap 360 400; sleep 12; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+exec bash -c true; echo SF; adb -s 127.0.0.1:5555 shell input tap 360 553; sleep 16; adb -s 127.0.0.1:5555 shell pm list packages 2>/dev/null | grep -i cpuz; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
