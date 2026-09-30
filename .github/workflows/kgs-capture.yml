@@ -302,11 +302,23 @@ jobs:
             echo "=== adb install failed; falling back to the pm session API ==="
             timeout 1800 sudo docker exec redroid sh -c '
               cd /data/local/tmp/splits || exit 1
-              SESSION=$(pm install-create -r | tr -d "\r")
-              echo "session=[$SESSION]"
+              # pm install-create prints a SENTENCE, not a bare id:
+              #   Success: created install session [1020103925]
+              # so the number has to be pulled out of it.
+              RAW=$(pm install-create -r 2>&1 | tr -d "\r")
+              echo "install-create said: $RAW"
+              SESSION=$(echo "$RAW" | grep -oE "[0-9]+" | tail -1)
+              echo "session id=[$SESSION]"
+              if [ -z "$SESSION" ]; then
+                echo "could not extract a session id; install-create output was:"
+                echo "$RAW"
+                exit 1
+              fi
               for f in ./*.apk; do
+                echo "  install-write $f"
                 pm install-write "$SESSION" "$(basename $f)" "$f" || echo "  write FAILED $f"
               done
+              echo "  install-commit"
               pm install-commit "$SESSION"
             ' 2>&1 | tail -30
           fi
