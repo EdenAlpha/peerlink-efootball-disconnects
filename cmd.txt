@@ -1,1 +1,1 @@
-exec sudo docker exec redroid iptables -t nat -L OUTPUT -n -v 2>/dev/null | head -6; tail -3 /tmp/kgs/flows.log
+tap 640 940
