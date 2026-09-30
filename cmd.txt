@@ -1,1 +1,1 @@
-exec sudo docker exec redroid ls -la /data/local/tmp/splits/ 2>&1 | head -30; ls /tmp/kgs/out/ 2>/dev/null | head -30
+exec sudo docker exec redroid sh -c "cd /data/local/tmp/splits; S=$(pm install-create -r 2>&1 | grep -oE [0-9]+ | tail -1); echo session=$S; for f in ./*.apk; do pm install-write $S $(basename $f) $f > /dev/null 2>&1 || echo FAIL $f; done; pm install-commit $S"
