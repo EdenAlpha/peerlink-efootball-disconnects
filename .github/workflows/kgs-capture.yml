@@ -483,25 +483,68 @@ jobs:
           echo "########## PHASE 3: memory scan for CommandRequest.path"
           sudo docker cp kgs-login/scripts/scan_paths.js \
             redroid:/data/local/tmp/scan_paths.js
+
+          # ATTACH, do not spawn. `frida -f` starts the process suspended and
+          # injects before its first instruction; eFootball 11.0.1 tears that
+          # down and the previous run died exactly here:
+          #     Connected to 127.0.0.1:27042 (id=socket@127.0.0.1:27042)
+          #     Spawning `jp.konami.pesam`...
+          #     Failed to spawn: error receiving data: Connection reset by peer
+          # so scan.log was empty, 0 passes, 0 paths -- an infrastructure
+          # failure that looked identical to "the game never built a request".
+          # The heartbeat in scan_paths.js exists to tell those apart, and it is
+          # what made this diagnosable.
+          #
+          # Launch normally instead, wait for the process, then attach to the
+          # live pid. This also attaches only after startup checks have run.
           sudo docker exec redroid sh -c 'am force-stop jp.konami.pesam' 2>/dev/null
-          timeout 420 frida -H 127.0.0.1:27042 -f jp.konami.pesam \
-            -l kgs-login/scripts/scan_paths.js --runtime=v8 \
-            > $W/scan.log 2>&1 &
-          SPID=$!
-          echo "phase 3 frida pid $SPID"
-          for i in $(seq 1 36); do
-            sleep 10
-            # the first launch shows a splash / terms screen and nobody is
-            # there to tap it, so nudge the UI
-            sudo docker exec redroid /system/bin/input tap 360 640   >/dev/null 2>&1
-            sudo docker exec redroid /system/bin/input keyevent 66 >/dev/null 2>&1
-            echo "  phase3 t=$((i*10))s  $(grep -c '^\[scan\] pass' $W/scan.log 2>/dev/null || echo 0) pass(es) logged"
+          sudo docker exec redroid sh -c \
+            'monkey -p jp.konami.pesam -c android.intent.category.LAUNCHER 1' 2>&1 | tail -2
+          GPID=""
+          for i in $(seq 1 24); do
+            sleep 5
+            GPID=$(sudo docker exec redroid sh -c \
+              'pidof jp.konami.pesam 2>/dev/null' 2>/dev/null | tr -d '\r' | awk '{print $1}')
+            if [ -n "$GPID" ]; then echo "game pid=$GPID after $((i*5))s"; break; fi
+            echo "  waiting for game process t=$((i*5))s"
           done
-          kill $SPID 2>/dev/null
-          echo "--- scan log ---"
+          if [ -z "$GPID" ]; then
+            echo "=== GAME PROCESS NEVER APPEARED ==="
+            sudo docker exec redroid logcat -d -t 200 2>&1 | tail -40
+            echo "=== graphics ==="
+            sudo docker exec redroid sh -c 'ls /vendor/lib64/libvulkan.so /vendor/lib64/hw/vulkan.*.so 2>&1' | head
+            echo "=== end ==="
+          else
+            echo "--- is libUE4.so actually mapped? ---"
+            sudo docker exec redroid sh -c \
+              "grep -c libUE4 /proc/$GPID/maps 2>/dev/null" || echo "cannot read maps"
+            sudo docker exec redroid sh -c \
+              "grep libUE4 /proc/$GPID/maps 2>/dev/null | head -3" || true
+            echo "--- attaching to live pid $GPID ---"
+            timeout 420 frida -H 127.0.0.1:27042 -p "$GPID" \
+              -l kgs-login/scripts/scan_paths.js --runtime=v8 \
+              > $W/scan.log 2>&1 &
+            SPID=$!
+            echo "phase 3 frida pid $SPID"
+            for i in $(seq 1 36); do
+              sleep 10
+              alive=$(sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null' 2>/dev/null | tr -d '\r' | awk '{print $1}')
+              echo "  phase3 t=$((i*10))s passes=$(grep -c '^\[scan\] pass' $W/scan.log 2>/dev/null || echo 0) gamepid=${alive:-GONE}"
+              # the first launch shows a splash / terms screen and nobody is
+              # there to tap it, so nudge the UI
+              sudo docker exec redroid /system/bin/input tap 360 640   >/dev/null 2>&1
+              sudo docker exec redroid /system/bin/input keyevent 66 >/dev/null 2>&1
+              [ -n "$alive" ] || { echo "game died at t=$((i*10))s"; break; }
+            done
+            kill $SPID 2>/dev/null
+          fi
+          echo "--- what frida itself said (this is what diagnosed the last run) ---"
+          head -14 $W/scan.log 2>/dev/null || true
+          echo "--- scanner output ---"
           grep -E "^\[scan\]|path=" $W/scan.log | head -80 || true
-          echo "--- any path= line at all? ---"
-          grep -c 'path=' $W/scan.log 2>/dev/null || echo 0
+          echo "--- pass count: 0 WITH a frida error above means the scanner never"
+          echo "    ran, which is NOT the same as the game building no request ---"
+          grep -c '^\[scan\] pass' $W/scan.log 2>/dev/null || echo 0
           tail -20 $W/scan.log || true
           cp -f $W/scan.log "$R/scan-paths.log" 2>/dev/null || true
           sudo docker exec redroid logcat -d -t 400 > $W/logcat-p3.txt 2>&1 || true
