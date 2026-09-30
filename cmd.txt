@@ -1,1 +1,1 @@
-exec bash -c true; echo MARK10; cp /tmp/kgs/m8.png /tmp/live-res/screen.png; ls -la /tmp/live-res/screen.png
+amstart com.android.vending/com.google.android.finsky.activities.MainActivity
