@@ -561,102 +561,133 @@ jobs:
             sudo docker exec redroid sh -c \
               "grep libUE4 /proc/$GPID/maps 2>/dev/null | head -3" || true
 
-            # ---- TRUST OUR OWN CA, THEN READ THE TRAFFIC ----
-            # The memory scan had to be abandoned. It works -- 2 GB was read
-            # cleanly from the live process -- but the cost is transferring
-            # bytes, and a serialised request only exists for about a
-            # microsecond:
-            #     pass 1: read 715.9 MB, rescanned 715.94 MB in 36.10s
-            #     pass 2: read 715.9 MB, rescanned  10.03 MB in 30.22s
-            #     8 pass(es) over 300s, no CommandRequest found
-            # Dirty-page tracking worked (10 MB instead of 2 GB on an unchanged
-            # pass) and it still found nothing, because only 8 samples fit.
-            # No sampling interval can catch a microsecond; the approach was
-            # wrong, not the implementation.
+            # ---- FULL DECRYPTED CAPTURE: transparent proxy with our CA ----
+            # A CA in the system store alone captures nothing -- the previous
+            # run proved that by producing a live game and zero data. TLS must
+            # be TERMINATED somewhere, its plaintext logged, and the bytes
+            # re-encrypted upstream. That somewhere is mitmdump on the HOST:
             #
-            # Traffic has none of that problem: a command that is sent is
-            # captured whole, every time. And TLS is only opaque because the
-            # game trusts a CA it was built to trust -- so give the phone a CA
-            # of ours in the SYSTEM store (user-added CAs are not trusted by
-            # apps on modern Android) and the game will complete the handshake
-            # with us in the clear.
-            echo "########## PHASE 4: intercept the traffic instead of reading memory"
+            #   game -(TLS, trusts our CA)-> mitmdump:8080 -(TLS, real Konami)-> Konami
+            #
+            # The phone reaches the proxy by an iptables DNAT on its own port
+            # 443, so no per-app proxy setting is needed and nothing is
+            # injected into the game. mitmproxy signs its leaf certificates
+            # with OUR ca.key, which is why the phone must trust our ca.crt.
+            echo "########## PHASE 4: transparent intercept, full decrypted capture"
             if bash kgs-login/scripts/setup_ca.sh redroid "$W/ca" 2>&1; then
               echo "CA installed"
               cp -f "$W/ca/ca.crt" "$R/intercept-ca.crt" 2>/dev/null || true
-              cp -f "$W/ca/leaf.crt" "$R/intercept-leaf.crt" 2>/dev/null || true
-              echo "--- proof the phone trusts it: what the store now holds ---"
+              echo "--- proxy on the host, signing with OUR ca.key ---"
+              python3 -m pip install --quiet --break-system-packages \
+                mitmproxy || echo "MITMPROXY INSTALL FAILED (see below)"
+              mkdir -p $W/mitm
+              cat "$W/ca/ca.key" "$W/ca/ca.crt" > $W/mitm/mitmproxy-ca.pem
+              cp -f "$W/ca/ca.crt" $W/mitm/mitmproxy-ca-cert.pem
+              FLOWS_LOG=$W/flows.log \
+              timeout 600 mitmdump --mode transparent --listen-port 8080 \
+                --set confdir=$W/mitm -s kgs-login/scripts/mitm_addon.py \
+                -w $W/flows.mitm > $W/mitm.log 2>&1 &
+              MITM_PID=$!
+              echo "mitmdump pid $MITM_PID"
+              sleep 10
+              if grep -q ADDON-READY $W/flows.log 2>/dev/null; then
+                echo "proxy up, addon loaded"
+              else
+                echo "=== PROXY OR ADDON DID NOT START ==="
+                head -40 $W/mitm.log || true
+              fi
+              echo "--- route the phone's 443 through the proxy ---"
+              sudo docker exec redroid iptables --version 2>&1 \
+                || echo "NO IPTABLES IN THE CONTAINER"
+              GW=$(sudo docker exec redroid sh -c \
+                'ip route show default 2>/dev/null' 2>/dev/null \
+                | awk '{print $3}' | tr -d '\r')
+              if [ -z "$GW" ]; then
+                echo "no 'ip' route; reading /proc/net/route instead"
+                HEXGW=$(sudo docker exec redroid cat /proc/net/route \
+                  2>/dev/null | awk '$2=="00000000" {print $3}' | head -1)
+                GW=$(python3 -c "
+import socket, struct, sys
+h = '$HEXGW'.strip()
+print(socket.inet_ntoa(struct.pack('<L', int(h, 16))))" 2>/dev/null)
+              fi
+              echo "host gateway as seen from the phone: [$GW]"
+              if [ -n "$GW" ]; then
+                sudo docker exec redroid sh -c \
+                  "iptables -t nat -C OUTPUT -p tcp --dport 443 -j DNAT --to-destination $GW:8080 2>/dev/null || iptables -t nat -A OUTPUT -p tcp --dport 443 -j DNAT --to-destination $GW:8080" 2>&1
+                echo "iptables rc=$?"
+                sudo docker exec redroid sh -c \
+                  'iptables -t nat -L OUTPUT -n -v 2>/dev/null | head -12'
+              else
+                echo "=== NO GATEWAY FOUND - cannot redirect; capture impossible ==="
+              fi
+              echo "--- ground-truth capture, restarted so it overlaps the LIVE window ---"
+              echo "--- (the phase-1 pcap was killed at line ~822, before the game"
+              echo "---  ever ran at line ~1521; that empty file proved nothing) ---"
               sudo docker exec redroid sh -c \
-                'ls /system/etc/security/cacerts/ | wc -l'
-              sudo docker exec redroid sh -c \
-                "ls -la /system/etc/security/cacerts/ | tail -3" || true
+                'rm -f /data/local/tmp/game2.pcap; tcpdump -i any -s 0 -w /data/local/tmp/game2.pcap tcp >/data/local/tmp/tcpdump2.out 2>&1 &'
+              sleep 2
+              sudo docker exec redroid sh -c 'ps -A | grep -i tcpdump' \
+                || echo "tcpdump2 NOT running"
               sudo docker exec redroid sh -c 'am force-stop jp.konami.pesam' 2>/dev/null
-              echo "--- restarting the game so it reads the trust store ---"
-              sudo docker exec redroid sh -c \
-                'am start -W -n jp.konami.pesam/com.epicgames.ue4.SplashActivity' 2>&1
-              for i in $(seq 1 12); do
+              echo "--- restarting the game INTO the intercept ---"
+              sudo docker exec redroid sh -c "am start -W -n $ACT" 2>&1
+              for i in $(seq 1 36); do
                 sleep 10
                 alive=$(sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null' 2>/dev/null | tr -d '\r' | awk '{print $1}')
-                echo "  phase4 t=$((i*10))s gamepid=${alive:-GONE}"
+                echo "  phase4 t=$((i*10))s gamepid=${alive:-GONE} flows=$(grep -c '^### ' $W/flows.log 2>/dev/null || echo 0)"
                 sudo docker exec redroid /system/bin/input tap 360 640 >/dev/null 2>&1
-                [ -n "$alive" ] || break
+                sudo docker exec redroid /system/bin/input keyevent 66 >/dev/null 2>&1
+                # screenshot the actual screen: no more inventing what it shows
+                sudo docker exec redroid sh -c \
+                  "screencap -p /data/local/tmp/screen_$i.png" >/dev/null 2>&1
+                [ -n "$alive" ] || { echo "game died at t=$((i*10))s"; break; }
               done
+              kill $MITM_PID 2>/dev/null
+              echo "--- diagnostic ladder: each layer proves the next ---"
+              echo "1. SYNs at all (game2.pcap size / syn count):"
+              sudo docker exec redroid sh -c \
+                'ls -la /data/local/tmp/game2.pcap 2>/dev/null; tcpdump -r /data/local/tmp/game2.pcap -c 2000 2>/dev/null | grep -c "S "' || echo "no syns read"
+              echo "2. proxy saw handshakes (mitm.log tail):"
+              tail -15 $W/mitm.log || true
+              echo "3. destinations the game contacted:"
+              grep -h '^HOST-SEEN:' $W/flows.log 2>/dev/null | sort -u | head -20 \
+                || echo "no HOST-SEEN lines"
+              echo "4. decrypted Konami requests/responses:"
+              grep -c '^### ' $W/flows.log 2>/dev/null || echo 0
+              grep '^### ' $W/flows.log 2>/dev/null | head -30 || true
+              echo "--- pull the evidence ---"
+              sudo docker cp redroid:/data/local/tmp/game2.pcap $W/game2.pcap 2>&1 \
+                || echo "no game2.pcap to copy"
+              for i in $(seq 1 36); do
+                sudo docker cp redroid:/data/local/tmp/screen_$i.png \
+                  $W/screen_$i.png 2>/dev/null || true
+              done
+              ls -la $W/screen_*.png 2>/dev/null | head -8 || echo "no screenshots"
+              cp -f $W/flows.log "$R/flows-decrypted.log" 2>/dev/null || true
+              cp -f $W/mitm.log "$R/mitm.log" 2>/dev/null || true
             else
               echo "=== CA INSTALL FAILED - the interception route is unavailable ==="
               echo "the staged CA is at /data/local/tmp/cacerts in the container"
               sudo docker exec redroid sh -c 'ls -la /data/local/tmp/cacerts/' 2>&1
             fi
 
-            # ---- READ MEMORY. Do not inject, and do it from the HOST. ----
-            # Both Frida injection paths are rejected identically by this game:
-            #     Spawning `jp.konami.pesam`...
-            #     Failed to spawn: error receiving data: Connection reset by peer
-            #     Attaching...
-            #     Failed to attach: error receiving data: Connection reset by peer
-            # It kills itself rather than be read. But it does not need to know
-            # it is being read: /proc/<pid>/mem reads another process's address
-            # space with nothing injected, no thread created inside it, and no
-            # memory written -- so there is no /proc/self/maps entry, no extra
-            # thread and no modified code for it to detect.
-            #
-            # The reader runs on the HOST, not in the container: redroid ships
-            # no interpreter, and
-            #     OCI runtime exec failed: exec: "python3": executable file not
-            #     found in $PATH
-            # is what that costs. The host reads the container's
-            # /proc/<pid>/mem over `docker exec ... dd`, because both share the
-            # same PID namespace view and redroid runs as root.
-            # The game starts (SplashActivity, pid found in 5 s) and stays alive
-            # the full 6 minutes, so there is a long window to read in.
-            echo "--- reading the game's memory from the host (no injection) ---"
-            GPID="$GPID" \
-            timeout 400 python3 kgs-login/scripts/read_paths.py \
-              --package jp.konami.pesam --seconds 300 --interval 3 \
-              --docker-exec "sudo docker exec redroid" \
-              > $W/scan.log 2>&1 &
-            SPID=$!
-            echo "phase 3 reader pid $SPID"
-            for i in $(seq 1 36); do
-              sleep 10
-              alive=$(sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null' 2>/dev/null | tr -d '\r' | awk '{print $1}')
-              echo "  phase3 t=$((i*10))s passes=$(grep -c '^\[scan\] pass' $W/scan.log 2>/dev/null || echo 0) gamepid=${alive:-GONE}"
-              # the first launch shows a splash / terms screen and nobody is
-              # there to tap it, so nudge the UI
-              sudo docker exec redroid /system/bin/input tap 360 640   >/dev/null 2>&1
-              sudo docker exec redroid /system/bin/input keyevent 66 >/dev/null 2>&1
-              [ -n "$alive" ] || { echo "game died at t=$((i*10))s"; break; }
-            done
-            kill $SPID 2>/dev/null
+            # ---- MEMORY SCAN RETIRED. ----
+            # read_paths.py stays in the repo, but it no longer runs: the fast
+            # version managed 8 passes in 300 s and found nothing, and the pass
+            # cost is dominated by copying bytes, so no tuning beats a
+            # microsecond-lived message. Traffic interception above replaces it.
+            echo "--- memory scan retired; the intercept above is the capture ---"
           fi
-          echo "--- what frida itself said (this is what diagnosed the last run) ---"
-          head -14 $W/scan.log 2>/dev/null || true
-          echo "--- scanner output ---"
-          grep -E "^\[scan\]|path=" $W/scan.log | head -80 || true
-          echo "--- pass count: 0 WITH a frida error above means the scanner never"
-          echo "    ran, which is NOT the same as the game building no request ---"
-          grep -c '^\[scan\] pass' $W/scan.log 2>/dev/null || echo 0
-          tail -20 $W/scan.log || true
-          cp -f $W/scan.log "$R/scan-paths.log" 2>/dev/null || true
+          echo "--- decrypted flows (the actual result) ---"
+          grep -c '^### ' $W/flows.log 2>/dev/null || echo 0
+          grep '^### ' $W/flows.log 2>/dev/null | head -40 || true
+          echo "--- destinations contacted ---"
+          grep -h '^HOST-SEEN:' $W/flows.log 2>/dev/null | sort -u | head -20 \
+            || echo "no HOST-SEEN lines"
+          echo "--- proxy errors (pinning/trust failures show here) ---"
+          grep -iE "error|warn|tls|handshake|certificate" $W/mitm.log \
+            2>/dev/null | tail -20 || true
           sudo docker exec redroid logcat -d -t 400 > $W/logcat-p3.txt 2>&1 || true
           echo "=== logcat phase 3 (filtered) ==="
           grep -iE "konami|pesam|FATAL|AndroidRuntime|libUE4|Vulkan|EGL" \
@@ -750,10 +781,16 @@ jobs:
           # make the step summary self-contained, so a run is readable even if
           # every git operation failed
           { echo '## capture'; echo;
-            echo '### scan result (the thing being hunted)'; echo '```text';
-            grep -E "^\[scan\]|path=" $W/scan.log 2>/dev/null | head -60 \
-              || echo 'no scan log';
+            echo '### decrypted Konami flows (the thing being hunted)'; echo '```text';
+            grep '^### ' $W/flows.log 2>/dev/null | head -60 \
+              || echo 'no decrypted flows';
+            echo '```';
+            echo '### destinations contacted'; echo '```text';
+            grep -h '^HOST-SEEN:' $W/flows.log 2>/dev/null | sort -u | head -20 \
+              || echo 'no HOST-SEEN lines';
             echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          # the decrypted flows are small text: commit them, not just the report
+          cp -f $W/flows.log "$R/flows-decrypted.log" 2>/dev/null || true
 
       # The git push above is best-effort and has already silently lost one
       # full run's capture. An artifact is the retrieval path that cannot fail
@@ -769,8 +806,13 @@ jobs:
           path: |
             kgs-login/ci-report/capture.md
             kgs-login/ci-report/scan-paths.log
+            kgs-login/ci-report/flows-decrypted.log
             kgs-login/ci-report/capture/
             /tmp/kgs/scan.log
+            /tmp/kgs/flows.log
+            /tmp/kgs/flows.mitm
+            /tmp/kgs/mitm.log
+            /tmp/kgs/screen_*.png
             /tmp/kgs/frida.log
             /tmp/kgs/frida2.log
             /tmp/kgs/pipeline.log
@@ -780,3 +822,4 @@ jobs:
             /tmp/kgs/inst1.log
             /tmp/kgs/inst2.log
             /tmp/kgs/game.pcap
+            /tmp/kgs/game2.pcap
