@@ -1,0 +1,10 @@
+cmd: exec sudo iptables-legacy -t nat -A PREROUTING -i docker0 -p tcp --dport 443 -j DNAT --to-destination 172.17.0.1:8080 2>&1; echo add=$?; sudo iptables-legacy -t nat -L PREROUTING -n -v 2>/dev/null | head -8
+at: 10:06:34
+$ sudo iptables-legacy -t nat -A PREROUTING -i docker0 -p tcp --dport 443 -j DNAT --to-destination 172.17.0.1:8080 2>&1; echo add=$?; sudo iptables-legacy -t nat -L PREROUTING -n -v 2>/dev/null | head -8
+add=0
+Chain PREROUTING (policy ACCEPT 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+    0     0 DNAT       6    --  docker0 *       0.0.0.0/0            0.0.0.0/0            tcp dpt:443 to:172.17.0.1:8080
+rc=0
+gamepid: 
+flows: 0
