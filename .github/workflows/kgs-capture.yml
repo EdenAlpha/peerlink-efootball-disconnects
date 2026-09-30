@@ -400,29 +400,54 @@ jobs:
             "am start -W -n $AACT" 2>&1 | tail -3
           sleep 8
           A_SHOT 0; echo "--- aurora screen 0 texts ---"; A_TEXT
-          # --- onboarding: tap through by WORDS, screenshotting each step ---
-          # First launch is some order of welcome / permissions / login choice.
-          # "Anonymous" is the goal; the rest are doors on the way there.
-          for pat in 'Anonymous' '^Next$' '^Allow$' 'Get Started' '^Skip$' \
-                     '^Continue$' '^OK$' 'Agree' 'Accept'; do
-            echo "--- try [$pat] ---"
-            bash kgs-login/scripts/uitap.sh redroid "$pat" 2>&1 || true
-            sleep 4
-          done
-          A_PULL 1; echo "--- aurora screen 1 texts ---"; A_TEXT
+          # --- permissions first, by command, so no dialog can appear later ---
+          # Aurora needs the installer permission; granting it by shell kills
+          # a whole class of prompts before they exist.
+          echo "--- pre-grant installer + storage ---"
+          adb -s $SERIAL shell pm grant com.aurora.store android.permission.REQUEST_INSTALL_PACKAGES 2>&1 || true
+          adb -s $SERIAL shell appops set com.aurora.store REQUEST_INSTALL_PACKAGES allow 2>&1 || true
+          adb -s $SERIAL shell pm grant com.aurora.store android.permission.READ_EXTERNAL_STORAGE 2>&1 || true
+          adb -s $SERIAL shell pm grant com.aurora.store android.permission.WRITE_EXTERNAL_STORAGE 2>&1 || true
+          # --- onboarding: ONE tap, proven by source, not guessed ---
+          # Aurora's own code (OnboardingScreen.kt): on page 0 the left button
+          # is Skip and it calls finishOnboarding() immediately. Tapping Next
+          # would walk Permissions/MicroG pages for nothing. Skip at (160,1105)
+          # on the 720x1280 Welcome screen seen in aurora_0.png.
+          echo "--- tap Skip (finishes onboarding per Aurora's source) ---"
+          sudo docker exec redroid /system/bin/input tap 160 1105 >/dev/null 2>&1
+          sleep 5
+          A_PULL 1
+          echo "--- full node dump after Skip (geometry, not text) ---"
+          bash kgs-login/scripts/uidump.sh redroid $W/ui_after_skip.xml 2>&1 | head -60
+          cp -f $W/ui_after_skip.xml "$R/capture/ui_after_skip.xml" 2>/dev/null || true
           # --- open eFootball's Play page directly (skips search UI) ---
           echo "--- open market page ---"
           sudo docker exec redroid sh -c \
             "am start -a android.intent.action.VIEW -d 'market://details?id=jp.konami.pesam'" 2>&1 | tail -3
           sleep 8
-          A_PULL 2; echo "--- market page texts ---"; A_TEXT
+          A_PULL 2
+          echo "--- full node dump on market dialog ---"
+          bash kgs-login/scripts/uidump.sh redroid $W/ui_market.xml 2>&1 | head -40
+          # "Continue to Aurora Store?" dialog: Open was at (662,1158) on the
+          # 720x1280 screenshot. Tap it, then dump what Aurora shows.
+          echo "--- tap Open on the Continue dialog ---"
+          sudo docker exec redroid /system/bin/input tap 662 1158 >/dev/null 2>&1
+          sleep 8
+          A_PULL 3
+          echo "--- full node dump on the app page ---"
+          bash kgs-login/scripts/uidump.sh redroid $W/ui_apppage.xml 2>&1 | head -80
+          cp -f $W/ui_apppage.xml "$R/capture/ui_apppage.xml" 2>/dev/null || true
           # --- install / update with asset packs ---
+          # Positions come from the dumps above on the NEXT run; this run
+          # tries the text taps (harmless if they miss) plus one center tap.
           for pat in '^Install$' '^Update$' '^OK$' '^Allow$' 'Retry'; do
             echo "--- try [$pat] ---"
             bash kgs-login/scripts/uitap.sh redroid "$pat" 2>&1 || true
             sleep 5
           done
-          A_PULL 3
+          A_PULL 4
+          VER0=$(adb -s $SERIAL shell dumpsys package jp.konami.pesam 2>/dev/null | grep -m1 versionName | tr -d '\r')
+          echo "game version before wait: [$VER0]"
           echo "--- wait for packs (15 min): asset dirs + screenshots ---"
           for i in $(seq 1 15); do
             sleep 60
@@ -434,6 +459,12 @@ jobs:
             for pat in '^Allow$' '^Install$' '^OK$'; do
               bash kgs-login/scripts/uitap.sh redroid "$pat" 2>/dev/null || true
             done
+            # early exit: a version change means Aurora replaced the app
+            VER=$(adb -s $SERIAL shell dumpsys package jp.konami.pesam 2>/dev/null | grep -m1 versionName | tr -d '\r')
+            if [ -n "$VER" ] && [ "$VER" != "$VER0" ]; then
+              echo "VERSION CHANGED [$VER0] -> [$VER]; install happened, stopping wait"
+              break
+            fi
             [ $((i % 3)) -eq 0 ] && A_PULL w$i
           done
           A_PULL done
