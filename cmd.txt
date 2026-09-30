@@ -1,1 +1,1 @@
-exec sudo docker exec redroid iptables -t nat -D OUTPUT -p tcp --dport 443 -j DNAT --to-destination 172.17.0.1:8080; echo del_rc=$?; sudo iptables -t nat -A PREROUTING -i docker0 -p tcp --dport 443 -j REDIRECT --to-port 8080; echo add_rc=$?; sudo iptables -t nat -L PREROUTING -n -v | head -8; sudo ss -tln 2>/dev/null | grep 8080
+exec sudo modprobe nft_redir nf_nat xt_REDIRECT 2>&1; echo mp=$?; sudo iptables -t nat -A PREROUTING -i docker0 -p tcp --dport 443 -j REDIRECT --to-port 8080 2>&1; echo add=$?; sudo iptables -t nat -L PREROUTING -n | head -8
