@@ -1,1 +1,1 @@
-exec bash -c true; echo MARK8; sleep 20; sudo docker exec redroid sh -c "pidof jp.konami.pesam"; sudo docker exec redroid sh -c "screencap -p /data/local/tmp/m8.png"
+exec bash -c true; echo MARK9; sudo docker cp redroid:/data/local/tmp/m8.png /tmp/kgs/m8.png; ls -la /tmp/kgs/m8.png
