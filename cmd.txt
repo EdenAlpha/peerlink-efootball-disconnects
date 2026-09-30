@@ -1,1 +1,1 @@
-exec bash -c true; echo MARK9; sudo docker cp redroid:/data/local/tmp/m8.png /tmp/kgs/m8.png; ls -la /tmp/kgs/m8.png
+exec bash -c true; echo MARK10; cp /tmp/kgs/m8.png /tmp/live-res/screen.png; ls -la /tmp/live-res/screen.png
