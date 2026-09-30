@@ -1,1 +1,1 @@
-shot
+exec sudo docker exec redroid sh -c "input tap 665 1145; sleep 12; screencap -p /data/local/tmp/live_shot.png"
