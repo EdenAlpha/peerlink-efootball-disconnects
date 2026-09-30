@@ -1,1 +1,1 @@
-exec sudo docker exec redroid sh -c "screencap -p /data/local/tmp/s.png; sleep 3; ls -l /data/local/tmp/s.png; echo ---B64---; base64 -w0 /data/local/tmp/s.png"
+exec bash kgs-login/live/pm_reinstall.sh redroid
