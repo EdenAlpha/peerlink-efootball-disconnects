@@ -1,1 +1,1 @@
-exec sudo docker exec redroid sh -c "am start -W -n com.aurora.store/.ComposeActivity 2>&1 | head -3; sleep 6; dumpsys window | grep mCurrentFocus"
+exec sudo docker exec redroid /system/bin/input tap 160 1105; sleep 4; sudo docker exec redroid /system/bin/input tap 360 770; sleep 6; sudo docker exec redroid sh -c "dumpsys window | grep mCurrentFocus"
