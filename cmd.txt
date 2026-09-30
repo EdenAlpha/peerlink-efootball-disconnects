@@ -1,1 +1,1 @@
-exec sudo docker exec redroid sh -c "ls -Z /system/etc/security/cacerts/293a83db.0 /system/etc/security/cacerts/928a8368.0 /system/etc/security/cacerts/f8fc53da.0"
+exec sudo docker exec redroid sh -c "ls -la /data/local/tmp/game2.pcap; tcpdump -r /data/local/tmp/game2.pcap -nn -c 200 2>/dev/null | awk \"{print \\$3}\" | cut -d. -f1-4 | sort | uniq -c | sort -rn | head -15"
