@@ -44,6 +44,12 @@ jobs:
       PEERLINK_GMAIL: ${{ secrets.PEERLINK_GMAIL }}
       PEERLINK_GPASS: ${{ secrets.PEERLINK_GPASS }}
       DEV_MODE: adb
+      # REQUIRED in adb mode. dev.sh calls plain `adb shell ...` with no -s,
+      # and on this runner adb reports no default device, so every tap and
+      # every screenshot silently produced nothing (adb's stderr is discarded
+      # by dev.sh). ANDROID_SERIAL is honoured by adb itself, so one variable
+      # fixes every call in the loop.
+      ANDROID_SERIAL: 127.0.0.1:5555
     steps:
       - name: checkout
         uses: actions/checkout@v4
