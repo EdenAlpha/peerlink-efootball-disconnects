@@ -1,0 +1,9 @@
+cmd: exec bash -c true; echo T3; adb -s 127.0.0.1:5555 install-multiple /data/local/tmp/splits/base.apk /data/local/tmp/splits/split_config.arm64_v8a.apk 2>&1 | tail -8; echo "== rc/path =="; adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam
+at: 23:04:50
+$ bash -c true; echo T3; adb -s 127.0.0.1:5555 install-multiple /data/local/tmp/splits/base.apk /data/local/tmp/splits/split_config.arm64_v8a.apk 2>&1 | tail -8; echo "== rc/path =="; adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam
+T3
+adb: failed to stat "/data/local/tmp/splits/split_config.arm64_v8a.apk": No such file or directory
+== rc/path ==
+rc=1
+gamepid: 
+flows: 0
