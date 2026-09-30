@@ -46,19 +46,21 @@ CONTAINER="${CONTAINER:-redroid}"
 : "${PUSH_WATCHDOG_SECS:=600}"
 BRANCH=live-res
 
+# Every device call goes through dev.sh so the SAME loop drives either
+# redroid (docker) or the Play emulator / a real phone (adb).
+DEV_SCRIPT="$(dirname "$0")/dev.sh"
+# shellcheck source=dev.sh
+. "$DEV_SCRIPT"
+
 say() { echo "live: $*"; }
 now() { date -u +%s; }
 
 shot_to() { # $1 = dest png path on host
-  sudo docker exec "$CONTAINER" sh -c \
-    'screencap -p /data/local/tmp/live_shot.png' >/dev/null 2>&1
-  sudo docker cp "$CONTAINER:/data/local/tmp/live_shot.png" "$1" \
-    2>/dev/null || true
+  dev_shot "$1"
 }
 
 game_alive() {
-  sudo docker exec "$CONTAINER" sh -c \
-    'pidof jp.konami.pesam 2>/dev/null' 2>/dev/null | tr -d '\r' | awk '{print $1}'
+  dev_pid
 }
 
 flows_seen() { { grep -c '^### ' "$W/flows.log" 2>/dev/null || echo 0; } | head -1; }
@@ -133,8 +135,7 @@ run_cmd() { # $1 = round dir, $2... = command words
   { echo "cmd: $verb $*"; echo "at: $(date -u +%H:%M:%S)"; } > "$out"
   case "$verb" in
     tap)
-      sudo docker exec "$CONTAINER" /system/bin/input tap "$1" "$2" \
-        >/dev/null 2>&1
+      dev_tap "$1" "$2"
       echo "tapped ($1,$2)" >> "$out"
       shot_to "$dir/shot.png"
       ;;
@@ -142,8 +143,7 @@ run_cmd() { # $1 = round dir, $2... = command words
       while [ $# -ge 2 ]; do
         x="$1"; y="$2"; shift 2
         echo "tap ($x,$y) at $(date -u +%H:%M:%S)" >> "$out"
-        sudo docker exec "$CONTAINER" /system/bin/input tap "$x" "$y" \
-          >/dev/null 2>&1
+        dev_tap "$x" "$y"
         sleep 2
       done
       shot_to "$dir/shot.png"
@@ -158,24 +158,20 @@ run_cmd() { # $1 = round dir, $2... = command words
       echo "screenshot only" >> "$out"
       ;;
     uidump)
-      bash kgs-login/scripts/uidump.sh "$CONTAINER" "$dir/ui.xml" \
-        >> "$out" 2>&1 || echo "uidump failed (see out)" >> "$out"
+      dev_uidump "$dir/ui.xml" >> "$out" 2>&1 || echo "uidump failed (see out)" >> "$out"
       shot_to "$dir/shot.png"
       ;;
     uitap)
-      bash kgs-login/scripts/uitap.sh "$CONTAINER" "$1" >> "$out" 2>&1 \
-        || echo "uitap missed" >> "$out"
+      dev_uitap "$1" >> "$out" 2>&1 || echo "uitap missed" >> "$out"
       shot_to "$dir/shot.png"
       ;;
     amstart)
-      sudo docker exec "$CONTAINER" sh -c "am start -W -n $1" \
-        >> "$out" 2>&1
+      dev_amstart "$1" >> "$out" 2>&1
       sleep 5
       shot_to "$dir/shot.png"
       ;;
     intent)
-      sudo docker exec "$CONTAINER" sh -c \
-        "am start -a android.intent.action.VIEW -d '$1'" >> "$out" 2>&1
+      dev_intent "$1" >> "$out" 2>&1
       sleep 5
       shot_to "$dir/shot.png"
       ;;

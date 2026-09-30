@@ -1,0 +1,131 @@
+name: kgs-maclive
+
+# THE SETUP THE USER ASKED FOR: the community-standard Play emulator with
+# enough RAM/ROM, and OUR proven live-control loop attached to it.
+#
+# Pieces (each one already exists and works):
+#   * community standard  = reactivecircus/android-emulator-runner on
+#     macos-14 (Apple Silicon), google_apis_playstore image. Real Play Store:
+#     the full ~3 GB data can be downloaded here, and Play decides device
+#     compatibility itself.
+#   * enough RAM and ROM  = the earlier mac run crashed with 4 GB RAM / 8 GB
+#     disk. Community Play setups use 8 GB RAM and 32 GB disk. Set here.
+#   * the drive loop      = kgs-login/live/live_loop.sh in DEV_MODE=adb.
+#     The exact same tap / screenshot / round-trip the user drove earlier -
+#     commands go to live-cmd/cmd.txt, photos come back on live-res.
+#
+# Flow once booted: sign in to Play with the burner account (number-match is
+# approved by the user when prompted), install eFootball, let the 3 GB come
+# down, launch it, and the recorder + live screenshots capture the login
+# conversation. The recorder (CA + transparent proxy) is armed before the
+# loop so the first tap that starts the game is already being recorded.
+#
+# Cost: public repos get unlimited Actions minutes. The loop caps itself.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  drive:
+    runs-on: macos-14
+    timeout-minutes: 180
+    env:
+      PEERLINK_GMAIL: ${{ secrets.PEERLINK_GMAIL }}
+      PEERLINK_GPASS: ${{ secrets.PEERLINK_GPASS }}
+      DEV_MODE: adb
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: boot ARM64 Play phone (community standard, proper resources)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: arm64-v8a
+          target: google_apis_playstore
+          profile: pixel_7
+          cores: 4
+          ram-size: 8192M
+          heap-size: 1024M
+          disk-size: 32768M
+          emulator-boot-timeout: 1800
+          disable-animations: true
+          script: |
+            set +e
+            W=/tmp/kgs; mkdir -p $W
+            exec >> >(tee -a $W/pipeline.log) 2>&1
+            echo "=== phone up ==="
+            adb shell getprop ro.build.fingerprint | tr -d '\r'
+            adb shell getprop ro.product.cpu.abi | tr -d '\r'
+            adb shell pm list packages 2>/dev/null | grep -i -E "vending|gms" | head -6
+
+            # ---- git: non-interactive, no prompts, proven before the loop ----
+            export GIT_TERMINAL_PROMPT=0
+            git config --global --unset-all credential.helper 2>/dev/null || true
+            git config --global credential.helper ''
+            if ! timeout 60 git ls-remote origin HEAD >/dev/null 2>&1; then
+              echo "=== GIT NOT WORKING - ABORT SO THE LOG COMES BACK ==="
+              timeout 60 git ls-remote origin HEAD 2>&1 | head -5
+              exit 1
+            fi
+            echo "git OK"
+
+            # ---- live-res as a worktree (auth inherited, cannot conflict) ----
+            git worktree remove --force /tmp/live-res 2>/dev/null || true
+            rm -rf /tmp/live-res
+            git fetch origin live-res 2>/dev/null
+            if git show-ref --verify --quiet refs/remotes/origin/live-res; then
+              git worktree add -f -B live-res /tmp/live-res origin/live-res 2>&1 | tail -1
+            else
+              git worktree add -f -b live-res /tmp/live-res 2>&1 | tail -1
+            fi
+            git -C /tmp/live-res branch --show-current
+
+            # ---- arm the recorder BEFORE the loop: first tap is recorded ----
+            bash kgs-login/scripts/setup_ca_mac.sh $W/ca 2>&1 | tail -6 \
+              || echo "CA step skipped/failed (non-fatal)"
+            mkdir -p $W/mitm
+            if [ -f "$W/ca/ca.key" ]; then
+              cat "$W/ca/ca.key" "$W/ca/ca.crt" > $W/mitm/mitmproxy-ca.pem
+              cp -f "$W/ca/ca.crt" $W/mitm/mitmproxy-ca-cert.pem
+            fi
+            python3 -m pip install --quiet mitmproxy 2>&1 | tail -2 || true
+            FLOWS_LOG=$W/flows.log nohup setsid mitmdump \
+              --mode transparent --listen-port 8080 \
+              --set confdir=$W/mitm -s kgs-login/scripts/mitm_addon.py \
+              -w $W/flows.mitm > $W/mitm.log 2>&1 < /dev/null &
+            sleep 12
+            grep -q ADDON-READY $W/flows.log 2>/dev/null \
+              && echo "proxy up" || { echo "PROXY DOWN"; head -20 $W/mitm.log; }
+            # macOS has no container bridge: point the EMULATOR's 443 at the
+            # proxy via pf (its own NAT), transparent mode still applies.
+            bash kgs-login/scripts/pf_redirect_mac.sh 2>&1 | tail -8 \
+              || echo "pf redirect skipped/failed (recorder sees nothing but session continues)"
+
+            # ---- the live drive loop: same tap/screenshot round-trip ----
+            echo "=== entering the live loop; drive via live-cmd/cmd.txt ==="
+            W=/tmp/kgs LIVE_RES_DIR=/tmp/live-res DEV_MODE=adb \
+              timeout 7200 bash kgs-login/live/live_loop.sh 2>&1 | tee -a $W/live.log
+            rc=${PIPESTATUS[0]}
+            echo "live loop exited rc=$rc"
+            exit $rc
+
+      - name: upload session
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgs-maclive-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            /tmp/kgs/pipeline.log
+            /tmp/kgs/live.log
+            /tmp/kgs/flows.log
+            /tmp/kgs/flows.mitm
+            /tmp/kgs/mitm.log
+            /tmp/live-res/
