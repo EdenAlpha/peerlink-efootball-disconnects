@@ -1,1 +1,1 @@
-exec bash -c true; echo T2; adb -s 127.0.0.1:5555 shell ls -1 /data/local/tmp/splits/ | grep -E "base|arm64"; echo "== count =="; adb -s 127.0.0.1:5555 shell ls -1 /data/local/tmp/splits/ | wc -l; echo "== installed? =="; adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam
+exec bash -c true; echo T3; adb -s 127.0.0.1:5555 install-multiple /data/local/tmp/splits/base.apk /data/local/tmp/splits/split_config.arm64_v8a.apk 2>&1 | tail -8; echo "== rc/path =="; adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam
