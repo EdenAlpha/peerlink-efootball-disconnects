@@ -1271,3 +1271,112 @@ Fixed three ways, since a lost publish must not cost a capture again:
 
 This is the recurring trap on this workflow: a step that swallows a failure and
 reports success. `set +e` at the top of the step is what let it pass.
+
+## Root cause of Play's "isn't compatible with your device" on the container
+
+Retracting two earlier guesses before the actual cause is recorded, because both
+were wrong and both were acted on:
+
+- **Not Android version.** The phone is SDK 34 and the game is `minSdkVersion=29`.
+  You were right that this was never the variable.
+- **Not SwiftShader.** The container genuinely has no GPU -- the renderer reads
+  `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0)), SwiftShader
+  driver-5.0.0), OpenGL ES 3.1.0` -- but the game only asks for GLES 3.1 and the
+  phone provides GLES 3.1. The absence of a GPU was real and irrelevant.
+
+### The measurement
+
+`kgs-login/scripts/apk_requirements.py` reads the declarations straight out of
+the APK's binary manifest (androguard; note the xapk is a zip, so the base APK has
+to be extracted first). For `jp.konami.pesam` 11.0.1 that is the complete set:
+
+```xml
+<uses-sdk minSdkVersion="29" targetSdkVersion="36"/>
+<uses-feature android:glEsVersion="0x00030001" android:required="true"/>
+<uses-feature android:name="android.hardware.touchscreen.multitouch"/>
+```
+
+Two hardware requirements, no third. `android:required` is omitted on the second,
+which the Android spec defines as **required=true**.
+
+Diffed against what the phone advertises:
+
+| Declaration | Phone | |
+|---|---|---|
+| `minSdkVersion=29` | SDK 34 | pass |
+| `primaryCpuAbi=arm64-v8a` | arm64-v8a | pass |
+| `glEsVersion` = GLES 3.1 | GLES 3.1 | pass |
+| `touchscreen.multitouch` | **not declared** | **fail** |
+
+`pm list features` returned `feature:android.hardware.touchscreen` and nothing
+else. CPU-Z installed cleanly from the same store on the same account with the
+same payment state -- it declares no graphics feature, so it never hits the gap.
+
+### Why the feature was missing
+
+Not a redroid bug in the input stack. The image simply ships the wrong set of
+declaration files. `/vendor/etc/permissions/` contained
+`android.hardware.touchscreen.xml` and **no** `android.hardware.touchscreen.multitouch*.xml`
+at all, while `/vendor/etc/permissions/handheld_core_hardware.xml` contains its
+own instruction to include exactly one of them:
+
+> devices that support multitouch must include the most appropriate one of these
+> files: `android.hardware.touchscreen.multitouch.xml` /
+> `.multitouch.distinct.xml` / `.multitouch.jazzhand.xml` --
+> ONLY ONE of the above should be included.
+
+So the phone was telling Android it had no multi-touch when it does. Play's device
+compatibility check reads those declared features and refuses the app.
+
+### The fix
+
+`kgs-login/live/android.hardware.touchscreen.multitouch.xml` declares
+`<feature name="android.hardware.touchscreen.multitouch" />`. The basic
+(non-independent) variant is correct here, per the spec text quoted above.
+
+This is a **capability declaration, not an identity change**. It does not alter
+`ro.product.*`, the build fingerprint, or anything Play uses to identify the
+device, and it does not touch Play Protect certification. redroid's input stack
+is a stock `InputReader` on a virtual touchscreen and does dispatch multi-pointer
+`MotionEvent`s, so the declaration is accurate. An earlier attempt to set
+`ro.product.*` to a Pixel profile **failed and changed nothing** -- those
+properties are locked after boot:
+
+```
+Failed to set property 'ro.build.fingerprint' ...
+getprop ro.product.model -> redroid14_arm64_only
+```
+
+`/` is a writable overlay in this container, so `/vendor/etc/permissions/` and
+`/system/etc/permissions/` both accept the file without remounting, and
+PermissionManager re-reads it on `docker restart redroid`. After the restart:
+
+```
+feature:android.hardware.touchscreen
+feature:android.hardware.touchscreen.multitouch
+```
+
+Applied permanently in `.github/workflows/kgs-gappslive.yml` step `04c`, which
+fails the run outright if the feature does not appear -- so the container can
+never again be silently missing it.
+
+### Cost, and the two stalls that cost the most time
+
+Both were avoidable and both are worth recording:
+
+1. **Payment method.** Before any app would install, Play demanded *"Add a
+   payment option to complete your account."* A `Skip` link clears it. This gate
+   has nothing to do with compatibility and its message is
+   *"Complete account setup"* -- it reads like an account problem, so it is easy
+   to misread as one.
+2. **`pm clear com.google.android.gms` destroys the store's auth token** and Play
+   cannot recover it unattended -- `Try again` is a dead button and the
+   `play.google.com/store/account` deep link does nothing. The account stays on
+   the device (`Account {name=..., type=com.google}`) but the store is useless
+   until a human signs in again. This is Google's own recommended fix for
+   compatibility errors, so following their advice costs a re-login.
+
+Credentials are Actions secrets (`PEERLINK_GMAIL`, `PEERLINK_GPASS`) staged to
+`$W/creds/` by step `04c`. The live command channel is a file in a **public**
+branch, so a password must never be typed into `cmd.txt` -- that is how the
+burner password reached history before. Commands read the staged file instead.
