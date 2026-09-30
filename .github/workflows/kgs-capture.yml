@@ -267,26 +267,52 @@ jobs:
           sudo docker cp $W/out/. redroid:/data/local/tmp/splits/
           sudo docker exec redroid sh -c 'ls /data/local/tmp/splits/*.apk | wc -l'
           sudo docker exec redroid sh -c 'ls -la /data/local/tmp/splits/*.apk' | head -30
-          # redroid's pm has NO install-multiple subcommand:
+          # The container's /system/bin/pm is a stripped build:
           #     Unknown command: install-multiple
-          # Every earlier INSTALL_FAILED_* was a fallback running after that.
-          # The supported path is the session API.
-          echo "--- pm subcommands available ---"
-          sudo docker exec redroid sh -c 'pm help 2>&1 | grep -iE "install" | head -12'
-          echo "--- install via session api ---"
-          timeout 1800 sudo docker exec redroid sh -c '
-            cd /data/local/tmp/splits || exit 1
-            SESSION=$(pm install-create -r | tr -d "\r")
-            echo "session=[$SESSION]"
-            case "$SESSION" in
-              ""|*[!0-9]*) echo "could not create a session"; exit 1 ;;
-            esac
-            for f in ./*.apk; do
-              echo "  write $f"
-              pm install-write "$SESSION" "$(basename $f)" "$f" || echo "  write FAILED $f"
-            done
-            pm install-commit "$SESSION"
-          ' 2>&1 | tail -40
+          # and every install attempt so far died inside it. redroid exposes
+          # adb on 5555, and the host-side adb goes through the real package
+          # installer service -- a different code path entirely.
+          echo "--- what pm actually offers (for the record) ---"
+          sudo docker exec redroid sh -c 'pm help 2>&1 | head -20'
+          echo "--- install adb on the host ---"
+          sudo apt-get install -y -qq adb 2>&1 | tail -2 || true
+          which adb || { echo "NO ADB"; exit 1; }
+          adb version | head -2
+          echo "--- connect to redroid ---"
+          adb connect 127.0.0.1:5555 2>&1 | tail -2
+          adb wait-for-device
+          adb shell getprop sys.boot_completed
+          echo "--- push the splits ---"
+          adb shell mkdir -p /data/local/tmp/splits
+          for f in $W/out/*.apk; do
+            adb push "$f" /data/local/tmp/splits/ 2>&1 | tail -1
+          done
+          adb shell ls -la /data/local/tmp/splits/ | head -30
+          echo "--- adb install-multiple (base first, then the rest) ---"
+          ok=0
+          adb install-multiple -r -g \
+              /data/local/tmp/splits/base.apk \
+              /data/local/tmp/splits/split_config.arm64_v8a.apk 2>&1 | tail -8 && ok=1
+          if [ "$ok" != "1" ]; then
+            echo "--- retry with every split ---"
+            timeout 1800 adb install-multiple -r -g /data/local/tmp/splits/*.apk 2>&1 | tail -12 \
+              && ok=1
+          fi
+          if [ "$ok" != "1" ]; then
+            echo "=== adb install failed; falling back to the pm session API ==="
+            timeout 1800 sudo docker exec redroid sh -c '
+              cd /data/local/tmp/splits || exit 1
+              SESSION=$(pm install-create -r | tr -d "\r")
+              echo "session=[$SESSION]"
+              for f in ./*.apk; do
+                pm install-write "$SESSION" "$(basename $f)" "$f" || echo "  write FAILED $f"
+              done
+              pm install-commit "$SESSION"
+            ' 2>&1 | tail -30
+          fi
+          echo "--- verify ---"
+          adb shell pm list packages 2>&1 | grep -i konami || true
+          sudo docker exec redroid /system/bin/pm list packages | grep -i konami || true
           echo "--- package state ---"
           sudo docker exec redroid /system/bin/pm list packages | grep -i konami \
             || { echo "=== GAME NOT INSTALLED AT ALL ===";
