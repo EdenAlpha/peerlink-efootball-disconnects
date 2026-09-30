@@ -1,11 +1,9 @@
-cmd: exec bash kgs-login/live/pm_reinstall.sh redroid
-at: 19:25:51
-$ bash kgs-login/live/pm_reinstall.sh redroid
-session=631846844
-Success
-commit rc=0
-reinstall rc=0
-package:jp.konami.pesam
+cmd: exec bash -c true; echo MARK10; cp /tmp/kgs/m8.png /tmp/live-res/screen.png; ls -la /tmp/live-res/screen.png
+at: 20:08:50
+$ bash -c true; echo MARK10; cp /tmp/kgs/m8.png /tmp/live-res/screen.png; ls -la /tmp/live-res/screen.png
+MARK10
+cp: cannot stat '/tmp/kgs/m8.png': No such file or directory
+-rw-r--r-- 1 runner runner 377489 Sep 30 20:08 /tmp/live-res/screen.png
 rc=0
 gamepid: 
 flows: 0
