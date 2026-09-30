@@ -1,1 +1,1 @@
-exec adb -s 127.0.0.1:5555 shell am force-stop jp.konami.pesam; adb -s 127.0.0.1:5555 uninstall jp.konami.pesam
+intent market://details?id=jp.konami.pesam
