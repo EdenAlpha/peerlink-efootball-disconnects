@@ -1,0 +1,11 @@
+cmd: amstart jp.konami.pesam/com.epicgames.ue4.SplashActivity
+at: 09:30:12
+Starting: Intent { cmp=jp.konami.pesam/com.epicgames.ue4.SplashActivity }
+Status: ok
+LaunchState: COLD
+Activity: jp.konami.pesam/com.epicgames.ue4.GameActivity
+TotalTime: 471
+WaitTime: 473
+Complete
+gamepid: 3189
+flows: 0
