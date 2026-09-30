@@ -1,0 +1,12 @@
+cmd: exec sudo docker exec redroid sh -c "pm list packages 2>/dev/null | grep -i konami; ls -la /storage/emulated/0/Download/ 2>/dev/null | head; ls /data/local/tmp/ 2>/dev/null"
+at: 09:43:19
+$ sudo docker exec redroid sh -c "pm list packages 2>/dev/null | grep -i konami; ls -la /storage/emulated/0/Download/ 2>/dev/null | head; ls /data/local/tmp/ 2>/dev/null"
+total 0
+cacerts
+game2.pcap
+live_shot.png
+splits
+tcpdump2.out
+rc=0
+gamepid: 
+flows: 0
