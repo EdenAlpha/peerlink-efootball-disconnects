@@ -1,0 +1,15 @@
+cmd: exec bash -c true; echo MARK7; sudo docker exec redroid /system/bin/pm list packages | grep -i konami; sudo docker exec redroid sh -c "am start -W -n jp.konami.pesam/com.epicgames.ue4.SplashActivity"
+at: 19:54:16
+$ bash -c true; echo MARK7; sudo docker exec redroid /system/bin/pm list packages | grep -i konami; sudo docker exec redroid sh -c "am start -W -n jp.konami.pesam/com.epicgames.ue4.SplashActivity"
+MARK7
+package:jp.konami.pesam
+Starting: Intent { cmp=jp.konami.pesam/com.epicgames.ue4.SplashActivity }
+Status: ok
+LaunchState: COLD
+Activity: jp.konami.pesam/com.epicgames.ue4.GameActivity
+TotalTime: 489
+WaitTime: 493
+Complete
+rc=0
+gamepid: 
+flows: 0
