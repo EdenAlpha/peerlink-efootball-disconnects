@@ -1,0 +1,260 @@
+name: kgs-waydroid
+
+# The phone with the REAL Play Store, without needing KVM.
+#
+# Why this exists: the emulator path died (no /dev/kvm on these runners) and
+# redroid has no Google services (Aurora's install was refused, anonymous
+# sessions are blocked, the recorder's certificate is rejected). Waydroid runs
+# real Android (Lineage + GAPPS) in a container: no VM, no KVM, just the
+# binder trick that already works on this runner. Play compatibility is
+# decided by Play itself -- nothing to hand-select.
+#
+# Plan: boot Waydroid+GAPPS (ARM64), sign in with the burner account, install
+# eFootball from real Play (asset delivery included), launch it, pull the full
+# data bundle + install our CA for a later capture. The number-match approval
+# is done by the account owner if sign-in asks for it.
+#
+# Risks, stated plainly: Waydroid needs weston + binder + ~5 GB free; the
+# script checks each loudly. eFootball may refuse uncertified/rooted devices
+# at LOGIN -- but fetching the data does not need login, and that is all this
+# run promises.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 330
+    env:
+      PEERLINK_GMAIL: ${{ secrets.PEERLINK_GMAIL }}
+      PEERLINK_GPASS: ${{ secrets.PEERLINK_GPASS }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: 01 binder + waydroid + weston
+        run: |
+          set +e
+          set -x
+          W=/tmp/wd; mkdir -p $W
+          exec >> >(tee -a $W/fetch.log) 2>&1
+          df -h / | tail -1
+          FREE=$(df --output=avail -k / | tail -1)
+          [ "$FREE" -gt 6000000 ] || { echo "=== DISK TOO SMALL (${FREE}k) ==="; exit 1; }
+          # binder: the same three nodes + binderfs that redroid uses
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq kmod "linux-modules-extra-$(uname -r)" curl ca-certificates 2>&1 | tail -2
+          sudo modprobe binder_linux devices="binder,hwbinder,vndbinder" || true
+          sudo mkdir -p /dev/binderfs
+          sudo mount -t binder binder /dev/binderfs 2>/dev/null || \
+            sudo mount -t binder none /dev/binderfs || true
+          mount | grep -i binder || { echo "=== NO BINDER ==="; exit 1; }
+          ls -la /dev/binderfs/ 2>/dev/null
+          # waydroid repo + weston (headless compositor) + adb
+          sudo curl --max-time 120 https://repo.waydro.id/waydroid.gpg \
+            --output /usr/share/keyrings/waydroid.gpg \
+            || { echo "=== WAYDROID KEY DOWNLOAD FAILED ==="; exit 1; }
+          echo "deb [signed-by=/usr/share/keyrings/waydroid.gpg] https://repo.waydro.id/ noble main" \
+            | sudo tee /etc/apt/sources.list.d/waydroid.list
+          sudo apt-get update -qq 2>&1 | tail -2
+          sudo apt-get install -y -qq waydroid weston adb 2>&1 | tail -3
+          which waydroid weston adb || { echo "=== INSTALL FAILED ==="; exit 1; }
+          waydroid --version 2>&1 | head -2
+
+      - name: 02 init GAPPS image
+        run: |
+          set +e
+          set -x
+          W=/tmp/wd; mkdir -p $W
+          exec >> >(tee -a $W/fetch.log) 2>&1
+          sudo waydroid init -s GAPPS -f 2>&1 | tail -5
+          echo "init rc=$?"
+          ls -la /var/lib/waydroid/images/ 2>/dev/null
+          [ -f /var/lib/waydroid/images/system.img ] \
+            || { echo "=== NO SYSTEM IMAGE ==="; exit 1; }
+          du -sh /var/lib/waydroid/ 2>/dev/null
+
+      - name: 03 boot the phone
+        run: |
+          set +e
+          set -x
+          W=/tmp/wd; mkdir -p $W
+          exec >> >(tee -a $W/fetch.log) 2>&1
+          # container daemon: systemd if present, manual if not
+          sudo systemctl start waydroid-container 2>/dev/null \
+            || sudo nohup waydroid container start > $W/container.log 2>&1 &
+          sleep 8
+          sudo waydroid container status 2>&1 | head -4 || tail -5 $W/container.log
+          # headless compositor for the session
+          export XDG_RUNTIME_DIR=/run/user/$(id -u)
+          mkdir -p "$XDG_RUNTIME_DIR"; chmod 700 "$XDG_RUNTIME_DIR"
+          nohup weston --backend=headless-backend.so --socket=wayland-1 \
+            --idle-time=0 > $W/weston.log 2>&1 &
+          sleep 4
+          export WAYLAND_DISPLAY=wayland-1
+          waydroid session start > $W/session.log 2>&1 &
+          sleep 10
+          cat $W/session.log 2>/dev/null | head -10 || true
+          booted=0
+          for i in $(seq 1 60); do
+            if [ "$(sudo waydroid shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
+              echo "BOOTED after $((i*30))s"; booted=1; break
+            fi
+            sleep 30
+            [ $((i % 10)) -eq 0 ] && { echo "--- waiting t=$((i/2))m ---"; sudo waydroid status 2>&1 | head -6; }
+          done
+          [ "$booted" = "1" ] || { echo "=== PHONE DID NOT BOOT ==="; sudo waydroid logcat -d 2>&1 | tail -20; exit 1; }
+          sudo waydroid shell getprop ro.build.fingerprint 2>/dev/null | tr -d '\r'
+          sudo waydroid shell pm list packages 2>/dev/null | grep -i -E "vending|gms" | head -6
+          # helpers used by every later step
+          cat > $W/wd.sh <<'EOF'
+          # usage: bash wd.sh <shot|tap-words...>: defined per step instead
+          EOF
+          echo "PHONE UP"
+
+      - name: 04 sign in to Play
+        run: |
+          set +e
+          set -x
+          W=/tmp/wd; mkdir -p $W
+          exec >> >(tee -a $W/fetch.log) 2>&1
+          export XDG_RUNTIME_DIR=/run/user/$(id -u) WAYLAND_DISPLAY=wayland-1
+          WSHOT() { weston-screenshooter -o "$W/play_$1.png" 2>/dev/null || true; }
+          WTAP() { # tap by words via uiautomator, read straight off the host
+            sudo waydroid shell uiautomator dump /data/local/tmp/ui.xml >/dev/null 2>&1 || return 1
+            M=$(sudo cat /var/lib/waydroid/data/local/tmp/ui.xml 2>/dev/null | python3 -c "
+          import sys, re, html
+          xml = sys.stdin.read()
+          pat = re.compile(sys.argv[1])
+          for m in re.finditer(r'<node [^>]*>', xml):
+              tag = m.group(0)
+              def attr(n):
+                  mm = re.search(n + r'=\"([^\"]*)\"', tag)
+                  return html.unescape(mm.group(1)) if mm else ''
+              text = (attr('text') + ' ' + attr('content-desc')).strip()
+              if text and pat.search(text):
+                  b = re.search(r'bounds=\"\[(\d+),(\d+)\]\[(\d+),(\d+)\]', tag)
+                  if b:
+                      x1, y1, x2, y2 = map(int, b.groups())
+                      if x2 > x1 and y2 > y1:
+                          print('%d %d %s' % ((x1+x2)//2, (y1+y2)//2, text)); break
+          " "$1")
+            [ -n "$M" ] || { echo "WTAP: no match [$1]"; return 1; }
+            sudo waydroid shell input tap $(echo "$M" | awk '{print $1, $2}') >/dev/null 2>&1
+            echo "WTAP: tapped $M"
+          }
+          # SetupWizard first (Skip/Start by words), then Play sign-in
+          sudo waydroid shell am start -a android.intent.action.VIEW \
+            -d 'market://details?id=jp.konami.pesam' 2>&1 | tail -2
+          sleep 25
+          WSHOT 0
+          for pat in 'Skip' 'Start' 'Next' 'Sign in' 'Got it' 'No thanks' 'Not now' '^OK$' 'Accept' 'I agree'; do
+            echo "--- try [$pat] ---"
+            WTAP "$pat" || true
+            sleep 6
+          done
+          WSHOT 1
+          # burner email if a field is showing (secret env, never printed)
+          sudo waydroid shell input tap 360 600 >/dev/null 2>&1; sleep 2
+          sudo waydroid shell input text "$PEERLINK_GMAIL" >/dev/null 2>&1
+          sleep 3
+          WSHOT 2
+          echo "SIGN-IN STEP DONE (screenshots show where it stands)"
+
+      - name: 05 install from Play + pull data
+        run: |
+          set +e
+          set -x
+          W=/tmp/wd; mkdir -p $W
+          exec >> >(tee -a $W/fetch.log) 2>&1
+          export XDG_RUNTIME_DIR=/run/user/$(id -u) WAYLAND_DISPLAY=wayland-1
+          WTAP() {
+            sudo waydroid shell uiautomator dump /data/local/tmp/ui.xml >/dev/null 2>&1 || return 1
+            M=$(sudo cat /var/lib/waydroid/data/local/tmp/ui.xml 2>/dev/null | python3 -c "
+          import sys, re, html
+          xml = sys.stdin.read()
+          pat = re.compile(sys.argv[1])
+          for m in re.finditer(r'<node [^>]*>', xml):
+              tag = m.group(0)
+              def attr(n):
+                  mm = re.search(n + r'=\"([^\"]*)\"', tag)
+                  return html.unescape(mm.group(1)) if mm else ''
+              text = (attr('text') + ' ' + attr('content-desc')).strip()
+              if text and pat.search(text):
+                  b = re.search(r'bounds=\"\[(\d+),(\d+)\]\[(\d+),(\d+)\]', tag)
+                  if b:
+                      x1, y1, x2, y2 = map(int, b.groups())
+                      if x2 > x1 and y2 > y1:
+                          print('%d %d %s' % ((x1+x2)//2, (y1+y2)//2, text)); break
+          " "$1")
+            [ -n "$M" ] || return 1
+            sudo waydroid shell input tap $(echo "$M" | awk '{print $1, $2}') >/dev/null 2>&1
+            echo "WTAP: tapped $M"
+          }
+          # password if asked, then Install/accepts
+          sudo waydroid shell input text "$PEERLINK_GPASS" >/dev/null 2>&1 || true
+          sleep 5
+          for pat in 'Next' 'I agree' 'Accept' '^Install$' '^OK$' 'Got it' 'Allow' 'Verify' 'Update'; do
+            echo "--- try [$pat] ---"
+            WTAP "$pat" || true
+            sleep 8
+          done
+          weston-screenshooter -o $W/store.png 2>/dev/null || true
+          sudo waydroid shell pm list packages 2>/dev/null | grep -i konami \
+            || echo "GAME NOT INSTALLED YET - continuing to tap Install below"
+          for i in $(seq 1 20); do
+            sleep 60
+            INST=$(sudo waydroid shell pm list packages 2>/dev/null | grep -i konami | tr -d '\r')
+            echo "t=${i}m installed=[${INST:-no}]"
+            WTAP '^Install$' 2>/dev/null || true
+            WTAP 'Accept' 2>/dev/null || true
+            [ $((i % 5)) -eq 0 ] && weston-screenshooter -o $W/wait_$i.png 2>/dev/null || true
+            [ -n "$INST" ] && { echo INSTALLED; break; }
+          done
+          sudo waydroid shell pm list packages 2>/dev/null | grep -i konami \
+            || { echo "=== PLAY NEVER INSTALLED IT ==="; exit 1; }
+          # launch and let the ~2 GB come down
+          sudo waydroid shell monkey -p jp.konami.pesam -c android.intent.category.LAUNCHER 1 2>&1 | tail -2 || \
+            sudo waydroid shell am start -n jp.konami.pesam/com.epicgames.ue4.SplashActivity 2>&1 | tail -2
+          mkdir -p $W/bundle
+          for i in $(seq 1 90); do
+            sleep 60
+            PID=$(sudo waydroid shell pidof jp.konami.pesam 2>/dev/null | tr -d '\r' | awk '{print $1}')
+            OBB=$(sudo waydroid shell du -sb /storage/emulated/0/Android/obb/jp.konami.pesam 2>/dev/null | tr -d '\r' | awk '{print $1}')
+            DAT=$(sudo waydroid shell du -sb /storage/emulated/0/Android/data/jp.konami.pesam 2>/dev/null | tr -d '\r' | awk '{print $1}')
+            echo "t=${i}m gamepid=${PID:-GONE} obb=${OBB:-0} data=${DAT:-0}"
+            sudo waydroid shell input tap 915 405 >/dev/null 2>&1
+            [ $((i % 5)) -eq 0 ] && weston-screenshooter -o $W/game_$i.png 2>/dev/null || true
+            TOTAL=$(( ${OBB:-0} + ${DAT:-0} ))
+            [ "$TOTAL" -gt 2500000000 ] && { echo "DATA COMPLETE (${TOTAL}B)"; break; }
+          done
+          weston-screenshooter -o $W/game_done.png 2>/dev/null || true
+          echo "--- install OUR ca into the system store (userdebug root) ---"
+          bash kgs-login/scripts/setup_ca_waydroid.sh $W/ca 2>&1 | tail -6 || echo "CA STEP MISSING/FAILED (non-fatal)"
+          echo "--- pull the bundle ---"
+          sudo cp -r /var/lib/waydroid/data/media/0/Android/obb/jp.konami.pesam $W/bundle/obb 2>/dev/null || \
+            sudo waydroid shell cp -r /storage/emulated/0/Android/obb/jp.konami.pesam /data/local/tmp/obbcopy 2>/dev/null || true
+          sudo waydroid shell "ls /data/local/tmp/obbcopy 2>/dev/null" | head -3 || true
+          du -sh $W/bundle 2>/dev/null; echo BUNDLE-STAGE-DONE
+
+      - name: 06 upload
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgs-waydroid-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            /tmp/wd/fetch.log
+            /tmp/wd/emu.log
+            /tmp/wd/weston.log
+            /tmp/wd/session.log
+            /tmp/wd/container.log
+            /tmp/wd/*.png
+            /tmp/wd/bundle/
