@@ -1,1 +1,1 @@
-amstart com.android.vending/com.google.android.finsky.activities.MainActivity
+exec bash -c true; echo PLAY1; adb connect 127.0.0.1:5555 >/dev/null 2>&1; adb -s 127.0.0.1:5555 shell am start -W -n com.android.vending/com.google.android.finsky.activities.MainActivity; sleep 10; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; ls -la /tmp/live-res/screen.png
