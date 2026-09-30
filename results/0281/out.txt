@@ -1,0 +1,12 @@
+cmd: exec bash -c true; echo T4; adb -s 127.0.0.1:5555 shell cp /data/local/tmp/splits/split_config.arm64_v8a.apk /data/local/tmp/c.apk; adb -s 127.0.0.1:5555 shell cp /data/local/tmp/splits/base.apk /data/local/tmp/b.apk; adb -s 127.0.0.1:5555 shell ls -l /data/local/tmp/b.apk /data/local/tmp/c.apk; echo "== install-multiple =="; adb -s 127.0.0.1:5555 install-multiple /data/local/tmp/b.apk /data/local/tmp/c.apk 2>&1 | tail -8; echo "== path =="; adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam
+at: 23:06:14
+$ bash -c true; echo T4; adb -s 127.0.0.1:5555 shell cp /data/local/tmp/splits/split_config.arm64_v8a.apk /data/local/tmp/c.apk; adb -s 127.0.0.1:5555 shell cp /data/local/tmp/splits/base.apk /data/local/tmp/b.apk; adb -s 127.0.0.1:5555 shell ls -l /data/local/tmp/b.apk /data/local/tmp/c.apk; echo "== install-multiple =="; adb -s 127.0.0.1:5555 install-multiple /data/local/tmp/b.apk /data/local/tmp/c.apk 2>&1 | tail -8; echo "== path =="; adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam
+T4
+-rw-r--r-- 1 shell shell 22347497 2026-09-30 18:06 /data/local/tmp/b.apk
+-rw-r--r-- 1 shell shell 57148181 2026-09-30 18:06 /data/local/tmp/c.apk
+== install-multiple ==
+adb: failed to stat "/data/local/tmp/c.apk": No such file or directory
+== path ==
+rc=1
+gamepid: 
+flows: 0
