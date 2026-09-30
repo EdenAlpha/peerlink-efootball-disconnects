@@ -1,1 +1,1 @@
-exec adb -s 127.0.0.1:5555 shell am force-stop com.aurora.store; adb -s 127.0.0.1:5555 shell am start -n com.aurora.store/.ComposeActivity; sleep 15; sudo docker exec redroid iptables -t nat -L OUTPUT -n -v | head -5
+exec tail -20 /tmp/kgs/mitm.log; echo ---; ls -la /tmp/kgs/flows.mitm /tmp/kgs/flows.log; echo ---; ss -tlnp 2>/dev/null | head -8
