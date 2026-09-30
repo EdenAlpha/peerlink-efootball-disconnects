@@ -1,1 +1,1 @@
-exec sudo docker exec redroid sh -c "cd /data/local/tmp/splits; S=$(pm install-create -r 2>&1 | grep -oE [0-9]+ | tail -1); echo session=$S; for f in ./*.apk; do pm install-write $S $(basename $f) $f > /dev/null 2>&1 || echo FAIL $f; done; pm install-commit $S"
+exec sudo docker exec redroid sh -c "strings /data/local/tmp/game2.pcap 2>/dev/null | grep -iE konami | sort -u | head -20"
