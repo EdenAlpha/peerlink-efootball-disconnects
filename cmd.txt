@@ -1,1 +1,1 @@
-exec bash -c true; echo PLAY18; adb -s 127.0.0.1:5555 shell input tap 578 1090; sleep 18; adb -s 127.0.0.1:5555 shell dumpsys account 2>/dev/null | grep -iE "Account \{|peerlink" | head -4; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+exec bash -c true; echo PLAY19; adb -s 127.0.0.1:5555 shell am start -a android.intent.action.VIEW -d "market://details?id=jp.konami.pesam" 2>&1 | tail -2; sleep 18; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
