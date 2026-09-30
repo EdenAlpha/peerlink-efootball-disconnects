@@ -1,1 +1,1 @@
-shot 19-50
+amstart jp.konami.pesam/com.epicgames.ue4.SplashActivity 2
