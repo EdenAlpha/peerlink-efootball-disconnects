@@ -1,22 +1,7 @@
-cmd: exec bash -c true; echo SU; echo "-- multitouch/graphics features --"; adb -s 127.0.0.1:5555 shell pm list features 2>/dev/null | grep -iE "multitouch|fingerprint|opengles|vulkan|leanback|touchscreen"; echo "-- emulator markers --"; for p in ro.hardware ro.kernel.qemu ro.boot.qemu ro.product.cpu.abi ro.product.cpu.abilist ro.hardware.vulkan ro.hardware.egl ro.build.version.sdk; do echo -n "$p="; adb -s 127.0.0.1:5555 shell getprop $p; done
-at: 22:58:22
-$ bash -c true; echo SU; echo "-- multitouch/graphics features --"; adb -s 127.0.0.1:5555 shell pm list features 2>/dev/null | grep -iE "multitouch|fingerprint|opengles|vulkan|leanback|touchscreen"; echo "-- emulator markers --"; for p in ro.hardware ro.kernel.qemu ro.boot.qemu ro.product.cpu.abi ro.product.cpu.abilist ro.hardware.vulkan ro.hardware.egl ro.build.version.sdk; do echo -n "$p="; adb -s 127.0.0.1:5555 shell getprop $p; done
-SU
--- multitouch/graphics features --
-feature:android.hardware.opengles.aep
-feature:android.hardware.touchscreen
-feature:android.hardware.vulkan.compute
-feature:android.hardware.vulkan.level=1
-feature:android.hardware.vulkan.version=4198400
--- emulator markers --
-ro.hardware=redroid
-ro.kernel.qemu=
-ro.boot.qemu=
-ro.product.cpu.abi=arm64-v8a
-ro.product.cpu.abilist=arm64-v8a
-ro.hardware.vulkan=pastel
-ro.hardware.egl=angle
-ro.build.version.sdk=34
+cmd: exec bash -c true; echo VK; adb -s 127.0.0.1:5555 shell input swipe 146 535 146 535 150; sleep 4; adb -s 127.0.0.1:5555 shell input swipe 898 639 898 639 180; sleep 14; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+at: 00:10:06
+$ bash -c true; echo VK; adb -s 127.0.0.1:5555 shell input swipe 146 535 146 535 150; sleep 4; adb -s 127.0.0.1:5555 shell input swipe 898 639 898 639 180; sleep 14; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+VK
 rc=0
-gamepid: 
+gamepid: 6484
 flows: 0
