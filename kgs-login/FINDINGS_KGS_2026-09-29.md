@@ -1825,13 +1825,67 @@ browser's identity string:
 | empty | 403 |
 
 The curl tests ran on the runner host and therefore did not traverse our own
-proxy, so the interception is not implicated either. The conclusion is that
-Konami's portal blocks this runner's egress address.
+proxy, so the interception is not implicated either.
 
-That is an access control, and routing around it is not something to do. It
-means Konami account linking -- and therefore clearing the tutorial gate -- is
-not reachable from this environment, independent of the device, the browser, the
-CA and every coordinate in this document.
+### ...and it holds with a real browser, too
+
+That first pass was weaker than it looked, and it was stated too confidently.
+Varying only the `User-Agent` does not settle the question: a WAF can key on the
+whole header set, and `curl` additionally presents a well-known non-browser TLS
+fingerprint (JA3). Both were open. So it was re-tested properly.
+
+**Full browser headers from the runner** -- `Accept`, `Accept-Language`,
+`sec-ch-ua*`, `Sec-Fetch-*`, `Upgrade-Insecure-Requests`:
+
+```
+GET https://my.konami.net/account-link/introduction?lt=...  -> 403
+GET https://my.konami.net/                     (site root) -> 403
+GET https://pes22-game.cs.konami.net/pes22/gate/gate_CMD_CHECK_STRING.php
+                                                          -> 500
+```
+
+The site *root* 403ing matters: the block happens at the edge, before any
+application logic or per-page rule. And the other Konami host answers (500 is a
+server-side error, not a refusal), so it is not our egress in general.
+
+**A real Chrome, not a simulated one.** Google Chrome was installed through Play
+and made the browser role holder:
+
+```
+cmd role add-role-holder --user 0 android.app.role.BROWSER com.android.chrome
+cmd package resolve-activity --brief -a VIEW -d https://example.com
+  -> com.android.chrome/com.google.android.apps.chrome.IntentDispatcher
+```
+
+The first load still failed, but for the wrong reason and worth recording exactly:
+it produced Chrome's *certificate error* interstitial ("Attackers may be trying to
+steal your passwords"), because Chrome does not trust the recorder's MITM CA. That
+page is not a Konami response and says nothing about Konami's WAF. Reading it as
+a 403 would have been a second wrong conclusion from the same page.
+
+Repeating the load with the DNAT rule removed -- recorder out of the path entirely,
+`flows.log` not advancing, Chrome speaking straight to Konami over a genuine TLS
+session -- returns Konami's own 403 page, with real KONAMI ID branding, a normal
+(non-error) padlock, and:
+
+```
+403 Forbidden
+申し訳ありませんが、このページにはアクセスできません。
+```
+
+A real browser, real header set, real TLS fingerprint, this runner's egress
+address: refused at Konami's edge.
+
+The conclusion is unchanged: **Konami's portal blocks this runner's egress
+address.** It is an access control, and routing around it is not something to do.
+Konami account linking -- and therefore clearing the tutorial gate -- is not
+reachable from here, independent of the device, the browser, the CA and every
+coordinate in this document.
+
+What remains unproven, and cannot be settled from here: whether the user's own
+residential address is served. It very likely is, which is why the honest
+recommendation is to attempt the linking on the user's own phone rather than from
+this runner.
 
 ### A second, independent problem
 
