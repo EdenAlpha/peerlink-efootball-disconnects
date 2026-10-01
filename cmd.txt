@@ -1,1 +1,1 @@
-exec bash -c true; echo WQ; for i in 1 2 3 4; do adb -s 127.0.0.1:5555 shell input swipe 639 551 639 551 150; sleep 9; done; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== flows =="; grep -c "^### " /tmp/kgs/flows.log 2>/dev/null
+exec bash -c true; echo SAVE1; echo "== sizes =="; wc -c /tmp/kgs/flows.log /tmp/kgs/mitm.log /tmp/kgs/game2.pcap 2>&1; echo "== flows.log =="; cat /tmp/kgs/flows.log 2>/dev/null; echo "== pcap present =="; adb -s 127.0.0.1:5555 shell su 0 ls -l /data/local/tmp/game2.pcap 2>&1 | tail -1
