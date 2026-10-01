@@ -1,0 +1,15 @@
+cmd: exec bash -c true; echo IR; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; echo "== recorder state =="; ls -la $W/flows.log 2>/dev/null || echo "no flows.log"; echo "flows=$(grep -c "^### " $W/flows.log 2>/dev/null || echo 0)"; echo "mitmdump: $(pgrep -c mitmdump 2>/dev/null || echo 0)"; echo "== advance onboarding =="; $A shell input swipe 1112 678 1112 678 250; sleep 10; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "flows now=$(grep -c "^### " $W/flows.log 2>/dev/null || echo 0)"; echo "== shot =="
+at: 19:43:39
+$ bash -c true; echo IR; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; echo "== recorder state =="; ls -la $W/flows.log 2>/dev/null || echo "no flows.log"; echo "flows=$(grep -c "^### " $W/flows.log 2>/dev/null || echo 0)"; echo "mitmdump: $(pgrep -c mitmdump 2>/dev/null || echo 0)"; echo "== advance onboarding =="; $A shell input swipe 1112 678 1112 678 250; sleep 10; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "flows now=$(grep -c "^### " $W/flows.log 2>/dev/null || echo 0)"; echo "== shot =="
+IR
+== recorder state ==
+no flows.log
+flows=0
+mitmdump: 0
+0
+== advance onboarding ==
+flows now=0
+== shot ==
+rc=0
+gamepid: 6261
+flows: 0
