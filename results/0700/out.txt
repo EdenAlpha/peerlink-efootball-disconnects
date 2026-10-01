@@ -1,0 +1,8 @@
+cmd: exec bash -c true; echo JP; A="adb -s 127.0.0.1:5555"; $A shell input swipe 1139 678 1139 678 250; sleep 12; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+at: 20:43:19
+$ bash -c true; echo JP; A="adb -s 127.0.0.1:5555"; $A shell input swipe 1139 678 1139 678 250; sleep 12; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+JP
+== shot ==
+rc=0
+gamepid: 26127
+flows: 0
