@@ -1,0 +1,14 @@
+cmd: exec bash -c true; echo HV; A="adb -s 127.0.0.1:5555"; $A shell input swipe 592 635 592 635 250; sleep 20; $A exec-out screencap -p > /tmp/live-res/s1.png; echo "== chrome yet? =="; $A shell pm list packages 2>/dev/null | grep -i chrome || echo not-yet; sleep 60; echo "== chrome now? =="; $A shell pm list packages 2>/dev/null | grep -i chrome || echo still-not; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== https handler now =="; $A shell cmd package resolve-activity --brief -a android.intent.action.VIEW -d "https://example.com" 2>/dev/null | tr -d "\r" | tail -2
+at: 12:36:29
+$ bash -c true; echo HV; A="adb -s 127.0.0.1:5555"; $A shell input swipe 592 635 592 635 250; sleep 20; $A exec-out screencap -p > /tmp/live-res/s1.png; echo "== chrome yet? =="; $A shell pm list packages 2>/dev/null | grep -i chrome || echo not-yet; sleep 60; echo "== chrome now? =="; $A shell pm list packages 2>/dev/null | grep -i chrome || echo still-not; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== https handler now =="; $A shell cmd package resolve-activity --brief -a android.intent.action.VIEW -d "https://example.com" 2>/dev/null | tr -d "\r" | tail -2
+HV
+== chrome yet? ==
+package:com.android.chrome
+== chrome now? ==
+package:com.android.chrome
+== https handler now ==
+priority=0 preferredOrder=0 match=0x208000 specificIndex=-1 isDefault=true
+org.chromium.webview_shell/.WebViewBrowserActivity
+rc=0
+gamepid: 10290
+flows: 16
