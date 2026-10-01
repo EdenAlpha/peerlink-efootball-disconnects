@@ -1,1 +1,1 @@
-exec bash -c true; echo TB; adb -s 127.0.0.1:5555 shell input swipe 168 677 168 677 250; sleep 12; for t in 160 399 639 878 1117; do adb -s 127.0.0.1:5555 shell input swipe $t 592 $t 592 250; sleep 14; done; echo "== flows2 =="; grep -c "^### " /tmp/kgs/flows2.log; echo "== ALL PATHS =="; grep -oE "### (REQ|RESP) POST /pes22/[^ ]*" /tmp/kgs/flows2.log | sed "s|### ||" | sed "s| -> 200||" | sort -u | grep "^REQ"
+exec bash -c true; echo SAVEALL; wc -c /tmp/kgs/flows2.log; echo "=== BEGIN FLOWS2 ==="; cat /tmp/kgs/flows2.log; echo "=== END FLOWS2 ==="
