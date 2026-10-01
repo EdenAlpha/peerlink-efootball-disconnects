@@ -255,6 +255,7 @@ jobs:
       # produced "Download Failed 0%" on the 2026-10-01 run. If the gate channel
       # is wanted, the recorder is armed from the live loop once the packs are
       # on disk.
+
       - name: 04b frida-server + hook staged (no launch; control is step 05)
         run: |
           set +e
@@ -312,83 +313,6 @@ jobs:
       # that runs before the live loop has no other way to make itself visible --
       # and that is exactly how the Google 2FA screen ended up waiting for an
       # answer that nobody could see. Step 05 re-creates it regardless.
-      - name: 04a2 prepare the live-res worktree so every later step can publish
-        run: |
-          set +e
-          set -x
-          W=/tmp/kgs; mkdir -p $W
-          export GIT_TERMINAL_PROMPT=0
-          LANE="${{ inputs.lane }}"
-          [ -z "$LANE" ] && LANE=a
-          RB="live-res-$LANE"
-          CB="live-cmd-$LANE"
-          echo "lane=$LANE results=$RB commands=$CB"
-          git worktree remove --force /tmp/live-res 2>/dev/null || true
-          rm -rf /tmp/live-res
-          git fetch origin "$CB" 2>/dev/null
-          if git show-ref --verify --quiet "refs/remotes/origin/$RB"; then
-            git worktree add -f -B "$RB" /tmp/live-res "origin/$RB" 2>&1 | tail -1
-          else
-            # Branch off HEAD, which always exists because checkout made it.
-            # Branching off the command branch instead looks tidier but fails
-            # whenever a fresh lane has no command branch seeded yet, and that
-            # took out a whole run: this step exited 1 and every later step was
-            # skipped behind it.
-            git worktree add -f -b "$RB" /tmp/live-res HEAD 2>&1 | tail -1
-          fi
-          [ -e /tmp/live-res/.git ] || { echo "=== WORKTREE FAILED ==="; exit 1; }
-          mkdir -p /tmp/live-res/install
-          echo "worktree ready; publish.sh works from any later step"
-
-      # Play must own the install or there is nothing to own: Play Asset Delivery
-      # only serves the ~2 GB of packs to an app Play itself installed, and a
-      # `pm install-create` sideload produces no PAD splits at all, which is why
-      # the game then reports "Download Failed 0%". play_install.sh is that
-      # sequence, and it is here rather than driven by hand because the run
-      # cannot reach the game without it.
-      #
-      # It stops with exit 2 at Google's 2FA screen, which a human has to answer
-      # on their own phone. That is why the step is non-fatal: the live loop
-      # still opens so the rest can be driven from there.
-      - name: 04b2 install eFootball from Play, then wait for the asset packs
-        run: |
-          set +e
-          set -x
-          W=/tmp/kgs; mkdir -p $W
-          exec >> >(tee -a $W/pipeline.log) 2>&1
-          adb connect 127.0.0.1:5555 2>&1 | tail -1
-          bash kgs-login/live/play_install.sh 127.0.0.1:5555 2>&1 | tail -45
-          echo "play_install rc=${PIPESTATUS[0]} (2 = stopped for a human 2FA code)"
-          echo "== is the game installed? =="
-          adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam 2>/dev/null \
-            || echo "=== NOT INSTALLED - onboarding below cannot run ==="
-          adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam 2>/dev/null \
-            | grep -o "split_pad_it_[0-9]*" | sort -u
-          exit 0
-
-      # Walk onboarding to the main menu unattended. Every coordinate is encoded
-      # in onboard.sh from real screenshots taken on 2026-10-01, and it stops on
-      # the first step whose screenshot does not change, naming the file to look
-      # at. That is deliberate: a blind chain taps confidently through a dialog
-      # it does not understand. Non-fatal by design, so the live loop still opens
-      # and the rest of the session is not lost to one unexpected screen.
-      - name: 04c onboard to the main menu
-        run: |
-          set +e
-          set -x
-          W=/tmp/kgs; mkdir -p $W
-          exec >> >(tee -a $W/pipeline.log) 2>&1
-          adb connect 127.0.0.1:5555 2>&1 | tail -1
-          bash kgs-login/live/onboard.sh 127.0.0.1:5555 2>&1 | tail -45
-          echo "onboard rc=${PIPESTATUS[0]} (3 = stopped on an unexpected screen)"
-          echo "== is the Konami account staged? =="
-          if [ -s "$W/creds/KID" ] && [ -s "$W/creds/KPASS" ]; then
-            echo "KONAMI ACCOUNT STAGED - the tutorial gate can be cleared"
-          else
-            echo "=== NO KONAMI ACCOUNT - the tutorial gate will not clear ==="
-          fi
-          ls -la "$W/creds" 2>&1 | head -8
-          exit 0
 
       - name: 05 live control loop
         run: |
@@ -411,7 +335,7 @@ jobs:
             # whenever a fresh lane has no command branch seeded yet, and that
             # took out a whole run: this step exited 1 and every later step was
             # skipped behind it.
-            git worktree add -f -b "$RB" /tmp/live-res HEAD 2>&1 | tail -1
+            git worktree add -f -B "$RB" /tmp/live-res HEAD 2>&1 | tail -1
           fi
           [ -e /tmp/live-res/.git ] || { echo "=== WORKTREE FAILED ==="; exit 1; }
           if ! timeout 60 git -C /tmp/live-res ls-remote origin HEAD >/dev/null 2>&1; then
