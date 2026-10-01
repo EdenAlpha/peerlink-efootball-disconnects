@@ -1,0 +1,7 @@
+cmd: exec bash -c true; echo JC; A="adb -s 127.0.0.1:5555"; PID=$($A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r" | awk "{print \$1}"); echo "pid=$PID"; $A shell su 0 sh -c "
+at: 19:51:25
+$ bash -c true; echo JC; A="adb -s 127.0.0.1:5555"; PID=$($A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r" | awk "{print \$1}"); echo "pid=$PID"; $A shell su 0 sh -c "
+kgs-login/live/live_loop.sh: eval: line 190: unexpected EOF while looking for matching `"'
+rc=2
+gamepid: 6261
+flows: 0
