@@ -307,6 +307,34 @@ jobs:
           adb -s 127.0.0.1:5555 shell wc -c /data/local/tmp/capture_insecure.js
           echo "FRIDA ARMED - drive from step 05"
 
+      # The results worktree is created HERE, before any step that can need a
+      # human, not in step 05. publish.sh pushes through this worktree, so a step
+      # that runs before the live loop has no other way to make itself visible --
+      # and that is exactly how the Google 2FA screen ended up waiting for an
+      # answer that nobody could see. Step 05 re-creates it regardless.
+      - name: 04a2 prepare the live-res worktree so every later step can publish
+        run: |
+          set +e
+          set -x
+          W=/tmp/kgs; mkdir -p $W
+          export GIT_TERMINAL_PROMPT=0
+          LANE="${{ inputs.lane }}"
+          [ -z "$LANE" ] && LANE=a
+          RB="live-res-$LANE"
+          CB="live-cmd-$LANE"
+          echo "lane=$LANE results=$RB commands=$CB"
+          git worktree remove --force /tmp/live-res 2>/dev/null || true
+          rm -rf /tmp/live-res
+          git fetch origin "$CB" 2>/dev/null
+          if git show-ref --verify --quiet "refs/remotes/origin/$RB"; then
+            git worktree add -f -B "$RB" /tmp/live-res "origin/$RB" 2>&1 | tail -1
+          else
+            git worktree add -f -b "$RB" /tmp/live-res "origin/$CB" 2>&1 | tail -1
+          fi
+          [ -e /tmp/live-res/.git ] || { echo "=== WORKTREE FAILED ==="; exit 1; }
+          mkdir -p /tmp/live-res/install
+          echo "worktree ready; publish.sh works from any later step"
+
       # Play must own the install or there is nothing to own: Play Asset Delivery
       # only serves the ~2 GB of packs to an app Play itself installed, and a
       # `pm install-create` sideload produces no PAD splits at all, which is why
