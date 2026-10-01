@@ -1,0 +1,10 @@
+cmd: exec bash -c true; echo IF; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; $A shell input swipe 640 441 640 441 250; sleep 6; $A shell input swipe 167 678 167 678 250; sleep 14; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== foreground =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; echo "flows=$(grep -c "^### " $W/flows.log)"
+at: 13:21:31
+$ bash -c true; echo IF; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; $A shell input swipe 640 441 640 441 250; sleep 6; $A shell input swipe 167 678 167 678 250; sleep 14; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== foreground =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; echo "flows=$(grep -c "^### " $W/flows.log)"
+IF
+== foreground ==
+  mCurrentFocus=Window{489d45b u0 jp.konami.pesam/com.epicgames.ue4.GameActivity}
+flows=18
+rc=0
+gamepid: 10290
+flows: 18
