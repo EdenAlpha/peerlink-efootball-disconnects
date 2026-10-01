@@ -1,0 +1,24 @@
+cmd: exec bash -c true; echo HM; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; $A shell input swipe 167 678 167 678 250; sleep 14; $A shell input swipe 366 342 366 342 250; sleep 22; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== foreground =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -2; echo "flows=$(grep -c "^### " $W/flows.log)"; echo "== recent hosts =="; grep "^HOST-SEEN" $W/flows.log 2>/dev/null | tail -6; echo "== recent paths =="; grep "^### " $W/flows.log 2>/dev/null | tail -6
+at: 11:52:44
+$ bash -c true; echo HM; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; $A shell input swipe 167 678 167 678 250; sleep 14; $A shell input swipe 366 342 366 342 250; sleep 22; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== foreground =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -2; echo "flows=$(grep -c "^### " $W/flows.log)"; echo "== recent hosts =="; grep "^HOST-SEEN" $W/flows.log 2>/dev/null | tail -6; echo "== recent paths =="; grep "^### " $W/flows.log 2>/dev/null | tail -6
+HM
+== foreground ==
+  mCurrentFocus=Window{7c673c3 u0 org.chromium.webview_shell/org.chromium.webview_shell.WebViewBrowserActivity}
+flows=14
+== recent hosts ==
+HOST-SEEN: d1ln4m3c7n87ju.cloudfront.net
+HOST-SEEN: www.applilink.jp
+HOST-SEEN: ducte5pbkhc9o.cloudfront.net
+HOST-SEEN: firebaselogging-pa.googleapis.com
+HOST-SEEN: firebaselogging.googleapis.com
+HOST-SEEN: my.konami.net
+== recent paths ==
+### REQ POST /pes22/gate/gate_CMD_GET_KID_USER_AGE_KIND.php
+### RESP POST /pes22/gate/gate_CMD_GET_KID_USER_AGE_KIND.php -> 200
+### REQ POST /pes22/gate/gate_CMD_GET_KONAMIID_TRANSITION_URL.php
+### RESP POST /pes22/gate/gate_CMD_GET_KONAMIID_TRANSITION_URL.php -> 200
+### REQ GET /account-link/introduction?lt=ZHJEDK9P9K3U42XG&isWebView=true
+### RESP GET /account-link/introduction?lt=ZHJEDK9P9K3U42XG&isWebView=true -> 403
+rc=0
+gamepid: 10290
+flows: 14
