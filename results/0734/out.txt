@@ -1,0 +1,11 @@
+cmd: exec bash -c true; echo IB; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; HOSTGW=$(ip -4 addr show docker0 | grep -oE "inet [0-9.]+" | head -1 | cut -d" " -f2); sudo iptables-legacy -t nat -A PREROUTING -i docker0 -p tcp --dport 443 -j DNAT --to-destination "$HOSTGW:8080" 2>/dev/null; echo "dnat: $(sudo iptables-legacy -t nat -L PREROUTING -n | grep -c DNAT)"; $A shell am force-stop com.android.chrome; $A shell am force-stop org.chromium.webview_shell; sleep 3; $A shell am start -n jp.konami.pesam/com.epicgames.ue4.GameActivity >/dev/null 2>&1; sleep 16; $A shell input swipe 1207 661 1207 661 250; sleep 12; $A shell input swipe 925 362 925 362 250; sleep 14; $A exec-out screencap -p > /tmp/live-res/s1.png; $A shell input swipe 381 418 381 418 250; sleep 22; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== foreground =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; echo "flows=$(grep -c "^### " $W/flows.log)"
+at: 12:57:03
+$ bash -c true; echo IB; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; HOSTGW=$(ip -4 addr show docker0 | grep -oE "inet [0-9.]+" | head -1 | cut -d" " -f2); sudo iptables-legacy -t nat -A PREROUTING -i docker0 -p tcp --dport 443 -j DNAT --to-destination "$HOSTGW:8080" 2>/dev/null; echo "dnat: $(sudo iptables-legacy -t nat -L PREROUTING -n | grep -c DNAT)"; $A shell am force-stop com.android.chrome; $A shell am force-stop org.chromium.webview_shell; sleep 3; $A shell am start -n jp.konami.pesam/com.epicgames.ue4.GameActivity >/dev/null 2>&1; sleep 16; $A shell input swipe 1207 661 1207 661 250; sleep 12; $A shell input swipe 925 362 925 362 250; sleep 14; $A exec-out screencap -p > /tmp/live-res/s1.png; $A shell input swipe 381 418 381 418 250; sleep 22; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== foreground =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; echo "flows=$(grep -c "^### " $W/flows.log)"
+IB
+dnat: 1
+== foreground ==
+  mCurrentFocus=Window{3932242 u0 com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity}
+flows=18
+rc=0
+gamepid: 10290
+flows: 18
