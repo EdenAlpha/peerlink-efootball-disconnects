@@ -1,0 +1,22 @@
+# Shell scripts must stay LF. A CRLF line ending in a bash script is not
+# cosmetic: under bash every field read from /proc/<pid>/maps keeps a trailing
+# \r, so `case` patterns fail to match and while-read loops silently mis-parse.
+# grab_gate_plaintext.sh was committed with CRLF twice and the region scan
+# reported "0 offsets" while having inspected nothing at all.
+*.sh text eol=lf
+
+# Anything executed on the device or in CI.
+*.py text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Captures and logs are binary-ish; never let git touch line endings.
+*.pcap binary
+*.pcapng binary
+*.mitm binary
+*.png binary
+*.jpg binary
+*.apk binary
+*.xapk binary
+*.so binary
+*.zip binary
