@@ -1,0 +1,10 @@
+cmd: exec bash -c true; echo JL; A="adb -s 127.0.0.1:5555"; $A shell am start -n jp.konami.pesam/com.epicgames.ue4.GameActivity >/dev/null 2>&1; for i in $(seq 1 10); do sleep 6; F=$($A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1); P=$($A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r" | awk "{print \$1}"); echo "t=$((i*6)) pid=${P:-none} $F"; case "$F" in *pesam*) echo "GAME UP"; break ;; esac; done; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+at: 20:35:38
+$ bash -c true; echo JL; A="adb -s 127.0.0.1:5555"; $A shell am start -n jp.konami.pesam/com.epicgames.ue4.GameActivity >/dev/null 2>&1; for i in $(seq 1 10); do sleep 6; F=$($A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1); P=$($A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r" | awk "{print \$1}"); echo "t=$((i*6)) pid=${P:-none} $F"; case "$F" in *pesam*) echo "GAME UP"; break ;; esac; done; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+JL
+t=6 pid=26127   mCurrentFocus=Window{99a4d8f u0 jp.konami.pesam/com.epicgames.ue4.GameActivity}
+GAME UP
+== shot ==
+rc=0
+gamepid: 26127
+flows: 0
