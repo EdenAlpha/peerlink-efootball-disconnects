@@ -1,0 +1,10 @@
+cmd: exec bash -c true; echo ID; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; $A shell input swipe 624 616 624 616 250; sleep 6; HOSTGW=$(ip -4 addr show docker0 | grep -oE "inet [0-9.]+" | head -1 | cut -d" " -f2); while sudo iptables-legacy -t nat -D PREROUTING -i docker0 -p tcp --dport 443 -j DNAT --to-destination "$HOSTGW:8080" 2>/dev/null; do :; done; echo "dnat left: $(sudo iptables-legacy -t nat -L PREROUTING -n | grep -c DNAT)"; echo "== chrome direct to konami, no proxy in the path =="; $A shell am start -n com.android.chrome/com.google.android.apps.chrome.Main -a android.intent.action.VIEW -d "https://my.konami.net/account-link/introduction?lt=ZHJEDK9P9K3U42XG" >/dev/null 2>&1; sleep 28; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== dumped =="
+at: 13:04:39
+$ bash -c true; echo ID; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; $A shell input swipe 624 616 624 616 250; sleep 6; HOSTGW=$(ip -4 addr show docker0 | grep -oE "inet [0-9.]+" | head -1 | cut -d" " -f2); while sudo iptables-legacy -t nat -D PREROUTING -i docker0 -p tcp --dport 443 -j DNAT --to-destination "$HOSTGW:8080" 2>/dev/null; do :; done; echo "dnat left: $(sudo iptables-legacy -t nat -L PREROUTING -n | grep -c DNAT)"; echo "== chrome direct to konami, no proxy in the path =="; $A shell am start -n com.android.chrome/com.google.android.apps.chrome.Main -a android.intent.action.VIEW -d "https://my.konami.net/account-link/introduction?lt=ZHJEDK9P9K3U42XG" >/dev/null 2>&1; sleep 28; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== dumped =="
+ID
+dnat left: 0
+== chrome direct to konami, no proxy in the path ==
+== dumped ==
+rc=0
+gamepid: 10290
+flows: 18
