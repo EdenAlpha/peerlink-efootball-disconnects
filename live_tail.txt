@@ -7,3 +7,6 @@ live: probe published OK; live-res is live
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    e8f28c8..edc6e6c  HEAD -> live-res
 kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   edc6e6c..3d3bc35  HEAD -> live-res
+kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
