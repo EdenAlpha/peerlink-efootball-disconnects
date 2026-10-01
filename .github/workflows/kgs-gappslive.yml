@@ -32,6 +32,14 @@ name: kgs-gappslive
 
 on:
   workflow_dispatch:
+    inputs:
+      lane:
+        description: >-
+          Suffix for the live control branches (live-cmd-<lane> and
+          live-res-<lane>). Two runs sharing one repository would otherwise
+          execute each other's taps on two different phones.
+        required: false
+        default: "a"
 
 permissions:
   contents: write
@@ -297,21 +305,26 @@ jobs:
           set +e
           W=/tmp/kgs; mkdir -p $W
           export GIT_TERMINAL_PROMPT=0
+          LANE="${{ inputs.lane }}"
+          [ -z "$LANE" ] && LANE=a
+          RB="live-res-$LANE"
+          CB="live-cmd-$LANE"
+          echo "lane=$LANE  results=$RB  commands=$CB"
           git worktree remove --force /tmp/live-res 2>/dev/null || true
           rm -rf /tmp/live-res
-          git fetch origin live-res 2>/dev/null
-          if git show-ref --verify --quiet refs/remotes/origin/live-res; then
-            git worktree add -f -B live-res /tmp/live-res origin/live-res 2>&1 | tail -1
+          git fetch origin "$RB" 2>/dev/null
+          if git show-ref --verify --quiet "refs/remotes/origin/$RB"; then
+            git worktree add -f -B "$RB" /tmp/live-res "origin/$RB" 2>&1 | tail -1
           else
-            git worktree add -f -b live-res /tmp/live-res 2>&1 | tail -1
+            git worktree add -f -b "$RB" /tmp/live-res "origin/$CB" 2>&1 | tail -1
           fi
           [ -e /tmp/live-res/.git ] || { echo "=== WORKTREE FAILED ==="; exit 1; }
           if ! timeout 60 git -C /tmp/live-res ls-remote origin HEAD >/dev/null 2>&1; then
             echo "=== GIT NOT WORKING - ABORT SO THE LOG COMES BACK ==="; exit 1
           fi
           echo "git OK"
-          echo "=== entering the live loop; drive via live-cmd/cmd.txt ==="
-          W=/tmp/kgs LIVE_RES_DIR=/tmp/live-res DEV_MODE=adb \
+          echo "=== entering the live loop; drive via $CB/cmd.txt ==="
+          BRANCH="$RB" CMD_BRANCH="$CB" W=/tmp/kgs LIVE_RES_DIR=/tmp/live-res DEV_MODE=adb \
             timeout 9000 bash kgs-login/live/live_loop.sh 2>&1 | tee -a $W/live.log
           rc=${PIPESTATUS[0]}
           echo "live loop exited rc=$rc"

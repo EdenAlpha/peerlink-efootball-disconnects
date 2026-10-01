@@ -44,7 +44,12 @@ CONTAINER="${CONTAINER:-redroid}"
 : "${HEARTBEAT_EVERY:=15}"
 : "${MAX_ROUNDS:=1400}"
 : "${PUSH_WATCHDOG_SECS:=600}"
-BRANCH=live-res
+# Settable so two runs can share one repository without fighting over the
+# channel. Two concurrent gappslive runs both polling live-cmd would execute
+# each other's taps on two different phones, and both pushing live-res would
+# overwrite each other's screenshots. The workflow passes a lane suffix.
+: "${BRANCH:=live-res}"
+: "${CMD_BRANCH:=live-cmd}"
 
 # Every device call goes through dev.sh so the SAME loop drives either
 # redroid (docker) or the Play emulator / a real phone (adb).
@@ -216,7 +221,7 @@ main() {
   # `adb reboot` wedged two sessions in a row, each hanging forever on
   # wait-for-device with no way to recover from outside. New pushes still
   # execute normally.
-  last=$(timeout 60 git show origin/live-cmd:cmd.txt 2>/dev/null | head -1 | tr -d '\r')
+  last=$(timeout 60 git show origin/$CMD_BRANCH:cmd.txt 2>/dev/null | head -1 | tr -d '\r')
   say "ignoring the already-queued command (not re-running it): [$last]"
   # Start the watchdog clock NOW, not at the first successful push: the failure
   # that matters most is the one where nothing was EVER published, and a
@@ -226,8 +231,8 @@ main() {
   while [ "$round" -lt "$MAX_ROUNDS" ]; do
     round=$((round + 1))
     since_hb=$((since_hb + 1))
-    timeout 60 git fetch origin live-cmd >/dev/null 2>&1 || true
-    cmd=$(timeout 60 git show origin/live-cmd:cmd.txt 2>/dev/null | head -1 | tr -d '\r')
+    timeout 60 git fetch origin $CMD_BRANCH >/dev/null 2>&1 || true
+    cmd=$(timeout 60 git show origin/$CMD_BRANCH:cmd.txt 2>/dev/null | head -1 | tr -d '\r')
     if [ -n "$cmd" ] && [ "$cmd" != "$last" ]; then
       last="$cmd"
       dir="$LIVE_RES_DIR/results/$(printf %04d "$round")"
