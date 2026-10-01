@@ -54,6 +54,13 @@ pid=$(AS pidof "$PKG" | tr -d '\r' | awk '{print $1}')
 say "pid $pid"
 
 SU mkdir -p "$WORK" || { say "cannot make $WORK as root"; exit 1; }
+# The redirect on the dd below (2>"$WORK/dd.err") is performed by THIS shell,
+# which is not root. If root created $WORK with default 0755 the unprivileged
+# shell cannot create files in it, and the dump silently produced nothing:
+#   line 154: /data/local/tmp/heapdump/dd.err: No such file or directory
+#   grab: region 1 unreadable:
+# Make it world-writable so the redirect works.
+SU chmod 777 "$WORK" || say "warn: could not chmod $WORK"
 
 # Largest writable anonymous regions: where a Java heap and a native heap both
 # live. The named dalvik-main space is the one that held the request strings.
