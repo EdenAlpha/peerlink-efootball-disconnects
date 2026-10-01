@@ -1,0 +1,12 @@
+cmd: exec bash -c true; echo N4; adb -s 127.0.0.1:5555 shell input tap 360 781; sleep 45; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== pad splits =="; adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam 2>/dev/null | grep -o "split_pad_it_[0-9]*" | sort -u; echo "== data MB =="; sudo docker exec redroid du -sm /data 2>/dev/null | tail -1
+at: 09:25:40
+$ bash -c true; echo N4; adb -s 127.0.0.1:5555 shell input tap 360 781; sleep 45; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== pad splits =="; adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam 2>/dev/null | grep -o "split_pad_it_[0-9]*" | sort -u; echo "== data MB =="; sudo docker exec redroid du -sm /data 2>/dev/null | tail -1
+N4
+== pad splits ==
+split_pad_it_0
+split_pad_it_1
+== data MB ==
+6352	/data
+rc=0
+gamepid: 
+flows: 0
