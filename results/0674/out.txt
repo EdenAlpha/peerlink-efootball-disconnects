@@ -1,0 +1,11 @@
+cmd: exec bash -c true; echo HZ; A="adb -s 127.0.0.1:5555"; $A shell input swipe 592 521 592 521 250; sleep 25; echo "== handler now =="; $A shell cmd package resolve-activity --brief -a android.intent.action.VIEW -d "https://example.com" 2>/dev/null | tr -d "\r" | tail -1; echo "== foreground =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; $A exec-out screencap -p > /tmp/live-res/screen.png
+at: 12:48:17
+$ bash -c true; echo HZ; A="adb -s 127.0.0.1:5555"; $A shell input swipe 592 521 592 521 250; sleep 25; echo "== handler now =="; $A shell cmd package resolve-activity --brief -a android.intent.action.VIEW -d "https://example.com" 2>/dev/null | tr -d "\r" | tail -1; echo "== foreground =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; $A exec-out screencap -p > /tmp/live-res/screen.png
+HZ
+== handler now ==
+org.chromium.webview_shell/.WebViewBrowserActivity
+== foreground ==
+  mCurrentFocus=Window{da1f121 u0 com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity}
+rc=0
+gamepid: 10290
+flows: 16
