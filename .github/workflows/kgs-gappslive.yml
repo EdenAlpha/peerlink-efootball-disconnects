@@ -334,6 +334,112 @@ jobs:
           chmod 600 $W/creds/GMAIL $W/creds/GPASS
           echo "creds staged: $(wc -c < $W/creds/GMAIL) byte email, $(wc -c < $W/creds/GPASS) byte password"
 
+      # kgs-capture.yml has frida but no game (no Play, so nothing to run).
+      # This workflow has the game but no frida. The game only reaches its login
+      # AFTER Play has delivered the asset packs, and the plaintext request bytes
+      # only exist inside libUE4.so's own send path -- so both halves have to be in
+      # the SAME container. That is the whole reason this step exists.
+      - name: 04d frida-server + plaintext hook (needs the Play-delivered game)
+        run: |
+          set +e
+          set -x
+          W=/tmp/kgs; mkdir -p $W
+          exec >> >(tee -a $W/pipeline.log) 2>&1
+
+          if ! adb -s 127.0.0.1:5555 shell pm list packages 2>/dev/null | grep -qi konami; then
+            echo "=== GAME NOT INSTALLED - frida step bailing early ==="
+            exit 0
+          fi
+          echo "game present: $(adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam 2>/dev/null | tr -d '\r')"
+
+          python3 -m pip install --quiet --break-system-packages frida-tools \
+            || { echo "PIP FAILED"; pip3 install --break-system-packages frida-tools; }
+          FRIDA_VER=$(python3 -c "import frida; print(frida.__version__)" 2>/dev/null)
+          echo "frida client version: ${FRIDA_VER:-<none>}"
+          [ -n "$FRIDA_VER" ] || { echo "=== NO FRIDA PYTHON MODULE ==="; exit 1; }
+
+          ok=0
+          url="https://github.com/frida/frida/releases/download/${FRIDA_VER}/frida-server-${FRIDA_VER}-android-arm64.xz"
+          echo "trying $url"
+          curl -fsSL --max-time 300 -o $W/frida-server.xz "$url" && ok=1
+          if [ "$ok" != "1" ]; then
+            echo "=== FRIDA SERVER DOWNLOAD FAILED ==="
+            curl -sS --max-time 30 "https://api.github.com/repos/frida/frida/releases/latest" \
+              | grep -o '"name": *"frida-server-[^"]*android-arm64[^"]*"' || true
+            exit 1
+          fi
+          xz -d -f $W/frida-server.xz || { echo "=== XZ FAILED ==="; exit 1; }
+          ls -la $W/frida-server
+
+          sudo docker cp $W/frida-server redroid:/data/local/tmp/frida-server || exit 1
+          sudo docker exec redroid chmod 755 /data/local/tmp/frida-server
+          sudo docker exec redroid mkdir -p /data/local/tmp/kgs
+          # keep stderr: Android 14 is SELinux enforcing and exec from
+          # /data/local/tmp is a common failure mode. `docker exec -d` discards
+          # that output, which is why this step previously died with an empty log.
+          sudo docker exec -d redroid sh -c \
+            '/data/local/tmp/frida-server > /data/local/tmp/frida.out 2>&1'
+          sleep 8
+          echo "--- frida-server output ---"
+          sudo docker exec redroid sh -c 'cat /data/local/tmp/frida.out 2>&1' || true
+          echo "--- process list ---"
+          sudo docker exec redroid sh -c 'ps -A | grep -i frida' || echo "frida-server NOT running"
+          echo "--- selinux ---"
+          sudo docker exec redroid sh -c 'getenforce 2>&1' || true
+          nc -zv 127.0.0.1 27042 && echo "frida-server REACHABLE" || echo "frida-server NOT reachable"
+          file $W/frida-server 2>/dev/null || head -c 20 $W/frida-server | xxd | head -2
+
+          # Attach the plaintext hook and relaunch the game. The hook forces
+          # Def_Online_gRPC_insecure=1 and intercepts libc send/write, so the
+          # frames land in /data/local/tmp/kgs on the device -- unencrypted,
+          # written by the game's own code. This is the photocopier step: we are
+          # reading the game's bytes, not synthesising them.
+          adb -s 127.0.0.1:5555 shell am force-stop jp.konami.pesam 2>/dev/null
+          adb -s 127.0.0.1:5555 shell rm -rf /data/local/tmp/kgs 2>/dev/null
+          adb -s 127.0.0.1:5555 shell mkdir -p /data/local/tmp/kgs 2>/dev/null
+          adb -s 127.0.0.1:5555 push -q kgs-login/scripts/capture_insecure.js \
+            /data/local/tmp/capture_insecure.js 2>&1 | tail -2
+
+          nohup setsid timeout 900 frida -H 127.0.0.1:27042 -f jp.konami.pesam \
+            -l kgs-login/scripts/capture_insecure.js --runtime=v8 \
+            > $W/frida-gapps.log 2>&1 < /dev/null &
+          FRIDA_PID=$!
+          echo "frida pid $FRIDA_PID (detached)"
+          sleep 20
+          echo "--- frida log ---"
+          cat $W/frida-gapps.log 2>&1 | tail -25
+          kill -0 $FRIDA_PID 2>/dev/null || echo "NOTE: frida client already exited; the game was still spawned by -f"
+
+          # Watch for frames. The game's first screen is a splash/terms prompt with
+          # nobody there to tap it, so nudge it the way a player would.
+          for i in $(seq 1 24); do
+            sleep 10
+            n=$(adb -s 127.0.0.1:5555 shell 'ls /data/local/tmp/kgs 2>/dev/null | wc -l' 2>/dev/null | tr -d '\r')
+            pid=$(adb -s 127.0.0.1:5555 shell pidof jp.konami.pesam 2>/dev/null | tr -d '\r')
+            echo "  hook t=$((i*10))s frames=${n:-?} gamepid=${pid:-none}"
+            adb -s 127.0.0.1:5555 shell input swipe 640 620 640 620 200 >/dev/null 2>&1
+            adb -s 127.0.0.1:5555 shell input tap 360 400  >/dev/null 2>&1
+            if [ "${n:-0}" != "0" ] && [ "${i}" -ge 8 ]; then
+              echo "=== FRAMES APPEARED at t=$((i*10))s - stopping the nudge ==="
+              break
+            fi
+          done
+
+          echo "--- frames on device ---"
+          adb -s 127.0.0.1:5555 shell 'ls -la /data/local/tmp/kgs 2>/dev/null' | head -20
+          echo "--- frida log tail ---"
+          tail -30 $W/frida-gapps.log 2>&1
+          mkdir -p $W/hookframes
+          sudo docker exec redroid sh -c \
+            'cd /data/local/tmp/kgs && tar cf - . 2>/dev/null' > $W/hookframes.tar 2>/dev/null
+          if [ -s $W/hookframes.tar ]; then
+            mkdir -p $W/hookframes && tar xf $W/hookframes.tar -C $W/hookframes 2>/dev/null
+            echo "PULLED $(ls -1 $W/hookframes | wc -l) frame file(s)"
+            ls -la $W/hookframes | head -20
+          else
+            echo "NO FRAMES CAPTURED"
+          fi
+
       - name: 05 live control loop
         run: |
           set +e
