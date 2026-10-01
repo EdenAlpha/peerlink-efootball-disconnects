@@ -1,0 +1,10 @@
+cmd: exec bash -c true; echo IC; A="adb -s 127.0.0.1:5555"; $A shell input swipe 618 890 618 890 250; sleep 18; echo "== focus =="; $A shell dumpsys window 2>/dev/null | tr -d '\r' | grep -iE "mCurrentFocus" | head -1; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+at: 19:12:47
+$ bash -c true; echo IC; A="adb -s 127.0.0.1:5555"; $A shell input swipe 618 890 618 890 250; sleep 18; echo "== focus =="; $A shell dumpsys window 2>/dev/null | tr -d '\r' | grep -iE "mCurrentFocus" | head -1; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+IC
+== focus ==
+  mCurrentFocus=Window{b2142b3 u0 com.android.vending/com.google.android.finsky.unauthenticated.activity.UnauthenticatedMainActivity}
+== shot ==
+rc=0
+gamepid: 
+flows: 0
