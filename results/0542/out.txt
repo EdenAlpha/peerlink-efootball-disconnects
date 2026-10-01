@@ -1,9 +1,24 @@
-cmd: exec bash -c true; echo S2; adb -s 127.0.0.1:5555 shell input swipe 639 551 639 551 250; sleep 9; adb -s 127.0.0.1:5555 shell input swipe 168 677 168 677 250; sleep 13; adb -s 127.0.0.1:5555 shell input swipe 399 592 399 592 250; sleep 14; adb -s 127.0.0.1:5555 shell input swipe 262 330 262 330 250; sleep 14; adb -s 127.0.0.1:5555 shell input swipe 639 260 639 260 250; sleep 15; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== flows2 =="; grep -c "^### " /tmp/kgs/flows2.log 2>/dev/null
-at: 01:19:39
-$ bash -c true; echo S2; adb -s 127.0.0.1:5555 shell input swipe 639 551 639 551 250; sleep 9; adb -s 127.0.0.1:5555 shell input swipe 168 677 168 677 250; sleep 13; adb -s 127.0.0.1:5555 shell input swipe 399 592 399 592 250; sleep 14; adb -s 127.0.0.1:5555 shell input swipe 262 330 262 330 250; sleep 14; adb -s 127.0.0.1:5555 shell input swipe 639 260 639 260 250; sleep 15; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== flows2 =="; grep -c "^### " /tmp/kgs/flows2.log 2>/dev/null
-S2
-== flows2 ==
-76
+cmd: exec bash -c true; echo K2; sudo docker cp /tmp/kgs/fs16 redroid:/data/local/tmp/frida16; sudo docker exec redroid chmod 755 /data/local/tmp/frida16; sudo docker exec -d redroid sh -c "/data/local/tmp/frida16 > /data/local/tmp/frida16.out 2>&1"; sleep 12; nc -z 27042 && echo PORT_OPEN || echo PORT_CLOSED; sudo docker exec redroid sh -c "ps -A | grep -i frida"; SCRIPT=$(find /home/runner -name capture_insecure.js -path "*kgs-login*" 2>/dev/null | head -1); echo "script=$SCRIPT"; (cd /tmp/kgs && nohup setsid timeout 5400 /home/runner/.local/bin/frida -H 127.0.0.1:27042 -n jp.konami.pesam -l "$SCRIPT" --runtime=v8 > /tmp/kgs/attach16.log 2>&1 < /dev/null &); sleep 28; echo "== attach16 =="; tail -14 /tmp/kgs/attach16.log
+at: 08:43:08
+$ bash -c true; echo K2; sudo docker cp /tmp/kgs/fs16 redroid:/data/local/tmp/frida16; sudo docker exec redroid chmod 755 /data/local/tmp/frida16; sudo docker exec -d redroid sh -c "/data/local/tmp/frida16 > /data/local/tmp/frida16.out 2>&1"; sleep 12; nc -z 27042 && echo PORT_OPEN || echo PORT_CLOSED; sudo docker exec redroid sh -c "ps -A | grep -i frida"; SCRIPT=$(find /home/runner -name capture_insecure.js -path "*kgs-login*" 2>/dev/null | head -1); echo "script=$SCRIPT"; (cd /tmp/kgs && nohup setsid timeout 5400 /home/runner/.local/bin/frida -H 127.0.0.1:27042 -n jp.konami.pesam -l "$SCRIPT" --runtime=v8 > /tmp/kgs/attach16.log 2>&1 < /dev/null &); sleep 28; echo "== attach16 =="; tail -14 /tmp/kgs/attach16.log
+K2
+nc: missing port number
+PORT_CLOSED
+root           39738   39732   10892188  39032 poll_schedule_timeout.constprop.0 0 S frida16
+script=/home/runner/work/peerlink-efootball-disconnects/peerlink-efootball-disconnects/kgs-login/scripts/capture_insecure.js
+== attach16 ==
+     ____
+    / _  |   Frida 16.7.19 - A world-class dynamic instrumentation toolkit
+   | (_| |
+    > _  |   Commands:
+   /_/ |_|       help      -> Displays the help system
+   . . . .       object?   -> Display information about 'object'
+   . . . .       exit/quit -> Exit
+   . . . .
+   . . . .   More info at https://frida.re/docs/home/
+   . . . .
+   . . . .   Connected to 127.0.0.1:27042 (id=socket@127.0.0.1:27042)
+Failed to spawn: connection closed
 rc=0
-gamepid: 29128
-flows: 22
+gamepid: 18731
+flows: 64
