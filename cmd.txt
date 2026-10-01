@@ -1,1 +1,1 @@
-status
+exec bash -c true; echo IB; A="adb -s 127.0.0.1:5555"; echo "== installed? =="; $A shell pm list packages 2>/dev/null | tr -d '\r' | grep -i pesam || echo "NOT INSTALLED"; echo "== splits =="; $A shell pm path jp.konami.pesam 2>/dev/null | tr -d '\r'; echo "== data size =="; $A shell su 0 du -sm /data/data/jp.konami.pesam 2>/dev/null | tr -d '\r' || echo "no data dir"; echo "== screen =="; $A shell wm size 2>/dev/null | tr -d '\r'
