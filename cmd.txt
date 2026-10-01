@@ -1,1 +1,1 @@
-exec bash -c true; echo VE; for i in $(seq 1 10); do adb -s 127.0.0.1:5555 shell input swipe 818 456 818 456 120; sleep 1; done; sleep 4; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+exec bash -c true; echo VF; adb -s 127.0.0.1:5555 shell input swipe 639 640 639 640 150; sleep 6; adb -s 127.0.0.1:5555 shell input swipe 1111 677 1111 677 180; sleep 14; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; adb -s 127.0.0.1:5555 shell pidof jp.konami.pesam
