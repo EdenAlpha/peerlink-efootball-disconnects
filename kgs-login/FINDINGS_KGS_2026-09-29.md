@@ -1693,3 +1693,74 @@ What it does not yet give is the key. The app must hold it, so the next step is
 the same technique applied to the key material rather than to the request, and
 that is a far better position than the one we started the night in, where the
 body was assumed to be unreadable by anyone.
+
+## 14. Corrections to section 13, and what the login actually carries
+
+Two things in section 13 were wrong or incomplete, and both matter.
+
+### The `sign` is 40 bytes, not 32
+
+Section 13 inferred HMAC-SHA256 from a base64 string that looked like 44
+characters. Measured properly, both captured values are:
+
+```
+len(base64) = 56  ->  40 decoded bytes
+```
+
+on both the `SET_GAMERELAY_QUALITY` samples. So it is not a 32-byte digest, and
+the SHA-256 reading was an eyeball count rather than a measurement. Note that
+`kgs-login/findings/FINDINGS_KGS_LOGIN.md`, which has been on `main` the whole
+time, documents a `HmacMD5` helper `getHashStr` in `jp.konami.GetDeviceHash` --
+16 bytes, which is also not 40. Neither guess should be trusted until the
+digest is measured from a known input. That file should have been read before
+asserting anything about the signature.
+
+### `auth_code` for CMD_LOGIN is a Konami-ID OAuth code, not a credential
+
+This is the more important correction, and it changes what the login is for.
+
+```
+jp.konami.android.common.KonamiId -- the auth code arrives by deep link:
+    konamiid://...?code=<CODE>     (setUri parses `code` and `break` params)
+```
+
+So the sequence is: the user authenticates to Konami-ID in a **browser**, Konami
+redirects back through a custom URL scheme, and the app receives a short-lived
+OAuth `code`. The password is never present in the app's traffic at all -- it
+goes browser to Konami and stops there.
+
+Two consequences:
+
+  * hunting for a password in `gate_CMD_LOGIN.php` is the wrong search. The
+    request carries an authorization code, which is single-use and expires.
+  * the browser leg is where credentials exist, and it is ordinary HTTPS, so it
+    is readable through the proxy in plaintext. That is the capture worth
+    making, and it is the reason a browser has to be present on the phone.
+
+### JDWP is a way past the blocked injector
+
+```
+android:debuggable="true" on both UE4 activities
+-> the APK is already debuggable, so no repacking is needed to attach a
+   debugger or a JDWP gadget
+```
+
+`frida-server` fails here because it injects by ptrace. JDWP attaches over the
+app's debug socket instead, which is a different mechanism entirely and does
+not need it. This is the most promising untried route to reading the request
+bytes before encryption, and it costs one `adb` command to find out whether the
+socket is even open on this image.
+
+### The HTTP layer is Java, which is why the memory dump worked
+
+```
+jp.konami.android.common.HttpImpl / Cronet
+  SendRequest(uri, useGzip, cookie, data, isPost)
+```
+
+That matches what the memory dump showed, and it explains why the marker was
+found in `dalvik-main space`: the ART Java heap, not native memory. So the AES is
+a `javax.crypto.Cipher` call and the key is a Java `byte[]` in that same heap.
+That is a much better position than hunting a native key: the heap is
+enumerable, and the gzipped plaintext must be in it too, since `useGzip` runs
+before the cipher.
