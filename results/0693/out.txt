@@ -1,0 +1,11 @@
+cmd: exec bash -c true; echo JO; for an in sign= gate_CMD_; do echo "== $an =="; grep -abo -m 8 -F "$an" /tmp/kgs/full/full.bin 2>/dev/null | head -8; done; echo done
+at: 20:42:16
+$ bash -c true; echo JO; for an in sign= gate_CMD_; do echo "== $an =="; grep -abo -m 8 -F "$an" /tmp/kgs/full/full.bin 2>/dev/null | head -8; done; echo done
+JO
+== sign= ==
+3276117105:sign=
+== gate_CMD_ ==
+done
+rc=0
+gamepid: 26127
+flows: 0
