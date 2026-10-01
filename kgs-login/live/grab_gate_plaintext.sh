@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # Pull every gzipped gate request body straight out of the game's heap.
 #
 # Why this works at all
@@ -60,35 +60,93 @@ SU mkdir -p "$WORK" || { say "cannot make $WORK as root"; exit 1; }
 maps=$(SU cat "/proc/$pid/maps")
 say "map lines: $(printf '%s\n' "$maps" | wc -l)"
 
-region_list=""
-printf '%s\n' "$maps" | while read -r range _ rest; do
+# Region selection. The previous version kept only writable anonymous regions
+# >= 64 MB and took the top 6. On the 2026-10-01 run that selected ZERO regions
+# ("candidate regions:" printed nothing), so the scan never ran and the reported
+# "0 gzip-magic offsets" meant nothing was inspected -- not that nothing was there.
+#
+# An AES key is not going to live in one large anonymous blob. It sits in a small
+# structure, or in a loaded object's data segment. So: take every readable
+# region, weight the ones named after a .so or the heap, and let MAXREGIONS cap
+# the work.
+MAXREGIONS=${MAXREGIONS:-40}
+MAXBYTES=${MAXBYTES:-2147483648}     # 2 GB ceiling on what we pull
+
+# Feed the selection loop from a FILE, not a here-string. With a here-string plus
+# another `while read` in the same script, the producer consumed exactly ONE line
+# and exited (confirmed with `bash -x`) -- which is how this scan previously
+# reported "0 offsets" having inspected nothing at all. Adding any second bare
+# `while read` over stdin here reintroduces it, so every loop in this script
+# reads from an explicit redirect.
+printf '%s\n' "$maps" > "$OUT/maps.txt"
+
+: > "$OUT/regions.txt"
+while read -r range perms rest; do
+  [ -n "${range:-}" ] || continue
   case "$range" in
     *-*) ;;
     *) continue ;;
   esac
-  case "$rest" in
-    *rw*) ;;
+  case "${perms:-}" in
+    r*) ;;
     *) continue ;;
   esac
   name="${rest##*  }"
-  size=$(( 0x${range#*-} - 0x${range%%-*} ))
-  [ "$size" -ge 67108864 ] || continue
-  printf '%s %s\n' "$size" "$range"
-done | sort -rn | head -6 > "$OUT/regions.txt"
+  start_hex="${range%-*}"
+  end_hex="${range#*-}"
+  size=$(( 0x$end_hex - 0x$start_hex ))
+  [ "$size" -gt 0 ] || continue
+  # Escaped separators: a bare word in a case pattern list ends the list early,
+  # which made `continue` fire for every region regardless of its name.
+  case "$name" in
+    /dev/* | \[vvar\] | \[vsyscall\] | anon_inode:*) continue ;;
+  esac
+  # Priority: 0 = named .so data or heap (most likely), 1 = other anon.
+  prio=1
+  case "$name" in
+    *.so* | *lib* | *heap* | *dalvik* | *art* | *jit*) prio=0 ;;
+    "" | *" "* | *anon*)                              prio=1 ;;
+    *) prio=0 ;;
+  esac
 
-say "candidate regions:"
-while read -r size range; do
-  say "  $range  $((size / 1048576)) MB"
+  printf '%d %d %s %s\n' "$prio" "$size" "$range" "$name"
+done < "$OUT/maps.txt" | sort -k1,1n -k2,2nr | head -"$MAXREGIONS" \
+  | cut -d' ' -f2- > "$OUT/regions.txt"
+
+say "candidate regions: $(wc -l < "$OUT/regions.txt")"
+while read -r size range _ name; do
+  say "  $range  $((size / 1048576)) MB  ${name:-anon}"
 done < "$OUT/regions.txt"
+
+if [ ! -s "$OUT/regions.txt" ]; then
+  say "FATAL: no readable regions matched. Aborting rather than reporting a false 0."
+  exit 2
+fi
 
 total_hits=0
 index=0
 
-while read -r size range; do
+# Search needles, in order of usefulness.
+#
+# 1. The `sign` cookie value, verbatim. Every gate request carries
+#    Cookie: sign=<40 bytes base64>. That exact byte string must be in memory
+#    (request headers, the curl handle, the builder's buffer). The AES key is
+#    referenced by the same code path, so it is likely nearby -- which makes
+#    this the most useful anchor for finding it.
+# 2. The literal "pes-custom-encrypt", the header name the game writes. That
+#    string is adjacent to the code that selects the cipher.
+# 3. gzip magic 1f 8b -- the pre-encryption body, kept because it is cheap and
+#    because recovering one plaintext body would validate the whole model.
+#
+# Set SIGN_B64 to the captured sign value to enable anchor 1.
+SIGN_B64=${SIGN_B64:-bTf0PnCf0wICPjEPX+PRyIPBaUpkwx5L8oa4+zxOq0VfuvYY3xVYAg==}
+
+while read -r size range _name; do
   index=$((index + 1))
   start="${range%-*}"
   end="${range#*-}"
   npages=$(( (0x$end - 0x$start) / 4096 ))
+  [ "$npages" -gt 0 ] || continue
   bin="$WORK/region$index.bin"
 
   say "dumping region $index $range ($((size / 1048576)) MB) to device"
@@ -99,52 +157,54 @@ while read -r size range; do
     continue
   fi
 
-  # grep for the gzip magic on the device: this is the fast part, and it is why
-  # the whole thing fits in a run that also has to install 2 GB and onboard.
-  offsets=$(SU grep -abo -m "$LIMIT" $'\x1f\x8b' "$bin")
-  n=$(printf '%s' "$offsets" | grep -c ':' )
-  say "  region $index has $n gzip-magic offsets"
+  # Record what is actually in this region, so a 0-hit region is provably
+  # inspected rather than merely reported.
+  say "  region $index dumped $(SU wc -c < "$bin") bytes"
 
-  printf '%s\n' "$offsets" | head -"$LIMIT" | while IFS=: read -r off _; do
-    [ -n "$off" ] || continue
-    win="$WORK/win_${index}_${off}.bin"
-    SU dd if="$bin" of="$win" bs=1 skip="$off" count="$SPAN" 2>/dev/null >/dev/null
-    A pull "$win" "$OUT/win.bin" >/dev/null 2>&1
-    [ -s "$OUT/win.bin" ] || continue
-    if python3 - "$OUT/win.bin" <<'PY' >> "$REPORT" 2>/dev/null
-import gzip, io, re, sys
-blob = open(sys.argv[1], "rb").read()
-i = 0
-while True:
-    i = blob.find(b"\x1f\x8b", i)
-    if i < 0:
-        break
-    for end in (len(blob), min(len(blob), i + 8192)):
-        try:
-            data = gzip.GzipFile(fileobj=io.BytesIO(blob[i:end])).read()
-        except Exception:
-            continue
-        if not data:
-            continue
-        try:
-            text = data.decode("utf-8")
-        except UnicodeDecodeError:
-            break
-        if "=" in text and re.search(r"(uid|opt|libVer|token|cmd|device|lang|auth)", text, re.I):
-            print("  ---- REQUEST BODY (%d bytes) ----" % len(data))
-            print("  " + text[:900].replace("\n", "\n  "))
-        break
-    i += 1
-PY
-    then :; fi
-    SU rm -f "$win"
+  # On-device grep is C and fast; this is what keeps the whole thing inside one
+  # run. Anchors are searched one at a time so we can attribute hits.
+  for anchor in sign magic header gzip; do
+    # Every anchor is searched as a FIXED string (-F). The gzip magic is passed
+    # as the two-character escape so no shell quoting hazard exists: "\x1f" in
+    # the C locale is the literal 4-character string, which grep -F would not
+    # match, so for that one anchor only we use a regex pattern instead.
+    case "$anchor" in
+      sign)   offsets=$(SU grep -abo -m "$LIMIT" -F "$SIGN_B64" "$bin") ;;
+      header) offsets=$(SU grep -abo -m "$LIMIT" -F "pes-custom-encrypt" "$bin") ;;
+      magic)  offsets=$(SU grep -abo -m "$LIMIT" -P "\x1f\x8b" "$bin" 2>/dev/null) \
+              || offsets=$(SU grep -abo -m "$LIMIT" -F "$(printf '\037\213')" "$bin") ;;
+      *)      offsets="" ;;
+    esac
+
+    n=$(printf '%s' "$offsets" | grep -c ':' )
+    say "  region $index anchor=$anchor hits=$n"
+    [ "$n" -gt 0 ] || continue
+
+    printf '%s\n' "$offsets" | head -"$LIMIT" | while IFS=: read -r off _; do
+      [ -n "$off" ] || continue
+      win="$WORK/win_${index}_${anchor}_${off}.bin"
+      SU dd if="$bin" of="$win" bs=1 skip="$off" count="$SPAN" 2>/dev/null >/dev/null
+      # Unique destination per hit -- the old code reused one filename and
+      # silently kept only the last window.
+      A pull "$win" "$OUT/win_${index}_${anchor}_${off}.bin" >/dev/null 2>&1
+    done
+    total_hits=$((total_hits + n))
   done
-  total_hits=$((total_hits + n))
-  SU rm -f "$bin"
+
+  SU rm -f "$bin" 2>/dev/null   # free space; keep only the small windows
 done < "$OUT/regions.txt"
 
+say "TOTAL ANCHOR HITS: $total_hits"
+say "windows kept in $OUT (win_*.bin)"
+
+# The per-window gzip decoder that used to live here was removed: the old
+# version pulled every window to the same path ("$OUT/win.bin") so only the
+# last hit survived. Windows are now kept individually as
+# $OUT/win_<region>_<anchor>_<offset>.bin and decoded offline with
+# decode_windows.py, which is faster and reproducible.
+
 SU rm -rf "$WORK"
-say "scanned regions, $total_hits gzip-magic offsets seen"
+say "scanned regions, $total_hits anchor hits"
+say "windows kept: $(ls -1 "$OUT"/win_*.bin 2>/dev/null | wc -l)"
 say "report: $REPORT"
-grep -c 'REQUEST BODY' "$REPORT" 2>/dev/null | sed 's/^/request bodies recovered: /' >> "$REPORT"
 exit 0
