@@ -1,0 +1,10 @@
+cmd: exec bash -c true; echo IG; A="adb -s 127.0.0.1:5555"; for i in $(seq 1 14); do F=$($A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1); case "$F" in *MinuteMaidActivity*) sleep 5 ;; *) echo "changed after $((i*5))s"; break ;; esac; done; echo "== focus =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+at: 19:25:47
+$ bash -c true; echo IG; A="adb -s 127.0.0.1:5555"; for i in $(seq 1 14); do F=$($A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1); case "$F" in *MinuteMaidActivity*) sleep 5 ;; *) echo "changed after $((i*5))s"; break ;; esac; done; echo "== focus =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+IG
+== focus ==
+  mCurrentFocus=Window{2f436b u0 com.google.android.gms/com.google.android.gms.auth.uiflows.minutemaid.MinuteMaidActivity}
+== shot ==
+rc=0
+gamepid: 
+flows: 0
