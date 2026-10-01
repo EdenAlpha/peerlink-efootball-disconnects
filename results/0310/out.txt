@@ -1,0 +1,20 @@
+cmd: exec bash -c true; echo IO; A="adb -s 127.0.0.1:5555"; $A shell input tap 533 458; for i in $(seq 1 12); do sleep 6; F=$($A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1); D=$($A shell su 0 du -sm /data/data/jp.konami.pesam 2>/dev/null | tr -d "\r" | cut -f1); echo "t=$((i*6)) data=${D:-?}MB $F"; case "$F" in *pesam*) echo "GAME IN FOREGROUND"; break ;; esac; done; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+at: 19:39:53
+$ bash -c true; echo IO; A="adb -s 127.0.0.1:5555"; $A shell input tap 533 458; for i in $(seq 1 12); do sleep 6; F=$($A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1); D=$($A shell su 0 du -sm /data/data/jp.konami.pesam 2>/dev/null | tr -d "\r" | cut -f1); echo "t=$((i*6)) data=${D:-?}MB $F"; case "$F" in *pesam*) echo "GAME IN FOREGROUND"; break ;; esac; done; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+IO
+t=6 data=1530MB   mCurrentFocus=Window{e233aa4 u0 ImmersiveModeConfirmation}
+t=12 data=1975MB   mCurrentFocus=Window{e233aa4 u0 ImmersiveModeConfirmation}
+t=18 data=1975MB   mCurrentFocus=Window{e233aa4 u0 ImmersiveModeConfirmation}
+t=24 data=1975MB   mCurrentFocus=Window{e233aa4 u0 ImmersiveModeConfirmation}
+t=30 data=1975MB   mCurrentFocus=Window{e233aa4 u0 ImmersiveModeConfirmation}
+t=36 data=1975MB   mCurrentFocus=Window{e233aa4 u0 ImmersiveModeConfirmation}
+t=42 data=1975MB   mCurrentFocus=Window{e233aa4 u0 ImmersiveModeConfirmation}
+t=48 data=1975MB   mCurrentFocus=Window{e233aa4 u0 ImmersiveModeConfirmation}
+t=54 data=1975MB   mCurrentFocus=Window{e233aa4 u0 ImmersiveModeConfirmation}
+t=60 data=1975MB   mCurrentFocus=Window{e233aa4 u0 ImmersiveModeConfirmation}
+t=66 data=1975MB   mCurrentFocus=Window{e233aa4 u0 ImmersiveModeConfirmation}
+t=72 data=1975MB   mCurrentFocus=Window{e233aa4 u0 ImmersiveModeConfirmation}
+== shot ==
+rc=0
+gamepid: 6261
+flows: 0
