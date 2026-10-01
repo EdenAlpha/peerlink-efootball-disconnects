@@ -75,7 +75,17 @@ GCODE="${PEERLINK_GCODE:-}"
 # ---------------------------------------------------------------- sign-in ---
 # "add account" rows in the account manager all say the same address, so the
 # signed-in state is read from the account list rather than guessed.
-signed_in() { have dumpsys account 2>/dev/null | grep -q "type=com.google"; }
+signed_in() {
+  # Match the actual account, do not merely count the string. `dumpsys account`
+  # on a phone that has never been signed in still reports a com.google account
+  # TYPE, so `grep -c "type=com.google"` returns 1 on a virgin device. That false
+  # positive made this script skip the entire sign-in, tap Install on an
+  # unauthenticated store, and then sit in the asset loop watching a size that
+  # never grew -- looking like a success right up until the game turned out not
+  # to be installed at all.
+  [ -z "$GMAIL" ] && return 1
+  have dumpsys account 2>/dev/null | grep -q "name=$GMAIL"
+}
 
 sign_in() {
   if signed_in; then say "account already present, skipping sign-in"; return 0; fi
