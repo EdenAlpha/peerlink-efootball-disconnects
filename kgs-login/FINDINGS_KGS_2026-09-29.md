@@ -1380,3 +1380,204 @@ Credentials are Actions secrets (`PEERLINK_GMAIL`, `PEERLINK_GPASS`) staged to
 `$W/creds/` by step `04c`. The live command channel is a file in a **public**
 branch, so a password must never be typed into `cmd.txt` -- that is how the
 burner password reached history before. Commands read the staged file instead.
+
+---
+
+# Session 2026-10-01: why the successful run could not be reproduced
+
+The run of 2026-09-30 23:20 delivered 1.97 GB of Play-delivered assets, logged
+in, and played. It was never written into a workflow -- the sequence existed
+only in the git history of the `live-cmd` branch. On 2026-10-01 every attempt
+to reproduce it failed, and the reasons turned out to be structural rather than
+incidental. All of it is now in the workflow, but the reasoning is recorded here
+because the workflow alone does not explain *why* the order is what it is.
+
+## 1. The runner is ephemeral, so "just re-run it" cannot work
+
+```
+runs-on: ubuntu-24.04-arm
+-v /root/rd:/data
+```
+
+`ubuntu-24.04-arm` is a GitHub-hosted runner. The bind mount looks persistent
+but the host it lives on is destroyed when the job ends. Every run therefore
+starts from a phone with no Play account, no game and no assets.
+
+This is the single most misleading fact in the setup: the container *looks*
+stateful. Two runs that differ only in their step order are not comparable,
+because the second one is not a continuation of the first.
+
+## 2. Play Asset Delivery requires Play to own the install
+
+This is the root cause of `Download Failed 0%`, and it is measurable rather
+than inferred.
+
+Step `04 install eFootball` installed the XAPK with the `pm` session API:
+
+```
+pm install-create / install-write / install-commit
+```
+
+That installs the binary and nothing else. When Play installed the app instead,
+`pm path` immediately grew two splits it had never had before:
+
+```
+/data/app/~~Q1GzS8ekEYA2811YTMf3Bw==/jp.konami.pesam-.../split_pad_it_0.apk
+/data/app/~~Q1GzS8ekEYA2811YTMf3Bw==/jp.konami.pesam-.../split_pad_it_1.apk
+```
+
+`pad` is Play Asset Delivery. Those splits are how the ~2 GB of game data
+arrives, and Play only produces them for an app it installed itself. Hence the
+first act of the working sequence was `pm uninstall jp.konami.pesam` before
+opening the Play page.
+
+Consequence: a sideload is not a faster path to the game, it is a path to a
+game with no data behind it.
+
+## 3. Interception and the asset download cannot overlap
+
+Play rejects a proxy whose certificate it does not trust, and the only symptom
+is the same bare `Download Failed 0%` on the game's splash, with nothing
+pointing at the recorder. Measured on 2026-10-01 at 06:01:
+
+```
+Client TLS handshake failed ... play.googleapis.com
+```
+
+So the recorder must be armed strictly *after* the packs are on disk. This is
+the reason `04b` (recorder) now sits after the install and no longer exists in
+the workflow at all -- it is armed from the live loop once the assets land.
+
+## 4. Android 14 apps read the trust store from the Conscrypt APEX
+
+The CA was installed correctly, under the correct subject hash, in the correct
+directory:
+
+```
+INSTALLED into /system/etc/security/cacerts/928a8368.0
+```
+
+and every app still refused the proxy's certificate. The reason is that Android
+14 does not read that directory. Conscrypt reads its own copy from the APEX,
+which carries 134 certificates, none of them ours:
+
+```
+mount --bind /system/etc/security/cacerts /apex/com.android.conscrypt/cacerts
+```
+
+After the bind mount the apex reports 135 and `928a8368.0` is present. This was
+found and fixed by hand at 00:15-00:16 on 2026-10-01 (live-cmd commits `VQ`,
+`VR`) and was **not in any workflow**, so every run in between had a CA that
+nothing read. It is now committed.
+
+## 5. Two channels exist and they are not interchangeable
+
+| | gate | command_service |
+|---|---|---|
+| transport | HTTPS/JSON | gRPC over HTTP/2 |
+| path shape | `/pes22/gate/gate_CMD_*.php` | protobuf field 4 |
+| captured | yes, 22 frames, 16 request/response pairs | never, zero gRPC frames in any capture |
+| host | `pes22-game.cs.konami.net` | `pes22-game.cs.konami.net` |
+
+Both live on the same host, and the capture filter covered `konami.net`, so the
+absence of gRPC frames is real and not a filter miss.
+
+Schema, hand-verified at `0xc95b00`:
+
+```
+CommandRequest  { 1: string id, 2: enum packMode, 3: string req, 4: string path }
+CommandResponse { 1: string id, 2: enum packMode, 3: string res }
+rpc CommandStream(stream CommandRequest) returns (stream CommandResponse)
+PackMode { JSON = 0, MSGPACK = 1 }   package command_service
+```
+
+`path` is the missing value. `kgs_client.py` speaks it correctly --
+`path="/"` returns `CommandResponse{id:"CMD_END_CONNECTION",
+res:'{"result":"NOERR"}'}` -- and path validation is deterministic: 62
+single-character segments returned UNAVAILABLE (14) on 3 of 3 attempts, and
+only `/`, `""` and `" "` were accepted.
+
+## 6. The gate login body is encrypted at the application layer
+
+`gate_CMD_LOGIN.php` request 608 B, response 13712 B. Shannon entropy:
+
+| | measured | a readable JSON body |
+|---|---|---|
+| request | 7.67 | ~4.5 |
+| response | 7.99 | ~4.5 |
+
+So the body is ciphertext produced by the app, not by TLS. We captured the
+envelope, not the letter. This is why the gate route cannot yield the login
+payload, and why only the game's own pre-encryption code path can.
+
+## 7. Google requires verification on every run, but it is not a secret
+
+The account is signed in from scratch each run, so 2026-10-01 confirmed what
+happens. It is a **number match**, not a security code:
+
+> Google sent a notification to your phone. Tap **Yes** on the notification,
+> then tap **66** on your phone.
+
+The number is displayed on the device, so no credential has to be transmitted
+and nothing has to be committed. `PEERLINK_GCODE` exists as an alternative for
+the security-code path, read from a secret.
+
+**Exposure to clean up:** on 2026-09-30 two 10-digit security codes were typed
+directly into `cmd.txt`, which is a file in a **public** branch --
+`1206010218` and `2001545675`. Both are single-use and spent, so the practical
+risk now is low, but it is the same mistake that leaked the burner password and
+forced a history rewrite. The `live-cmd` branch history needs rewriting once it
+is no longer the live control channel.
+
+## 8. frida-server 17.19.0 cannot inject into this redroid
+
+```
+frida client 17.19.0, frida-server 17.19.0, Android 14 arm64
+Failed to spawn: connection closed
+Failed to spawn: error receiving data: Connection reset by peer
+frida.out: Aborted (core dumped)
+```
+
+The client connects, negotiates, and the *server* dies at the injection step.
+Reproduced with both `-f` (spawn) and `-n` (attach), so it is not the spawn
+path. `kernel.yama.ptrace_scope=0` does not help. The remaining variable is the
+Frida build itself; 17.x against redroid's kernel is the suspect and an older
+release is the obvious next test.
+
+## 9. Interaction needs a 250 ms hold, not a tap
+
+Every successful navigation on 2026-09-30 used a press-and-hold:
+
+```
+RW  input swipe 168 677 168 677 250
+RX  input swipe 399 592 399 592 250
+RY  input swipe 818 647 818 647 250
+T7  input swipe 640 620 640 620 250
+```
+
+and the `Done` button on the language screen was `input tap 1139 677`. On
+2026-10-01 the same coordinates with bare `input tap` did nothing, while the
+game was at 300% CPU. Both facts are recorded because the coordinate is not the
+variable and the failure is not reproducible from the coordinates alone.
+
+## 10. Control latency, and why scripted steps are the wrong shape here
+
+`gh run view --log` returns nothing while a job is in progress. The live
+control loop does not open until step 05. So a scripted step that signs in and
+then waits ~45 minutes for a download is a three-hour silence in which nothing
+can be seen and nothing can be corrected.
+
+After moving the hand-over to immediately after boot:
+
+```
+06:51:53  dispatched
+06:53:00  01 boot done
+06:53:20  04a multitouch gate
+06:54:02  04b frida staged
+06:54:22  05 live control loop -- under control after 2.5 minutes
+```
+
+`kgs-login/live/play_install.sh` and `kgs-login/live/publish.sh` are kept as
+tools the loop can call, not as steps that run unattended. `publish.sh` pushes
+a screenshot to `live-res` from inside a script precisely so that even a long
+unattended wait leaves a trail instead of a silence.
