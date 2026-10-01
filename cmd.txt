@@ -1,1 +1,34 @@
-exec bash -c true; echo JB; A="adb -s 127.0.0.1:5555"; SU() { $A shell su 0 "$@" 2>/dev/null | tr -d '\r'; }; PID=$($A shell pidof jp.konami.pesam 2>/dev/null | tr -d '\r' | awk '{print $1}'); echo "pid=$PID"; W=/data/local/tmp; say(){ echo "grab: $*"; }; say "maps:"; SU cat /proc/$PID/maps > $W/maps.txt; echo "map lines=$(wc -l < $W/maps.txt)"; : > $W/regions.txt; while read -r range perms rest; do case "$range" in *-*) ;; *) continue ;; esac; case "$perms" in r*) ;; *) continue ;; esac; name="${rest##*  }"; size=$(( 0x${range#*-} - 0x${range%%-*} )); [ "$size" -gt 0 ] || continue; prio=1; case "$name" in *.so*|*lib*|*heap*|*dalvik*|*art*) prio=0 ;; esac; printf '%d %d %s %s\n' "$prio" "$size" "$range" "$name"; done < $W/maps.txt | sort -k1,1n -k2,2nr | head -6 | cut -d' ' -f2- > $W/regions.txt; echo "candidate regions: $(grep -c . $W/regions.txt)"; cat $W/regions.txt; SIGN=bTf0PnCf0wICPjEPX+PRyIPBaUpkwx5L8oa4+zxOq0VfuvYY3xVYAg==; TOTAL=0; while read -r size range name; do echo "== region $range $((size/1048576))MB $name"; start=${range%-*}; np=$(( (0x${range#*-} - 0x$start) / 4096 )); SU dd if=/proc/$PID/mem of=$W/r.bin bs=4096 skip=$((0x$start/4096)) count=$np; B=$(wc -c < $W/r.bin); echo "   dumped $B bytes"; S=$(SU grep -abo -m 20 -F "$SIGN" $W/r.bin | wc -l); H=$(SU grep -abo -m 20 -F "pes-custom-encrypt" $W/r.bin | wc -l); echo "   sign=$S header=$H"; TOTAL=$((TOTAL+S+H)); done < $W/regions.txt; echo "TOTAL HITS=$TOTAL"
+exec bash -c true; echo JC; A="adb -s 127.0.0.1:5555"; PID=$($A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r" | awk "{print \$1}"); echo "pid=$PID"; $A shell su 0 sh -c "
+PID=$PID
+W=/data/local/tmp
+mkdir -p \$W
+cat /proc/\$PID/maps > \$W/maps.txt
+echo map_lines=\$(wc -l < \$W/maps.txt)
+: > \$W/regions.txt
+while read -r range perms rest; do
+  case \"\$range\" in *-*) ;; *) continue ;; esac
+  case \"\$perms\" in r*) ;; *) continue ;; esac
+  name=\$(echo \"\$rest\" | sed -E \"s/^.*  //\")
+  size=\$(( 0x\${range#*-} - 0x\${range%%-*} ))
+  [ \"\$size\" -gt 0 ] || continue
+  prio=1
+  case \"\$name\" in *.so*|*lib*|*heap*|*dalvik*|*art*) prio=0 ;; esac
+  printf \"%d %d %s %s\n\" \$prio \$size \"\$range\" \"\$name\"
+done < \$W/maps.txt | sort -k1,1n -k2,2nr | head -6 | cut -d\" \" -f2- > \$W/regions.txt
+echo candidate_regions=\$(grep -c . \$W/regions.txt)
+cat \$W/regions.txt
+SIGN=bTf0PnCf0wICPjEPX+PRyIPBaUpkwx5L8oa4+zxOq0VfuvYY3xVYAg==
+TOTAL=0
+while read -r size range name; do
+  echo \"== \$range \$((size/1048576))MB \$name\"
+  start=\${range%-*}
+  np=\$(( (0x\${range#*-} - 0x\$start) / 4096 ))
+  dd if=/proc/\$PID/mem of=\$W/r.bin bs=4096 skip=\$((0x\$start/4096)) count=\$np 2>/dev/null
+  echo \"   dumped \$(wc -c < \$W/r.bin) bytes\"
+  S=\$(grep -abo -m 10 -F \"\$SIGN\" \$W/r.bin | wc -l)
+  H=\$(grep -abo -m 10 -F pes-custom-encrypt \$W/r.bin | wc -l)
+  echo \"   sign=\$S header=\$H\"
+  TOTAL=\$((TOTAL+S+H))
+done < \$W/regions.txt
+echo TOTAL_HITS=\$TOTAL
+" 2>&1 | tr -d "\r"
