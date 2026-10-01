@@ -133,3 +133,29 @@ Konami login runs, because that leg is an ordinary browser form post: with TLS
 terminated, the account password would sit in the log in plaintext, and
 `live-cmd`/`live-res` are public branches. Only the `/pes22/gate/` responses
 are committed, which is both the useful part and the safe part.
+
+### Two further routes, and the User-Agent, from the same session
+
+Driving past the team-selection wizard produced two routes not previously
+recorded, both `200`:
+
+```
+gate_CMD_SET_MYCLUB_ENTRY_INFO.php
+gate_CMD_GET_MAINMENU_INFO.php
+```
+
+`GET_MAINMENU_INFO` is the point at which the main menu is reached, which makes
+it a useful marker for "onboarding is finished".
+
+The game's memory also yields its own User-Agent verbatim:
+
+```
+PES/1.0 (ANDROID 14; ASKH124394950; redroid14_arm64_only; 1790844937; 6.0.1; ; 11.0.1; )
+```
+
+Field by field: platform and OS version, the User ID with its dashes stripped
+(`ASKH-124-394-950` from the title screen), the device model, a numeric token
+that behaves like a build or session epoch, then two version fields. This lines
+up with the `ReportLog.php` line in the passthrough capture taken from the zip
+earlier, which carried `libVer 1.17.1-Android-15` in the same positional
+arrangement, so the client identifies itself the same way in both places.
