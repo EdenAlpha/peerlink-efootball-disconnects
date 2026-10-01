@@ -1,16 +1,10 @@
-cmd: exec bash -c true; echo P1; cp /tmp/kgs/flows2.log /tmp/kgs/flows_pre_restart.log; adb -s 127.0.0.1:5555 shell am force-stop jp.konami.pesam; sleep 8; echo "== stopped, flows before relaunch: $(grep -c "^### " /tmp/kgs/flows2.log) =="; adb -s 127.0.0.1:5555 shell am start -n jp.konami.pesam/com.epicgames.ue4.SplashActivity >/dev/null 2>&1; echo "== launched, letting it log in =="; sleep 75; adb -s 127.0.0.1:5555 shell pidof jp.konami.pesam; echo "== flows after 75s: $(grep -c "^### " /tmp/kgs/flows2.log) =="; echo "== LOGIN CONVERSATION ONLY =="; grep -A6 "gate_CMD_LOGIN.php" /tmp/kgs/flows2.log | tail -12; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
-at: 05:46:02
-$ bash -c true; echo P1; cp /tmp/kgs/flows2.log /tmp/kgs/flows_pre_restart.log; adb -s 127.0.0.1:5555 shell am force-stop jp.konami.pesam; sleep 8; echo "== stopped, flows before relaunch: $(grep -c "^### " /tmp/kgs/flows2.log) =="; adb -s 127.0.0.1:5555 shell am start -n jp.konami.pesam/com.epicgames.ue4.SplashActivity >/dev/null 2>&1; echo "== launched, letting it log in =="; sleep 75; adb -s 127.0.0.1:5555 shell pidof jp.konami.pesam; echo "== flows after 75s: $(grep -c "^### " /tmp/kgs/flows2.log) =="; echo "== LOGIN CONVERSATION ONLY =="; grep -A6 "gate_CMD_LOGIN.php" /tmp/kgs/flows2.log | tail -12; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
-P1
-cp: cannot stat '/tmp/kgs/flows2.log': No such file or directory
-grep: /tmp/kgs/flows2.log: No such file or directory
-== stopped, flows before relaunch:  ==
-== launched, letting it log in ==
-3058
-grep: /tmp/kgs/flows2.log: No such file or directory
-== flows after 75s:  ==
-== LOGIN CONVERSATION ONLY ==
-grep: /tmp/kgs/flows2.log: No such file or directory
-rc=0
-gamepid: 3058
+cmd: exec bash -c true; echo G6; adb -s 127.0.0.1:5555 shell input swipe 640 477 640 477 250; sleep 10; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; sudo iptables-legacy -t nat -L PREROUTING -n | grep -c DNAT
+at: 06:54:24
+$ bash -c true; echo G6; adb -s 127.0.0.1:5555 shell input swipe 640 477 640 477 250; sleep 10; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; sudo iptables-legacy -t nat -L PREROUTING -n | grep -c DNAT
+G6
+iptables v1.8.10 (legacy): can't initialize iptables table `nat': Table does not exist (do you need to insmod?)
+Perhaps iptables or your kernel needs to be upgraded.
+0
+rc=1
+gamepid: 
 flows: 0
