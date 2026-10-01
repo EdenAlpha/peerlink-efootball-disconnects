@@ -1,0 +1,9 @@
+cmd: exec bash -c true; echo IU; A="adb -s 127.0.0.1:5555"; $A shell input swipe 640 640 640 640 250; sleep 12; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "pid=$($A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r")"; echo "== shot =="
+at: 19:46:14
+$ bash -c true; echo IU; A="adb -s 127.0.0.1:5555"; $A shell input swipe 640 640 640 640 250; sleep 12; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "pid=$($A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r")"; echo "== shot =="
+IU
+pid=6261
+== shot ==
+rc=0
+gamepid: 6261
+flows: 0
