@@ -1,0 +1,19 @@
+cmd: exec bash -c true; echo IW; W=/tmp/kgs; mkdir -p $W/live; A="adb -s 127.0.0.1:5555"; R=https://raw.githubusercontent.com/EdenAlpha/peerlink-efootball-disconnects/main/kgs-login/live; curl -fsSL --max-time 60 $R/grab_gate_plaintext.sh -o $W/live/grab.sh && echo "grab.sh $(wc -c < $W/live/grab.sh) bytes CR=$(tr -cd "\r" < $W/live/grab.sh | wc -c)"; curl -fsSL --max-time 60 $R/test_region_select.sh -o $W/live/t.sh && chmod +x $W/live/grab.sh $W/live/t.sh && echo "t.sh $(wc -c < $W/live/t.sh) bytes"; echo "== selection test on the runner =="; bash $W/live/t.sh 2>&1 | tail -9
+at: 19:47:13
+$ bash -c true; echo IW; W=/tmp/kgs; mkdir -p $W/live; A="adb -s 127.0.0.1:5555"; R=https://raw.githubusercontent.com/EdenAlpha/peerlink-efootball-disconnects/main/kgs-login/live; curl -fsSL --max-time 60 $R/grab_gate_plaintext.sh -o $W/live/grab.sh && echo "grab.sh $(wc -c < $W/live/grab.sh) bytes CR=$(tr -cd "\r" < $W/live/grab.sh | wc -c)"; curl -fsSL --max-time 60 $R/test_region_select.sh -o $W/live/t.sh && chmod +x $W/live/grab.sh $W/live/t.sh && echo "t.sh $(wc -c < $W/live/t.sh) bytes"; echo "== selection test on the runner =="; bash $W/live/t.sh 2>&1 | tail -9
+IW
+grab.sh 8501 bytes CR=0
+t.sh 4817 bytes
+== selection test on the runner ==
+
+=== assertions ===
+PASS: libUE4.so included (the key may live in its data segment)
+PASS: no-access pages excluded
+PASS: kernel pseudo-mappings excluded
+PASS: leading field is numeric (536870912 bytes)
+PASS: multi-word region name survived intact
+
+RESULT: OK
+rc=0
+gamepid: 6261
+flows: 0
