@@ -51,6 +51,13 @@ jobs:
     env:
       PEERLINK_GMAIL: ${{ secrets.PEERLINK_GMAIL }}
       PEERLINK_GPASS: ${{ secrets.PEERLINK_GPASS }}
+      # The Konami account. This is what clears the tutorial/mission gate, which
+      # otherwise blocks entering a match and creating a room. Step 04a stages it
+      # to $W/creds/KID and $W/creds/KPASS. It is a secret and never a commit:
+      # the live command channel is a file in a PUBLIC branch, which is how the
+      # burner password reached history before.
+      PEERLINK_KID: ${{ secrets.PEERLINK_KID }}
+      PEERLINK_KPASS: ${{ secrets.PEERLINK_KPASS }}
       # Rolling Google 2FA code. A secret, never a commit: the two codes typed
       # into live-cmd on 2026-09-30 are in that branch's PUBLIC history and
       # must never be repeated.
@@ -299,6 +306,30 @@ jobs:
             /data/local/tmp/capture_insecure.js 2>&1 | tail -1
           adb -s 127.0.0.1:5555 shell wc -c /data/local/tmp/capture_insecure.js
           echo "FRIDA ARMED - drive from step 05"
+
+      # Walk onboarding to the main menu unattended. Every coordinate is encoded
+      # in onboard.sh from real screenshots taken on 2026-10-01, and it stops on
+      # the first step whose screenshot does not change, naming the file to look
+      # at. That is deliberate: a blind chain taps confidently through a dialog
+      # it does not understand. Non-fatal by design, so the live loop still opens
+      # and the rest of the session is not lost to one unexpected screen.
+      - name: 04c onboard to the main menu
+        run: |
+          set +e
+          set -x
+          W=/tmp/kgs; mkdir -p $W
+          exec >> >(tee -a $W/pipeline.log) 2>&1
+          adb connect 127.0.0.1:5555 2>&1 | tail -1
+          bash kgs-login/live/onboard.sh 127.0.0.1:5555 2>&1 | tail -45
+          echo "onboard rc=${PIPESTATUS[0]} (3 = stopped on an unexpected screen)"
+          echo "== is the Konami account staged? =="
+          if [ -s "$W/creds/KID" ] && [ -s "$W/creds/KPASS" ]; then
+            echo "KONAMI ACCOUNT STAGED - the tutorial gate can be cleared"
+          else
+            echo "=== NO KONAMI ACCOUNT - the tutorial gate will not clear ==="
+          fi
+          ls -la "$W/creds" 2>&1 | head -8
+          exit 0
 
       - name: 05 live control loop
         run: |
