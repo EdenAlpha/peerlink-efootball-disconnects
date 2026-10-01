@@ -1,0 +1,9 @@
+cmd: exec bash -c true; echo H5; A="adb -s 127.0.0.1:5555"; $A shell am start -n jp.konami.pesam/com.epicgames.ue4.SplashActivity >/dev/null 2>&1; sleep 95; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "pid=$($A shell pidof jp.konami.pesam)"; echo launched
+at: 11:05:35
+$ bash -c true; echo H5; A="adb -s 127.0.0.1:5555"; $A shell am start -n jp.konami.pesam/com.epicgames.ue4.SplashActivity >/dev/null 2>&1; sleep 95; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "pid=$($A shell pidof jp.konami.pesam)"; echo launched
+H5
+pid=5493
+launched
+rc=0
+gamepid: 5493
+flows: 0
