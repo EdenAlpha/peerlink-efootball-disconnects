@@ -1,0 +1,12 @@
+cmd: exec bash -c true; echo IA; A="adb -s 127.0.0.1:5555"; echo "== game pid =="; $A shell pidof jp.konami.pesam 2>/dev/null | tr -d '\r' || echo "not running"; echo "== focus =="; $A shell dumpsys window 2>/dev/null | tr -d '\r' | grep -iE "mCurrentFocus" | head -1; $A exec-out screencap -p > /tmp/live-res/s1.png; echo "== shot taken =="
+at: 18:54:30
+$ bash -c true; echo IA; A="adb -s 127.0.0.1:5555"; echo "== game pid =="; $A shell pidof jp.konami.pesam 2>/dev/null | tr -d '\r' || echo "not running"; echo "== focus =="; $A shell dumpsys window 2>/dev/null | tr -d '\r' | grep -iE "mCurrentFocus" | head -1; $A exec-out screencap -p > /tmp/live-res/s1.png; echo "== shot taken =="
+IA
+== game pid ==
+not running
+== focus ==
+  mCurrentFocus=Window{9df0d16 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+== shot taken ==
+rc=0
+gamepid: 
+flows: 0
