@@ -68,21 +68,25 @@ def adb(serial: str, *args: str, timeout: int = 120) -> str:
 
 
 def shell_root(serial: str, script: str, timeout: int = 300) -> str:
-    """Run a shell command on the device as root.
+    """Run a command on the device as root.
 
-    The whole thing has to reach the device as ONE argument. `adb shell` joins
-    its own argv with spaces before handing it to the device shell, so passing
-    ["su", "0", "sh", "-c", "cat /proc/1/maps"] arrives as
+    Passed as ONE argument to `adb shell`, because adb joins its own argv with
+    spaces before the device shell sees it. Passing them separately arrived as
 
-        su 0 sh -c cat /proc/1/maps
+        su 0 sh -c cat /proc/18731/maps
 
-    where `sh -c cat` runs the single word "cat" with the path as $0. That
-    returns empty output and looks exactly like a permissions failure, which is
-    a misleading way to lose an hour. So the inner command is quoted here and
-    passed as one string.
+    where `sh -c cat` runs the single word "cat" with the path as $0: empty
+    output, indistinguishable from a permissions failure.
+
+    There is deliberately no `sh -c` layer. `su 0 <cmd>` works, and adding
+    `sh -c` on top of it returns nothing on this image. So scripts must avoid
+    shell metacharacters -- no pipes, no redirection -- which is why the dd
+    call below redirects its own stderr on the device instead of piping it
+    through tail.
     """
-    quoted = script.replace("'", "'\\''")
-    return adb(serial, "shell", "su 0 sh -c '%s'" % quoted, timeout=timeout)
+    if any(ch in script for ch in "|<>&;"):
+        return adb(serial, "shell", "su 0 sh -c \"%s\"" % script, timeout=timeout)
+    return adb(serial, "shell", "su 0 " + script, timeout=timeout)
 
 
 def main() -> int:
@@ -138,12 +142,13 @@ def main() -> int:
         # Read page-aligned so dd needs no byte offsets.
         got = shell_root(
             args.serial,
-            "dd if=/proc/%s/mem of=%s bs=4096 skip=%d count=%d 2>&1 | tail -1"
+            "dd if=/proc/%s/mem of=%s bs=4096 skip=%d count=%d 2>/data/local/tmp/dd.err"
             % (pid, remote, start // 4096, npages),
             timeout=600,
         )
-        if "denied" in got or "Permission" in got:
-            print("  SKIP %s -> %s" % (label, got.strip()[:80]))
+        err = shell_root(args.serial, "cat /data/local/tmp/dd.err")
+        if "denied" in err or "ermission" in err or "ermission" in got:
+            print("  SKIP %s -> %s" % (label, (err or got).strip()[:90]))
             continue
         local = os.path.join(args.out, "region_%012x.bin" % start)
         rc = subprocess.run(
