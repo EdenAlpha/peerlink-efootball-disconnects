@@ -1,0 +1,10 @@
+live: live control loop starting (poll 8s, max 1400 rounds)
+live: write commands to live-cmd/cmd.txt ; read live-res/results + status.txt
+live: ignoring the already-queued command (not re-running it): []
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   8ea425a..82ae1ac  HEAD -> live-res-b
+live: probe published OK; live-res is live
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   82ae1ac..ad9cbef  HEAD -> live-res-b
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   ad9cbef..9ffdeab  HEAD -> live-res-b
