@@ -1,0 +1,7 @@
+cmd: exec bash -c true; echo WJ; adb -s 127.0.0.1:5555 shell input swipe 988 557 988 557 150; sleep 18; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+at: 00:36:16
+$ bash -c true; echo WJ; adb -s 127.0.0.1:5555 shell input swipe 988 557 988 557 150; sleep 18; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+WJ
+rc=0
+gamepid: 9664
+flows: 17
