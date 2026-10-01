@@ -48,6 +48,23 @@ key()  { $A shell input keyevent "$1" >/dev/null 2>&1; sleep "${2:-3}"; }
 text() { $A shell input text "$1" >/dev/null 2>&1; sleep 2; }
 have() { $A shell "$@" 2>/dev/null | tr -d '\r'; }
 
+LAST_MB=""
+# Publish progress to live-res. Without this the whole of step 04b is
+# invisible: run logs are unreadable while the job runs, and the live control
+# loop does not open until step 05 -- so sign-in and the ~45 minute asset
+# download would be a three-hour silence. See publish.sh.
+pub() {
+  local label="$1" shot=""
+  [ -n "${2:-}" ] && [ -s "$SHOT_DIR/$2.png" ] && shot="$SHOT_DIR/$2.png"
+  {
+    echo "stage=play_install"
+    echo "label=$label"
+    echo "time=$(date -u +%H:%M:%S)"
+    echo "mb=${LAST_MB:-?}"
+  } > /tmp/live-res/status.txt 2>/dev/null
+  bash kgs-login/live/publish.sh "$label" "$shot" >/dev/null 2>&1 || true
+}
+
 GMAIL="${PEERLINK_GMAIL:-}"
 GPASS="${PEERLINK_GPASS:-}"
 GCODE="${PEERLINK_GCODE:-}"
@@ -69,7 +86,11 @@ sign_in() {
   $A shell am start -n com.android.vending/com.google.android.finsky.activities.MainActivity \
     >/dev/null 2>&1
   sleep 14
+  shot store-open
+  pub "play store open" store-open
   tap 360 907 14        # Sign in
+  shot signin-landed
+  pub "after sign-in tap" signin-landed
 
   # The email field, then the password field. Coordinates are position- and
   # screen-dependent, so each is confirmed against the view hierarchy before it
@@ -95,6 +116,7 @@ sign_in() {
   if [ -z "$GCODE" ]; then
     say "NO 2FA CODE STAGED -- a human is required at this screen"
     shot signin-needs-code
+    pub "HUMAN NEEDED - google 2FA code screen" signin-needs-code
     say "set the PEERLINK_GCODE secret to a freshly requested code and re-dispatch"
     return 2
   fi
@@ -163,11 +185,9 @@ tap_install
 say "waiting for the asset packs (this is the 2026-09-30 step UM/UV)"
 before=""
 stable=0
-# 2026-09-30 took roughly 45 minutes between tapping Install and the packs
-# settling, so 150 checks at ~23s each is about an hour -- it breaks out early
-# as soon as the size stops changing, and the job has 180 minutes total.
 for i in $(seq 1 150); do
   now=$(asset_mb)
+  LAST_MB="$now"
   say "  t=$((i*20))s data=${now:-?}MB"
   # The splash can put a "Download Failed" dialog up; dismiss it so the pack
   # fetch is not blocked behind a modal.
@@ -177,6 +197,7 @@ for i in $(seq 1 150); do
       say "  (tapped a download dialog away)"
     fi
   fi
+  [ $((i % 10)) -eq 0 ] && { shot "wait-$i"; pub "asset wait ${now:-?}MB" "wait-$i"; }
   if [ -n "$before" ] && [ -n "$now" ] && [ "$now" = "$before" ]; then
     stable=$((stable+1))
   else

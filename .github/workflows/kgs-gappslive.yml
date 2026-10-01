@@ -206,128 +206,32 @@ jobs:
       # certificate and the only symptom is a bare "Download Failed 0%" with no
       # hint that the recorder is the cause; measured 06:01 today as "Client TLS
       # handshake failed ... play.googleapis.com". The recorder is armed in 04c.
-      - name: 04b install the game FROM Play, then wait for the asset packs
-        run: |
-          set +e
-          set -x
-          W=/tmp/kgs; mkdir -p $W
-          exec >> >(tee -a $W/pipeline.log) 2>&1
 
-          HOSTGW=$(ip -4 addr show docker0 2>/dev/null \
-                   | grep -oE "inet [0-9.]+" | head -1 | cut -d" " -f2)
-          while sudo iptables-legacy -t nat -D PREROUTING -i docker0 -p tcp \
-                --dport 443 -j DNAT --to-destination "$HOSTGW:8080" 2>/dev/null; do
-            echo "removed a stale DNAT rule"
-          done
-          echo "dnat rules left (must be 0): $(sudo iptables-legacy -t nat -L PREROUTING -n | grep -c DNAT)"
-
-          if adb -s 127.0.0.1:5555 shell pm list packages 2>/dev/null | grep -qi konami; then
-            echo "uninstalling the sideloaded copy -- Play will not serve it"
-            adb -s 127.0.0.1:5555 shell pm uninstall jp.konami.pesam
-          fi
-
-          bash kgs-login/live/play_install.sh 127.0.0.1:5555
-          echo "play_install rc=$? (2 = stopped for a human 2FA code)"
-
-          # Deliberately does not fail the job. If the install did not happen,
-          # the live loop still runs and it is the only channel that can be
-          # driven by hand; killing the run here would throw that away.
-          adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam 2>/dev/null \
-            || echo "=== GAME NOT INSTALLED - the live loop has to fix this ==="
-          exit 0
-
-      # Armed AFTER the download on purpose: interception and the asset packs
-      # cannot coexist in time, because Play will not download through a proxy
-      # it does not trust. The hook in 04d needs none of this -- it forces the
-      # game's own plaintext path -- so this step is for the gate channel only,
-      # and is not allowed to take the run down with it.
+      # Control opens as soon as the phone is ready, exactly as it did on the
+      # run that worked on 2026-09-30. That run was driven by hand through the
+      # live command branch; an earlier attempt at this step instead scripted
+      # the sign-in and then sat blind through it, because `gh run view --log`
+      # returns nothing while a job runs and the live loop does not open until
+      # step 05. Waiting out ~45 minutes unobserved is strictly worse than
+      # looking at the screen, so nothing is installed or launched here.
       #
-      # The Conscrypt bind-mount below is the fix for "the CA is installed by
-      # hash, every app still refuses the proxy's certificate". On Android 14
-      # apps read the trust store from the Conscrypt APEX, which carries its own
-      # 134-cert copy of the store; ours was in /system but absent from the
-      # apex. Found and fixed by hand at 00:15-00:16 on 2026-10-01 and never
-      # written into a workflow, so every run since had a CA nothing read.
-      - name: 04c arm the recorder (CA + Conscrypt apex, proxy, tcpdump)
+      # frida-server only has to be running and the hook staged, so that when
+      # the game is next started under `frida -f` it is already attached.
+      #
+      # Deliberately absent: the mitm proxy, the CA and the DNAT rule. Play will
+      # not download its asset packs through a proxy whose certificate it
+      # rejects, and arming interception before the download is precisely what
+      # produced "Download Failed 0%" on the 2026-10-01 run. If the gate channel
+      # is wanted, the recorder is armed from the live loop once the packs are
+      # on disk.
+      - name: 04b frida-server + hook staged (no launch; control is step 05)
         run: |
           set +e
           set -x
           W=/tmp/kgs; mkdir -p $W
           exec >> >(tee -a $W/pipeline.log) 2>&1
-
-          bash kgs-login/scripts/setup_ca.sh redroid "$W/ca" 2>&1 | tail -8
-          HASH=$(cat "$W/ca/ca.hash" 2>/dev/null)
-          echo "ca hash: ${HASH:-<none>}"
-
-          adb -s 127.0.0.1:5555 shell su 0 mount --bind \
-            /system/etc/security/cacerts /apex/com.android.conscrypt/cacerts 2>&1 | tail -2
-          echo "system store certs: $(adb -s 127.0.0.1:5555 shell su 0 ls /system/etc/security/cacerts 2>/dev/null | wc -l)"
-          echo "apex store certs:   $(adb -s 127.0.0.1:5555 shell su 0 ls /apex/com.android.conscrypt/cacerts 2>/dev/null | wc -l)"
-          if [ -n "$HASH" ]; then
-            adb -s 127.0.0.1:5555 shell su 0 ls -l \
-              /apex/com.android.conscrypt/cacerts/$HASH.0 2>&1
-          fi
-
-          echo "--- restarting zygote so the trust store is re-read ---"
-          sudo docker exec redroid sh -c 'setprop ctl.restart zygote' 2>/dev/null || true
-          sleep 25
-          for i in $(seq 1 60); do
-            [ "$(adb -s 127.0.0.1:5555 shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ] \
-              && { echo "phone back after $((i*5))s"; break; }
-            sleep 5
-          done
           adb connect 127.0.0.1:5555 2>&1 | tail -1
-
-          echo "--- proxy on the host, signing with OUR ca.key ---"
-          python3 -m pip install --quiet --break-system-packages mitmproxy \
-            || echo "MITMPROXY INSTALL FAILED"
-          mkdir -p $W/mitm
-          if [ -f "$W/ca/ca.key" ]; then
-            cat "$W/ca/ca.key" "$W/ca/ca.crt" > $W/mitm/mitmproxy-ca.pem
-            cp -f "$W/ca/ca.crt" $W/mitm/mitmproxy-ca-cert.pem
-          else
-            echo "no ca.key; mitmproxy will use its own CA"
-          fi
-          FLOWS_LOG=$W/flows.log nohup setsid mitmdump \
-            --mode transparent --listen-port 8080 \
-            --set confdir=$W/mitm -s kgs-login/scripts/mitm_addon.py \
-            -w $W/flows.mitm > $W/mitm.log 2>&1 < /dev/null &
-          sleep 12
-          grep -q ADDON-READY $W/flows.log 2>/dev/null \
-            && echo "proxy up, addon loaded" \
-            || { echo "=== PROXY OR ADDON DID NOT START ==="; head -30 $W/mitm.log; }
-
-          echo "--- packet capture for the whole session ---"
-          sudo docker exec redroid sh -c \
-            'rm -f /data/local/tmp/game2.pcap; nohup tcpdump -i any -s 0 -w /data/local/tmp/game2.pcap tcp >/data/local/tmp/tcpdump2.out 2>&1 &'
-          sleep 2
-          sudo docker exec redroid sh -c 'ps -A | grep -i tcpdump' || echo "tcpdump NOT running"
-
-          # DNAT last of all: anything that reaches Play after this point goes
-          # through the proxy and will fail its certificate check.
-          sudo modprobe iptable_nat || true
-          HOSTGW=$(ip -4 addr show docker0 2>/dev/null \
-                   | grep -oE "inet [0-9.]+" | head -1 | cut -d" " -f2)
-          echo "docker0 gateway: [$HOSTGW]"
-          sudo iptables-legacy -t nat -A PREROUTING -i docker0 -p tcp \
-            --dport 443 -j DNAT --to-destination "$HOSTGW:8080" 2>&1
-          echo "dnat rc=$?"
-          sudo iptables-legacy -t nat -L PREROUTING -n | head -6
-          echo "RECORDER ARMED (gRPC plaintext capture does not depend on any of this)"
-          exit 0
-
-      - name: 04d frida-server + plaintext hook (assets are on disk by now)
-        run: |
-          set +e
-          set -x
-          W=/tmp/kgs; mkdir -p $W
-          exec >> >(tee -a $W/pipeline.log) 2>&1
-
-          if ! adb -s 127.0.0.1:5555 shell pm list packages 2>/dev/null | grep -qi konami; then
-            echo "=== GAME NOT INSTALLED - frida step bailing early ==="
-            exit 0
-          fi
-          echo "game present: $(adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam 2>/dev/null | tr -d '\r')"
+          adb -s 127.0.0.1:5555 wait-for-device
 
           python3 -m pip install --quiet --break-system-packages frida-tools \
             || { echo "PIP FAILED"; pip3 install --break-system-packages frida-tools; }
@@ -346,80 +250,31 @@ jobs:
             exit 1
           fi
           xz -d -f $W/frida-server.xz || { echo "=== XZ FAILED ==="; exit 1; }
-          ls -la $W/frida-server
 
           sudo docker cp $W/frida-server redroid:/data/local/tmp/frida-server || exit 1
           sudo docker exec redroid chmod 755 /data/local/tmp/frida-server
           sudo docker exec redroid mkdir -p /data/local/tmp/kgs
-          # keep stderr: Android 14 is SELinux enforcing and exec from
-          # /data/local/tmp is a common failure mode. `docker exec -d` discards
-          # that output, which is why this step previously died with an empty log.
+          # Keep stderr: Android 14 runs SELinux enforcing and exec from
+          # /data/local/tmp is a common failure mode, and `docker exec -d`
+          # discards exactly the output that would say so.
           sudo docker exec -d redroid sh -c \
             '/data/local/tmp/frida-server > /data/local/tmp/frida.out 2>&1'
           sleep 8
           echo "--- frida-server output ---"
           sudo docker exec redroid sh -c 'cat /data/local/tmp/frida.out 2>&1' || true
-          echo "--- process list ---"
           sudo docker exec redroid sh -c 'ps -A | grep -i frida' || echo "frida-server NOT running"
-          echo "--- selinux ---"
-          sudo docker exec redroid sh -c 'getenforce 2>&1' || true
           nc -zv 127.0.0.1 27042 && echo "frida-server REACHABLE" || echo "frida-server NOT reachable"
-          file $W/frida-server 2>/dev/null || head -c 20 $W/frida-server | xxd | head -2
 
-          # Attach the plaintext hook and relaunch the game. The hook forces
-          # Def_Online_gRPC_insecure=1 and intercepts libc send/write, so the
-          # frames land in /data/local/tmp/kgs on the device -- unencrypted,
-          # written by the game's own code. This is the photocopier step: we are
-          # reading the game's bytes, not synthesising them.
-          adb -s 127.0.0.1:5555 shell am force-stop jp.konami.pesam 2>/dev/null
-          adb -s 127.0.0.1:5555 shell rm -rf /data/local/tmp/kgs 2>/dev/null
-          adb -s 127.0.0.1:5555 shell mkdir -p /data/local/tmp/kgs 2>/dev/null
-          adb -s 127.0.0.1:5555 push -q kgs-login/scripts/capture_insecure.js \
-            /data/local/tmp/capture_insecure.js 2>&1 | tail -2
-
-          # 7200, not 900: the hook has to outlive this step. It is detached, so
-          # it keeps running into step 05, and the live loop is what actually
-          # walks the game to the login screen. A 15 minute cap killed the hook
-          # while the operator was still navigating.
-          nohup setsid timeout 7200 frida -H 127.0.0.1:27042 -f jp.konami.pesam \
-            -l kgs-login/scripts/capture_insecure.js --runtime=v8 \
-            > $W/frida-gapps.log 2>&1 < /dev/null &
-          FRIDA_PID=$!
-          echo "frida pid $FRIDA_PID (detached)"
-          sleep 20
-          echo "--- frida log ---"
-          cat $W/frida-gapps.log 2>&1 | tail -25
-          kill -0 $FRIDA_PID 2>/dev/null || echo "NOTE: frida client already exited; the game was still spawned by -f"
-
-          # Watch for frames. The game's first screen is a splash/terms prompt with
-          # nobody there to tap it, so nudge it the way a player would.
-          for i in $(seq 1 24); do
-            sleep 10
-            n=$(adb -s 127.0.0.1:5555 shell 'ls /data/local/tmp/kgs 2>/dev/null | wc -l' 2>/dev/null | tr -d '\r')
-            pid=$(adb -s 127.0.0.1:5555 shell pidof jp.konami.pesam 2>/dev/null | tr -d '\r')
-            echo "  hook t=$((i*10))s frames=${n:-?} gamepid=${pid:-none}"
-            adb -s 127.0.0.1:5555 shell input swipe 640 620 640 620 200 >/dev/null 2>&1
-            adb -s 127.0.0.1:5555 shell input tap 360 400  >/dev/null 2>&1
-            if [ "${n:-0}" != "0" ] && [ "${i}" -ge 8 ]; then
-              echo "=== FRAMES APPEARED at t=$((i*10))s - stopping the nudge ==="
-              break
-            fi
+          # Stage the hook and the helper scripts on the device. Driving the
+          # install from step 05 needs play_install.sh reachable too.
+          for f in capture_insecure.js decode_capture.py; do
+            [ -f "kgs-login/scripts/$f" ] && adb -s 127.0.0.1:5555 push -q \
+              "kgs-login/scripts/$f" "/data/local/tmp/$f" 2>&1 | tail -1
           done
-
-          echo "--- frames on device ---"
-          adb -s 127.0.0.1:5555 shell 'ls -la /data/local/tmp/kgs 2>/dev/null' | head -20
-          echo "--- frida log tail ---"
-          tail -30 $W/frida-gapps.log 2>&1
-          mkdir -p $W/hookframes
-          sudo docker exec redroid sh -c \
-            'cd /data/local/tmp/kgs && tar cf - . 2>/dev/null' > $W/hookframes.tar 2>/dev/null
-          if [ -s $W/hookframes.tar ]; then
-            mkdir -p $W/hookframes && tar xf $W/hookframes.tar -C $W/hookframes 2>/dev/null
-            echo "PULLED $(ls -1 $W/hookframes | wc -l) frame file(s)"
-            ls -la $W/hookframes | head -20
-          else
-            echo "NO FRAMES CAPTURED"
-          fi
+          adb -s 127.0.0.1:5555 push kgs-login/scripts/capture_insecure.js \
+            /data/local/tmp/capture_insecure.js 2>&1 | tail -1
+          adb -s 127.0.0.1:5555 shell wc -c /data/local/tmp/capture_insecure.js
+          echo "FRIDA ARMED - drive from step 05"
 
       - name: 05 live control loop
         run: |
