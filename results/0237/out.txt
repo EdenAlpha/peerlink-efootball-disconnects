@@ -1,0 +1,23 @@
+cmd: exec bash -c true; echo VN; echo "== ca files =="; ls -l /tmp/kgs/ca/ 2>&1; echo "== hash =="; H=$(openssl x509 -subject_hash_old -in /tmp/kgs/ca/ca.crt -noout 2>/dev/null); echo "hash=$H"; echo "== in phone system store? =="; adb -s 127.0.0.1:5555 shell su 0 ls -l /system/etc/security/cacerts/$H.0 2>&1; echo "== ca subject =="; openssl x509 -in /tmp/kgs/ca/ca.crt -noout -subject 2>&1; echo "== mitm pem =="; ls -l /tmp/kgs/mitm/ 2>&1
+at: 00:12:23
+$ bash -c true; echo VN; echo "== ca files =="; ls -l /tmp/kgs/ca/ 2>&1; echo "== hash =="; H=$(openssl x509 -subject_hash_old -in /tmp/kgs/ca/ca.crt -noout 2>/dev/null); echo "hash=$H"; echo "== in phone system store? =="; adb -s 127.0.0.1:5555 shell su 0 ls -l /system/etc/security/cacerts/$H.0 2>&1; echo "== ca subject =="; openssl x509 -in /tmp/kgs/ca/ca.crt -noout -subject 2>&1; echo "== mitm pem =="; ls -l /tmp/kgs/mitm/ 2>&1
+VN
+== ca files ==
+total 12
+-rw-r--r-- 1 runner runner 1155 Sep 30 23:21 ca.crt
+-rw-r--r-- 1 runner runner    9 Sep 30 23:21 ca.hash
+-rw------- 1 runner runner 1708 Sep 30 23:21 ca.key
+== hash ==
+hash=928a8368
+== in phone system store? ==
+-rw-r--r-- 1 root root 1155 2026-09-30 19:21 /system/etc/security/cacerts/928a8368.0
+== ca subject ==
+subject=CN = kgs-intercept-ca
+== mitm pem ==
+total 12
+-rw-r--r-- 1 runner runner 1155 Sep 30 23:22 mitmproxy-ca-cert.pem
+-rw-r--r-- 1 runner runner 2863 Sep 30 23:22 mitmproxy-ca.pem
+-rw-r--r-- 1 runner runner  770 Sep 30 23:22 mitmproxy-dhparam.pem
+rc=0
+gamepid: 6484
+flows: 0
