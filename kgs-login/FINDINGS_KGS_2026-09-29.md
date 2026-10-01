@@ -1631,3 +1631,65 @@ gate_CMD_SET_TRACKRECORD.php
 
 All eight returned 200 through the proxy, which is the first end-to-end proof
 that the Conscrypt apex bind-mount makes interception readable by the game.
+
+## 13. The gate body encryption is AES-256, found in the game's own memory
+
+This is the answer to the question the whole night has been circling: the gate
+bodies are not opaque, they are AES-256, and the app says so in its own memory.
+
+frida-server cannot inject into this redroid image. Reproduced on two major
+lines, 17.19.0 and 16.7.19, both dying at the injection step:
+
+```
+Failed to spawn: connection closed
+Failed to spawn: error receiving data: Connection reset by peer
+frida.out: Aborted (core dumped)
+```
+
+on spawn (`-f`) and attach (`-n`) alike, with the server confirmed running.
+`kernel.yama.ptrace_scope=0` does not help. So the injector route is closed.
+
+The fallback needs no injector. The game assembles the request body and only
+then encrypts it, so the plaintext is in its own heap while it runs, and
+reading `/proc/<pid>/mem` needs permission to open a file rather than ptrace
+injection. The container has root via `su 0`. `kgs-login/scripts/dump_game_mem.py`
+does this with `dd` over page-aligned regions, and it works:
+
+```
+pid 18731
+5960 map lines
+636 writable regions over 256K
+  000012c00000-000032c00000 rw-p [anon:dalvik-main space (region space)]  512.0 MB  markers: /pes22/gate/
+```
+
+Searching the readable strings in that region returns the request construction
+in plaintext:
+
+```
+AES256
+AddRequestHeader()
+AddRequestHeader() pes-custom-encrypt:AES256
+https://pes22-game.cs.konami.net/pes22/gate/gate_CMD_SET_GAMERELAY_QUALITY.php
+sign=N6hqmmR/noUzgwWd/zFM2mDeZlJPgIkbsQGw2U2/zkjaqrWA7k+fGw==;
+  uri     = https://pes22-game.cs.konami.net/pes22/gate/gate_CMD_GAM...
+```
+
+So, measured rather than inferred:
+
+  * the body cipher is **AES-256**
+  * it is announced in a request header, `pes-custom-encrypt: AES256`
+  * there is a separate `sign` value, base64, and 44 characters decodes to 32
+    bytes -- the size of an **HMAC-SHA256** digest, so the request is
+    authenticated as well as encrypted
+  * the full absolute URL of each gate call is present in cleartext, which is
+    why the proxy could name every route even though it could not read a body
+
+This closes the loop on the earlier entropy measurement. Bodies at 7.9 bits per
+byte and 38 percent printable are AES output; the printable constant is the
+signature of random bytes and nothing about compression, which was tested and
+excluded separately.
+
+What it does not yet give is the key. The app must hold it, so the next step is
+the same technique applied to the key material rather than to the request, and
+that is a far better position than the one we started the night in, where the
+body was assumed to be unreadable by anyone.
