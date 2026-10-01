@@ -1,1 +1,1 @@
-exec bash -c true; echo WA; adb -s 127.0.0.1:5555 shell input swipe 634 267 634 267 150; sleep 4; adb -s 127.0.0.1:5555 shell input swipe 639 638 639 638 180; sleep 20; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== konami in mitm =="; grep -i konami /tmp/kgs/mitm.log 2>/dev/null | tail -12
+exec bash -c true; echo WB; adb -s 127.0.0.1:5555 shell input swipe 634 267 634 267 150; sleep 4; adb -s 127.0.0.1:5555 shell input swipe 639 638 639 638 180; sleep 18; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
