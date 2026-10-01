@@ -1,1 +1,1 @@
-exec bash -c true; echo G1; adb -s 127.0.0.1:5555 shell input swipe 1245 665 1245 665 250; sleep 10; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo flows=$(grep -c "^### " /tmp/kgs/flows.log)
+exec bash -c true; echo G2; adb -s 127.0.0.1:5555 shell input keyevent 4; sleep 9; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo flows=$(grep -c "^### " /tmp/kgs/flows.log)
