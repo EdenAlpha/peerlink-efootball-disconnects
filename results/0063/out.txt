@@ -1,0 +1,8 @@
+cmd: exec bash -c true; echo H6; A="adb -s 127.0.0.1:5555"; H() { $A shell input swipe $1 $2 $1 $2 250; }; H 853 403; sleep 9; H 1139 677; sleep 15; H 1139 677; sleep 15; H 807 460; sleep 15; $A exec-out screencap -p > /tmp/live-res/s1.png; H 1206 343; sleep 13; H 640 640; sleep 13; H 1139 677; sleep 15; $A exec-out screencap -p > /tmp/live-res/screen.png; echo onboard-1
+at: 11:08:50
+$ bash -c true; echo H6; A="adb -s 127.0.0.1:5555"; H() { $A shell input swipe $1 $2 $1 $2 250; }; H 853 403; sleep 9; H 1139 677; sleep 15; H 1139 677; sleep 15; H 807 460; sleep 15; $A exec-out screencap -p > /tmp/live-res/s1.png; H 1206 343; sleep 13; H 640 640; sleep 13; H 1139 677; sleep 15; $A exec-out screencap -p > /tmp/live-res/screen.png; echo onboard-1
+H6
+onboard-1
+rc=0
+gamepid: 5493
+flows: 0
