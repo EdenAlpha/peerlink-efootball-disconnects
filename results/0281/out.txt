@@ -1,0 +1,21 @@
+cmd: exec bash -c true; echo IK; A="adb -s 127.0.0.1:5555"; $A shell am start -a android.intent.action.VIEW -d "market://details?id=jp.konami.pesam" >/dev/null 2>&1; for i in $(seq 1 12); do F=$($A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1); case "$F" in *vending*) sleep 5 ;; *) echo "unexpected $F"; break ;; esac; done; sleep 6; echo "== focus =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; $A shell uiautomator dump /sdcard/u.xml >/dev/null 2>&1; $A shell cat /sdcard/u.xml 2>/dev/null | tr ">" "\n" | grep -oE "text=\"[^\"]+\"" | head -12; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+at: 19:33:06
+$ bash -c true; echo IK; A="adb -s 127.0.0.1:5555"; $A shell am start -a android.intent.action.VIEW -d "market://details?id=jp.konami.pesam" >/dev/null 2>&1; for i in $(seq 1 12); do F=$($A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1); case "$F" in *vending*) sleep 5 ;; *) echo "unexpected $F"; break ;; esac; done; sleep 6; echo "== focus =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; $A shell uiautomator dump /sdcard/u.xml >/dev/null 2>&1; $A shell cat /sdcard/u.xml 2>/dev/null | tr ">" "\n" | grep -oE "text=\"[^\"]+\"" | head -12; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+IK
+== focus ==
+  mCurrentFocus=Window{c7446fa u0 com.android.vending/com.google.android.finsky.transparentmainactivity.TransparentMainActivityPrivate}
+text="eFootball™"
+text="KONAMI"
+text="Contains ads"
+text="In-app purchases"
+text="Install"
+text="Google Play Services will install additional components (5.7 MB) needed to use this app"
+text="Games"
+text="Apps"
+text="Search"
+text="Books"
+text="You"
+== shot ==
+rc=0
+gamepid: 
+flows: 0
