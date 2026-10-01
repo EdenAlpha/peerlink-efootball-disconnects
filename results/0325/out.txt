@@ -1,0 +1,10 @@
+cmd: exec bash -c true; echo IS; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; $A shell input swipe 807 460 807 460 250; sleep 12; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "pid=$($A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r")"; echo "flows=$($W/flows.log 2>/dev/null; echo n/a)"; echo "== shot =="
+at: 19:44:33
+$ bash -c true; echo IS; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; $A shell input swipe 807 460 807 460 250; sleep 12; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "pid=$($A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r")"; echo "flows=$($W/flows.log 2>/dev/null; echo n/a)"; echo "== shot =="
+IS
+pid=6261
+flows=n/a
+== shot ==
+rc=0
+gamepid: 6261
+flows: 0
