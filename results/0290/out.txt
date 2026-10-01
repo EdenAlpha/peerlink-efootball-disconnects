@@ -1,16 +1,9 @@
-cmd: exec bash -c true; echo T5; echo "== mounts =="; adb -s 127.0.0.1:5555 shell mount | grep -E "vendor| / | /system"; echo "== try remount rw /vendor =="; adb -s 127.0.0.1:5555 shell su 0 mount -o remount,rw /vendor 2>&1 | tail -2; echo "== try remount rw / =="; adb -s 127.0.0.1:5555 shell su 0 mount -o remount,rw / 2>&1 | tail -2; echo "== write test /vendor =="; adb -s 127.0.0.1:5555 shell su 0 touch /vendor/etc/permissions/zz-test.xml 2>&1 | tail -2; adb -s 127.0.0.1:5555 shell su 0 ls -l /vendor/etc/permissions/zz-test.xml 2>&1 | tail -1; echo "== write test /system =="; adb -s 127.0.0.1:5555 shell su 0 touch /system/etc/permissions/zz-test.xml 2>&1 | tail -2; adb -s 127.0.0.1:5555 shell su 0 ls -l /system/etc/permissions/zz-test.xml 2>&1 | tail -1
-at: 23:07:29
-$ bash -c true; echo T5; echo "== mounts =="; adb -s 127.0.0.1:5555 shell mount | grep -E "vendor| / | /system"; echo "== try remount rw /vendor =="; adb -s 127.0.0.1:5555 shell su 0 mount -o remount,rw /vendor 2>&1 | tail -2; echo "== try remount rw / =="; adb -s 127.0.0.1:5555 shell su 0 mount -o remount,rw / 2>&1 | tail -2; echo "== write test /vendor =="; adb -s 127.0.0.1:5555 shell su 0 touch /vendor/etc/permissions/zz-test.xml 2>&1 | tail -2; adb -s 127.0.0.1:5555 shell su 0 ls -l /vendor/etc/permissions/zz-test.xml 2>&1 | tail -1; echo "== write test /system =="; adb -s 127.0.0.1:5555 shell su 0 touch /system/etc/permissions/zz-test.xml 2>&1 | tail -2; adb -s 127.0.0.1:5555 shell su 0 ls -l /system/etc/permissions/zz-test.xml 2>&1 | tail -1
-T5
-== mounts ==
-overlay on / type overlay (rw,relatime,lowerdir=/var/lib/docker/overlay2/l/TQASWHJPAZOAYGC4JRREY7VN45:/var/lib/docker/overlay2/l/N73YBZDTUCN22QKFJDDXIN4CNC,upperdir=/var/lib/docker/overlay2/36b0319a01c831782517c561bdaf41396df6471ccce7dafb40fc9139bfd3c7e3/diff,workdir=/var/lib/docker/overlay2/36b0319a01c831782517c561bdaf41396df6471ccce7dafb40fc9139bfd3c7e3/work,nouserxattr)
-== try remount rw /vendor ==
-mount: '/vendor' not in /proc/mounts
-== try remount rw / ==
-== write test /vendor ==
--rw-rw-rw- 1 root root 0 2026-09-30 18:07 /vendor/etc/permissions/zz-test.xml
-== write test /system ==
--rw-rw-rw- 1 root root 0 2026-09-30 18:07 /system/etc/permissions/zz-test.xml
+cmd: exec bash -c true; echo D8; adb -s 127.0.0.1:5555 shell input swipe 1206 343 1206 343 250; sleep 24; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/step1.png; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== flows =="; grep -c "^### " /tmp/kgs/flows.log
+at: 07:53:48
+$ bash -c true; echo D8; adb -s 127.0.0.1:5555 shell input swipe 1206 343 1206 343 250; sleep 24; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/step1.png; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== flows =="; grep -c "^### " /tmp/kgs/flows.log
+D8
+== flows ==
+6
 rc=0
-gamepid: 
-flows: 0
+gamepid: 8404
+flows: 6
