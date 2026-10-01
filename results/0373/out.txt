@@ -1,0 +1,14 @@
+cmd: exec bash -c true; echo HP; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; $A shell input swipe 640 440 640 440 250; sleep 6; curl -fsSL --max-time 60 https://raw.githubusercontent.com/EdenAlpha/peerlink-efootball-disconnects/main/kgs-login/live/grab_gate_plaintext.sh -o $W/live/grab.sh && chmod +x $W/live/grab.sh && wc -c $W/live/grab.sh; $A shell input swipe 1207 661 1207 661 250; sleep 6; $A shell input swipe 167 678 167 678 250; sleep 10; echo "== now grabbing memory =="; timeout 900 bash $W/live/grab.sh 127.0.0.1:5555 2>&1 | tail -30
+at: 12:02:15
+$ bash -c true; echo HP; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; $A shell input swipe 640 440 640 440 250; sleep 6; curl -fsSL --max-time 60 https://raw.githubusercontent.com/EdenAlpha/peerlink-efootball-disconnects/main/kgs-login/live/grab_gate_plaintext.sh -o $W/live/grab.sh && chmod +x $W/live/grab.sh && wc -c $W/live/grab.sh; $A shell input swipe 1207 661 1207 661 250; sleep 6; $A shell input swipe 167 678 167 678 250; sleep 10; echo "== now grabbing memory =="; timeout 900 bash $W/live/grab.sh 127.0.0.1:5555 2>&1 | tail -30
+HP
+5039 /tmp/kgs/live/grab.sh
+== now grabbing memory ==
+grab: pid 10290
+grab: map lines: 5035
+grab: candidate regions:
+grab: scanned regions, 0 gzip-magic offsets seen
+grab: report: /tmp/kgs/gate-plaintext.txt
+rc=0
+gamepid: 10290
+flows: 16
