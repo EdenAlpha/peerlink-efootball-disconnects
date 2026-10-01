@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 # Pull every gzipped gate request body straight out of the game's heap.
 #
 # Why this works at all
