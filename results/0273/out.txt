@@ -1,0 +1,11 @@
+cmd: exec bash -c true; echo IJ; A="adb -s 127.0.0.1:5555"; $A shell input tap 591 1112; for i in $(seq 1 14); do F=$($A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1); case "$F" in *GoogleServicesActivity*) sleep 5 ;; *) echo "left setup after $((i*5))s"; break ;; esac; done; echo "== focus =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+at: 19:31:52
+$ bash -c true; echo IJ; A="adb -s 127.0.0.1:5555"; $A shell input tap 591 1112; for i in $(seq 1 14); do F=$($A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1); case "$F" in *GoogleServicesActivity*) sleep 5 ;; *) echo "left setup after $((i*5))s"; break ;; esac; done; echo "== focus =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+IJ
+left setup after 10s
+== focus ==
+  mCurrentFocus=Window{520246e u0 com.android.vending/com.android.vending.AssetBrowserActivity}
+== shot ==
+rc=0
+gamepid: 
+flows: 0
