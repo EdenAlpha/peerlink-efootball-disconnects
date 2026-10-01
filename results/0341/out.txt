@@ -1,0 +1,52 @@
+cmd: exec bash -c true; echo IX; W=/tmp/kgs; timeout 800 bash $W/live/grab.sh 127.0.0.1:5555 2>&1 | tail -45
+at: 19:47:31
+$ bash -c true; echo IX; W=/tmp/kgs; timeout 800 bash $W/live/grab.sh 127.0.0.1:5555 2>&1 | tail -45
+IX
+grab:   f6ab56253000-f6ab62185000  191 MB  anon
+grab:   f6ab4c660000-f6ab548ba000  130 MB  anon
+grab:   f6abf1641000-f6abf798a000  99 MB  anon
+grab:   f6abd7c69000-f6abddede000  98 MB  anon
+grab:   f6ac84800000-f6ac88800000  64 MB  (deleted)
+grab:   f6abeee18000-f6abf163e000  40 MB  anon
+grab:   974fc000-994fc000  32 MB  (deleted)
+grab:   994fc000-9b4fc000  32 MB  anon
+grab:   9b4fc000-9d4fc000  32 MB  (deleted)
+grab:   9d4fc000-9f4fc000  32 MB  anon
+grab:   f6ac7d6e2000-f6ac7f200000  27 MB  anon
+grab:   f6ac8bcf0000-f6ac8d80e000  27 MB  anon
+grab:   f6ac0e90e000-f6ac1042b000  27 MB  anon
+grab:   f6ac046bc000-f6ac059bc000  19 MB  anon
+grab:   f6ab54938000-f6ab55a61000  17 MB  anon
+grab:   f6ac14f83000-f6ac16000000  16 MB  anon
+grab:   f6ac74dec000-f6ac75e69000  16 MB  anon
+grab:   f6ac90e00000-f6ac91e00000  16 MB  inter region ref bitmap]
+grab:   f6ac94800000-f6ac95800000  16 MB  space live bitmap]
+grab:   764fd000-774fc000  15 MB  moving space]
+grab:   fffff9c3a000-fffffac39000  15 MB  anon
+grab:   f6abf798d000-f6abf871b000  13 MB  anon
+grab:   f6abe1542000-f6abe2229000  12 MB  anon
+grab:   70f47000-71c1b000  12 MB  anon
+grab:   f6ac9740b000-f6ac97dd6000  9 MB  anon
+grab:   f6ab62200000-f6ab62b72000  9 MB  anon
+grab:   f6ac96aa0000-f6ac9740b000  9 MB  anon
+grab:   f6ac98665000-f6ac98f89000  9 MB  anon
+grab:   f6ac0e02e000-f6ac0e90e000  8 MB  anon
+grab:   f6ac97dd6000-f6ac98665000  8 MB  anon
+grab:   f6ac088bb000-f6ac0911b000  8 MB  anon
+grab:   f6ac07f1a000-f6ac08762000  8 MB  anon
+grab:   f6ac0d676000-f6ac0debc000  8 MB  anon
+grab:   f6ac0bb00000-f6ac0c330000  8 MB  anon
+grab:   f6ac0a262000-f6ac0aa69000  8 MB  anon
+grab:   f6ac933fd000-f6ac93bfe000  8 MB  stack]
+grab:   f6ac93bfe000-f6ac943ff000  8 MB  stack]
+grab: dumping region 1 12c00000-32c00000 (512 MB) to device
+/tmp/kgs/live/grab.sh: line 153: /data/local/tmp/heapdump/dd.err: No such file or directory
+grab:   region 1 unreadable: 
+grab: TOTAL ANCHOR HITS: 0
+grab: windows kept in /tmp/kgs (win_*.bin)
+grab: scanned regions, 0 anchor hits
+grab: windows kept: 0
+grab: report: /tmp/kgs/gate-plaintext.txt
+rc=0
+gamepid: 6261
+flows: 0
