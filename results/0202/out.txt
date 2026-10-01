@@ -1,0 +1,8 @@
+cmd: exec bash -c true; echo HG; A="adb -s 127.0.0.1:5555"; $A shell input swipe 807 478 807 478 250; sleep 40; $A exec-out screencap -p > /tmp/live-res/screen.png; echo data-downloaded
+at: 11:32:49
+$ bash -c true; echo HG; A="adb -s 127.0.0.1:5555"; $A shell input swipe 807 478 807 478 250; sleep 40; $A exec-out screencap -p > /tmp/live-res/screen.png; echo data-downloaded
+HG
+data-downloaded
+rc=0
+gamepid: 5493
+flows: 0
