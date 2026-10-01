@@ -1,28 +1,12 @@
-cmd: exec bash -c true; echo T6; git fetch -q origin main; git show origin/main:kgs-login/live/android.hardware.touchscreen.multitouch.xml > /tmp/mt.xml; wc -c /tmp/mt.xml; adb -s 127.0.0.1:5555 push /tmp/mt.xml /data/local/tmp/mt.xml 2>&1 | tail -1; adb -s 127.0.0.1:5555 shell su 0 cp /data/local/tmp/mt.xml /vendor/etc/permissions/android.hardware.touchscreen.multitouch.xml; adb -s 127.0.0.1:5555 shell su 0 rm -f /vendor/etc/permissions/zz-test.xml /system/etc/permissions/zz-test.xml; adb -s 127.0.0.1:5555 shell su 0 ls -l /vendor/etc/permissions/; echo "== restart =="; sudo docker restart redroid; sleep 35; adb connect 127.0.0.1:5555 2>&1 | tail -1; sleep 8; echo "== features now =="; adb -s 127.0.0.1:5555 shell pm list features 2>/dev/null | grep -iE "multitouch|touchscreen"
-at: 23:09:34
-$ bash -c true; echo T6; git fetch -q origin main; git show origin/main:kgs-login/live/android.hardware.touchscreen.multitouch.xml > /tmp/mt.xml; wc -c /tmp/mt.xml; adb -s 127.0.0.1:5555 push /tmp/mt.xml /data/local/tmp/mt.xml 2>&1 | tail -1; adb -s 127.0.0.1:5555 shell su 0 cp /data/local/tmp/mt.xml /vendor/etc/permissions/android.hardware.touchscreen.multitouch.xml; adb -s 127.0.0.1:5555 shell su 0 rm -f /vendor/etc/permissions/zz-test.xml /system/etc/permissions/zz-test.xml; adb -s 127.0.0.1:5555 shell su 0 ls -l /vendor/etc/permissions/; echo "== restart =="; sudo docker restart redroid; sleep 35; adb connect 127.0.0.1:5555 2>&1 | tail -1; sleep 8; echo "== features now =="; adb -s 127.0.0.1:5555 shell pm list features 2>/dev/null | grep -iE "multitouch|touchscreen"
-T6
-1423 /tmp/mt.xml
-/tmp/mt.xml: 1 file pushed, 0 skipped. 14.6 MB/s (1423 bytes in 0.000s)
-total 52
--rw-r--r-- 1 root root  834 2024-08-14 05:09 android.hardware.ethernet.xml
--rw-r--r-- 1 root root  764 2024-08-14 04:11 android.hardware.hardware_keystore.km41.xml
--rw-r--r-- 1 root root  870 2024-08-14 05:09 android.hardware.opengles.aep.xml
--rw-rw-rw- 1 root root 1423 2026-09-30 18:09 android.hardware.touchscreen.multitouch.xml
--rw-r--r-- 1 root root  909 2024-08-14 05:09 android.hardware.touchscreen.xml
--rw-r--r-- 1 root root  845 2024-08-14 05:09 android.hardware.usb.accessory.xml
--rw-r--r-- 1 root root  866 2024-08-14 05:09 android.hardware.vulkan.compute-0.xml
--rw-r--r-- 1 root root  865 2024-08-14 05:09 android.hardware.vulkan.level-1.xml
--rw-r--r-- 1 root root  902 2024-08-14 05:09 android.hardware.vulkan.version-1_1.xml
--rw-r--r-- 1 root root  829 2024-08-14 05:09 android.hardware.wifi.xml
--rw-r--r-- 1 root root 5242 2024-08-14 05:09 handheld_core_hardware.xml
--rw-r--r-- 1 root root   68 2024-08-14 05:09 redroid-removed-permissions.xml
-== restart ==
-redroid
-already connected to 127.0.0.1:5555
-== features now ==
-feature:android.hardware.touchscreen
-feature:android.hardware.touchscreen.multitouch
+cmd: exec bash -c true; echo WD; adb -s 127.0.0.1:5555 shell input swipe 639 638 639 638 180; sleep 20; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== konami =="; grep -i konami /tmp/kgs/mitm.log 2>/dev/null | tail -8
+at: 00:28:21
+$ bash -c true; echo WD; adb -s 127.0.0.1:5555 shell input swipe 639 638 639 638 180; sleep 20; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== konami =="; grep -i konami /tmp/kgs/mitm.log 2>/dev/null | tail -8
+WD
+== konami ==
+[00:10:15.197][172.17.0.2:59768] Client TLS handshake failed. The client does not trust the proxy's certificate for legal.konami.com (OpenSSL Error([('SSL routines', '', 'tls alert certificate unknown')]))
+[00:10:53.321][172.17.0.2:58132] Client TLS handshake failed. The client does not trust the proxy's certificate for pes22-game.cs.konami.net (OpenSSL Error([('SSL routines', '', 'tls alert certificate unknown')]))
+[00:13:30.605][172.17.0.2:38770] Client TLS handshake failed. The client does not trust the proxy's certificate for pes22-game.cs.konami.net (OpenSSL Error([('SSL routines', '', 'tls alert certificate unknown')]))
+172.17.0.2:60072: GET https://104.81.173.151/_common/img/konami_logo_normal.p… HTTP/2.0
 rc=0
-gamepid: 
-flows: 0
+gamepid: 9664
+flows: 9
