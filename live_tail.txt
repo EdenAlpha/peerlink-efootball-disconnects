@@ -1,7 +1,3 @@
-; read live-res/results + status.txt
-live: ignoring the already-queued command (not re-running it): []
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
- * [new branch]      HEAD -> live-res-h
 live: probe published OK; live-res is live
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    8776591..3deaea2  HEAD -> live-res-h
@@ -37,3 +33,7 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    1d8dc0b..47922d2  HEAD -> live-res-h
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    47922d2..415fecb  HEAD -> live-res-h
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   415fecb..3f22db4  HEAD -> live-res-h
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   3f22db4..85f0888  HEAD -> live-res-h
