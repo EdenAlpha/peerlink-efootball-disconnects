@@ -96,6 +96,11 @@ def main() -> int:
     ap.add_argument("--top", type=int, default=12,
                     help="how many of the largest writable regions to dump")
     ap.add_argument("--out", default="/tmp/kgs/memdump")
+    ap.add_argument("--report", default="/tmp/kgs/memdump-report.txt",
+                    help="also write the findings here. The regions themselves "
+                         "are far too large for an artifact, and they live "
+                         "outside the paths step 06 uploads, so without this "
+                         "the whole capture is lost when the VM goes away.")
     args = ap.parse_args()
 
     if shutil.which("adb") is None:
