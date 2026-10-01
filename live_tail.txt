@@ -1,30 +1,4 @@
-live: live control loop starting (poll 8s, max 1400 rounds)
-live: write commands to live-cmd/cmd.txt ; read live-res/results + status.txt
-live: ignoring the already-queued command (not re-running it): []
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   7baa2b2..c0d0659  HEAD -> live-res
-live: probe published OK; live-res is live
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   c0d0659..c9bbb65  HEAD -> live-res
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   c9bbb65..ef5aa2f  HEAD -> live-res
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   ef5aa2f..96b743c  HEAD -> live-res
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   96b743c..fe3d3e9  HEAD -> live-res
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   fe3d3e9..e82ca03  HEAD -> live-res
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   e82ca03..3ec47a9  HEAD -> live-res
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   3ec47a9..b8e998c  HEAD -> live-res
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   b8e998c..ba1af68  HEAD -> live-res
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   ba1af68..5e0d37b  HEAD -> live-res
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   5e0d37b..fe48d91  HEAD -> live-res
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+
    fe48d91..64ee96a  HEAD -> live-res
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    64ee96a..87d9b49  HEAD -> live-res
@@ -36,3 +10,30 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    00eb408..9eb470f  HEAD -> live-res
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    9eb470f..e959a63  HEAD -> live-res
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   e959a63..3e19a5d  HEAD -> live-res
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   3e19a5d..4f8b628  HEAD -> live-res
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   4f8b628..62f29e7  HEAD -> live-res
+kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   62f29e7..3822a54  HEAD -> live-res
+kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   3822a54..161b3b9  HEAD -> live-res
+kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   161b3b9..4b319df  HEAD -> live-res
+kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   4b319df..0bb7a10  HEAD -> live-res
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   0bb7a10..9b3fb06  HEAD -> live-res
+kgs-login/live/live_loop.sh: line 66: echo: write error: Broken pipe
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   9b3fb06..4a57853  HEAD -> live-res
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   4a57853..da1e72c  HEAD -> live-res
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   da1e72c..0ce7d18  HEAD -> live-res
