@@ -1,1 +1,1 @@
-exec bash -c true; echo D1; adb -s 127.0.0.1:5555 shell dumpsys input 2>/dev/null | grep -iE "viewport|orientation=|displayId=0" | head -6; adb -s 127.0.0.1:5555 shell input tap 455 160; sleep 7; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+exec bash -c true; echo D2; adb -s 127.0.0.1:5555 shell input keyevent 20; sleep 3; adb -s 127.0.0.1:5555 shell input keyevent 20; sleep 6; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
