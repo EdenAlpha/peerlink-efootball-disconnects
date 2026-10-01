@@ -1,0 +1,17 @@
+cmd: exec bash -c true; echo RD; adb -s 127.0.0.1:5555 shell input swipe 807 440 807 440 150; sleep 22; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== flows2 =="; grep -c "^### " /tmp/kgs/flows2.log 2>/dev/null; grep -oE "### (REQ|RESP) POST /pes22/[^ ]*" /tmp/kgs/flows2.log 2>/dev/null | sort -u | tail -8
+at: 00:58:17
+$ bash -c true; echo RD; adb -s 127.0.0.1:5555 shell input swipe 807 440 807 440 150; sleep 22; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== flows2 =="; grep -c "^### " /tmp/kgs/flows2.log 2>/dev/null; grep -oE "### (REQ|RESP) POST /pes22/[^ ]*" /tmp/kgs/flows2.log 2>/dev/null | sort -u | tail -8
+RD
+== flows2 ==
+42
+### RESP POST /pes22/gate/gate_CMD_GET_SERVER_ENV.php
+### RESP POST /pes22/gate/gate_CMD_GET_STADIUM_DATA.php
+### RESP POST /pes22/gate/gate_CMD_GET_USER_EULA_INFO.php
+### RESP POST /pes22/gate/gate_CMD_LOGIN.php
+### RESP POST /pes22/gate/gate_CMD_SET_GAMERELAY_QUALITY.php
+### RESP POST /pes22/gate/gate_CMD_SET_MENU_TRACKRECORD.php
+### RESP POST /pes22/gate/gate_CMD_SET_TRACKRECORD.php
+### RESP POST /pes22/gate/gate_CMD_USE_MYCLUB_AGENT.php
+rc=0
+gamepid: 29128
+flows: 22
