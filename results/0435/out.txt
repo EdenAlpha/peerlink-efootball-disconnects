@@ -1,10 +1,7 @@
-cmd: exec adb -s 127.0.0.1:5555 shell input swipe 360 300 360 800 500; sleep 12; sudo docker exec redroid iptables -t nat -L OUTPUT -n -v | head -5; tail -3 /tmp/kgs/flows.log
-at: 09:58:11
-$ adb -s 127.0.0.1:5555 shell input swipe 360 300 360 800 500; sleep 12; sudo docker exec redroid iptables -t nat -L OUTPUT -n -v | head -5; tail -3 /tmp/kgs/flows.log
-Chain OUTPUT (policy ACCEPT 0 packets, 0 bytes)
- pkts bytes target     prot opt in     out     source               destination         
-    0     0 DNAT       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpt:443 to:172.17.0.1:8080
-ADDON-READY targets=konami.net,konami.jp
+cmd: exec bash -c true; echo R9; adb -s 127.0.0.1:5555 shell input swipe 639 549 639 549 150; sleep 8; adb -s 127.0.0.1:5555 shell input swipe 168 677 168 677 150; sleep 14; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+at: 00:54:43
+$ bash -c true; echo R9; adb -s 127.0.0.1:5555 shell input swipe 639 549 639 549 150; sleep 8; adb -s 127.0.0.1:5555 shell input swipe 168 677 168 677 150; sleep 14; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+R9
 rc=0
-gamepid: 
-flows: 0
+gamepid: 29128
+flows: 22
