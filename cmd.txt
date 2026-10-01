@@ -1,1 +1,1 @@
-exec bash -c true; echo HA; A="adb -s 127.0.0.1:5555"; $A shell input swipe 640 640 640 640 250; sleep 14; $A exec-out screencap -p > /tmp/live-res/screen.png; echo survey1-continue
+exec bash -c true; echo HB; A="adb -s 127.0.0.1:5555"; $A shell input swipe 400 267 400 267 250; sleep 8; $A exec-out screencap -p > /tmp/live-res/screen.png; echo survey2-picked
