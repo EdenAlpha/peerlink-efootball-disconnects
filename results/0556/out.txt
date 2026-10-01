@@ -1,0 +1,14 @@
+cmd: exec bash -c true; echo JJ; A="adb -s 127.0.0.1:5555"; PID=$($A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r" | awk "{print \$1}"); $A shell su 0 cat /proc/$PID/maps 2>/dev/null | tr -d "\r" | grep libUE4; echo "== dumps available on device =="; $A shell ls -l /data/local/tmp/*.so 2>&1 | tr -d "\r"
+at: 20:21:02
+$ bash -c true; echo JJ; A="adb -s 127.0.0.1:5555"; PID=$($A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r" | awk "{print \$1}"); $A shell su 0 cat /proc/$PID/maps 2>/dev/null | tr -d "\r" | grep libUE4; echo "== dumps available on device =="; $A shell ls -l /data/local/tmp/*.so 2>&1 | tr -d "\r"
+JJ
+f6abeee18000-f6abf163e000 r--p 00000000 08:01 6292386                    /data/app/~~ZumihQArX2V144SdAV7GeA==/jp.konami.pesam-F5atS3xGk_4AJHPDLcKwBQ==/lib/arm64/libUE4.so
+f6abf1641000-f6abf798a000 r-xp 02825000 08:01 6292386                    /data/app/~~ZumihQArX2V144SdAV7GeA==/jp.konami.pesam-F5atS3xGk_4AJHPDLcKwBQ==/lib/arm64/libUE4.so
+f6abf798d000-f6abf871b000 r--p 08b6d000 08:01 6292386                    /data/app/~~ZumihQArX2V144SdAV7GeA==/jp.konami.pesam-F5atS3xGk_4AJHPDLcKwBQ==/lib/arm64/libUE4.so
+f6abf871e000-f6abf8783000 rw-p 098fa000 08:01 6292386                    /data/app/~~ZumihQArX2V144SdAV7GeA==/jp.konami.pesam-F5atS3xGk_4AJHPDLcKwBQ==/lib/arm64/libUE4.so
+== dumps available on device ==
+-rw-rw-rw- 1 root root  42098688 2026-10-01 13:19 /data/local/tmp/rw.so
+-rw-rw-rw- 1 root root 104108032 2026-10-01 13:20 /data/local/tmp/rx.so
+rc=0
+gamepid: 6261
+flows: 0
