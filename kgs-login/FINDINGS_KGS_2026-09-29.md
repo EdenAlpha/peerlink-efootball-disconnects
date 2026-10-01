@@ -1581,3 +1581,53 @@ After moving the hand-over to immediately after boot:
 tools the loop can call, not as steps that run unattended. `publish.sh` pushes
 a screenshot to `live-res` from inside a script precisely so that even a long
 unattended wait leaves a trail instead of a silence.
+
+
+## 11. A mandatory data download gates every online feature
+
+After onboarding the game stops at the title screen and refuses to go online
+until a further data patch is fetched:
+
+```
+Download Latest Data?
+Online features will be locked unless you download the data.
+Data size: 59.76 MB
+```
+
+This is separate from the ~2 GB of Play-delivered asset packs. Those get the
+game to the title screen; this 59.76 MB is what unlocks online play, and
+therefore what gates the Konami login, and therefore the whole room-creation
+path PeerLink needs. It reads like a nag dialog and is easy to cancel, after
+which the title screen simply never offers a way online.
+
+## 12. Onboarding order that reaches the title screen
+
+Recorded because each screen is one interaction and the chain is
+unattended-hostile. Every press is a 250 ms hold, never a bare tap:
+
+```
+language list            -> Done            (bottom right)
+Country / Region         -> Next, then Confirm on the "cannot be changed" dialog
+Birth Year and Month     -> picker opens, accept January/2000, Done,
+                            then Confirm on the second "cannot be changed" dialog
+Terms of Use             -> tick "Consent to All of the Above", then Consent
+Privacy Notice [Games]   -> Consent
+survey x3                -> pick an option, then Continue
+title screen             -> "Download Latest Data?" -> Download  (59.76 MB)
+```
+
+Interception was live throughout and the gate traffic was readable:
+
+```
+gate_CMD_GET_SERVER_ENV.php
+gate_CMD_GET_COUNTRY_LIST.php
+gate_CMD_GET_AGE_GATE_REQUIREMENTS.php
+gate_CMD_GET_KID_USER_AGE_KIND.php
+gate_CMD_GET_SURVEY_INFO.php
+gate_CMD_CREATE_USER.php
+gate_CMD_GET_PRODUCT_LIST.php
+gate_CMD_SET_TRACKRECORD.php
+```
+
+All eight returned 200 through the proxy, which is the first end-to-end proof
+that the Conscrypt apex bind-mount makes interception readable by the game.
