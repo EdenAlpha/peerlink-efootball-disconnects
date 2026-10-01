@@ -1,5 +1,4 @@
-live: live control loop starting (poll 8s, max 1400 rounds)
-live: write commands to live-cmd/cmd.txt ; read live-res/results + status.txt
+; read live-res/results + status.txt
 live: ignoring the already-queued command (not re-running it): []
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
  * [new branch]      HEAD -> live-res-h
@@ -28,3 +27,13 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    ac8e11a..0ca86f5  HEAD -> live-res-h
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    0ca86f5..bc3e3ef  HEAD -> live-res-h
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   bc3e3ef..9bf84af  HEAD -> live-res-h
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   9bf84af..df7cdfc  HEAD -> live-res-h
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   df7cdfc..1d8dc0b  HEAD -> live-res-h
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   1d8dc0b..47922d2  HEAD -> live-res-h
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   47922d2..415fecb  HEAD -> live-res-h
