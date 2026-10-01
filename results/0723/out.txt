@@ -1,0 +1,23 @@
+cmd: exec bash -c true; echo IA; A="adb -s 127.0.0.1:5555"; echo "== cmd role help =="; $A shell cmd role help 2>&1 | head -12; echo "== try add-role-holder =="; $A shell cmd role add-role-holder --user 0 android.app.role.BROWSER com.android.chrome 2>&1 | tail -2; sleep 4; echo "== handler now =="; $A shell cmd package resolve-activity --brief -a android.intent.action.VIEW -d "https://example.com" 2>/dev/null | tr -d "\r" | tail -1; echo "== role holders =="; $A shell cmd role get-role-holders android.app.role.BROWSER 2>&1 | tail -3; $A exec-out screencap -p > /tmp/live-res/screen.png
+at: 12:55:27
+$ bash -c true; echo IA; A="adb -s 127.0.0.1:5555"; echo "== cmd role help =="; $A shell cmd role help 2>&1 | head -12; echo "== try add-role-holder =="; $A shell cmd role add-role-holder --user 0 android.app.role.BROWSER com.android.chrome 2>&1 | tail -2; sleep 4; echo "== handler now =="; $A shell cmd package resolve-activity --brief -a android.intent.action.VIEW -d "https://example.com" 2>/dev/null | tr -d "\r" | tail -1; echo "== role holders =="; $A shell cmd role get-role-holders android.app.role.BROWSER 2>&1 | tail -3; $A exec-out screencap -p > /tmp/live-res/screen.png
+IA
+== cmd role help ==
+Role (role) commands:
+  help or -h
+    Print this help text.
+
+  get-role-holders [--user USER_ID] ROLE
+  add-role-holder [--user USER_ID] ROLE PACKAGE [FLAGS]
+  remove-role-holder [--user USER_ID] ROLE PACKAGE [FLAGS]
+  clear-role-holders [--user USER_ID] ROLE [FLAGS]
+  set-bypassing-role-qualification true|false
+
+== try add-role-holder ==
+== handler now ==
+com.android.chrome/com.google.android.apps.chrome.IntentDispatcher
+== role holders ==
+com.android.chrome
+rc=0
+gamepid: 10290
+flows: 16
