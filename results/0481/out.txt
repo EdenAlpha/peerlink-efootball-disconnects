@@ -1,7 +1,8 @@
-cmd: exec bash -c true; echo RL; adb -s 127.0.0.1:5555 shell input swipe 168 677 168 677 250; sleep 15; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
-at: 01:05:38
-$ bash -c true; echo RL; adb -s 127.0.0.1:5555 shell input swipe 168 677 168 677 250; sleep 15; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
-RL
+cmd: exec bash -c true; echo J3; for i in 1 2; do adb -s 127.0.0.1:5555 shell input swipe 1000 557 1000 557 250; sleep 13; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/s$i.png; done; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo flows=$(grep -c "^### " /tmp/kgs/flows.log)
+at: 08:32:16
+$ bash -c true; echo J3; for i in 1 2; do adb -s 127.0.0.1:5555 shell input swipe 1000 557 1000 557 250; sleep 13; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/s$i.png; done; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo flows=$(grep -c "^### " /tmp/kgs/flows.log)
+J3
+flows=60
 rc=0
-gamepid: 29128
-flows: 22
+gamepid: 18731
+flows: 60
