@@ -1,9 +1,5 @@
 e-res-h
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   fb75592..cd4c397  HEAD -> live-res-h
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   cd4c397..abdcc61  HEAD -> live-res-h
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    abdcc61..8f34cee  HEAD -> live-res-h
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    8f34cee..8cdb994  HEAD -> live-res-h
@@ -37,3 +33,7 @@ kgs-login/live/live_loop.sh: line 71: echo: write error: Broken pipe
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    65bd37b..4cc4dd0  HEAD -> live-res-h
 kgs-login/live/live_loop.sh: line 71: echo: write error: Broken pipe
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   4cc4dd0..016b7e2  HEAD -> live-res-h
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   016b7e2..0325e29  HEAD -> live-res-h
