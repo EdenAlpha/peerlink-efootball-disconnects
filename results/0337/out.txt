@@ -1,0 +1,11 @@
+cmd: exec bash -c true; echo IV; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; R=https://raw.githubusercontent.com/EdenAlpha/peerlink-efootball-disconnects/main/kgs-login/live; curl -fsSL --max-time 60 $R/grab_gate_plaintext.sh -o $W/live/grab.sh && echo "fetched $(wc -c < $W/live/grab.sh) bytes, CR lines=$(grep -c $'\r' $W/live/grab.sh || echo 0)"; curl -fsSL --max-time 60 $R/test_region_select.sh -o $W/live/t.sh && chmod +x $W/live/grab.sh $W/live/t.sh; echo "== off-device selection test =="; bash $W/live/t.sh 2>&1 | tail -9
+at: 19:46:55
+$ bash -c true; echo IV; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; R=https://raw.githubusercontent.com/EdenAlpha/peerlink-efootball-disconnects/main/kgs-login/live; curl -fsSL --max-time 60 $R/grab_gate_plaintext.sh -o $W/live/grab.sh && echo "fetched $(wc -c < $W/live/grab.sh) bytes, CR lines=$(grep -c $'\r' $W/live/grab.sh || echo 0)"; curl -fsSL --max-time 60 $R/test_region_select.sh -o $W/live/t.sh && chmod +x $W/live/grab.sh $W/live/t.sh; echo "== off-device selection test =="; bash $W/live/t.sh 2>&1 | tail -9
+IV
+curl: (23) Failure writing output to destination
+curl: (23) Failure writing output to destination
+== off-device selection test ==
+bash: /tmp/kgs/live/t.sh: No such file or directory
+rc=127
+gamepid: 6261
+flows: 0
