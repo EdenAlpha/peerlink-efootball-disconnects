@@ -1,4 +1,4 @@
-time=00:01:19
-gamepid=6484
-flows=0
-round=180
+time=00:32:37
+gamepid=9664
+flows=15
+round=330
