@@ -1,1 +1,1 @@
-exec bash -c true; echo WN; adb -s 127.0.0.1:5555 shell input swipe 639 566 639 566 150; sleep 12; adb -s 127.0.0.1:5555 shell input swipe 160 676 160 676 150; sleep 16; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== flows =="; grep -c "^### " /tmp/kgs/flows.log 2>/dev/null
+exec bash -c true; echo WO; for i in 1 2 3; do adb -s 127.0.0.1:5555 shell input swipe 639 638 639 638 150; sleep 10; done; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
