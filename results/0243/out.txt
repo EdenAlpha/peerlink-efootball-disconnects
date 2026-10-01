@@ -1,0 +1,14 @@
+cmd: exec bash -c true; echo HI; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; $A shell am start -n jp.konami.pesam/com.epicgames.ue4.SplashActivity >/dev/null 2>&1; sleep 100; $A shell input swipe 1207 661 1207 661 250; sleep 15; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "flows=$(grep -c "^### " $W/flows.log)"; echo "== hosts seen =="; grep "^HOST-SEEN" $W/flows.log 2>/dev/null | tail -5
+at: 11:39:57
+$ bash -c true; echo HI; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; $A shell am start -n jp.konami.pesam/com.epicgames.ue4.SplashActivity >/dev/null 2>&1; sleep 100; $A shell input swipe 1207 661 1207 661 250; sleep 15; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "flows=$(grep -c "^### " $W/flows.log)"; echo "== hosts seen =="; grep "^HOST-SEEN" $W/flows.log 2>/dev/null | tail -5
+HI
+flows=10
+== hosts seen ==
+HOST-SEEN: d1ln4m3c7n87ju.cloudfront.net
+HOST-SEEN: www.applilink.jp
+HOST-SEEN: ducte5pbkhc9o.cloudfront.net
+HOST-SEEN: firebaselogging-pa.googleapis.com
+HOST-SEEN: firebaselogging.googleapis.com
+rc=0
+gamepid: 10290
+flows: 10
