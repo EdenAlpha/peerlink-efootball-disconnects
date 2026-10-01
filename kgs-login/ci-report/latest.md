@@ -41,7 +41,7 @@ bbb77fa6888e: Download complete
 bbb77fa6888e: Pull complete
 Digest: sha256:0a611199ba2e0b5d60af39b3327a517f6407231f4352114ed3bd3cbfe2be69aa
 Status: Downloaded newer image for redroid/redroid:14.0.0_64only-latest
-4bd1501c07d6c6f16d8a37c565554aea1b40504d81ee6b208536b1ab173d4b40
+8a0c321e6bd2dc27b378b3b5ec2b156e30f1063fb7273fd0e1ff0a108d033636
 + booted=0
 ++ seq 1 36
 + for i in $(seq 1 36)
@@ -106,98 +106,98 @@ ls: /vendor/lib64/libvulkan.so: No such file or directory
 
 ### pipeline (apkeep, frida, install, capture)
 ```text
-+ '[' -n 6370 ']'
++ '[' -n 6383 ']'
 + for i in $(seq 1 36)
 + sleep 10
 ++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
-++ awk '{print $1}'
 ++ tr -d '\r'
-+ alive=6370
+++ awk '{print $1}'
++ alive=6383
 ++ grep -c '^### ' /tmp/kgs/flows.log
 ++ echo 0
-+ echo '  phase4 t=320s gamepid=6370 flows=0
++ echo '  phase4 t=320s gamepid=6383 flows=0
 0'
-  phase4 t=320s gamepid=6370 flows=0
+  phase4 t=320s gamepid=6383 flows=0
 0
 + sudo docker exec redroid /system/bin/input tap 915 405
 + sudo docker exec redroid /system/bin/input tap 500 435
 + sudo docker exec redroid /system/bin/input tap 360 640
 + sudo docker exec redroid /system/bin/input keyevent 66
 + sudo docker exec redroid sh -c 'screencap -p /data/local/tmp/screen_32.png'
-+ '[' -n 6370 ']'
++ '[' -n 6383 ']'
 + for i in $(seq 1 36)
 + sleep 10
 ++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
 ++ tr -d '\r'
 ++ awk '{print $1}'
-+ alive=6370
++ alive=6383
 ++ grep -c '^### ' /tmp/kgs/flows.log
 ++ echo 0
-+ echo '  phase4 t=330s gamepid=6370 flows=0
++ echo '  phase4 t=330s gamepid=6383 flows=0
 0'
-  phase4 t=330s gamepid=6370 flows=0
+  phase4 t=330s gamepid=6383 flows=0
 0
 + sudo docker exec redroid /system/bin/input tap 915 405
 + sudo docker exec redroid /system/bin/input tap 500 435
 + sudo docker exec redroid /system/bin/input tap 360 640
 + sudo docker exec redroid /system/bin/input keyevent 66
 + sudo docker exec redroid sh -c 'screencap -p /data/local/tmp/screen_33.png'
-+ '[' -n 6370 ']'
++ '[' -n 6383 ']'
 + for i in $(seq 1 36)
 + sleep 10
 ++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
 ++ tr -d '\r'
 ++ awk '{print $1}'
-+ alive=6370
++ alive=6383
 ++ grep -c '^### ' /tmp/kgs/flows.log
 ++ echo 0
-+ echo '  phase4 t=340s gamepid=6370 flows=0
++ echo '  phase4 t=340s gamepid=6383 flows=0
 0'
-  phase4 t=340s gamepid=6370 flows=0
+  phase4 t=340s gamepid=6383 flows=0
 0
 + sudo docker exec redroid /system/bin/input tap 915 405
 + sudo docker exec redroid /system/bin/input tap 500 435
 + sudo docker exec redroid /system/bin/input tap 360 640
 + sudo docker exec redroid /system/bin/input keyevent 66
 + sudo docker exec redroid sh -c 'screencap -p /data/local/tmp/screen_34.png'
-+ '[' -n 6370 ']'
++ '[' -n 6383 ']'
 + for i in $(seq 1 36)
 + sleep 10
 ++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
 ++ awk '{print $1}'
 ++ tr -d '\r'
-+ alive=6370
++ alive=6383
 ++ grep -c '^### ' /tmp/kgs/flows.log
 ++ echo 0
-+ echo '  phase4 t=350s gamepid=6370 flows=0
++ echo '  phase4 t=350s gamepid=6383 flows=0
 0'
-  phase4 t=350s gamepid=6370 flows=0
+  phase4 t=350s gamepid=6383 flows=0
 0
 + sudo docker exec redroid /system/bin/input tap 915 405
 + sudo docker exec redroid /system/bin/input tap 500 435
 + sudo docker exec redroid /system/bin/input tap 360 640
 + sudo docker exec redroid /system/bin/input keyevent 66
 + sudo docker exec redroid sh -c 'screencap -p /data/local/tmp/screen_35.png'
-+ '[' -n 6370 ']'
++ '[' -n 6383 ']'
 + for i in $(seq 1 36)
 + sleep 10
 ++ sudo docker exec redroid sh -c 'pidof jp.konami.pesam 2>/dev/null'
 ++ tr -d '\r'
 ++ awk '{print $1}'
-+ alive=6370
++ alive=6383
 ++ grep -c '^### ' /tmp/kgs/flows.log
 ++ echo 0
-+ echo '  phase4 t=360s gamepid=6370 flows=0
++ echo '  phase4 t=360s gamepid=6383 flows=0
 0'
-  phase4 t=360s gamepid=6370 flows=0
+  phase4 t=360s gamepid=6383 flows=0
 0
 + sudo docker exec redroid /system/bin/input tap 915 405
 + sudo docker exec redroid /system/bin/input tap 500 435
 + sudo docker exec redroid /system/bin/input tap 360 640
 + sudo docker exec redroid /system/bin/input keyevent 66
 + sudo docker exec redroid sh -c 'screencap -p /data/local/tmp/screen_36.png'
-+ '[' -n 6370 ']'
-+ kill 28894
++ '[' -n 6383 ']'
++ kill 28886
 + echo '--- diagnostic ladder: each layer proves the next ---'
 --- diagnostic ladder: each layer proves the next ---
 ++ '[' 0 = 0 ']'
@@ -207,13 +207,13 @@ CA trusted by phone: YES
 + echo '1. SYNs at all (game2.pcap size / syn count):'
 1. SYNs at all (game2.pcap size / syn count):
 + sudo docker exec redroid sh -c 'ls -la /data/local/tmp/game2.pcap 2>/dev/null; tcpdump -r /data/local/tmp/game2.pcap -c 2000 2>/dev/null | grep -c "S "'
--rw-r--r-- 1 root root 36864 2026-09-30 09:02 /data/local/tmp/game2.pcap
-159
+-rw-r--r-- 1 root root 32768 2026-10-01 03:06 /data/local/tmp/game2.pcap
+156
 + echo '2. proxy saw handshakes (mitm.log tail):'
 2. proxy saw handshakes (mitm.log tail):
 + tail -15 /tmp/kgs/mitm.log
-[08:56:27.178] Loading script kgs-login/scripts/mitm_addon.py
-[08:56:27.180] Transparent Proxy listening at *:8080.
+[03:00:26.311] Loading script kgs-login/scripts/mitm_addon.py
+[03:00:26.313] Transparent Proxy listening at *:8080.
 + echo '3. destinations the game contacted:'
 3. destinations the game contacted:
 + grep -h '^HOST-SEEN:' /tmp/kgs/flows.log
@@ -305,14 +305,14 @@ CA trusted by phone: YES
 + sudo docker cp redroid:/data/local/tmp/screen_36.png /tmp/kgs/screen_36.png
 + ls -la /tmp/kgs/screen_1.png /tmp/kgs/screen_10.png /tmp/kgs/screen_11.png /tmp/kgs/screen_12.png /tmp/kgs/screen_13.png /tmp/kgs/screen_14.png /tmp/kgs/screen_15.png /tmp/kgs/screen_16.png /tmp/kgs/screen_17.png /tmp/kgs/screen_18.png /tmp/kgs/screen_19.png /tmp/kgs/screen_2.png /tmp/kgs/screen_20.png /tmp/kgs/screen_21.png /tmp/kgs/screen_22.png /tmp/kgs/screen_23.png /tmp/kgs/screen_24.png /tmp/kgs/screen_25.png /tmp/kgs/screen_26.png /tmp/kgs/screen_27.png /tmp/kgs/screen_28.png /tmp/kgs/screen_29.png /tmp/kgs/screen_3.png /tmp/kgs/screen_30.png /tmp/kgs/screen_31.png /tmp/kgs/screen_32.png /tmp/kgs/screen_33.png /tmp/kgs/screen_34.png /tmp/kgs/screen_35.png /tmp/kgs/screen_36.png /tmp/kgs/screen_4.png /tmp/kgs/screen_5.png /tmp/kgs/screen_6.png /tmp/kgs/screen_7.png /tmp/kgs/screen_8.png /tmp/kgs/screen_9.png
 + head -8
--rw-r--r-- 1 root root 904128 Sep 30 08:56 /tmp/kgs/screen_1.png
--rw-r--r-- 1 root root 532762 Sep 30 08:58 /tmp/kgs/screen_10.png
--rw-r--r-- 1 root root 532762 Sep 30 08:58 /tmp/kgs/screen_11.png
--rw-r--r-- 1 root root 532762 Sep 30 08:58 /tmp/kgs/screen_12.png
--rw-r--r-- 1 root root 532762 Sep 30 08:59 /tmp/kgs/screen_13.png
--rw-r--r-- 1 root root 532762 Sep 30 08:59 /tmp/kgs/screen_14.png
--rw-r--r-- 1 root root 532762 Sep 30 08:59 /tmp/kgs/screen_15.png
--rw-r--r-- 1 root root 532762 Sep 30 08:59 /tmp/kgs/screen_16.png
+-rw-r--r-- 1 root root 904128 Oct  1 03:00 /tmp/kgs/screen_1.png
+-rw-r--r-- 1 root root 532762 Oct  1 03:02 /tmp/kgs/screen_10.png
+-rw-r--r-- 1 root root 532762 Oct  1 03:02 /tmp/kgs/screen_11.png
+-rw-r--r-- 1 root root 532762 Oct  1 03:02 /tmp/kgs/screen_12.png
+-rw-r--r-- 1 root root 532762 Oct  1 03:03 /tmp/kgs/screen_13.png
+-rw-r--r-- 1 root root 532762 Oct  1 03:03 /tmp/kgs/screen_14.png
+-rw-r--r-- 1 root root 532762 Oct  1 03:03 /tmp/kgs/screen_15.png
+-rw-r--r-- 1 root root 532762 Oct  1 03:03 /tmp/kgs/screen_16.png
 + cp -f /tmp/kgs/flows.log /flows-decrypted.log
 + true
 + cp -f /tmp/kgs/mitm.log /mitm.log
@@ -353,7 +353,7 @@ tcpdump: listening on any, link-type LINUX_SLL2 (Linux cooked v2), snapshot leng
 0 packets dropped by kernel
 + sudo docker cp redroid:/data/local/tmp/game.pcap /tmp/kgs/game.pcap
 + ls -la /tmp/kgs/game.pcap
--rw-r--r-- 1 root root 24 Sep 30 08:49 /tmp/kgs/game.pcap
+-rw-r--r-- 1 root root 24 Oct  1 02:53 /tmp/kgs/game.pcap
 + echo 'GAME PCAP CAPTURED: /tmp/kgs/game.pcap'
 GAME PCAP CAPTURED: /tmp/kgs/game.pcap
 ```
@@ -378,15 +378,15 @@ Failed to spawn: error receiving data: Connection reset by peer
 
 ### logcat (filtered)
 ```text
-09-30 08:45:20.580  3584  3584 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
-09-30 08:45:20.765  3602  3602 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
-09-30 08:45:20.952  3620  3620 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
-09-30 08:46:21.200  3648  3648 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
-09-30 08:46:21.391  3666  3666 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
-09-30 08:46:21.575  3684  3684 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
-09-30 08:46:40.445   229   586 I ActivityManager: Force stopping jp.konami.pesam appid=10087 user=0: from pid 3785
-09-30 08:46:40.451   821   821 D CarrierSvcBindHelper: onHandleForceStop: [jp.konami.pesam]
-09-30 08:46:40.539  3788  3788 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
-09-30 08:49:44.190   229   655 I ActivityManager: Force stopping jp.konami.pesam appid=10087 user=0: from pid 4451
-09-30 08:49:44.195   821   821 D CarrierSvcBindHelper: onHandleForceStop: [jp.konami.pesam]
+10-01 02:49:20.926  3584  3584 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-01 02:49:21.108  3602  3602 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-01 02:49:21.287  3620  3620 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-01 02:50:21.531  3650  3650 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-01 02:50:21.713  3668  3668 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-01 02:50:21.889  3688  3688 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-01 02:50:40.731   233   695 I ActivityManager: Force stopping jp.konami.pesam appid=10087 user=0: from pid 3791
+10-01 02:50:40.735   817   817 D CarrierSvcBindHelper: onHandleForceStop: [jp.konami.pesam]
+10-01 02:50:40.816  3794  3794 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-01 02:53:44.276   233   694 I ActivityManager: Force stopping jp.konami.pesam appid=10087 user=0: from pid 4450
+10-01 02:53:44.278   817   817 D CarrierSvcBindHelper: onHandleForceStop: [jp.konami.pesam]
 ```
