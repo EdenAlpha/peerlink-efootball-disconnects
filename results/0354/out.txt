@@ -1,0 +1,16 @@
+cmd: exec bash -c true; echo HO; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; $A shell input swipe 640 440 640 440 250; sleep 12; $A exec-out screencap -p > /tmp/live-res/s1.png; $A shell input swipe 366 342 366 342 250; sleep 24; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== foreground =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -2; echo "flows=$(grep -c "^### " $W/flows.log)"; echo "== last paths =="; grep "^### " $W/flows.log 2>/dev/null | tail -5
+at: 11:58:59
+$ bash -c true; echo HO; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; $A shell input swipe 640 440 640 440 250; sleep 12; $A exec-out screencap -p > /tmp/live-res/s1.png; $A shell input swipe 366 342 366 342 250; sleep 24; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== foreground =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -2; echo "flows=$(grep -c "^### " $W/flows.log)"; echo "== last paths =="; grep "^### " $W/flows.log 2>/dev/null | tail -5
+HO
+== foreground ==
+  mCurrentFocus=Window{489d45b u0 jp.konami.pesam/com.epicgames.ue4.GameActivity}
+flows=16
+== last paths ==
+### RESP POST /pes22/gate/gate_CMD_GET_KONAMIID_TRANSITION_URL.php -> 200
+### REQ GET /account-link/introduction?lt=ZHJEDK9P9K3U42XG&isWebView=true
+### RESP GET /account-link/introduction?lt=ZHJEDK9P9K3U42XG&isWebView=true -> 403
+### REQ POST /pes22/gate/gate_CMD_DATA_TRANSITION.php
+### RESP POST /pes22/gate/gate_CMD_DATA_TRANSITION.php -> 200
+rc=0
+gamepid: 10290
+flows: 16
