@@ -184,6 +184,22 @@ jobs:
           mkdir -p $W/creds
           printf '%s' "$PEERLINK_GMAIL" > $W/creds/GMAIL
           printf '%s' "$PEERLINK_GPASS" > $W/creds/GPASS
+          # The Konami account is what gets past the tutorial/mission gate, which
+          # otherwise blocks entering a match and creating a room. Staged the
+          # same way as the Google credentials for the same reason: the live
+          # command channel is a file in a PUBLIC branch, so a real account
+          # password must never be typed into cmd.txt. Commands read
+          # KID=$(cat $W/creds/KID) / KPASS=$(cat $W/creds/KPASS) instead.
+          # Both are optional -- a missing Konami account still reaches the
+          # login screen, and the login REQUEST is what carries the route.
+          if [ -n "${PEERLINK_KID:-}" ]; then
+            printf '%s' "$PEERLINK_KID" > $W/creds/KID
+            printf '%s' "$PEERLINK_KPASS" > $W/creds/KPASS
+            chmod 600 $W/creds/KID $W/creds/KPASS
+            echo "konami creds staged: $(wc -c < $W/creds/KID) byte id"
+          else
+            echo "NO PEERLINK_KID SECRET - tutorial gate will not be passed"
+          fi
           chmod 600 $W/creds/GMAIL $W/creds/GPASS
           echo "creds staged: $(wc -c < $W/creds/GMAIL) byte email, $(wc -c < $W/creds/GPASS) byte password"
 
