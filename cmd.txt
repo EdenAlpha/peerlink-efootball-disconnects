@@ -1,1 +1,1 @@
-exec bash -c true; echo R8; adb -s 127.0.0.1:5555 shell input swipe 639 441 639 441 150; sleep 14; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+exec bash -c true; echo R9; adb -s 127.0.0.1:5555 shell input swipe 639 549 639 549 150; sleep 8; adb -s 127.0.0.1:5555 shell input swipe 168 677 168 677 150; sleep 14; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
