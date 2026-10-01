@@ -329,7 +329,12 @@ jobs:
           if git show-ref --verify --quiet "refs/remotes/origin/$RB"; then
             git worktree add -f -B "$RB" /tmp/live-res "origin/$RB" 2>&1 | tail -1
           else
-            git worktree add -f -b "$RB" /tmp/live-res "origin/$CB" 2>&1 | tail -1
+            # Branch off HEAD, which always exists because checkout made it.
+            # Branching off the command branch instead looks tidier but fails
+            # whenever a fresh lane has no command branch seeded yet, and that
+            # took out a whole run: this step exited 1 and every later step was
+            # skipped behind it.
+            git worktree add -f -b "$RB" /tmp/live-res HEAD 2>&1 | tail -1
           fi
           [ -e /tmp/live-res/.git ] || { echo "=== WORKTREE FAILED ==="; exit 1; }
           mkdir -p /tmp/live-res/install
@@ -401,7 +406,12 @@ jobs:
           if git show-ref --verify --quiet "refs/remotes/origin/$RB"; then
             git worktree add -f -B "$RB" /tmp/live-res "origin/$RB" 2>&1 | tail -1
           else
-            git worktree add -f -b "$RB" /tmp/live-res "origin/$CB" 2>&1 | tail -1
+            # Branch off HEAD, which always exists because checkout made it.
+            # Branching off the command branch instead looks tidier but fails
+            # whenever a fresh lane has no command branch seeded yet, and that
+            # took out a whole run: this step exited 1 and every later step was
+            # skipped behind it.
+            git worktree add -f -b "$RB" /tmp/live-res HEAD 2>&1 | tail -1
           fi
           [ -e /tmp/live-res/.git ] || { echo "=== WORKTREE FAILED ==="; exit 1; }
           if ! timeout 60 git -C /tmp/live-res ls-remote origin HEAD >/dev/null 2>&1; then
