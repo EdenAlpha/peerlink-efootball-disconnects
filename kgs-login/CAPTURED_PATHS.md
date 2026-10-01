@@ -19,23 +19,44 @@ traffic after MITM -- not assembled by hand.
 |---|---|---|
 | 1 | `gate_CMD_CHECK_STRING.php` | |
 | 2 | `gate_CMD_CREATE_USER.php` | 12368 B response, User ID `ASKH-124-394-950` |
-| 3 | `gate_CMD_GET_AGE_GATE_REQUIREMENTS.php` | |
-| 4 | `gate_CMD_GET_COUNTRY_LIST.php` | |
+| 3 | `gate_CMD_GET_AGE_GATE_REQUIREMENTS.php` | 86 B request / 160 B response |
+| 4 | `gate_CMD_GET_COUNTRY_LIST.php` | 86 B / **2,352 B** — largest body in the set |
 | 5 | `gate_CMD_GET_GAMERELAY_QUALITYCHECK_LIST.php` | |
-| 6 | `gate_CMD_GET_KID_USER_AGE_KIND.php` | |
+| 6 | `gate_CMD_GET_KID_USER_AGE_KIND.php` | 86 B request / 128 B response |
 | 7 | `gate_CMD_GET_MAINMENU_INFO.php` | marks the end of onboarding |
 | 8 | `gate_CMD_GET_PRODUCT_LIST.php` | |
-| 9 | `gate_CMD_GET_SERVER_ENV.php` | |
+| 9 | `gate_CMD_GET_SERVER_ENV.php` | 86 B request / 224 B response |
 | 10 | `gate_CMD_GET_STADIUM_DATA.php` | |
 | 11 | `gate_CMD_GET_SURVEY_INFO.php` | |
 | 12 | `gate_CMD_GET_USEABLE_TEAM_LIST.php` | |
-| 13 | `gate_CMD_GET_USER_EULA_INFO.php` | |
+| 13 | `gate_CMD_GET_USER_EULA_INFO.php` | 86 B / 512 B |
 | 14 | `gate_CMD_LOGIN.php` | **608 B request — the login** |
 | 15 | `gate_CMD_SEND_ADJUST_PARAM.php` | |
 | 16 | `gate_CMD_SET_GAMERELAY_QUALITY.php` | 11 calls, the P2P relay setting |
 | 17 | `gate_CMD_SET_MYCLUB_ENTRY_INFO.php` | |
 | 18 | `gate_CMD_SET_PLAYDATA_MATCH.php` | |
 | 19 | `gate_CMD_SET_TRACKRECORD.php` | |
+
+### Lane `h`, 2026-10-01: request/response sizes
+
+Run `36851667352` captured all three age-gate routes as a self-consistent set
+from a single session -- same 86-byte request shape, only the endpoint varying.
+Full record in `captures/2026-10-01-lane-h/`:
+
+| route | request | response | sha1 |
+|---|---|---|---|
+| `gate_CMD_GET_AGE_GATE_REQUIREMENTS.php` | 86 B | 160 B | `1cc5c728` |
+| `gate_CMD_GET_COUNTRY_LIST.php` | 86 B | 2,352 B | `a5ae9786` |
+| `gate_CMD_GET_KID_USER_AGE_KIND.php` | 86 B | 128 B | `51564e04` |
+| `gate_CMD_GET_SERVER_ENV.php` | 86 B | 224 B | |
+| `gate_CMD_GET_USER_EULA_INFO.php` | 86 B | 512 B | |
+| `gate_CMD_GET_KONAMIID_TRANSITION_URL.php` | 86 B | 320 B | |
+| `gate_CMD_DATA_TRANSITION.php` | 86 B | 224 B | |
+
+`COUNTRY_LIST` at 2,352 bytes is the largest single body recorded in this
+project and the most likely to yield readable structure once the app-layer
+encryption is broken, since a country list has highly predictable internal
+structure. It is the best decryption target currently in hand.
 
 Sample response frame, captured verbatim:
 
