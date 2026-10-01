@@ -307,6 +307,32 @@ jobs:
           adb -s 127.0.0.1:5555 shell wc -c /data/local/tmp/capture_insecure.js
           echo "FRIDA ARMED - drive from step 05"
 
+      # Play must own the install or there is nothing to own: Play Asset Delivery
+      # only serves the ~2 GB of packs to an app Play itself installed, and a
+      # `pm install-create` sideload produces no PAD splits at all, which is why
+      # the game then reports "Download Failed 0%". play_install.sh is that
+      # sequence, and it is here rather than driven by hand because the run
+      # cannot reach the game without it.
+      #
+      # It stops with exit 2 at Google's 2FA screen, which a human has to answer
+      # on their own phone. That is why the step is non-fatal: the live loop
+      # still opens so the rest can be driven from there.
+      - name: 04b2 install eFootball from Play, then wait for the asset packs
+        run: |
+          set +e
+          set -x
+          W=/tmp/kgs; mkdir -p $W
+          exec >> >(tee -a $W/pipeline.log) 2>&1
+          adb connect 127.0.0.1:5555 2>&1 | tail -1
+          bash kgs-login/live/play_install.sh 127.0.0.1:5555 2>&1 | tail -45
+          echo "play_install rc=${PIPESTATUS[0]} (2 = stopped for a human 2FA code)"
+          echo "== is the game installed? =="
+          adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam 2>/dev/null \
+            || echo "=== NOT INSTALLED - onboarding below cannot run ==="
+          adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam 2>/dev/null \
+            | grep -o "split_pad_it_[0-9]*" | sort -u
+          exit 0
+
       # Walk onboarding to the main menu unattended. Every coordinate is encoded
       # in onboard.sh from real screenshots taken on 2026-10-01, and it stops on
       # the first step whose screenshot does not change, naming the file to look
