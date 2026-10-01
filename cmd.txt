@@ -1,1 +1,1 @@
-exec bash -c true; echo A3; adb -s 127.0.0.1:5555 shell input tap 360 631; sleep 3; G=$(cat /tmp/kgs/creds/GMAIL); adb -s 127.0.0.1:5555 shell input text "$G"; sleep 2; adb -s 127.0.0.1:5555 shell input keyevent 66; sleep 15; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+exec bash -c true; echo A4; adb -s 127.0.0.1:5555 shell input text "$(cat /tmp/kgs/creds/GPASS)"; sleep 3; adb -s 127.0.0.1:5555 shell input tap 591 667; sleep 20; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
