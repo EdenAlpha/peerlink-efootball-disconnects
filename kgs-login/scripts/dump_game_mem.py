@@ -68,8 +68,21 @@ def adb(serial: str, *args: str, timeout: int = 120) -> str:
 
 
 def shell_root(serial: str, script: str, timeout: int = 300) -> str:
-    """Run a shell command on the device as root."""
-    return adb(serial, "shell", "su", "0", "sh", "-c", script, timeout=timeout)
+    """Run a shell command on the device as root.
+
+    The whole thing has to reach the device as ONE argument. `adb shell` joins
+    its own argv with spaces before handing it to the device shell, so passing
+    ["su", "0", "sh", "-c", "cat /proc/1/maps"] arrives as
+
+        su 0 sh -c cat /proc/1/maps
+
+    where `sh -c cat` runs the single word "cat" with the path as $0. That
+    returns empty output and looks exactly like a permissions failure, which is
+    a misleading way to lose an hour. So the inner command is quoted here and
+    passed as one string.
+    """
+    quoted = script.replace("'", "'\\''")
+    return adb(serial, "shell", "su 0 sh -c '%s'" % quoted, timeout=timeout)
 
 
 def main() -> int:
