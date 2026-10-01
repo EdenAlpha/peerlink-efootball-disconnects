@@ -1,1 +1,1 @@
-exec bash -c true; echo VK; adb -s 127.0.0.1:5555 shell input swipe 146 535 146 535 150; sleep 4; adb -s 127.0.0.1:5555 shell input swipe 898 639 898 639 180; sleep 14; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+exec bash -c true; echo VL; adb -s 127.0.0.1:5555 shell input swipe 898 639 898 639 180; sleep 14; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== flows =="; grep -c . /tmp/kgs/flows.log 2>/dev/null
