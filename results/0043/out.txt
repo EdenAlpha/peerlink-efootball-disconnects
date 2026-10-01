@@ -1,0 +1,17 @@
+cmd: exec bash -c true; echo H4; A="adb -s 127.0.0.1:5555"; $A shell input swipe 360 781 360 781 250; sleep 60; $A exec-out screencap -p > /tmp/live-res/s1.png; echo "== pad splits =="; $A shell pm path jp.konami.pesam 2>/dev/null | grep -o "split_pad_it_[0-9]*" | sort -u; echo "== data MB =="; $A shell su 0 du -sm /data 2>/dev/null | tail -1; sleep 100; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== pad splits after =="; $A shell pm path jp.konami.pesam 2>/dev/null | grep -o "split_pad_it_[0-9]*" | sort -u; echo "== data MB after =="; $A shell su 0 du -sm /data 2>/dev/null | tail -1
+at: 11:01:47
+$ bash -c true; echo H4; A="adb -s 127.0.0.1:5555"; $A shell input swipe 360 781 360 781 250; sleep 60; $A exec-out screencap -p > /tmp/live-res/s1.png; echo "== pad splits =="; $A shell pm path jp.konami.pesam 2>/dev/null | grep -o "split_pad_it_[0-9]*" | sort -u; echo "== data MB =="; $A shell su 0 du -sm /data 2>/dev/null | tail -1; sleep 100; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== pad splits after =="; $A shell pm path jp.konami.pesam 2>/dev/null | grep -o "split_pad_it_[0-9]*" | sort -u; echo "== data MB after =="; $A shell su 0 du -sm /data 2>/dev/null | tail -1
+H4
+== pad splits ==
+split_pad_it_0
+split_pad_it_1
+== data MB ==
+5905	/data
+== pad splits after ==
+split_pad_it_0
+split_pad_it_1
+== data MB after ==
+5905	/data
+rc=0
+gamepid: 
+flows: 0
