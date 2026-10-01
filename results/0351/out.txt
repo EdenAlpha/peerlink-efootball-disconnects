@@ -1,0 +1,15 @@
+cmd: exec bash -c true; echo IY; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; curl -fsSL --max-time 60 https://raw.githubusercontent.com/EdenAlpha/peerlink-efootball-disconnects/main/kgs-login/live/grab_gate_plaintext.sh -o $W/live/grab.sh && chmod +x $W/live/grab.sh && echo "grab.sh $(wc -c < $W/live/grab.sh) bytes"; echo "game pid: $($A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r")"; MAXREGIONS=8 timeout 700 bash $W/live/grab.sh 127.0.0.1:5555 2>&1 | grep -E "candidate|dumping|dumped|anchor=|TOTAL|windows kept|unreadable|FATAL" | head -40
+at: 19:48:57
+$ bash -c true; echo IY; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; curl -fsSL --max-time 60 https://raw.githubusercontent.com/EdenAlpha/peerlink-efootball-disconnects/main/kgs-login/live/grab_gate_plaintext.sh -o $W/live/grab.sh && chmod +x $W/live/grab.sh && echo "grab.sh $(wc -c < $W/live/grab.sh) bytes"; echo "game pid: $($A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r")"; MAXREGIONS=8 timeout 700 bash $W/live/grab.sh 127.0.0.1:5555 2>&1 | grep -E "candidate|dumping|dumped|anchor=|TOTAL|windows kept|unreadable|FATAL" | head -40
+IY
+grab.sh 8501 bytes
+game pid: 6261
+grab: candidate regions: 8
+grab: dumping region 1 12c00000-32c00000 (512 MB) to device
+grab:   region 1 unreadable: 
+grab: TOTAL ANCHOR HITS: 0
+grab: windows kept in /tmp/kgs (win_*.bin)
+grab: windows kept: 0
+rc=0
+gamepid: 6261
+flows: 0
