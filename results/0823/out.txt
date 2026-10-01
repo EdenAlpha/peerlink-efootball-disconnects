@@ -1,0 +1,10 @@
+cmd: exec bash -c true; echo IE; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; HOSTGW=$(ip -4 addr show docker0 | grep -oE "inet [0-9.]+" | head -1 | cut -d" " -f2); sudo iptables-legacy -t nat -A PREROUTING -i docker0 -p tcp --dport 443 -j DNAT --to-destination "$HOSTGW:8080" 2>/dev/null; echo "dnat: $(sudo iptables-legacy -t nat -L PREROUTING -n | grep -c DNAT)"; $A shell am force-stop com.android.chrome; sleep 2; $A shell am start -n jp.konami.pesam/com.epicgames.ue4.GameActivity >/dev/null 2>&1; sleep 22; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== foreground =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1
+at: 13:11:52
+$ bash -c true; echo IE; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; HOSTGW=$(ip -4 addr show docker0 | grep -oE "inet [0-9.]+" | head -1 | cut -d" " -f2); sudo iptables-legacy -t nat -A PREROUTING -i docker0 -p tcp --dport 443 -j DNAT --to-destination "$HOSTGW:8080" 2>/dev/null; echo "dnat: $(sudo iptables-legacy -t nat -L PREROUTING -n | grep -c DNAT)"; $A shell am force-stop com.android.chrome; sleep 2; $A shell am start -n jp.konami.pesam/com.epicgames.ue4.GameActivity >/dev/null 2>&1; sleep 22; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== foreground =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1
+IE
+dnat: 1
+== foreground ==
+  mCurrentFocus=Window{489d45b u0 jp.konami.pesam/com.epicgames.ue4.GameActivity}
+rc=0
+gamepid: 10290
+flows: 18
