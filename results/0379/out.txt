@@ -1,13 +1,9 @@
-cmd: exec GW=$(sudo docker exec redroid ip route show default 2>/dev/null | awk "{for(i=1;i<=NF;i++) if($i==via) print $(i+1)}" | head -1); echo gw=[$GW]; sudo docker exec redroid iptables -t nat -A OUTPUT -p tcp --dport 443 -j DNAT --to-destination $GW:8080; echo dnat_rc=$?; sudo docker exec redroid iptables -t nat -L OUTPUT -n | head -8
-at: 09:50:13
-$ GW=$(sudo docker exec redroid ip route show default 2>/dev/null | awk "{for(i=1;i<=NF;i++) if($i==via) print $(i+1)}" | head -1); echo gw=[$GW]; sudo docker exec redroid iptables -t nat -A OUTPUT -p tcp --dport 443 -j DNAT --to-destination $GW:8080; echo dnat_rc=$?; sudo docker exec redroid iptables -t nat -L OUTPUT -n | head -8
-kgs-login/live/live_loop.sh: line 185: i: unbound variable
-gw=[]
-iptables v1.8.7 (legacy): can't initialize iptables table `nat': Table does not exist (do you need to insmod?)
-Perhaps iptables or your kernel needs to be upgraded.
-dnat_rc=3
-iptables v1.8.7 (legacy): can't initialize iptables table `nat': Table does not exist (do you need to insmod?)
-Perhaps iptables or your kernel needs to be upgraded.
-rc=3
-gamepid: 
-flows: 0
+cmd: exec bash -c true; echo WQ; for i in 1 2 3 4; do adb -s 127.0.0.1:5555 shell input swipe 639 551 639 551 150; sleep 9; done; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== flows =="; grep -c "^### " /tmp/kgs/flows.log 2>/dev/null
+at: 00:43:07
+$ bash -c true; echo WQ; for i in 1 2 3 4; do adb -s 127.0.0.1:5555 shell input swipe 639 551 639 551 150; sleep 9; done; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== flows =="; grep -c "^### " /tmp/kgs/flows.log 2>/dev/null
+WQ
+== flows ==
+22
+rc=0
+gamepid: 9664
+flows: 22
