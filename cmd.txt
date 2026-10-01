@@ -1,1 +1,1 @@
-exec bash -c true; echo RD; adb -s 127.0.0.1:5555 shell input swipe 807 440 807 440 150; sleep 22; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== flows2 =="; grep -c "^### " /tmp/kgs/flows2.log 2>/dev/null; grep -oE "### (REQ|RESP) POST /pes22/[^ ]*" /tmp/kgs/flows2.log 2>/dev/null | sort -u | tail -8
+exec bash -c true; echo RE; sleep 30; adb -s 127.0.0.1:5555 shell pidof jp.konami.pesam; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== flows2 =="; grep -c "^### " /tmp/kgs/flows2.log 2>/dev/null
