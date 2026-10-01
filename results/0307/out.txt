@@ -1,0 +1,13 @@
+cmd: exec bash -c true; echo IN; A="adb -s 127.0.0.1:5555"; $A shell pm list packages 2>/dev/null | tr -d "\r" | grep -i pesam || echo "NOT INSTALLED YET"; echo "== data =="; $A shell su 0 du -sm /data/data/jp.konami.pesam 2>/dev/null | tr -d "\r" || echo "-"; echo "== external =="; $A shell su 0 du -sm /sdcard/Android/data/jp.konami.pesam 2>/dev/null | tr -d "\r" || echo "-"; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+at: 19:39:27
+$ bash -c true; echo IN; A="adb -s 127.0.0.1:5555"; $A shell pm list packages 2>/dev/null | tr -d "\r" | grep -i pesam || echo "NOT INSTALLED YET"; echo "== data =="; $A shell su 0 du -sm /data/data/jp.konami.pesam 2>/dev/null | tr -d "\r" || echo "-"; echo "== external =="; $A shell su 0 du -sm /sdcard/Android/data/jp.konami.pesam 2>/dev/null | tr -d "\r" || echo "-"; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+IN
+package:jp.konami.pesam
+== data ==
+1	/data/data/jp.konami.pesam
+== external ==
+-
+== shot ==
+rc=0
+gamepid: 
+flows: 0
