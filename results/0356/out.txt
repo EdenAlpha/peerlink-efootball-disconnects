@@ -1,0 +1,12 @@
+cmd: exec bash -c true; echo IZ; W=/tmp/kgs; curl -fsSL --max-time 60 https://raw.githubusercontent.com/EdenAlpha/peerlink-efootball-disconnects/main/kgs-login/live/grab_gate_plaintext.sh -o $W/live/grab.sh && echo "grab.sh $(wc -c < $W/live/grab.sh) bytes (want 8942)"; grep -q "chmod 777" $W/live/grab.sh && echo "CHMOD PRESENT" || echo "CHMOD MISSING"; echo "== workdir preflight =="; adb -s 127.0.0.1:5555 shell su 0 mkdir -p /data/local/tmp/heapdump 2>&1 | tr -d "\r"; adb -s 127.0.0.1:5555 shell su 0 chmod 777 /data/local/tmp/heapdump 2>&1 | tr -d "\r"; adb -s 127.0.0.1:5555 shell ls -ld /data/local/tmp/heapdump 2>&1 | tr -d "\r"; adb -s 127.0.0.1:5555 shell touch /data/local/tmp/heapdump/probe 2>&1 | tr -d "\r"; adb -s 127.0.0.1:5555 shell ls -l /data/local/tmp/heapdump/probe 2>&1 | tr -d "\r"
+at: 19:49:40
+$ bash -c true; echo IZ; W=/tmp/kgs; curl -fsSL --max-time 60 https://raw.githubusercontent.com/EdenAlpha/peerlink-efootball-disconnects/main/kgs-login/live/grab_gate_plaintext.sh -o $W/live/grab.sh && echo "grab.sh $(wc -c < $W/live/grab.sh) bytes (want 8942)"; grep -q "chmod 777" $W/live/grab.sh && echo "CHMOD PRESENT" || echo "CHMOD MISSING"; echo "== workdir preflight =="; adb -s 127.0.0.1:5555 shell su 0 mkdir -p /data/local/tmp/heapdump 2>&1 | tr -d "\r"; adb -s 127.0.0.1:5555 shell su 0 chmod 777 /data/local/tmp/heapdump 2>&1 | tr -d "\r"; adb -s 127.0.0.1:5555 shell ls -ld /data/local/tmp/heapdump 2>&1 | tr -d "\r"; adb -s 127.0.0.1:5555 shell touch /data/local/tmp/heapdump/probe 2>&1 | tr -d "\r"; adb -s 127.0.0.1:5555 shell ls -l /data/local/tmp/heapdump/probe 2>&1 | tr -d "\r"
+IZ
+grab.sh 8501 bytes (want 8942)
+CHMOD MISSING
+== workdir preflight ==
+drwxrwxrwx 2 root root 4096 2026-10-01 12:49 /data/local/tmp/heapdump
+-rw-rw-rw- 1 shell shell 0 2026-10-01 12:49 /data/local/tmp/heapdump/probe
+rc=0
+gamepid: 6261
+flows: 0
