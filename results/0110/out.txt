@@ -1,0 +1,8 @@
+cmd: exec bash -c true; echo N6; A="adb -s 127.0.0.1:5555"; $A shell input swipe 1112 678 1112 678 250; sleep 15; $A exec-out screencap -p > /tmp/live-res/screen.png; echo next-tapped
+at: 09:38:28
+$ bash -c true; echo N6; A="adb -s 127.0.0.1:5555"; $A shell input swipe 1112 678 1112 678 250; sleep 15; $A exec-out screencap -p > /tmp/live-res/screen.png; echo next-tapped
+N6
+next-tapped
+rc=0
+gamepid: 5467
+flows: 0
