@@ -60,18 +60,45 @@ def requestheaders(flow):
         pass
 
 
+def _body(flow, msg) -> bytes:
+    """Best-effort body bytes for a request or response.
+
+    `content` decompresses eagerly and raises when the declared Content-Encoding
+    is wrong -- a real occurrence here (b'\\xbb\\xba' advertised as gzip), which
+    used to take out the whole flow. `raw_content` never decompresses, so fall
+    back to it and let `analyse_capture.py` deal with the encoding.
+    """
+    try:
+        return bytes(getattr(msg, "content", None) or b"")
+    except Exception:
+        try:
+            return bytes(getattr(msg, "raw_content", None) or b"")
+        except Exception:
+            return b""
+
+
 def request(flow):
     try:
         host = _host(flow)
         if not _is_target(host):
             return
-        body = bytes(flow.request.content or b"")
+    except Exception:
+        return
+    # Log the destination BEFORE touching the body. The path is the whole point
+    # of this capture; a flow that dies decoding must still leave evidence that
+    # it happened, exactly like requestheaders does.
+    try:
         _log("### REQ %s %s" % (flow.request.method, flow.request.path))
         _log("HOST: %s" % host)
+    except Exception:
+        _log("ADDON-ERROR request header: "
+             + traceback.format_exc(limit=3).replace("\n", " | "))
+    try:
+        body = _body(flow, flow.request)
         _log("REQLEN: %d" % len(body))
         _log("REQHEX: " + body.hex())
     except Exception:
-        _log("ADDON-ERROR request: "
+        _log("ADDON-ERROR request body: "
              + traceback.format_exc(limit=3).replace("\n", " | "))
 
 
@@ -80,10 +107,17 @@ def response(flow):
         host = _host(flow)
         if not _is_target(host):
             return
-        body = bytes(flow.response.content or b"")
+    except Exception:
+        return
+    try:
         _log("### RESP %s %s -> %d"
              % (flow.request.method, flow.request.path,
                 flow.response.status_code))
+    except Exception:
+        _log("ADDON-ERROR response header: "
+             + traceback.format_exc(limit=3).replace("\n", " | "))
+    try:
+        body = _body(flow, flow.response)
         _log("RESPLEN: %d" % len(body))
         _log("RESPHEX: " + body.hex())
     except Exception:
