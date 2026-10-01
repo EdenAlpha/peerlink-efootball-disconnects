@@ -11,20 +11,31 @@ traffic after MITM -- not assembled by hand.
 
 ## Captured 2026-10-01, in the order the game issued them
 
-| # | path |
-|---|---|
-| 1 | `gate_CMD_CHECK_STRING.php` |
-| 2 | `gate_CMD_CREATE_USER.php` |
-| 3 | `gate_CMD_GET_AGE_GATE_REQUIREMENTS.php` |
-| 4 | `gate_CMD_GET_COUNTRY_LIST.php` |
-| 5 | `gate_CMD_GET_GAMERELAY_QUALITYCHECK_LIST.php` |
-| 6 | `gate_CMD_GET_KID_USER_AGE_KIND.php` |
-| 7 | `gate_CMD_GET_PRODUCT_LIST.php` |
-| 8 | `gate_CMD_GET_SERVER_ENV.php` |
-| 9 | `gate_CMD_GET_STADIUM_DATA.php` |
-| 10 | `gate_CMD_GET_SURVEY_INFO.php` |
-| 11 | `gate_CMD_SEND_ADJUST_PARAM.php` |
-| 12 | `gate_CMD_SET_TRACKRECORD.php` |
+19 distinct routes across 37 request/response pairs, every one `200`, all on
+`pes22-game.cs.konami.net`. Raw bodies in
+`captures/2026-10-01-gate/gate-login-exchange.txt`.
+
+| # | path | note |
+|---|---|---|
+| 1 | `gate_CMD_CHECK_STRING.php` | |
+| 2 | `gate_CMD_CREATE_USER.php` | 12368 B response, User ID `ASKH-124-394-950` |
+| 3 | `gate_CMD_GET_AGE_GATE_REQUIREMENTS.php` | |
+| 4 | `gate_CMD_GET_COUNTRY_LIST.php` | |
+| 5 | `gate_CMD_GET_GAMERELAY_QUALITYCHECK_LIST.php` | |
+| 6 | `gate_CMD_GET_KID_USER_AGE_KIND.php` | |
+| 7 | `gate_CMD_GET_MAINMENU_INFO.php` | marks the end of onboarding |
+| 8 | `gate_CMD_GET_PRODUCT_LIST.php` | |
+| 9 | `gate_CMD_GET_SERVER_ENV.php` | |
+| 10 | `gate_CMD_GET_STADIUM_DATA.php` | |
+| 11 | `gate_CMD_GET_SURVEY_INFO.php` | |
+| 12 | `gate_CMD_GET_USEABLE_TEAM_LIST.php` | |
+| 13 | `gate_CMD_GET_USER_EULA_INFO.php` | |
+| 14 | `gate_CMD_LOGIN.php` | **608 B request — the login** |
+| 15 | `gate_CMD_SEND_ADJUST_PARAM.php` | |
+| 16 | `gate_CMD_SET_GAMERELAY_QUALITY.php` | 11 calls, the P2P relay setting |
+| 17 | `gate_CMD_SET_MYCLUB_ENTRY_INFO.php` | |
+| 18 | `gate_CMD_SET_PLAYDATA_MATCH.php` | |
+| 19 | `gate_CMD_SET_TRACKRECORD.php` | |
 
 Sample response frame, captured verbatim:
 
