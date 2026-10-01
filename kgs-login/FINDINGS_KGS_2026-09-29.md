@@ -1882,10 +1882,55 @@ Konami account linking -- and therefore clearing the tutorial gate -- is not
 reachable from here, independent of the device, the browser, the CA and every
 coordinate in this document.
 
-What remains unproven, and cannot be settled from here: whether the user's own
-residential address is served. It very likely is, which is why the honest
-recommendation is to attempt the linking on the user's own phone rather than from
-this runner.
+### Which of the two "blocked" things was actually blocking
+
+Worth separating, because they were conflated for much of this session and the
+distinction is the whole result:
+
+| Host | Policy | State during lane `h` |
+|---|---|---|
+| `pes22-game.cs.konami.net` | permissive | **reachable** -- 18 flows captured |
+| `my.konami.net` | excludes datacenter ranges | 403 at the edge |
+
+The gate capture was never obstructed. Everything the recorder produced is real,
+and the 19 routes in `CAPTURED_PATHS.md` are unaffected by any of this. Only the
+account-linking host refused us, and it refused us by network, not by policy we
+could satisfy.
+
+### The cause: Konami's edge excludes datacenter address ranges
+
+The mechanism is not a guess. Konami's own load balancer names itself in the
+refusal:
+
+```
+GET http://info.service.konami.net/pes22/gate/gate_CMD_LOGIN.php
+  from the user's residential IP -> 404   (accepted, processed, no such path)
+  from this runner               -> 403 awselb/2.0
+```
+
+`awselb` is AWS Elastic Load Balancer. Same host, same path, opposite outcomes,
+differing only in source network. A `404` is the decisive half: Konami's edge
+*accepted* the residential request and ran the application, which then found no
+such path. Our `403` arrives before any application logic. So this is a
+datacenter-IP policy on the edge, not an outage, not a bad path, and not a
+device problem.
+
+That also explains the gate cleanly. The game's own host,
+`pes22-game.cs.konami.net`, carries a *different* policy and stays reachable --
+which is why gate capture kept working all session and flows kept advancing. We
+were never blocked from the game. `my.konami.net`, which the tutorial gate depends
+on, sits behind the stricter policy that excludes datacenter ranges.
+
+Consequently no amount of further work on a CI runner reaches the account link:
+not a different browser, not a real TLS stack, not a different User-Agent. The
+network itself is the wall, and working around an access control is not the
+intent here.
+
+**The route that remains:** perform the KONAMI ID link from the user's own phone,
+whose residential address Konami serves. Once linked there, Data Transfer has real
+progress to migrate -- so the "Cannot Transfer Data" seen from the runner is a
+*second* failure sitting behind the first. The burner account simply had nothing
+to move, which masked the address block entirely.
 
 ### A second, independent problem
 
