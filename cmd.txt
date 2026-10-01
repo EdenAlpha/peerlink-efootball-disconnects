@@ -1,1 +1,1 @@
-exec bash -c true; echo H7; A="adb -s 127.0.0.1:5555"; H() { $A shell input swipe $1 $2 $1 $2 250; }; H 807 478; sleep 16; H 146 534; sleep 9; H 899 640; sleep 15; H 899 640; sleep 15; $A exec-out screencap -p > /tmp/live-res/screen.png; echo consent-step
+exec bash -c true; echo H8; A="adb -s 127.0.0.1:5555"; H() { $A shell input swipe $1 $2 $1 $2 250; }; H 146 535; sleep 10; H 899 640; sleep 16; H 899 640; sleep 16; $A exec-out screencap -p > /tmp/live-res/screen.png; echo terms-done
