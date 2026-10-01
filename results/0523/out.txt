@@ -1,0 +1,11 @@
+cmd: exec bash -c true; echo HR; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; $A shell am start -a android.intent.action.VIEW -d "market://details?id=com.android.chrome"; sleep 20; $A exec-out screencap -p > /tmp/live-res/s1.png; echo "== foreground =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; echo "flows=$(grep -c "^### " $W/flows.log)"
+at: 12:23:18
+$ bash -c true; echo HR; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; $A shell am start -a android.intent.action.VIEW -d "market://details?id=com.android.chrome"; sleep 20; $A exec-out screencap -p > /tmp/live-res/s1.png; echo "== foreground =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; echo "flows=$(grep -c "^### " $W/flows.log)"
+HR
+Starting: Intent { act=android.intent.action.VIEW dat=market://details/... }
+== foreground ==
+  mCurrentFocus=Window{60ac99c u0 com.android.vending/com.google.android.finsky.transparentmainactivity.TransparentMainActivityPrivate}
+flows=16
+rc=0
+gamepid: 10290
+flows: 16
