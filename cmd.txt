@@ -1,1 +1,1 @@
-exec bash -c true; echo N7; A="adb -s 127.0.0.1:5555"; $A shell input swipe 807 478 807 478 250; sleep 16; $A exec-out screencap -p > /tmp/live-res/screen.png; echo confirmed
+exec bash -c true; echo N8; A="adb -s 127.0.0.1:5555"; sleep 45; $A shell input swipe 1207 661 1207 661 250; sleep 15; $A exec-out screencap -p > /tmp/live-res/screen.png; echo menu-open
