@@ -144,9 +144,17 @@ sign_in() {
 
 # ---------------------------------------------------------------- install ---
 asset_mb() {
-  # PAD unpacks into /data/media/0/Android/obb/<pkg> and the app's own files
-  # dir. Counting all of /data is blunt but it cannot miss the packs.
-  have du -sm /data 2>/dev/null | awk '{print $1}'
+  # /data is root-only. A plain `adb shell du` returns nothing at all, so the
+  # wait loop below never sees two equal readings, never decides the download has
+  # settled, and spins for its entire budget -- reporting "?MB" the whole time.
+  # That is exactly what happened on lane f. Ask through su instead, and fall
+  # back to the app's own directory if the whole-filesystem read fails.
+  local m
+  m=$($A shell su 0 du -sm /data 2>/dev/null | tr -d '\r' | awk '{print $1}')
+  if [ -z "$m" ]; then
+    m=$($A shell su 0 du -sm "/data/data/$PKG" 2>/dev/null | tr -d '\r' | awk '{print $1}')
+  fi
+  printf '%s' "$m"
 }
 
 open_play_page() {
@@ -185,7 +193,7 @@ tap_install
 say "waiting for the asset packs (this is the 2026-09-30 step UM/UV)"
 before=""
 stable=0
-for i in $(seq 1 150); do
+for i in $(seq 1 100); do
   now=$(asset_mb)
   LAST_MB="$now"
   say "  t=$((i*20))s data=${now:-?}MB"

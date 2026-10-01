@@ -19,7 +19,11 @@ set -uo pipefail
 LABEL="${1:-progress}"
 SHOT="${2:-}"
 DIR=/tmp/live-res
-BRANCH=live-res
+# Settable for the same reason as in live_loop.sh: a lane suffix, so two
+# concurrent runs do not overwrite each other's screenshots. It was hardcoded to
+# live-res here while live_loop.sh had already been made configurable, so a run
+# on lane f published into lane a's dead branch and appeared to publish nothing.
+: "${BRANCH:=live-res}"
 
 [ -e "$DIR/.git" ] || { echo "publish: no worktree at $DIR"; exit 2; }
 
