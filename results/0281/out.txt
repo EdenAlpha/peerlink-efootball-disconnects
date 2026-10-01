@@ -1,12 +1,11 @@
-cmd: exec bash -c true; echo T4; adb -s 127.0.0.1:5555 shell cp /data/local/tmp/splits/split_config.arm64_v8a.apk /data/local/tmp/c.apk; adb -s 127.0.0.1:5555 shell cp /data/local/tmp/splits/base.apk /data/local/tmp/b.apk; adb -s 127.0.0.1:5555 shell ls -l /data/local/tmp/b.apk /data/local/tmp/c.apk; echo "== install-multiple =="; adb -s 127.0.0.1:5555 install-multiple /data/local/tmp/b.apk /data/local/tmp/c.apk 2>&1 | tail -8; echo "== path =="; adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam
-at: 23:06:14
-$ bash -c true; echo T4; adb -s 127.0.0.1:5555 shell cp /data/local/tmp/splits/split_config.arm64_v8a.apk /data/local/tmp/c.apk; adb -s 127.0.0.1:5555 shell cp /data/local/tmp/splits/base.apk /data/local/tmp/b.apk; adb -s 127.0.0.1:5555 shell ls -l /data/local/tmp/b.apk /data/local/tmp/c.apk; echo "== install-multiple =="; adb -s 127.0.0.1:5555 install-multiple /data/local/tmp/b.apk /data/local/tmp/c.apk 2>&1 | tail -8; echo "== path =="; adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam
-T4
--rw-r--r-- 1 shell shell 22347497 2026-09-30 18:06 /data/local/tmp/b.apk
--rw-r--r-- 1 shell shell 57148181 2026-09-30 18:06 /data/local/tmp/c.apk
-== install-multiple ==
-adb: failed to stat "/data/local/tmp/c.apk": No such file or directory
-== path ==
-rc=1
-gamepid: 
-flows: 0
+cmd: exec bash -c true; echo VW; adb -s 127.0.0.1:5555 shell input swipe 807 478 807 478 150; sleep 10; adb -s 127.0.0.1:5555 shell input swipe 1111 677 1111 677 180; sleep 20; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== konami =="; grep -i konami /tmp/kgs/mitm.log 2>/dev/null | tail -8
+at: 00:21:57
+$ bash -c true; echo VW; adb -s 127.0.0.1:5555 shell input swipe 807 478 807 478 150; sleep 10; adb -s 127.0.0.1:5555 shell input swipe 1111 677 1111 677 180; sleep 20; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== konami =="; grep -i konami /tmp/kgs/mitm.log 2>/dev/null | tail -8
+VW
+== konami ==
+[00:10:15.197][172.17.0.2:59768] Client TLS handshake failed. The client does not trust the proxy's certificate for legal.konami.com (OpenSSL Error([('SSL routines', '', 'tls alert certificate unknown')]))
+[00:10:53.321][172.17.0.2:58132] Client TLS handshake failed. The client does not trust the proxy's certificate for pes22-game.cs.konami.net (OpenSSL Error([('SSL routines', '', 'tls alert certificate unknown')]))
+[00:13:30.605][172.17.0.2:38770] Client TLS handshake failed. The client does not trust the proxy's certificate for pes22-game.cs.konami.net (OpenSSL Error([('SSL routines', '', 'tls alert certificate unknown')]))
+rc=0
+gamepid: 9664
+flows: 4
