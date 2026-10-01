@@ -1,0 +1,9 @@
+cmd: exec bash -c true; echo IP; A="adb -s 127.0.0.1:5555"; $A shell input swipe 853 402 853 402 250; sleep 6; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1
+at: 19:41:34
+$ bash -c true; echo IP; A="adb -s 127.0.0.1:5555"; $A shell input swipe 853 402 853 402 250; sleep 6; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1
+IP
+== shot ==
+  mCurrentFocus=Window{3d321a5 u0 jp.konami.pesam/com.epicgames.ue4.GameActivity}
+rc=0
+gamepid: 6261
+flows: 0
