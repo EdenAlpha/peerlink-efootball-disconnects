@@ -1,0 +1,8 @@
+cmd: exec bash -c true; echo N8; A="adb -s 127.0.0.1:5555"; sleep 45; $A shell input swipe 1207 661 1207 661 250; sleep 15; $A exec-out screencap -p > /tmp/live-res/screen.png; echo menu-open
+at: 09:45:27
+$ bash -c true; echo N8; A="adb -s 127.0.0.1:5555"; sleep 45; $A shell input swipe 1207 661 1207 661 250; sleep 15; $A exec-out screencap -p > /tmp/live-res/screen.png; echo menu-open
+N8
+menu-open
+rc=0
+gamepid: 5467
+flows: 0
