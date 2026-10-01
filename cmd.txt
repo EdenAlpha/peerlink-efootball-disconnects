@@ -1,1 +1,1 @@
-status
+exec bash -c true; echo H1; A="adb -s 127.0.0.1:5555"; echo "accounts=$($A shell dumpsys account 2>/dev/null | grep -c "type=com.google")"; $A shell am start -a android.intent.action.VIEW -d "market://details?id=jp.konami.pesam"; sleep 22; $A shell input swipe 360 907 360 907 250; sleep 16; $A exec-out screencap -p > /tmp/live-res/screen.png; echo signin-opened
