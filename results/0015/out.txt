@@ -1,0 +1,14 @@
+cmd: exec bash -c true; echo IA; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; R=https://raw.githubusercontent.com/EdenAlpha/peerlink-efootball-disconnects/main/kgs-login/live; echo "== fetch the FIXED scripts =="; curl -fsSL --max-time 60 $R/grab_gate_plaintext.sh -o $W/live/grab.sh && echo "grab.sh $(wc -c < $W/live/grab.sh) bytes, CRLF=$(grep -c $'\r' $W/live/grab.sh || true)"; curl -fsSL --max-time 60 $R/test_region_select.sh -o $W/live/testsel.sh && chmod +x $W/live/testsel.sh $W/live/grab.sh; echo "== prove the selection works OFF-DEVICE first =="; bash $W/live/testsel.sh 2>&1 | tail -8; echo "== now the real thing, during a live gate request =="; timeout 600 bash $W/live/grab.sh 127.0.0.1:5555 2>&1 | tail -40
+at: 18:51:46
+$ bash -c true; echo IA; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; R=https://raw.githubusercontent.com/EdenAlpha/peerlink-efootball-disconnects/main/kgs-login/live; echo "== fetch the FIXED scripts =="; curl -fsSL --max-time 60 $R/grab_gate_plaintext.sh -o $W/live/grab.sh && echo "grab.sh $(wc -c < $W/live/grab.sh) bytes, CRLF=$(grep -c $'\r' $W/live/grab.sh || true)"; curl -fsSL --max-time 60 $R/test_region_select.sh -o $W/live/testsel.sh && chmod +x $W/live/testsel.sh $W/live/grab.sh; echo "== prove the selection works OFF-DEVICE first =="; bash $W/live/testsel.sh 2>&1 | tail -8; echo "== now the real thing, during a live gate request =="; timeout 600 bash $W/live/grab.sh 127.0.0.1:5555 2>&1 | tail -40
+IA
+== fetch the FIXED scripts ==
+curl: (23) Failure writing output to destination
+curl: (23) Failure writing output to destination
+== prove the selection works OFF-DEVICE first ==
+bash: /tmp/kgs/live/testsel.sh: No such file or directory
+== now the real thing, during a live gate request ==
+bash: /tmp/kgs/live/grab.sh: No such file or directory
+rc=127
+gamepid: 
+flows: 0
