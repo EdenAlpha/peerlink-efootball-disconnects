@@ -1764,3 +1764,86 @@ a `javax.crypto.Cipher` call and the key is a Java `byte[]` in that same heap.
 That is a much better position than hunting a native key: the heap is
 enumerable, and the gzipped plaintext must be in it too, since `useGzip` runs
 before the cipher.
+
+## 15. Data Transfer is a migration tool, not a login route
+
+The path to the Konami login, established on 2026-10-01:
+
+```
+title screen -> hamburger (1207, 661) -> Data Transfer (925, 362)
+```
+
+The hamburger holds six entries and no login item, confirmed on three separate
+devices: Legal and Privacy, General Contact, Data Transfer, Graphics, Clear
+Cache, Delete Live Update.
+
+Data Transfer then offers exactly two methods, which is the fork that matters:
+
+```
+Transfer data linked to Google Play account.
+Transfer data linked to KONAMI ID account.
+```
+
+The KONAMI ID option is the account-linking route. It calls a gate endpoint we
+had not seen before and hands off to a browser:
+
+```
+gate_CMD_GET_KONAMIID_TRANSITION_URL.php   -> 200
+  then, in org.chromium.webview_shell:
+  https://my.konami.net/account-link/introduction?lt=ZHJEDK9P9K3U42XG&isWebView=true
+```
+
+The Google Play option calls `gate_CMD_DATA_TRANSITION.php` -> 200 and then
+reports **"There's no data to transfer."** That is correct behaviour, not a
+failure: Data Transfer moves *existing* progress from another account onto this
+device, and a burner account has none. It is a migration tool, and treating it
+as a login route is the mistake that cost time.
+
+### Two new routes, captured live under interception
+
+```
+gate_CMD_GET_KONAMIID_TRANSITION_URL.php
+gate_CMD_DATA_TRANSITION.php
+```
+
+### The Konami portal returns 403 from this network
+
+The account-linking page never loads:
+
+```
+403 Forbidden
+申し訳ありませんが、このページにはアクセスできません。
+```
+
+Tested three User-Agents from the runner to establish that this is not the debug
+browser's identity string:
+
+| User-Agent | result |
+|---|---|
+| `WebView Browser Tester 127.0.6533.103` | 403 |
+| a normal Chromium 127 Android string | 403 |
+| empty | 403 |
+
+The curl tests ran on the runner host and therefore did not traverse our own
+proxy, so the interception is not implicated either. The conclusion is that
+Konami's portal blocks this runner's egress address.
+
+That is an access control, and routing around it is not something to do. It
+means Konami account linking -- and therefore clearing the tutorial gate -- is
+not reachable from this environment, independent of the device, the browser, the
+CA and every coordinate in this document.
+
+### A second, independent problem
+
+`konamiid://` has no handler on this device:
+
+```
+cmd package resolve-activity -a VIEW -d "konamiid://x?code=y"
+No activity found
+```
+
+Even with the portal reachable, the OAuth return leg would have nowhere to
+land: the app's own decompiled manifest registers `pesactionmobile` and `https`,
+not `konamiid`. Worth checking on a device where the portal does load, because
+it would fail late and look like a login problem rather than a missing
+registration.
