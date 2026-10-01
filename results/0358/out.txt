@@ -1,0 +1,16 @@
+cmd: exec bash -c true; echo JA; W=/tmp/kgs; B="?cb=$(date +%s)"; curl -fsSL --max-time 60 "https://raw.githubusercontent.com/EdenAlpha/peerlink-efootball-disconnects/main/kgs-login/live/grab_gate_plaintext.sh$B" -o $W/live/grab.sh && echo "grab.sh $(wc -c < $W/live/grab.sh) bytes"; grep -q "chmod 777" $W/live/grab.sh && echo "CHMOD PRESENT" || echo "CHMOD MISSING"; adb -s 127.0.0.1:5555 shell su 0 mkdir -p /data/local/tmp/heapdump >/dev/null 2>&1; adb -s 127.0.0.1:5555 shell su 0 chmod 777 /data/local/tmp/heapdump >/dev/null 2>&1; MAXREGIONS=6 timeout 700 bash $W/live/grab.sh 127.0.0.1:5555 2>&1 | grep -E "candidate|dumping|dumped|anchor=|TOTAL|windows kept|unreadable|No such" | head -40
+at: 19:49:58
+$ bash -c true; echo JA; W=/tmp/kgs; B="?cb=$(date +%s)"; curl -fsSL --max-time 60 "https://raw.githubusercontent.com/EdenAlpha/peerlink-efootball-disconnects/main/kgs-login/live/grab_gate_plaintext.sh$B" -o $W/live/grab.sh && echo "grab.sh $(wc -c < $W/live/grab.sh) bytes"; grep -q "chmod 777" $W/live/grab.sh && echo "CHMOD PRESENT" || echo "CHMOD MISSING"; adb -s 127.0.0.1:5555 shell su 0 mkdir -p /data/local/tmp/heapdump >/dev/null 2>&1; adb -s 127.0.0.1:5555 shell su 0 chmod 777 /data/local/tmp/heapdump >/dev/null 2>&1; MAXREGIONS=6 timeout 700 bash $W/live/grab.sh 127.0.0.1:5555 2>&1 | grep -E "candidate|dumping|dumped|anchor=|TOTAL|windows kept|unreadable|No such" | head -40
+JA
+grab.sh 8501 bytes
+CHMOD MISSING
+grab: candidate regions: 6
+grab: dumping region 1 12c00000-32c00000 (512 MB) to device
+/tmp/kgs/live/grab.sh: line 153: /data/local/tmp/heapdump/dd.err: No such file or directory
+grab:   region 1 unreadable: 
+grab: TOTAL ANCHOR HITS: 0
+grab: windows kept in /tmp/kgs (win_*.bin)
+grab: windows kept: 0
+rc=0
+gamepid: 6261
+flows: 0
