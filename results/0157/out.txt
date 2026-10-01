@@ -1,37 +1,16 @@
-cmd: exec bash -c true; echo UX; echo "== exit info =="; adb -s 127.0.0.1:5555 shell dumpsys activity exit-info jp.konami.pesam 2>/dev/null | head -30; echo "== fatal/crash log =="; adb -s 127.0.0.1:5555 shell su 0 logcat -d -t 600 2>/dev/null | grep -iE "FATAL|DEBUG.*konami|signal|tombstone|SIGSEGV|SIGABRT|Unity|dlopen|linker|UnsatisfiedLink" | tail -20
-at: 23:56:41
-$ bash -c true; echo UX; echo "== exit info =="; adb -s 127.0.0.1:5555 shell dumpsys activity exit-info jp.konami.pesam 2>/dev/null | head -30; echo "== fatal/crash log =="; adb -s 127.0.0.1:5555 shell su 0 logcat -d -t 600 2>/dev/null | grep -iE "FATAL|DEBUG.*konami|signal|tombstone|SIGSEGV|SIGABRT|Unity|dlopen|linker|UnsatisfiedLink" | tail -20
-UX
-== exit info ==
-ACTIVITY MANAGER PROCESS EXIT INFO (dumpsys activity exit-info)
-Last Timestamp of Persistence Into Persistent Storage: 2026-09-30 19:42:36.907
-  package: jp.konami.pesam
-    Historical Process Exit for uid=10105
-        ApplicationExitInfo #0:
-          timestamp=2026-09-30 19:55:39.782 pid=5642 realUid=10105 packageUid=10105 definingUid=10105 user=0
-          process=jp.konami.pesam reason=10 (USER REQUESTED) subreason=21 (FORCE STOP) status=0
-          importance=100 pss=0.96GB rss=1.1GB description=stop jp.konami.pesam due to from pid 6370 state=empty trace=null
-== fatal/crash log ==
-09-30 19:53:01.037   230   305 E NativeTombstoneManager: Tombstone's UID (1002) not an app, ignoring
-09-30 19:53:01.083   230   305 I BootReceiver: Copying /data/tombstones/tombstone_12 to DropBox (SYSTEM_TOMBSTONE)
-09-30 19:53:01.083   230   305 I DropBoxManagerService: add tag=SYSTEM_TOMBSTONE isTagEnabled=true flags=0x6
-09-30 19:53:01.085   230   305 E NativeTombstoneManager: Tombstone's UID (1002) not an app, ignoring
-09-30 19:53:01.085   230   305 I DropBoxManagerService: add tag=SYSTEM_TOMBSTONE_PROTO_WITH_HEADERS isTagEnabled=true flags=0x4
-09-30 19:53:01.170  6258  6290 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 6290 (bt_stack_manage), pid 6258 (droid.bluetooth)
-09-30 19:53:01.284  6303  6303 I crash_dump64: obtaining output fd from tombstoned, type: kDebuggerdTombstoneProto
-09-30 19:53:01.285    49    49 I tombstoned: received crash request for pid 6290
-09-30 19:53:01.473  6303  6303 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
-09-30 19:53:01.539    49    49 E tombstoned: Tombstone written to: tombstone_13
-09-30 19:53:01.549   230   305 E NativeTombstoneManager: Tombstone's UID (1002) not an app, ignoring
-09-30 19:53:01.630   230   305 I BootReceiver: Copying /data/tombstones/tombstone_13 to DropBox (SYSTEM_TOMBSTONE)
-09-30 19:53:01.630   230   305 I DropBoxManagerService: add tag=SYSTEM_TOMBSTONE isTagEnabled=true flags=0x6
-09-30 19:53:01.702   230   305 E NativeTombstoneManager: Tombstone's UID (1002) not an app, ignoring
-09-30 19:53:01.704   230   305 I DropBoxManagerService: add tag=SYSTEM_TOMBSTONE_PROTO_WITH_HEADERS isTagEnabled=true flags=0x4
-09-30 19:55:39.825  3931  6374 D libEGL  : dlopen (libGLESv2_angle.so) success at 0x208b434eac38c73d
-09-30 19:55:39.838   152   152 I Zygote  : Process 5642 exited due to signal 9 (Killed)
-09-30 19:55:40.490   230  3458 I Process : Sending signal. PID: 5642 SIG: 9
-09-30 19:55:40.566   483   971 D libEGL  : dlopen (libGLESv2_angle.so) success at 0x208b434eac38c73d
-09-30 19:55:40.885   230  2773 D libEGL  : dlopen (libGLESv2_angle.so) success at 0x208b434eac38c73d
+cmd: exec bash -c true; echo C5; W=/tmp/kgs; bash kgs-login/scripts/setup_ca.sh redroid $W/ca 2>&1 | tail -4; H=$(cat $W/ca/ca.hash 2>/dev/null); echo "hash=$H"; adb -s 127.0.0.1:5555 shell su 0 mount --bind /system/etc/security/cacerts /apex/com.android.conscrypt/cacerts 2>&1 | tail -2; echo "apex certs: $(adb -s 127.0.0.1:5555 shell su 0 ls /apex/com.android.conscrypt/cacerts | wc -l)"; adb -s 127.0.0.1:5555 shell su 0 ls -l /apex/com.android.conscrypt/cacerts/$H.0 2>&1; sudo docker exec redroid sh -c "setprop ctl.restart zygote"; sleep 30; adb connect 127.0.0.1:5555 | tail -1; adb -s 127.0.0.1:5555 shell getprop sys.boot_completed
+at: 07:25:57
+$ bash -c true; echo C5; W=/tmp/kgs; bash kgs-login/scripts/setup_ca.sh redroid $W/ca 2>&1 | tail -4; H=$(cat $W/ca/ca.hash 2>/dev/null); echo "hash=$H"; adb -s 127.0.0.1:5555 shell su 0 mount --bind /system/etc/security/cacerts /apex/com.android.conscrypt/cacerts 2>&1 | tail -2; echo "apex certs: $(adb -s 127.0.0.1:5555 shell su 0 ls /apex/com.android.conscrypt/cacerts | wc -l)"; adb -s 127.0.0.1:5555 shell su 0 ls -l /apex/com.android.conscrypt/cacerts/$H.0 2>&1; sudo docker exec redroid sh -c "setprop ctl.restart zygote"; sleep 30; adb connect 127.0.0.1:5555 | tail -1; adb -s 127.0.0.1:5555 shell getprop sys.boot_completed
+C5
+ca-setup: system store is writable, installing
+ca-setup: INSTALLED into /system/etc/security/cacerts/928a8368.0
+-rw-r--r-- 1 root root 1155 2026-10-01 00:25 /system/etc/security/cacerts/928a8368.0
+ca-setup: RESULT: installed without remount
+hash=928a8368
+apex certs: 135
+-rw-r--r-- 1 root root 1155 2026-10-01 00:25 /apex/com.android.conscrypt/cacerts/928a8368.0
+already connected to 127.0.0.1:5555
+1
 rc=0
 gamepid: 
 flows: 0
