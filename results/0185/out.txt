@@ -1,0 +1,8 @@
+cmd: exec bash -c true; echo HF; A="adb -s 127.0.0.1:5555"; $A shell input swipe 640 640 640 640 250; sleep 15; $A exec-out screencap -p > /tmp/live-res/screen.png; echo username-continue
+at: 11:30:12
+$ bash -c true; echo HF; A="adb -s 127.0.0.1:5555"; $A shell input swipe 640 640 640 640 250; sleep 15; $A exec-out screencap -p > /tmp/live-res/screen.png; echo username-continue
+HF
+username-continue
+rc=0
+gamepid: 5493
+flows: 0
