@@ -1,0 +1,20 @@
+# Command routes, one per line:  ROUTE  or  ROUTE=payload-file.json
+#
+# A route is a CommandRequest.path value on the gRPC command_service channel.
+# It is NOT the same thing as the gate's HTTP paths (`gate_CMD_LOGIN.php` and
+# friends) -- those are a separate channel and their names only suggest what
+# the gRPC ones look like.
+#
+# The server answers an unknown route with grpc-status 14 UNAVAILABLE, which an
+# AWS ALB renders as HTTP 502. So a 14 here means "this line is wrong", not
+# "the server is unwell". kgs_session.py stops at the first 14 and names it.
+#
+# None of the lines below are verified. Each has to earn its place by coming
+# back with something other than 14. Replace them as real routes are recovered
+# from the game's own request bytes.
+
+CMD_GET_SESSION_ID
+CMD_LOGIN
+CMD_CREATEJOIN_ROOM
+CMD_GET_ROOM_INFO
+CMD_SEND_RECRUIT_CODE
