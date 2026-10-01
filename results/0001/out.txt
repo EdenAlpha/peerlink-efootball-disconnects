@@ -1,0 +1,9 @@
+cmd: exec bash -c true; echo N1; adb -s 127.0.0.1:5555 shell am start -a android.intent.action.VIEW -d "market://details?id=jp.konami.pesam"; sleep 22; adb -s 127.0.0.1:5555 shell input tap 360 907; sleep 16; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo signin-opened
+at: 09:17:29
+$ bash -c true; echo N1; adb -s 127.0.0.1:5555 shell am start -a android.intent.action.VIEW -d "market://details?id=jp.konami.pesam"; sleep 22; adb -s 127.0.0.1:5555 shell input tap 360 907; sleep 16; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo signin-opened
+N1
+Starting: Intent { act=android.intent.action.VIEW dat=market://details/... }
+signin-opened
+rc=0
+gamepid: 
+flows: 0
