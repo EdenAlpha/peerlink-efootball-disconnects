@@ -1,0 +1,20 @@
+cmd: exec bash -c true; echo HL; W=/tmp/kgs; U="https://my.konami.net/account-link/introduction"; echo "== curl with the webview_shell UA =="; curl -sS -o /dev/null -w "%{http_code}\n" --max-time 30 -A "WebView Browser Tester 127.0.6533.103" "$U"; echo "== curl with a normal chromium UA =="; curl -sS -o /dev/null -w "%{http_code}\n" --max-time 30 -A "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Mobile Safari/537.36" "$U"; echo "== curl with no UA at all =="; curl -sS -o /dev/null -w "%{http_code}\n" --max-time 30 -A "" "$U"; echo "== captured konami flows =="; grep -A3 "my.konami.net" $W/flows.log 2>/dev/null | head -20
+at: 11:50:40
+$ bash -c true; echo HL; W=/tmp/kgs; U="https://my.konami.net/account-link/introduction"; echo "== curl with the webview_shell UA =="; curl -sS -o /dev/null -w "%{http_code}\n" --max-time 30 -A "WebView Browser Tester 127.0.6533.103" "$U"; echo "== curl with a normal chromium UA =="; curl -sS -o /dev/null -w "%{http_code}\n" --max-time 30 -A "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Mobile Safari/537.36" "$U"; echo "== curl with no UA at all =="; curl -sS -o /dev/null -w "%{http_code}\n" --max-time 30 -A "" "$U"; echo "== captured konami flows =="; grep -A3 "my.konami.net" $W/flows.log 2>/dev/null | head -20
+HL
+== curl with the webview_shell UA ==
+403
+== curl with a normal chromium UA ==
+403
+== curl with no UA at all ==
+403
+== captured konami flows ==
+HOST-SEEN: my.konami.net
+### REQ GET /account-link/introduction?lt=ZHJEDK9P9K3U42XG&isWebView=true
+HOST: my.konami.net
+REQLEN: 0
+REQHEX: 
+### RESP GET /account-link/introduction?lt=ZHJEDK9P9K3U42XG&isWebView=true -> 403
+rc=0
+gamepid: 10290
+flows: 14
