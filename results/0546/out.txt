@@ -1,0 +1,24 @@
+cmd: exec bash -c true; echo JH; A="adb -s 127.0.0.1:5555"; PID=$($A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r" | awk "{print \$1}"); echo "pid=$PID"; $A shell su 0 dd if=/proc/$PID/mem of=/data/local/tmp/rw.so bs=4096 skip=66215407128 count=10278 2>&1 | tr -d "\r"; $A shell ls -l /data/local/tmp/rw.so 2>&1 | tr -d "\r"; mkdir -p /tmp/live-res/seg; $A pull /data/local/tmp/rw.so /tmp/live-res/seg/libUE4_rw.so 2>&1 | tail -1; ls -l /tmp/live-res/seg/; echo "== anchor offsets on device =="; $A shell su 0 grep -abo -F AES256 /data/local/tmp/rw.so 2>&1 | tr -d "\r" | head -12
+at: 20:19:20
+$ bash -c true; echo JH; A="adb -s 127.0.0.1:5555"; PID=$($A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r" | awk "{print \$1}"); echo "pid=$PID"; $A shell su 0 dd if=/proc/$PID/mem of=/data/local/tmp/rw.so bs=4096 skip=66215407128 count=10278 2>&1 | tr -d "\r"; $A shell ls -l /data/local/tmp/rw.so 2>&1 | tr -d "\r"; mkdir -p /tmp/live-res/seg; $A pull /data/local/tmp/rw.so /tmp/live-res/seg/libUE4_rw.so 2>&1 | tail -1; ls -l /tmp/live-res/seg/; echo "== anchor offsets on device =="; $A shell su 0 grep -abo -F AES256 /data/local/tmp/rw.so 2>&1 | tr -d "\r" | head -12
+JH
+pid=6261
+10278+0 records in
+10278+0 records out
+42098688 bytes (40 M) copied, 0.030 s, 1.3 G/s
+-rw-rw-rw- 1 root root 42098688 2026-10-01 13:19 /data/local/tmp/rw.so
+/data/local/tmp/rw.so: 1 file pulled, 0 skipped. 223.8 MB/s (42098688 bytes in 0.179s)
+total 41112
+-rw-r--r-- 1 runner runner 42098688 Oct  1 20:19 libUE4_rw.so
+== anchor offsets on device ==
+11037889:AES256
+11037911:AES256
+11196025:AES256
+11196107:AES256
+11971984:AES256
+12289256:AES256
+12289470:AES256
+12600942:AES256
+rc=0
+gamepid: 6261
+flows: 0
