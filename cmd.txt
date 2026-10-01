@@ -1,1 +1,1 @@
-exec bash -c true; echo D2; adb -s 127.0.0.1:5555 shell input keyevent 20; sleep 3; adb -s 127.0.0.1:5555 shell input keyevent 20; sleep 6; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png
+exec bash -c true; echo D3; echo "== top =="; adb -s 127.0.0.1:5555 shell top -b -n 1 -m 8 2>/dev/null | head -14; echo "== game logcat =="; adb -s 127.0.0.1:5555 logcat -d -t 400 2>/dev/null | grep -iE "pesam|libUE4|ANR in|FATAL|EGL|SwiftShader|vulkan" | tail -22
