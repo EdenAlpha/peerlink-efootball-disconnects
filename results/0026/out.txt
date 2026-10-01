@@ -1,0 +1,9 @@
+cmd: exec bash -c true; echo N3; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/s1.png; echo "google_accounts=$(adb -s 127.0.0.1:5555 shell dumpsys account 2>/dev/null | grep -c "type=com.google")"; adb -s 127.0.0.1:5555 shell input tap 579 1063; sleep 15; adb -s 127.0.0.1:5555 shell input tap 591 1112; sleep 14; adb -s 127.0.0.1:5555 shell input tap 591 1112; sleep 16; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo terms-done
+at: 09:22:24
+$ bash -c true; echo N3; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/s1.png; echo "google_accounts=$(adb -s 127.0.0.1:5555 shell dumpsys account 2>/dev/null | grep -c "type=com.google")"; adb -s 127.0.0.1:5555 shell input tap 579 1063; sleep 15; adb -s 127.0.0.1:5555 shell input tap 591 1112; sleep 14; adb -s 127.0.0.1:5555 shell input tap 591 1112; sleep 16; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo terms-done
+N3
+google_accounts=1
+terms-done
+rc=0
+gamepid: 
+flows: 0
