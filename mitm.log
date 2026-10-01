@@ -1,0 +1,1387 @@
+[07:28:15.210] Loading script kgs-login/scripts/mitm_addon.py
+[07:28:15.212] Transparent Proxy listening at *:8080.
+[07:28:32.654][172.17.0.2:53762] client connect
+[07:28:32.664][172.17.0.2:53762] server connect 142.251.214.99:443
+172.17.0.2:53762: GET https://142.251.214.99/spi/v2/platforms/android/gmp/1%3…
+               << 200 OK 388b
+[07:28:33.131][172.17.0.2:44348] client connect
+[07:28:33.141][172.17.0.2:44348] server connect 142.251.34.78:443
+[07:29:08.193][172.17.0.2:44136] client connect
+[07:29:08.198][172.17.0.2:44136] server connect 172.217.118.4:443
+172.17.0.2:44136: POST https://172.217.118.4/v1/firelog/legacy/batchlog
+               << 200 OK 140b
+[07:29:10.328][172.17.0.2:44494] client connect
+[07:29:10.333][172.17.0.2:44494] server connect 172.217.113.4:443
+172.17.0.2:44494: POST https://172.217.113.4/v0cc/log/batch?format=json_proto3
+               << 200 OK 211b
+[07:31:07.602][172.17.0.2:35354] client connect
+[07:31:07.607][172.17.0.2:35354] server connect 172.217.119.4:443
+172.17.0.2:35354: GET https://172.217.119.4/play/log/timestamp
+               << 200 OK 39b
+172.17.0.2:35354: POST https://172.217.119.4/play/log?format=raw&proto_v2=true
+               << 200 OK 38b
+[07:31:07.759][172.17.0.2:35354] server disconnect 172.217.119.4:443
+[07:31:07.760][172.17.0.2:35354] client disconnect
+[07:32:32.731][172.17.0.2:53762] server disconnect 142.251.214.99:443
+[07:32:33.179][172.17.0.2:44348] 142.251.34.78:443: HTTP/2 protocol error: Invalid input ConnectionInputs.RECV_PING in state ConnectionState.CLOSED
+[07:32:33.180][172.17.0.2:44348] server disconnect 142.251.34.78:443
+[07:33:10.267][172.17.0.2:44136] server disconnect 172.217.118.4:443
+[07:33:10.408][172.17.0.2:44494] server disconnect 172.217.113.4:443
+[07:33:32.727][172.17.0.2:53762] client disconnect
+[07:33:33.497][172.17.0.2:38808] client connect
+[07:33:33.501][172.17.0.2:38808] server connect 172.217.119.4:443
+172.17.0.2:38808: GET https://172.217.119.4/play/log/timestamp
+               << 200 OK 39b
+172.17.0.2:38808: POST https://172.217.119.4/play/log?format=raw&proto_v2=true
+               << 200 OK 38b
+[07:33:33.612][172.17.0.2:38808] server disconnect 172.217.119.4:443
+[07:33:33.615][172.17.0.2:38808] client disconnect
+[07:34:10.271][172.17.0.2:44136] client disconnect
+[07:34:10.411][172.17.0.2:44494] client disconnect
+[07:43:23.178][172.17.0.2:44348] Closing connection due to inactivity: Client(172.17.0.2:44348, state=open, alpn=h2)
+[07:43:23.179][172.17.0.2:44348] client disconnect
+[07:45:26.903][172.17.0.2:50678] client connect
+[07:45:26.939][172.17.0.2:50678] server connect 52.10.135.55:443
+172.17.0.2:50678: POST https://52.10.135.55/pes22/gate/gate_CMD_GET_SERVER_ENV…
+               << 200 OK 2.3k
+[07:45:27.375][172.17.0.2:44622] client connect
+[07:45:27.377][172.17.0.2:44622] server connect 65.8.196.9:443
+172.17.0.2:44622: GET https://65.8.196.9/prd/banner/title/000007/3d4093c9e3c0…
+               << 200 OK 428k
+172.17.0.2:50678: POST https://52.10.135.55/pes22/gate/gate_CMD_GET_COUNTRY_LI…
+               << 200 OK 2.3k
+[07:46:27.754][172.17.0.2:50678] server disconnect 52.10.135.55:443
+[07:49:27.401][172.17.0.2:44622] server disconnect 65.8.196.9:443
+[07:50:27.480][172.17.0.2:44622] client disconnect
+[07:50:27.753][172.17.0.2:50678] client disconnect
+[07:51:30.790][172.17.0.2:55058] client connect
+[07:51:30.827][172.17.0.2:55058] server connect 44.226.216.2:443
+172.17.0.2:55058: POST https://44.226.216.2/pes22/gate/gate_CMD_GET_AGE_GATE_R…
+               << 200 OK 160b
+[07:52:30.960][172.17.0.2:55058] server disconnect 44.226.216.2:443
+[07:56:30.962][172.17.0.2:55058] client disconnect
+[07:59:14.242][172.17.0.2:40750] client connect
+[07:59:14.278][172.17.0.2:40750] server connect 52.40.209.32:443
+172.17.0.2:40750: POST https://52.40.209.32/pes22/gate/gate_CMD_GET_KID_USER_A…
+               << 200 OK 128b
+[08:00:14.434][172.17.0.2:40750] server disconnect 52.40.209.32:443
+[08:00:58.502][172.17.0.2:42610] client connect
+[08:00:58.505][172.17.0.2:42610] server connect 23.213.191.225:443
+172.17.0.2:42610: GET https://23.213.191.225/kde/games/view/en/ HTTP/2.0
+      << HTTP/2.0 200 OK 18.7k
+172.17.0.2:42610: GET https://23.213.191.225/_common/img/konami_logo_normal.p… HTTP/2.0
+      << HTTP/2.0 200 OK 4.1k
+172.17.0.2:42610: GET https://23.213.191.225/kde/games/css/style.css HTTP/2.0
+      << HTTP/2.0 200 OK 2.4k
+[08:01:01.209][172.17.0.2:33344] client connect
+[08:01:01.212][172.17.0.2:33344] server connect 2.19.153.111:443
+172.17.0.2:33344: GET https://2.19.153.111/ci/logo/favicon_K.ico HTTP/2.0
+      << HTTP/2.0 200 OK 11.2k
+[08:02:05.324][172.17.0.2:40750] server connect 52.40.209.32:443
+172.17.0.2:40750: POST https://52.40.209.32/pes22/gate/gate_CMD_GET_SURVEY_INF…
+               << 200 OK 464b
+[08:03:01.100][172.17.0.2:42610] server disconnect 23.213.191.225:443
+[08:03:01.434][172.17.0.2:33344] server disconnect 2.19.153.111:443
+[08:03:05.466][172.17.0.2:40750] server disconnect 52.40.209.32:443
+[08:06:06.682][172.17.0.2:40750] server connect 52.40.209.32:443
+172.17.0.2:40750: POST https://52.40.209.32/pes22/gate/gate_CMD_CHECK_STRING.p…
+               << 200 OK 128b
+172.17.0.2:40750: POST https://52.40.209.32/pes22/gate/gate_CMD_CREATE_USER.ph…
+               << 200 OK 12.1k
+172.17.0.2:40750: POST https://52.40.209.32/pes22/gate/gate_CMD_GET_PRODUCT_LI…
+               << 200 OK 7.1k
+[08:06:09.197][172.17.0.2:34788] client connect
+[08:06:09.208][172.17.0.2:34788] server connect 185.151.204.11:443
+[08:06:09.210][172.17.0.2:34798] client connect
+[08:06:09.224][172.17.0.2:34798] server connect 185.151.204.11:443
+172.17.0.2:34788: POST https://185.151.204.11/third_party_sharing
+               << 200 OK 16b
+172.17.0.2:34798: POST https://185.151.204.11/sdk_click
+               << 200 OK 70b
+172.17.0.2:34788: POST https://185.151.204.11/session
+               << 200 OK 84b
+172.17.0.2:34788: POST https://185.151.204.11/event
+               << 200 OK 70b
+[08:06:09.445][172.17.0.2:60316] client connect
+[08:06:09.456][172.17.0.2:60316] server connect 142.251.32.174:443
+172.17.0.2:60316: GET https://142.251.32.174/config/app/1:327451421140:androi… HTTP/2.0
+      << HTTP/2.0 304 Not Modified 0b
+172.17.0.2:60316: POST https://142.251.32.174/a HTTP/2.0
+      << HTTP/2.0 204 No Content 0b
+[08:06:10.244][172.17.0.2:33344] client disconnect
+[08:06:10.244][172.17.0.2:42610] client disconnect
+172.17.0.2:40750: POST https://52.40.209.32/pes22/gate/gate_CMD_SET_TRACKRECOR…
+               << 200 OK 96b
+[08:06:11.113][172.17.0.2:42788] client connect
+[08:06:11.117][172.17.0.2:42788] server connect 172.217.114.4:443
+172.17.0.2:42788: GET https://172.217.114.4/reauth/v1beta/users/me/settings HTTP/2.0
+      << HTTP/2.0 200 OK 159b
+172.17.0.2:42788: GET https://172.217.114.4/reauth/v1beta/users/me/settings HTTP/2.0
+      << HTTP/2.0 200 OK 159b
+172.17.0.2:34788: GET https://185.151.204.11/attribution?initiated_by=backend…
+               << 200 OK 156b
+[08:06:14.256][172.17.0.2:34798] server disconnect 185.151.204.11:443
+[08:06:16.287][172.17.0.2:34788] server disconnect 185.151.204.11:443
+[08:06:44.666][172.17.0.2:46666] client connect
+[08:06:44.670][172.17.0.2:46666] server connect 172.217.112.4:443
+172.17.0.2:46666: POST https://172.217.112.4/v0cc/log/batch?format=json_proto3
+               << 200 OK 211b
+[08:06:44.815][172.17.0.2:33872] client connect
+[08:06:44.819][172.17.0.2:33872] server connect 172.217.114.4:443
+172.17.0.2:33872: POST https://172.217.114.4/google.internal.fmd.FmdApiService… HTTP/2.0
+      << HTTP/2.0 200 OK 5b
+[08:07:10.906][172.17.0.2:40750] server disconnect 52.40.209.32:443
+[08:09:25.113][172.17.0.2:50700] client connect
+[08:09:25.115][172.17.0.2:50700] server connect 65.8.196.9:443
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 1.3m
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 11.8k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 365b
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 529k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 6.6k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 365b
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 200k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 2.5k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 365b
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 710k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 7.9k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 365b
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 136k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 1.7k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 365b
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 671k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 8.3k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 140k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 6.6m
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 26.2k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 365b
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 1.1m
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 12.2k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 365b
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 1.9m
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 16.3k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 365b
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 438k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 5.0k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 365b
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 10.8m
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 73.3k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 2.0m
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 15.0k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 665b
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 365b
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 4.2m
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 31.6k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 365b
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 1.5m
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 14.6k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 365b
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 6.3m
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 37.4k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 365b
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 2.8m
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 26.3k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 365b
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 6.0m
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 47.9k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 578k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 443k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 5.0k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 365b
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 2.3m
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 25.3k
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 365b
+172.17.0.2:50700: GET https://65.8.196.9/livedata/202610/0f16a3d0773a87713e8d…
+               << 200 OK 8.8m
+[08:10:09.587][172.17.0.2:60316] 142.251.32.174:443: HTTP/2 protocol error: Invalid input ConnectionInputs.RECV_PING in state ConnectionState.CLOSED
+[08:10:09.587][172.17.0.2:60316] server disconnect 142.251.32.174:443
+[08:10:11.239][172.17.0.2:42788] 172.217.114.4:443: HTTP/2 protocol error: Invalid input ConnectionInputs.RECV_PING in state ConnectionState.CLOSED
+[08:10:11.239][172.17.0.2:42788] server disconnect 172.217.114.4:443
+[08:10:25.795][172.17.0.2:40750] server connect 52.40.209.32:443
+172.17.0.2:40750: POST https://52.40.209.32/pes22/gate/gate_CMD_GET_STADIUM_DA…
+               << 200 OK 640b
+172.17.0.2:40750: POST https://52.40.209.32/pes22/gate/gate_CMD_GET_GAMERELAY_…
+               << 200 OK 2.3k
+172.17.0.2:40750: POST https://52.40.209.32/pes22/gate/gate_CMD_SEND_ADJUST_PA…
+               << 200 OK 96b
+[08:10:26.985][172.17.0.2:39564] client connect
+[08:10:27.022][172.17.0.2:39564] server connect 32.184.206.158:443
+[08:10:27.099][172.17.0.2:39564] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:27.099][172.17.0.2:39564] client disconnect
+[08:10:27.100][172.17.0.2:39564] server disconnect 32.184.206.158:443
+[08:10:27.101][172.17.0.2:57138] client connect
+[08:10:27.136][172.17.0.2:57138] server connect 54.203.69.122:443
+[08:10:27.149][172.17.0.2:60604] client connect
+[08:10:27.156][172.17.0.2:60604] server connect 34.111.40.119:443
+[08:10:27.214][172.17.0.2:57138] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:27.214][172.17.0.2:57138] client disconnect
+[08:10:27.215][172.17.0.2:57138] server disconnect 54.203.69.122:443
+[08:10:27.215][172.17.0.2:44350] client connect
+172.17.0.2:60604 <- tcp <- 34.111.40.119:443
+[08:10:27.227][172.17.0.2:60604] server disconnect 34.111.40.119:443
+[08:10:27.227][172.17.0.2:60604] client disconnect
+[08:10:27.253][172.17.0.2:44350] server connect 44.229.198.107:443
+[08:10:27.332][172.17.0.2:44350] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:27.333][172.17.0.2:44350] client disconnect
+[08:10:27.333][172.17.0.2:44350] server disconnect 44.229.198.107:443
+[08:10:27.335][172.17.0.2:38674] client connect
+[08:10:27.371][172.17.0.2:38674] server connect 35.162.122.19:443
+[08:10:27.448][172.17.0.2:38674] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:27.448][172.17.0.2:38674] client disconnect
+[08:10:27.449][172.17.0.2:38674] server disconnect 35.162.122.19:443
+[08:10:27.453][172.17.0.2:32970] client connect
+[08:10:27.489][172.17.0.2:32970] server connect 44.226.252.93:443
+[08:10:27.568][172.17.0.2:32970] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:27.568][172.17.0.2:32970] client disconnect
+[08:10:27.569][172.17.0.2:32970] server disconnect 44.226.252.93:443
+[08:10:27.569][172.17.0.2:41360] client connect
+[08:10:27.607][172.17.0.2:41360] server connect 52.43.133.82:443
+[08:10:27.686][172.17.0.2:41360] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:27.688][172.17.0.2:41360] client disconnect
+[08:10:27.688][172.17.0.2:41360] server disconnect 52.43.133.82:443
+[08:10:27.688][172.17.0.2:35468] client connect
+[08:10:27.724][172.17.0.2:35468] server connect 44.224.10.74:443
+[08:10:27.804][172.17.0.2:35468] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:27.804][172.17.0.2:35468] client disconnect
+[08:10:27.805][172.17.0.2:35468] server disconnect 44.224.10.74:443
+[08:10:27.806][172.17.0.2:34140] client connect
+[08:10:27.843][172.17.0.2:34140] server connect 184.32.60.162:443
+[08:10:27.921][172.17.0.2:34140] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:27.922][172.17.0.2:34140] client disconnect
+[08:10:27.922][172.17.0.2:34140] server disconnect 184.32.60.162:443
+[08:10:29.753][172.17.0.2:34520] client connect
+[08:10:29.789][172.17.0.2:34520] server connect 32.184.206.158:443
+[08:10:29.878][172.17.0.2:34520] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:29.879][172.17.0.2:57804] client connect
+[08:10:29.880][172.17.0.2:34520] client disconnect
+[08:10:29.880][172.17.0.2:34520] server disconnect 32.184.206.158:443
+[08:10:29.915][172.17.0.2:57804] server connect 54.203.69.122:443
+[08:10:29.993][172.17.0.2:57804] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:29.994][172.17.0.2:57804] client disconnect
+[08:10:29.994][172.17.0.2:57804] server disconnect 54.203.69.122:443
+[08:10:29.996][172.17.0.2:48078] client connect
+[08:10:30.032][172.17.0.2:48078] server connect 44.229.198.107:443
+[08:10:30.109][172.17.0.2:48078] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:30.110][172.17.0.2:38096] client connect
+[08:10:30.110][172.17.0.2:48078] client disconnect
+[08:10:30.111][172.17.0.2:48078] server disconnect 44.229.198.107:443
+[08:10:30.146][172.17.0.2:38096] server connect 35.162.122.19:443
+[08:10:30.223][172.17.0.2:38096] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:30.224][172.17.0.2:38096] client disconnect
+[08:10:30.224][172.17.0.2:38096] server disconnect 35.162.122.19:443
+[08:10:30.225][172.17.0.2:50366] client connect
+[08:10:30.262][172.17.0.2:50366] server connect 44.226.252.93:443
+[08:10:30.338][172.17.0.2:50366] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:30.338][172.17.0.2:50366] client disconnect
+[08:10:30.339][172.17.0.2:50366] server disconnect 44.226.252.93:443
+[08:10:30.342][172.17.0.2:57454] client connect
+[08:10:30.377][172.17.0.2:57454] server connect 52.43.133.82:443
+[08:10:30.452][172.17.0.2:57454] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:30.453][172.17.0.2:57454] client disconnect
+[08:10:30.453][172.17.0.2:57454] server disconnect 52.43.133.82:443
+[08:10:30.457][172.17.0.2:51878] client connect
+[08:10:30.492][172.17.0.2:51878] server connect 44.224.10.74:443
+[08:10:30.567][172.17.0.2:51878] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:30.568][172.17.0.2:51878] client disconnect
+[08:10:30.568][172.17.0.2:51878] server disconnect 44.224.10.74:443
+[08:10:30.569][172.17.0.2:58606] client connect
+[08:10:30.605][172.17.0.2:58606] server connect 184.32.60.162:443
+[08:10:30.686][172.17.0.2:58606] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:30.686][172.17.0.2:58606] client disconnect
+[08:10:30.686][172.17.0.2:58606] server disconnect 184.32.60.162:443
+[08:10:33.660][172.17.0.2:34528] client connect
+[08:10:33.696][172.17.0.2:34528] server connect 32.184.206.158:443
+[08:10:33.772][172.17.0.2:34528] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:33.773][172.17.0.2:57806] client connect
+[08:10:33.773][172.17.0.2:34528] client disconnect
+[08:10:33.774][172.17.0.2:34528] server disconnect 32.184.206.158:443
+[08:10:33.808][172.17.0.2:57806] server connect 54.203.69.122:443
+[08:10:33.882][172.17.0.2:57806] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:33.883][172.17.0.2:48082] client connect
+[08:10:33.884][172.17.0.2:57806] client disconnect
+[08:10:33.884][172.17.0.2:57806] server disconnect 54.203.69.122:443
+[08:10:33.918][172.17.0.2:48082] server connect 44.229.198.107:443
+[08:10:33.993][172.17.0.2:48082] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:33.994][172.17.0.2:38106] client connect
+[08:10:33.995][172.17.0.2:48082] client disconnect
+[08:10:33.995][172.17.0.2:48082] server disconnect 44.229.198.107:443
+[08:10:34.030][172.17.0.2:38106] server connect 35.162.122.19:443
+[08:10:34.106][172.17.0.2:38106] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:34.107][172.17.0.2:38106] client disconnect
+[08:10:34.107][172.17.0.2:38106] server disconnect 35.162.122.19:443
+[08:10:34.108][172.17.0.2:50376] client connect
+[08:10:34.144][172.17.0.2:50376] server connect 44.226.252.93:443
+[08:10:34.220][172.17.0.2:50376] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:34.221][172.17.0.2:57470] client connect
+[08:10:34.222][172.17.0.2:50376] client disconnect
+[08:10:34.222][172.17.0.2:50376] server disconnect 44.226.252.93:443
+[08:10:34.257][172.17.0.2:57470] server connect 52.43.133.82:443
+[08:10:34.333][172.17.0.2:57470] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:34.334][172.17.0.2:57470] client disconnect
+[08:10:34.334][172.17.0.2:57470] server disconnect 52.43.133.82:443
+[08:10:34.334][172.17.0.2:51892] client connect
+[08:10:34.371][172.17.0.2:51892] server connect 44.224.10.74:443
+[08:10:34.446][172.17.0.2:51892] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:34.447][172.17.0.2:58618] client connect
+[08:10:34.448][172.17.0.2:51892] client disconnect
+[08:10:34.448][172.17.0.2:51892] server disconnect 44.224.10.74:443
+[08:10:34.483][172.17.0.2:58618] server connect 184.32.60.162:443
+[08:10:34.559][172.17.0.2:58618] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:34.560][172.17.0.2:58618] client disconnect
+[08:10:34.560][172.17.0.2:58618] server disconnect 184.32.60.162:443
+[08:10:34.653][172.17.0.2:34536] client connect
+[08:10:34.689][172.17.0.2:34536] server connect 32.184.206.158:443
+[08:10:34.897][172.17.0.2:34536] client disconnect
+[08:10:34.897][172.17.0.2:34536] server disconnect 32.184.206.158:443
+172.17.0.2:40750: POST https://52.40.209.32/pes22/gate/gate_CMD_SET_GAMERELAY_…
+               << 200 OK 96b
+[08:10:44.750][172.17.0.2:46666] server disconnect 172.217.112.4:443
+[08:10:45.120][172.17.0.2:33872] 172.217.114.4:443: HTTP/2 protocol error: Invalid input ConnectionInputs.RECV_PING in state ConnectionState.CLOSED
+[08:10:45.121][172.17.0.2:33872] server disconnect 172.217.114.4:443
+[08:10:45.371][172.17.0.2:40880] client connect
+[08:10:45.407][172.17.0.2:40880] server connect 32.184.206.158:443
+[08:10:45.483][172.17.0.2:40880] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:45.484][172.17.0.2:39616] client connect
+[08:10:45.486][172.17.0.2:40880] client disconnect
+[08:10:45.486][172.17.0.2:40880] server disconnect 32.184.206.158:443
+[08:10:45.520][172.17.0.2:39616] server connect 54.203.69.122:443
+[08:10:45.596][172.17.0.2:39616] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:45.596][172.17.0.2:39616] client disconnect
+[08:10:45.596][172.17.0.2:39616] server disconnect 54.203.69.122:443
+[08:10:45.603][172.17.0.2:59648] client connect
+[08:10:45.639][172.17.0.2:59648] server connect 44.229.198.107:443
+[08:10:45.715][172.17.0.2:59648] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:45.716][172.17.0.2:46820] client connect
+[08:10:45.716][172.17.0.2:59648] client disconnect
+[08:10:45.717][172.17.0.2:59648] server disconnect 44.229.198.107:443
+[08:10:45.752][172.17.0.2:46820] server connect 35.162.122.19:443
+[08:10:45.830][172.17.0.2:46820] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:45.830][172.17.0.2:46820] client disconnect
+[08:10:45.831][172.17.0.2:46820] server disconnect 35.162.122.19:443
+[08:10:45.833][172.17.0.2:50136] client connect
+[08:10:45.869][172.17.0.2:50136] server connect 44.226.252.93:443
+[08:10:45.944][172.17.0.2:50136] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:45.947][172.17.0.2:50136] client disconnect
+[08:10:45.947][172.17.0.2:50136] server disconnect 44.226.252.93:443
+[08:10:45.951][172.17.0.2:45936] client connect
+[08:10:45.987][172.17.0.2:45936] server connect 52.43.133.82:443
+[08:10:46.062][172.17.0.2:45936] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:46.064][172.17.0.2:45936] client disconnect
+[08:10:46.064][172.17.0.2:45936] server disconnect 52.43.133.82:443
+[08:10:46.065][172.17.0.2:58016] client connect
+[08:10:46.101][172.17.0.2:58016] server connect 44.224.10.74:443
+[08:10:46.180][172.17.0.2:58016] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:46.181][172.17.0.2:58016] client disconnect
+[08:10:46.181][172.17.0.2:58016] server disconnect 44.224.10.74:443
+[08:10:46.182][172.17.0.2:54826] client connect
+[08:10:46.218][172.17.0.2:54826] server connect 184.32.60.162:443
+[08:10:46.295][172.17.0.2:54826] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:46.295][172.17.0.2:54826] client disconnect
+[08:10:46.295][172.17.0.2:54826] server disconnect 184.32.60.162:443
+[08:10:46.364][172.17.0.2:40884] client connect
+[08:10:46.400][172.17.0.2:40884] server connect 32.184.206.158:443
+[08:10:46.818][172.17.0.2:40884] client disconnect
+[08:10:46.818][172.17.0.2:40884] server disconnect 32.184.206.158:443
+[08:10:55.796][172.17.0.2:37180] client connect
+[08:10:55.832][172.17.0.2:37180] server connect 54.203.69.122:443
+[08:10:55.909][172.17.0.2:37180] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:55.910][172.17.0.2:37180] client disconnect
+[08:10:55.910][172.17.0.2:37180] server disconnect 54.203.69.122:443
+[08:10:55.912][172.17.0.2:52138] client connect
+[08:10:55.947][172.17.0.2:52138] server connect 44.229.198.107:443
+[08:10:56.022][172.17.0.2:52138] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:56.023][172.17.0.2:52138] client disconnect
+[08:10:56.023][172.17.0.2:52138] server disconnect 44.229.198.107:443
+[08:10:56.024][172.17.0.2:34556] client connect
+[08:10:56.060][172.17.0.2:34556] server connect 32.187.160.14:443
+[08:10:56.142][172.17.0.2:34556] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:56.142][172.17.0.2:39124] client connect
+[08:10:56.143][172.17.0.2:34556] client disconnect
+[08:10:56.143][172.17.0.2:34556] server disconnect 32.187.160.14:443
+[08:10:56.178][172.17.0.2:39124] server connect 16.146.220.162:443
+[08:10:56.258][172.17.0.2:39124] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:56.258][172.17.0.2:39124] client disconnect
+[08:10:56.259][172.17.0.2:39124] server disconnect 16.146.220.162:443
+[08:10:56.260][172.17.0.2:37746] client connect
+[08:10:56.296][172.17.0.2:37746] server connect 52.43.133.82:443
+[08:10:56.373][172.17.0.2:37746] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:56.373][172.17.0.2:48942] client connect
+[08:10:56.375][172.17.0.2:37746] client disconnect
+[08:10:56.375][172.17.0.2:37746] server disconnect 52.43.133.82:443
+[08:10:56.410][172.17.0.2:48942] server connect 184.32.60.162:443
+[08:10:56.488][172.17.0.2:48942] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:56.488][172.17.0.2:48942] client disconnect
+[08:10:56.488][172.17.0.2:48942] server disconnect 184.32.60.162:443
+[08:10:56.489][172.17.0.2:56064] client connect
+[08:10:56.525][172.17.0.2:56064] server connect 35.162.122.19:443
+[08:10:56.601][172.17.0.2:56064] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:56.602][172.17.0.2:56064] client disconnect
+[08:10:56.602][172.17.0.2:56064] server disconnect 35.162.122.19:443
+[08:10:56.604][172.17.0.2:44498] client connect
+[08:10:56.640][172.17.0.2:44498] server connect 44.255.253.52:443
+[08:10:56.717][172.17.0.2:44498] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:10:56.717][172.17.0.2:44498] client disconnect
+[08:10:56.717][172.17.0.2:44498] server disconnect 44.255.253.52:443
+[08:10:56.787][172.17.0.2:37190] client connect
+[08:10:56.823][172.17.0.2:37190] server connect 54.203.69.122:443
+[08:10:56.922][172.17.0.2:37190] client disconnect
+[08:10:56.923][172.17.0.2:37190] server disconnect 54.203.69.122:443
+[08:11:03.335][172.17.0.2:34964] client connect
+[08:11:03.371][172.17.0.2:34964] server connect 54.203.69.122:443
+[08:11:03.445][172.17.0.2:34964] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:03.446][172.17.0.2:34964] client disconnect
+[08:11:03.446][172.17.0.2:34964] server disconnect 54.203.69.122:443
+[08:11:03.447][172.17.0.2:46450] client connect
+[08:11:03.482][172.17.0.2:46450] server connect 44.229.198.107:443
+[08:11:03.557][172.17.0.2:46450] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:03.557][172.17.0.2:46450] client disconnect
+[08:11:03.558][172.17.0.2:46450] server disconnect 44.229.198.107:443
+[08:11:03.558][172.17.0.2:53800] client connect
+[08:11:03.594][172.17.0.2:53800] server connect 32.187.160.14:443
+[08:11:03.671][172.17.0.2:53800] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:03.671][172.17.0.2:53800] client disconnect
+[08:11:03.672][172.17.0.2:53800] server disconnect 32.187.160.14:443
+[08:11:03.672][172.17.0.2:55424] client connect
+[08:11:03.708][172.17.0.2:55424] server connect 16.146.220.162:443
+[08:11:03.786][172.17.0.2:55424] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:03.786][172.17.0.2:55424] client disconnect
+[08:11:03.787][172.17.0.2:55424] server disconnect 16.146.220.162:443
+[08:11:03.787][172.17.0.2:50460] client connect
+[08:11:03.823][172.17.0.2:50460] server connect 52.43.133.82:443
+[08:11:03.901][172.17.0.2:50460] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:03.901][172.17.0.2:50460] client disconnect
+[08:11:03.902][172.17.0.2:50460] server disconnect 52.43.133.82:443
+[08:11:03.903][172.17.0.2:38326] client connect
+[08:11:03.940][172.17.0.2:38326] server connect 184.32.60.162:443
+[08:11:04.018][172.17.0.2:38326] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:04.018][172.17.0.2:38326] client disconnect
+[08:11:04.019][172.17.0.2:38326] server disconnect 184.32.60.162:443
+[08:11:04.019][172.17.0.2:60406] client connect
+[08:11:04.056][172.17.0.2:60406] server connect 35.162.122.19:443
+[08:11:04.132][172.17.0.2:60406] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:04.132][172.17.0.2:60406] client disconnect
+[08:11:04.133][172.17.0.2:60406] server disconnect 35.162.122.19:443
+[08:11:04.138][172.17.0.2:59966] client connect
+[08:11:04.180][172.17.0.2:59966] server connect 44.255.253.52:443
+[08:11:04.259][172.17.0.2:59966] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:04.260][172.17.0.2:59966] client disconnect
+[08:11:04.260][172.17.0.2:59966] server disconnect 44.255.253.52:443
+[08:11:08.441][172.17.0.2:35378] client connect
+[08:11:08.445][172.17.0.2:35378] server connect 172.217.113.4:443
+172.17.0.2:35378: POST https://172.217.113.4/play/log?format=raw&proto_v2=true
+               << 200 OK 38b
+[08:11:08.518][172.17.0.2:35378] server disconnect 172.217.113.4:443
+[08:11:08.520][172.17.0.2:35378] client disconnect
+[08:11:09.258][172.17.0.2:34798] client disconnect
+[08:11:09.868][172.17.0.2:37042] client connect
+[08:11:09.904][172.17.0.2:37042] server connect 54.203.69.122:443
+[08:11:09.980][172.17.0.2:37042] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:09.980][172.17.0.2:37042] client disconnect
+[08:11:09.981][172.17.0.2:37042] server disconnect 54.203.69.122:443
+[08:11:09.984][172.17.0.2:34634] client connect
+[08:11:10.020][172.17.0.2:34634] server connect 44.229.198.107:443
+[08:11:10.095][172.17.0.2:34634] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:10.095][172.17.0.2:34634] client disconnect
+[08:11:10.096][172.17.0.2:34634] server disconnect 44.229.198.107:443
+[08:11:10.099][172.17.0.2:39556] client connect
+[08:11:10.135][172.17.0.2:39556] server connect 32.187.160.14:443
+[08:11:10.213][172.17.0.2:39556] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:10.214][172.17.0.2:39556] client disconnect
+[08:11:10.214][172.17.0.2:39556] server disconnect 32.187.160.14:443
+[08:11:10.219][172.17.0.2:56408] client connect
+[08:11:10.255][172.17.0.2:56408] server connect 16.146.220.162:443
+[08:11:10.334][172.17.0.2:56408] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:10.334][172.17.0.2:56408] client disconnect
+[08:11:10.334][172.17.0.2:56408] server disconnect 16.146.220.162:443
+[08:11:10.340][172.17.0.2:33738] client connect
+[08:11:10.376][172.17.0.2:33738] server connect 52.43.133.82:443
+[08:11:10.452][172.17.0.2:33738] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:10.452][172.17.0.2:33738] client disconnect
+[08:11:10.453][172.17.0.2:33738] server disconnect 52.43.133.82:443
+[08:11:10.454][172.17.0.2:57298] client connect
+[08:11:10.490][172.17.0.2:57298] server connect 184.32.60.162:443
+[08:11:10.569][172.17.0.2:57298] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:10.569][172.17.0.2:57298] client disconnect
+[08:11:10.570][172.17.0.2:57298] server disconnect 184.32.60.162:443
+[08:11:10.573][172.17.0.2:39362] client connect
+[08:11:10.609][172.17.0.2:39362] server connect 35.162.122.19:443
+[08:11:10.687][172.17.0.2:39362] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:10.688][172.17.0.2:39362] client disconnect
+[08:11:10.688][172.17.0.2:39362] server disconnect 35.162.122.19:443
+[08:11:10.690][172.17.0.2:50478] client connect
+[08:11:10.725][172.17.0.2:50478] server connect 44.255.253.52:443
+[08:11:10.801][172.17.0.2:50478] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:10.802][172.17.0.2:50478] client disconnect
+[08:11:10.802][172.17.0.2:50478] server disconnect 44.255.253.52:443
+[08:11:11.288][172.17.0.2:34788] client disconnect
+172.17.0.2:40750: POST https://52.40.209.32/pes22/gate/gate_CMD_SET_GAMERELAY_…
+               << 200 OK 96b
+[08:11:16.422][172.17.0.2:37052] client connect
+[08:11:16.457][172.17.0.2:37052] server connect 54.203.69.122:443
+[08:11:16.533][172.17.0.2:37052] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:16.533][172.17.0.2:37052] client disconnect
+[08:11:16.534][172.17.0.2:37052] server disconnect 54.203.69.122:443
+[08:11:16.538][172.17.0.2:34638] client connect
+[08:11:16.573][172.17.0.2:34638] server connect 44.229.198.107:443
+[08:11:16.650][172.17.0.2:34638] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:16.650][172.17.0.2:34638] client disconnect
+[08:11:16.651][172.17.0.2:34638] server disconnect 44.229.198.107:443
+[08:11:16.654][172.17.0.2:62905] client connect
+[08:11:16.690][172.17.0.2:62905] server connect 32.187.160.14:443
+[08:11:16.769][172.17.0.2:62905] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:16.770][172.17.0.2:62905] client disconnect
+[08:11:16.770][172.17.0.2:62905] server disconnect 32.187.160.14:443
+[08:11:16.776][172.17.0.2:56422] client connect
+[08:11:16.811][172.17.0.2:56422] server connect 16.146.220.162:443
+[08:11:16.889][172.17.0.2:56422] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:16.890][172.17.0.2:56422] client disconnect
+[08:11:16.890][172.17.0.2:56422] server disconnect 16.146.220.162:443
+[08:11:16.892][172.17.0.2:33750] client connect
+[08:11:16.928][172.17.0.2:33750] server connect 52.43.133.82:443
+[08:11:17.004][172.17.0.2:33750] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:17.005][172.17.0.2:33750] client disconnect
+[08:11:17.005][172.17.0.2:33750] server disconnect 52.43.133.82:443
+[08:11:17.006][172.17.0.2:57300] client connect
+[08:11:17.042][172.17.0.2:57300] server connect 184.32.60.162:443
+[08:11:17.122][172.17.0.2:57300] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:17.122][172.17.0.2:57300] client disconnect
+[08:11:17.122][172.17.0.2:57300] server disconnect 184.32.60.162:443
+[08:11:17.123][172.17.0.2:39372] client connect
+[08:11:17.159][172.17.0.2:39372] server connect 35.162.122.19:443
+[08:11:17.235][172.17.0.2:39372] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:17.235][172.17.0.2:39372] client disconnect
+[08:11:17.235][172.17.0.2:39372] server disconnect 35.162.122.19:443
+[08:11:17.238][172.17.0.2:50494] client connect
+[08:11:17.273][172.17.0.2:50494] server connect 44.255.253.52:443
+[08:11:17.350][172.17.0.2:50494] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:11:17.351][172.17.0.2:50494] client disconnect
+[08:11:17.351][172.17.0.2:50494] server disconnect 44.255.253.52:443
+[08:11:44.749][172.17.0.2:46666] client disconnect
+[08:12:13.937][172.17.0.2:40750] server disconnect 52.40.209.32:443
+[08:12:25.098][172.17.0.2:40750] server connect 52.40.209.32:443
+172.17.0.2:40750: POST https://52.40.209.32/pes22/gate/gate_CMD_SET_GAMERELAY_…
+               << 200 OK 96b
+[08:12:42.873][172.17.0.2:53722] client connect
+[08:12:42.878][172.17.0.2:53722] server connect 34.111.40.119:443
+172.17.0.2:53722 <- tcp <- 34.111.40.119:443
+[08:12:42.895][172.17.0.2:53722] server disconnect 34.111.40.119:443
+[08:12:42.896][172.17.0.2:53722] client disconnect
+[08:13:25.231][172.17.0.2:40750] server disconnect 52.40.209.32:443
+[08:13:36.791][172.17.0.2:50700] server disconnect 65.8.196.9:443
+[08:14:36.874][172.17.0.2:50700] client disconnect
+[08:17:25.235][172.17.0.2:40750] client disconnect
+[08:19:53.755][172.17.0.2:39670] client connect
+[08:19:53.792][172.17.0.2:39670] server connect 32.184.206.158:443
+172.17.0.2:39670: POST https://32.184.206.158/pes22/gate/gate_CMD_GET_SERVER_E…
+               << 200 OK 2.3k
+[08:19:54.224][172.17.0.2:35962] client connect
+[08:19:54.226][172.17.0.2:35962] server connect 65.8.196.157:443
+172.17.0.2:35962: GET https://65.8.196.157/prd/banner/title/000007/3d4093c9e3…
+               << 200 OK 428k
+172.17.0.2:39670: POST https://32.184.206.158/pes22/gate/gate_CMD_GET_USER_EUL…
+               << 200 OK 512b
+172.17.0.2:39670: POST https://32.184.206.158/pes22/gate/gate_CMD_GET_COUNTRY_…
+               << 200 OK 2.3k
+172.17.0.2:39670: POST https://32.184.206.158/pes22/gate/gate_CMD_GET_AGE_GATE…
+               << 200 OK 160b
+172.17.0.2:39670: POST https://32.184.206.158/pes22/gate/gate_CMD_GET_KID_USER…
+               << 200 OK 128b
+[08:19:57.025][172.17.0.2:53714] client connect
+[08:19:57.028][172.17.0.2:53714] server connect 52.85.132.87:443
+172.17.0.2:53714: GET https://52.85.132.87/app/env/detail.php?ua_appli_id=113…
+               << 200 OK 327b
+172.17.0.2:53714: GET https://52.85.132.87/app/setting/index.php?ua_appli_id=…
+               << 200 OK 327b
+172.17.0.2:53714: GET https://52.85.132.87/ad/external/detail.php?appli_id=11…
+               << 200 OK 325b
+172.17.0.2:53714: GET https://52.85.132.87/app/info/index.php?ua_appli_id=113…
+               << 200 OK 1.3k
+172.17.0.2:53714: POST https://52.85.132.87/ad/external/app/install/regist.php
+               << 200 OK 310b
+[08:19:58.086][172.17.0.2:48998] client connect
+[08:19:58.087][172.17.0.2:49006] client connect
+[08:19:58.088][172.17.0.2:49012] client connect
+[08:19:58.089][172.17.0.2:48998] server connect 52.85.132.87:443
+[08:19:58.091][172.17.0.2:49006] server connect 52.85.132.87:443
+[08:19:58.091][172.17.0.2:49012] server connect 52.85.132.87:443
+172.17.0.2:53714: POST https://52.85.132.87/ad/auth/login.php
+               << 200 OK 310b
+[08:19:58.210][172.17.0.2:49020] client connect
+[08:19:58.213][172.17.0.2:49020] server connect 52.85.132.87:443
+172.17.0.2:48998: GET https://52.85.132.87/ad/external/adid/index.php?ua_appl…
+               << 200 OK 1.3k
+172.17.0.2:49006: POST https://52.85.132.87/analysis/regist.php
+               << 200 OK 336b
+172.17.0.2:49012: POST https://52.85.132.87/analysis/regist.php
+               << 200 OK 336b
+172.17.0.2:49020: POST https://52.85.132.87/ad/auth/login.php
+               << 200 OK 338b
+[08:19:58.355][172.17.0.2:35962] client disconnect
+[08:19:58.355][172.17.0.2:35962] server disconnect 65.8.196.157:443
+[08:19:58.411][172.17.0.2:49034] client connect
+[08:19:58.412][172.17.0.2:49046] client connect
+[08:19:58.414][172.17.0.2:49034] server connect 52.85.132.87:443
+[08:19:58.415][172.17.0.2:49046] server connect 52.85.132.87:443
+172.17.0.2:48998: GET https://52.85.132.87/ad/external/banner/detail.php?ua_a…
+               << 200 OK 353b
+172.17.0.2:53714: GET https://52.85.132.87/ad/external/banner/detail.php?ua_a…
+               << 200 OK 324b
+172.17.0.2:49012: GET https://52.85.132.87/ad/auth/checkLoginStatus.php?cr=0&…
+               << 200 OK 342b
+172.17.0.2:49006: GET https://52.85.132.87/ad/auth/checkLoginStatus.php?cr=0&…
+               << 200 OK 342b
+172.17.0.2:49020: GET https://52.85.132.87/ad/auth/checkLoginStatus.php?cr=0&…
+               << 200 OK 342b
+172.17.0.2:49046: GET https://52.85.132.87/ad/auth/checkLoginStatus.php?cr=0&…
+               << 200 OK 342b
+172.17.0.2:49034: GET https://52.85.132.87/ad/auth/checkLoginStatus.php?cr=0&…
+               << 200 OK 342b
+172.17.0.2:49006: GET https://52.85.132.87/ad/external/app/read/checkAllRead.…
+               << 200 OK 348b
+172.17.0.2:48998: GET https://52.85.132.87/ad/external/app/read/checkAllRead.…
+               << 200 OK 348b
+172.17.0.2:49020: GET https://52.85.132.87/ad/external/app/read/checkAllRead.…
+               << 200 OK 348b
+[08:19:58.685][172.17.0.2:39670] client disconnect
+[08:19:58.686][172.17.0.2:39670] server disconnect 32.184.206.158:443
+172.17.0.2:53714: GET https://52.85.132.87/ad/external/banner/detail.php?ua_a…
+               << 200 OK 353b
+[08:19:58.688][172.17.0.2:49046] client disconnect
+[08:19:58.689][172.17.0.2:49046] server disconnect 52.85.132.87:443
+172.17.0.2:49012: GET https://52.85.132.87/ad/external/app/allAdDataForDispla…
+               << 200 OK 2.9k
+[08:19:58.835][172.17.0.2:49034] client disconnect
+[08:19:58.836][172.17.0.2:49034] server disconnect 52.85.132.87:443
+[08:19:58.867][172.17.0.2:41804] client connect
+[08:19:58.869][172.17.0.2:41804] server connect 65.8.196.99:443
+172.17.0.2:41804: GET https://65.8.196.99/es/banner/wecc_banner_AMSP_812x396_…
+               << 200 OK 137k
+172.17.0.2:53714: GET https://52.85.132.87/ad/auth/checkLoginStatus.php?cr=0&…
+               << 200 OK 342b
+[08:19:58.965][172.17.0.2:49006] client disconnect
+[08:19:58.966][172.17.0.2:49006] server disconnect 52.85.132.87:443
+172.17.0.2:53714: GET https://52.85.132.87/ad/external/layout/index.php?ua_ap…
+               << 200 OK 512b
+[08:19:59.104][172.17.0.2:41810] client connect
+[08:19:59.106][172.17.0.2:49060] client connect
+[08:19:59.107][172.17.0.2:49062] client connect
+[08:19:59.107][172.17.0.2:49064] client connect
+[08:19:59.108][172.17.0.2:49070] client connect
+[08:19:59.108][172.17.0.2:49074] client connect
+[08:19:59.110][172.17.0.2:41810] server connect 65.8.196.99:443
+172.17.0.2:41804: GET https://65.8.196.99/es/js/jquery-1.8.2.min.js
+               << 200 OK 33.3k
+[08:19:59.113][172.17.0.2:49060] server connect 52.85.132.87:443
+[08:19:59.114][172.17.0.2:49062] server connect 52.85.132.87:443
+[08:19:59.116][172.17.0.2:49064] server connect 52.85.132.87:443
+[08:19:59.117][172.17.0.2:49070] server connect 52.85.132.87:443
+[08:19:59.119][172.17.0.2:49074] server connect 52.85.132.87:443
+172.17.0.2:41810: GET https://65.8.196.99/es/js/underscore-min.js
+               << 200 OK 5.2k
+172.17.0.2:53714: GET https://52.85.132.87/ad/external/layout/template/ad_typ…
+               << 200 OK 3.2k
+172.17.0.2:49012: GET https://52.85.132.87/ad/external/layout/template/ad_typ…
+               << 200 OK 2.0k
+172.17.0.2:49020: GET https://52.85.132.87/img/assets/media_player/back_en.pn…
+               << 200 OK 982b
+172.17.0.2:49060: GET https://52.85.132.87/img/assets/media_player/sound_on.p…
+               << 200 OK 311b
+[08:19:59.287][172.17.0.2:41804] client disconnect
+[08:19:59.287][172.17.0.2:41804] server disconnect 65.8.196.99:443
+172.17.0.2:49062: GET https://52.85.132.87/img/assets/media_player/sound_off.…
+               << 200 OK 358b
+172.17.0.2:49064: GET https://52.85.132.87/img/assets/media_player/dl_en.png
+               << 200 OK 1.4k
+172.17.0.2:49070: GET https://52.85.132.87/img/assets/media_player/stop.png
+               << 200 OK 1.3k
+172.17.0.2:49074: GET https://52.85.132.87/img/assets/media_player/play.png
+               << 200 OK 1.4k
+[08:19:59.293][172.17.0.2:41810] client disconnect
+[08:19:59.294][172.17.0.2:41810] server disconnect 65.8.196.99:443
+[08:19:59.294][172.17.0.2:53714] client disconnect
+[08:19:59.295][172.17.0.2:53714] server disconnect 52.85.132.87:443
+[08:19:59.295][172.17.0.2:49012] client disconnect
+[08:19:59.295][172.17.0.2:49012] server disconnect 52.85.132.87:443
+[08:19:59.296][172.17.0.2:49020] client disconnect
+[08:19:59.296][172.17.0.2:49020] server disconnect 52.85.132.87:443
+172.17.0.2:48998: GET https://52.85.132.87/ad/external/layout/template/ad_typ…
+               << 200 OK 24.1k
+[08:19:59.342][172.17.0.2:49060] client disconnect
+[08:19:59.342][172.17.0.2:49060] server disconnect 52.85.132.87:443
+172.17.0.2:49064: GET https://52.85.132.87/ad/auth/checkLoginStatus.php?cr=0&…
+               << 200 OK 342b
+172.17.0.2:48998: POST https://52.85.132.87/ad/external/app/read/regist.php
+               << 200 OK 347b
+172.17.0.2:49064: POST https://52.85.132.87/analysis/list/regist.php
+               << 200 OK 336b
+172.17.0.2:48998: GET https://52.85.132.87/ad/auth/checkLoginStatus.php?cr=0&…
+               << 200 OK 342b
+[08:20:59.499][172.17.0.2:60316] Closing connection due to inactivity: Client(172.17.0.2:60316, state=open, alpn=h2)
+[08:20:59.499][172.17.0.2:60316] client disconnect
+[08:21:01.140][172.17.0.2:42788] Closing connection due to inactivity: Client(172.17.0.2:42788, state=open, alpn=h2)
+[08:21:01.140][172.17.0.2:42788] client disconnect
+[08:21:34.844][172.17.0.2:33872] Closing connection due to inactivity: Client(172.17.0.2:33872, state=open, alpn=h2)
+[08:21:34.844][172.17.0.2:33872] client disconnect
+172.17.0.2:48998: GET https://52.85.132.87/ad/auth/checkLoginStatus.php?cr=0&…
+               << 200 OK 342b
+172.17.0.2:49064: GET https://52.85.132.87/ad/auth/checkLoginStatus.php?cr=0&…
+               << 200 OK 342b
+172.17.0.2:49070: GET https://52.85.132.87/app/env/detail.php?ua_appli_id=113…
+               << 200 OK 327b
+172.17.0.2:49062: GET https://52.85.132.87/ad/auth/checkLoginStatus.php?cr=0&…
+               << 200 OK 342b
+172.17.0.2:48998: GET https://52.85.132.87/ad/external/app/read/checkAllRead.…
+               << 200 OK 348b
+172.17.0.2:49064: GET https://52.85.132.87/ad/external/app/read/checkAllRead.…
+               << 200 OK 348b
+172.17.0.2:49070: GET https://52.85.132.87/app/setting/index.php?ua_appli_id=…
+               << 200 OK 327b
+172.17.0.2:49062: GET https://52.85.132.87/ad/external/app/read/checkAllRead.…
+               << 200 OK 348b
+[08:22:25.643][172.17.0.2:56140] client connect
+[08:22:25.680][172.17.0.2:56140] server connect 34.218.97.216:443
+172.17.0.2:56140: POST https://34.218.97.216/pes22/gate/gate_CMD_LOGIN.php
+               << 200 OK 12.9k
+[08:22:26.134][172.17.0.2:49074] client disconnect
+[08:22:26.134][172.17.0.2:49074] server disconnect 52.85.132.87:443
+172.17.0.2:48998: GET https://52.85.132.87/ad/auth/checkLoginStatus.php?cr=0&…
+               << 200 OK 342b
+172.17.0.2:49064: GET https://52.85.132.87/ad/auth/checkLoginStatus.php?cr=0&…
+               << 200 OK 342b
+172.17.0.2:49062: GET https://52.85.132.87/ad/auth/checkLoginStatus.php?cr=0&…
+               << 200 OK 342b
+172.17.0.2:49070: GET https://52.85.132.87/app/env/detail.php?ua_appli_id=113…
+               << 200 OK 327b
+172.17.0.2:48998: GET https://52.85.132.87/ad/external/app/read/checkAllRead.…
+               << 200 OK 348b
+172.17.0.2:49064: GET https://52.85.132.87/ad/external/app/read/checkAllRead.…
+               << 200 OK 348b
+172.17.0.2:49062: GET https://52.85.132.87/ad/external/app/read/checkAllRead.…
+               << 200 OK 348b
+172.17.0.2:49070: GET https://52.85.132.87/app/setting/index.php?ua_appli_id=…
+               << 200 OK 327b
+[08:22:27.385][172.17.0.2:33630] client connect
+[08:22:27.395][172.17.0.2:33630] server connect 185.151.204.11:443
+172.17.0.2:33630: POST https://185.151.204.11/event
+               << 200 OK 70b
+[08:22:27.430][172.17.0.2:56140] client disconnect
+[08:22:27.431][172.17.0.2:56140] server disconnect 34.218.97.216:443
+172.17.0.2:33630: POST https://185.151.204.11/third_party_sharing
+               << 202 Accepted 127b
+[08:22:27.555][172.17.0.2:56142] client connect
+[08:22:27.592][172.17.0.2:56142] server connect 34.218.97.216:443
+172.17.0.2:56142: POST https://34.218.97.216/pes22/gate/gate_CMD_GET_PRODUCT_L…
+               << 200 OK 7.1k
+[08:22:27.816][172.17.0.2:48998] client disconnect
+[08:22:27.817][172.17.0.2:48998] server disconnect 52.85.132.87:443
+172.17.0.2:56142: POST https://34.218.97.216/pes22/gate/gate_CMD_SET_TRACKRECO…
+               << 200 OK 96b
+[08:22:32.445][172.17.0.2:33630] server disconnect 185.151.204.11:443
+[08:22:32.460][172.17.0.2:42844] client connect
+[08:22:32.464][172.17.0.2:42844] server connect 172.217.117.4:443
+172.17.0.2:42844: POST https://172.217.117.4/v0cc/log/batch?format=json_proto3
+               << 200 OK 211b
+[08:22:32.551][172.17.0.2:49064] client disconnect
+[08:22:32.551][172.17.0.2:49064] server disconnect 52.85.132.87:443
+[08:22:32.581][172.17.0.2:45694] client connect
+[08:22:32.585][172.17.0.2:45694] server connect 172.217.112.4:443
+172.17.0.2:45694: POST https://172.217.112.4/v1/firelog/legacy/batchlog
+               << 200 OK 140b
+[08:22:34.729][172.17.0.2:49062] client disconnect
+[08:22:34.730][172.17.0.2:49062] server disconnect 52.85.132.87:443
+172.17.0.2:56142: POST https://34.218.97.216/pes22/gate/gate_CMD_GET_STADIUM_D…
+               << 200 OK 640b
+172.17.0.2:56142: POST https://34.218.97.216/pes22/gate/gate_CMD_GET_GAMERELAY…
+               << 200 OK 2.5k
+[08:23:18.445][172.17.0.2:49028] client connect
+[08:23:18.482][172.17.0.2:49028] server connect 16.146.220.162:443
+[08:23:18.557][172.17.0.2:49028] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:18.558][172.17.0.2:37718] client connect
+[08:23:18.559][172.17.0.2:49028] client disconnect
+[08:23:18.559][172.17.0.2:49028] server disconnect 16.146.220.162:443
+[08:23:18.594][172.17.0.2:37718] server connect 35.81.17.106:443
+[08:23:18.672][172.17.0.2:37718] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:18.672][172.17.0.2:37718] client disconnect
+[08:23:18.673][172.17.0.2:37718] server disconnect 35.81.17.106:443
+[08:23:18.674][172.17.0.2:46432] client connect
+[08:23:18.678][172.17.0.2:35564] client connect
+[08:23:18.681][172.17.0.2:35564] server connect 34.111.40.119:443
+172.17.0.2:35564 <- tcp <- 34.111.40.119:443
+[08:23:18.704][172.17.0.2:35564] server disconnect 34.111.40.119:443
+[08:23:18.704][172.17.0.2:35564] client disconnect
+[08:23:18.710][172.17.0.2:46432] server connect 54.200.194.69:443
+[08:23:18.786][172.17.0.2:46432] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:18.786][172.17.0.2:46432] client disconnect
+[08:23:18.787][172.17.0.2:46432] server disconnect 54.200.194.69:443
+[08:23:18.788][172.17.0.2:60008] client connect
+[08:23:18.826][172.17.0.2:60008] server connect 32.189.186.108:443
+[08:23:18.903][172.17.0.2:60008] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:18.904][172.17.0.2:33828] client connect
+[08:23:18.905][172.17.0.2:60008] client disconnect
+[08:23:18.905][172.17.0.2:60008] server disconnect 32.189.186.108:443
+[08:23:18.940][172.17.0.2:33828] server connect 44.226.216.2:443
+[08:23:19.017][172.17.0.2:33828] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:19.018][172.17.0.2:33828] client disconnect
+[08:23:19.018][172.17.0.2:33828] server disconnect 44.226.216.2:443
+[08:23:19.020][172.17.0.2:57094] client connect
+[08:23:19.055][172.17.0.2:57094] server connect 32.190.115.29:443
+[08:23:19.134][172.17.0.2:57094] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:19.134][172.17.0.2:57094] client disconnect
+[08:23:19.135][172.17.0.2:57094] server disconnect 32.190.115.29:443
+[08:23:19.137][172.17.0.2:38962] client connect
+[08:23:19.173][172.17.0.2:38962] server connect 35.166.57.166:443
+[08:23:19.251][172.17.0.2:38962] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:19.251][172.17.0.2:38962] client disconnect
+[08:23:19.253][172.17.0.2:38962] server disconnect 35.166.57.166:443
+[08:23:19.255][172.17.0.2:50188] client connect
+[08:23:19.291][172.17.0.2:50188] server connect 35.162.196.95:443
+[08:23:19.366][172.17.0.2:50188] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:19.367][172.17.0.2:50188] client disconnect
+[08:23:19.367][172.17.0.2:50188] server disconnect 35.162.196.95:443
+[08:23:21.238][172.17.0.2:40182] client connect
+[08:23:21.274][172.17.0.2:40182] server connect 35.84.59.110:443
+[08:23:21.350][172.17.0.2:40182] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:21.350][172.17.0.2:60016] client connect
+[08:23:21.351][172.17.0.2:40182] client disconnect
+[08:23:21.351][172.17.0.2:40182] server disconnect 35.84.59.110:443
+[08:23:21.388][172.17.0.2:60016] server connect 32.189.186.108:443
+[08:23:21.465][172.17.0.2:60016] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:21.465][172.17.0.2:60016] client disconnect
+[08:23:21.466][172.17.0.2:60016] server disconnect 32.189.186.108:443
+[08:23:21.466][172.17.0.2:48394] client connect
+[08:23:21.502][172.17.0.2:48394] server connect 35.162.122.19:443
+[08:23:21.578][172.17.0.2:48394] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:21.579][172.17.0.2:37720] client connect
+[08:23:21.579][172.17.0.2:48394] client disconnect
+[08:23:21.580][172.17.0.2:48394] server disconnect 35.162.122.19:443
+[08:23:21.615][172.17.0.2:37720] server connect 35.81.17.106:443
+[08:23:21.691][172.17.0.2:37720] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:21.691][172.17.0.2:33266] client connect
+[08:23:21.692][172.17.0.2:37720] client disconnect
+[08:23:21.692][172.17.0.2:37720] server disconnect 35.81.17.106:443
+[08:23:21.728][172.17.0.2:33266] server connect 184.34.183.36:443
+[08:23:21.806][172.17.0.2:33266] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:21.806][172.17.0.2:33266] client disconnect
+[08:23:21.807][172.17.0.2:33266] server disconnect 184.34.183.36:443
+[08:23:21.807][172.17.0.2:52656] client connect
+[08:23:21.843][172.17.0.2:52656] server connect 44.226.252.93:443
+[08:23:21.926][172.17.0.2:52656] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:21.929][172.17.0.2:52656] client disconnect
+[08:23:21.929][172.17.0.2:52656] server disconnect 44.226.252.93:443
+[08:23:21.929][172.17.0.2:34922] client connect
+[08:23:21.965][172.17.0.2:34922] server connect 34.215.102.226:443
+[08:23:22.042][172.17.0.2:34922] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:22.043][172.17.0.2:34922] client disconnect
+[08:23:22.043][172.17.0.2:34922] server disconnect 34.215.102.226:443
+[08:23:22.044][172.17.0.2:46444] client connect
+[08:23:22.080][172.17.0.2:46444] server connect 54.200.194.69:443
+[08:23:22.157][172.17.0.2:46444] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:22.157][172.17.0.2:46444] client disconnect
+[08:23:22.158][172.17.0.2:46444] server disconnect 54.200.194.69:443
+[08:23:27.345][172.17.0.2:40190] client connect
+[08:23:27.380][172.17.0.2:40190] server connect 35.84.59.110:443
+[08:23:27.456][172.17.0.2:40190] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:27.457][172.17.0.2:60032] client connect
+[08:23:27.458][172.17.0.2:40190] client disconnect
+[08:23:27.458][172.17.0.2:40190] server disconnect 35.84.59.110:443
+[08:23:27.494][172.17.0.2:60032] server connect 32.189.186.108:443
+[08:23:27.575][172.17.0.2:60032] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:27.576][172.17.0.2:60032] client disconnect
+[08:23:27.576][172.17.0.2:60032] server disconnect 32.189.186.108:443
+[08:23:27.578][172.17.0.2:48398] client connect
+[08:23:27.614][172.17.0.2:48398] server connect 35.162.122.19:443
+[08:23:27.690][172.17.0.2:48398] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:27.690][172.17.0.2:37736] client connect
+[08:23:27.691][172.17.0.2:48398] client disconnect
+[08:23:27.691][172.17.0.2:48398] server disconnect 35.162.122.19:443
+[08:23:27.726][172.17.0.2:37736] server connect 35.81.17.106:443
+[08:23:27.803][172.17.0.2:37736] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:27.804][172.17.0.2:37736] client disconnect
+[08:23:27.804][172.17.0.2:37736] server disconnect 35.81.17.106:443
+[08:23:27.806][172.17.0.2:33276] client connect
+[08:23:27.843][172.17.0.2:33276] server connect 184.34.183.36:443
+[08:23:27.919][172.17.0.2:33276] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:27.919][172.17.0.2:33276] client disconnect
+[08:23:27.920][172.17.0.2:33276] server disconnect 184.34.183.36:443
+[08:23:27.921][172.17.0.2:57212] client connect
+[08:23:27.956][172.17.0.2:57212] server connect 44.226.252.93:443
+[08:23:28.034][172.17.0.2:57212] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:28.035][172.17.0.2:57212] client disconnect
+[08:23:28.035][172.17.0.2:57212] server disconnect 44.226.252.93:443
+[08:23:28.035][172.17.0.2:48670] client connect
+[08:23:28.072][172.17.0.2:48670] server connect 34.215.102.226:443
+[08:23:28.150][172.17.0.2:48670] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:28.150][172.17.0.2:48670] client disconnect
+[08:23:28.151][172.17.0.2:48670] server disconnect 34.215.102.226:443
+[08:23:28.152][172.17.0.2:55204] client connect
+[08:23:28.188][172.17.0.2:55204] server connect 54.200.194.69:443
+[08:23:28.271][172.17.0.2:55204] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:28.271][172.17.0.2:55204] client disconnect
+[08:23:28.274][172.17.0.2:55204] server disconnect 54.200.194.69:443
+[08:23:28.341][172.17.0.2:60470] client connect
+[08:23:28.377][172.17.0.2:60470] server connect 35.84.59.110:443
+[08:23:28.381][172.17.0.2:60484] client connect
+[08:23:28.417][172.17.0.2:60484] server connect 35.84.59.110:443
+[08:23:28.494][172.17.0.2:60484] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:28.494][172.17.0.2:60484] client disconnect
+[08:23:28.495][172.17.0.2:60484] server disconnect 35.84.59.110:443
+[08:23:28.498][172.17.0.2:38950] client connect
+[08:23:28.533][172.17.0.2:38950] server connect 32.189.186.108:443
+[08:23:28.608][172.17.0.2:38950] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:28.609][172.17.0.2:58598] client connect
+[08:23:28.610][172.17.0.2:38950] client disconnect
+[08:23:28.610][172.17.0.2:38950] server disconnect 32.189.186.108:443
+[08:23:28.645][172.17.0.2:58598] server connect 35.162.122.19:443
+[08:23:28.722][172.17.0.2:58598] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:28.722][172.17.0.2:46378] client connect
+[08:23:28.723][172.17.0.2:58598] client disconnect
+[08:23:28.723][172.17.0.2:58598] server disconnect 35.162.122.19:443
+[08:23:28.758][172.17.0.2:46378] server connect 35.81.17.106:443
+[08:23:28.834][172.17.0.2:46378] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:28.835][172.17.0.2:37932] client connect
+[08:23:28.835][172.17.0.2:46378] client disconnect
+[08:23:28.836][172.17.0.2:46378] server disconnect 35.81.17.106:443
+[08:23:28.870][172.17.0.2:37932] server connect 184.34.183.36:443
+[08:23:28.946][172.17.0.2:37932] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:28.947][172.17.0.2:57222] client connect
+[08:23:28.947][172.17.0.2:37932] client disconnect
+[08:23:28.948][172.17.0.2:37932] server disconnect 184.34.183.36:443
+[08:23:28.982][172.17.0.2:57222] server connect 44.226.252.93:443
+[08:23:29.058][172.17.0.2:57222] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:29.058][172.17.0.2:48678] client connect
+[08:23:29.059][172.17.0.2:57222] client disconnect
+[08:23:29.059][172.17.0.2:57222] server disconnect 44.226.252.93:443
+[08:23:29.093][172.17.0.2:48678] server connect 34.215.102.226:443
+[08:23:29.168][172.17.0.2:48678] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:29.168][172.17.0.2:55216] client connect
+[08:23:29.169][172.17.0.2:48678] client disconnect
+[08:23:29.170][172.17.0.2:48678] server disconnect 34.215.102.226:443
+[08:23:29.204][172.17.0.2:55216] server connect 54.200.194.69:443
+[08:23:29.279][172.17.0.2:55216] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:29.280][172.17.0.2:55216] client disconnect
+[08:23:29.280][172.17.0.2:55216] server disconnect 54.200.194.69:443
+[08:23:29.373][172.17.0.2:60486] client connect
+[08:23:29.408][172.17.0.2:60486] server connect 35.84.59.110:443
+[08:23:30.541][172.17.0.2:60486] client disconnect
+[08:23:30.542][172.17.0.2:60486] server disconnect 35.84.59.110:443
+[08:23:30.542][172.17.0.2:60470] client disconnect
+[08:23:30.542][172.17.0.2:60470] server disconnect 35.84.59.110:443
+172.17.0.2:56142: POST https://34.218.97.216/pes22/gate/gate_CMD_SET_GAMERELAY…
+               << 200 OK 96b
+[08:23:34.425][172.17.0.2:52658] client connect
+[08:23:34.429][172.17.0.2:52658] server connect 172.217.116.4:443
+172.17.0.2:52658: POST https://172.217.116.4/play/log?format=raw&proto_v2=true
+               << 200 OK 38b
+[08:23:34.493][172.17.0.2:52658] server disconnect 172.217.116.4:443
+[08:23:34.494][172.17.0.2:52658] client disconnect
+[08:23:36.556][172.17.0.2:60490] client connect
+[08:23:36.591][172.17.0.2:60490] server connect 35.84.59.110:443
+[08:23:36.668][172.17.0.2:60490] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:36.669][172.17.0.2:38954] client connect
+[08:23:36.670][172.17.0.2:60490] client disconnect
+[08:23:36.670][172.17.0.2:60490] server disconnect 35.84.59.110:443
+[08:23:36.706][172.17.0.2:38954] server connect 32.189.186.108:443
+[08:23:36.786][172.17.0.2:38954] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:36.786][172.17.0.2:38954] client disconnect
+[08:23:36.787][172.17.0.2:38954] server disconnect 32.189.186.108:443
+[08:23:36.794][172.17.0.2:58604] client connect
+[08:23:36.830][172.17.0.2:58604] server connect 35.162.122.19:443
+[08:23:36.907][172.17.0.2:58604] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:36.907][172.17.0.2:46388] client connect
+[08:23:36.908][172.17.0.2:58604] client disconnect
+[08:23:36.908][172.17.0.2:58604] server disconnect 35.162.122.19:443
+[08:23:36.943][172.17.0.2:46388] server connect 35.81.17.106:443
+[08:23:37.019][172.17.0.2:46388] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:37.020][172.17.0.2:37942] client connect
+[08:23:37.021][172.17.0.2:46388] client disconnect
+[08:23:37.022][172.17.0.2:46388] server disconnect 35.81.17.106:443
+[08:23:37.056][172.17.0.2:37942] server connect 184.34.183.36:443
+[08:23:37.134][172.17.0.2:37942] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:37.134][172.17.0.2:37942] client disconnect
+[08:23:37.135][172.17.0.2:37942] server disconnect 184.34.183.36:443
+[08:23:37.137][172.17.0.2:57238] client connect
+[08:23:37.174][172.17.0.2:57238] server connect 44.226.252.93:443
+[08:23:37.252][172.17.0.2:57238] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:37.253][172.17.0.2:57238] client disconnect
+[08:23:37.253][172.17.0.2:57238] server disconnect 44.226.252.93:443
+[08:23:37.258][172.17.0.2:48692] client connect
+[08:23:37.293][172.17.0.2:48692] server connect 34.215.102.226:443
+[08:23:37.368][172.17.0.2:48692] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:37.368][172.17.0.2:48692] client disconnect
+[08:23:37.369][172.17.0.2:48692] server disconnect 34.215.102.226:443
+[08:23:37.370][172.17.0.2:55218] client connect
+[08:23:37.405][172.17.0.2:55218] server connect 54.200.194.69:443
+[08:23:37.482][172.17.0.2:55218] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:37.483][172.17.0.2:55218] client disconnect
+[08:23:37.483][172.17.0.2:55218] server disconnect 54.200.194.69:443
+[08:23:37.548][172.17.0.2:60506] client connect
+[08:23:37.584][172.17.0.2:60506] server connect 35.84.59.110:443
+[08:23:39.032][172.17.0.2:60506] client disconnect
+[08:23:39.032][172.17.0.2:60506] server disconnect 35.84.59.110:443
+[08:23:40.200][172.17.0.2:41834] client connect
+[08:23:40.237][172.17.0.2:41834] server connect 35.84.59.110:443
+[08:23:40.313][172.17.0.2:41834] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:40.314][172.17.0.2:41834] client disconnect
+[08:23:40.314][172.17.0.2:41834] server disconnect 35.84.59.110:443
+[08:23:40.314][172.17.0.2:40636] client connect
+[08:23:40.350][172.17.0.2:40636] server connect 32.189.186.108:443
+[08:23:40.427][172.17.0.2:40636] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:40.427][172.17.0.2:40636] client disconnect
+[08:23:40.428][172.17.0.2:40636] server disconnect 32.189.186.108:443
+[08:23:40.429][172.17.0.2:45330] client connect
+[08:23:40.466][172.17.0.2:45330] server connect 35.162.122.19:443
+[08:23:40.544][172.17.0.2:45330] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:40.545][172.17.0.2:45330] client disconnect
+[08:23:40.545][172.17.0.2:45330] server disconnect 35.162.122.19:443
+[08:23:40.547][172.17.0.2:40196] client connect
+[08:23:40.583][172.17.0.2:40196] server connect 35.81.17.106:443
+[08:23:40.661][172.17.0.2:40196] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:40.661][172.17.0.2:40196] client disconnect
+[08:23:40.662][172.17.0.2:40196] server disconnect 35.81.17.106:443
+[08:23:40.662][172.17.0.2:56132] client connect
+[08:23:40.697][172.17.0.2:56132] server connect 184.34.183.36:443
+[08:23:40.775][172.17.0.2:56132] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:40.775][172.17.0.2:56132] client disconnect
+[08:23:40.776][172.17.0.2:56132] server disconnect 184.34.183.36:443
+[08:23:40.779][172.17.0.2:58868] client connect
+[08:23:40.815][172.17.0.2:58868] server connect 44.226.252.93:443
+[08:23:40.891][172.17.0.2:58868] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:40.892][172.17.0.2:58034] client connect
+[08:23:40.893][172.17.0.2:58868] client disconnect
+[08:23:40.894][172.17.0.2:58868] server disconnect 44.226.252.93:443
+[08:23:40.928][172.17.0.2:58034] server connect 34.215.102.226:443
+[08:23:41.004][172.17.0.2:58034] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:41.004][172.17.0.2:58524] client connect
+[08:23:41.005][172.17.0.2:58034] client disconnect
+[08:23:41.005][172.17.0.2:58034] server disconnect 34.215.102.226:443
+[08:23:41.041][172.17.0.2:58524] server connect 54.200.194.69:443
+[08:23:41.117][172.17.0.2:58524] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:41.117][172.17.0.2:58524] client disconnect
+[08:23:41.118][172.17.0.2:58524] server disconnect 54.200.194.69:443
+[08:23:41.192][172.17.0.2:41842] client connect
+[08:23:41.228][172.17.0.2:41842] server connect 35.84.59.110:443
+[08:23:41.316][172.17.0.2:41842] client disconnect
+[08:23:41.317][172.17.0.2:41842] server disconnect 35.84.59.110:443
+[08:23:47.235][172.17.0.2:41850] client connect
+[08:23:47.271][172.17.0.2:41850] server connect 35.84.59.110:443
+[08:23:47.348][172.17.0.2:41850] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:47.349][172.17.0.2:41850] client disconnect
+[08:23:47.349][172.17.0.2:41850] server disconnect 35.84.59.110:443
+[08:23:47.354][172.17.0.2:40638] client connect
+[08:23:47.390][172.17.0.2:40638] server connect 32.189.186.108:443
+[08:23:47.467][172.17.0.2:40638] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:47.469][172.17.0.2:40638] client disconnect
+[08:23:47.469][172.17.0.2:40638] server disconnect 32.189.186.108:443
+[08:23:47.471][172.17.0.2:45336] client connect
+[08:23:47.511][172.17.0.2:45336] server connect 35.162.122.19:443
+[08:23:47.593][172.17.0.2:45336] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:47.595][172.17.0.2:45336] client disconnect
+[08:23:47.596][172.17.0.2:45336] server disconnect 35.162.122.19:443
+[08:23:47.597][172.17.0.2:40212] client connect
+[08:23:47.632][172.17.0.2:40212] server connect 35.81.17.106:443
+[08:23:47.708][172.17.0.2:40212] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:47.709][172.17.0.2:40212] client disconnect
+[08:23:47.709][172.17.0.2:40212] server disconnect 35.81.17.106:443
+[08:23:47.712][172.17.0.2:56138] client connect
+[08:23:47.747][172.17.0.2:56138] server connect 184.34.183.36:443
+[08:23:47.823][172.17.0.2:56138] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:47.823][172.17.0.2:56138] client disconnect
+[08:23:47.823][172.17.0.2:56138] server disconnect 184.34.183.36:443
+[08:23:47.826][172.17.0.2:58870] client connect
+[08:23:47.862][172.17.0.2:58870] server connect 44.226.252.93:443
+[08:23:47.939][172.17.0.2:58870] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:47.940][172.17.0.2:58870] client disconnect
+[08:23:47.940][172.17.0.2:58870] server disconnect 44.226.252.93:443
+[08:23:47.943][172.17.0.2:53220] client connect
+[08:23:47.978][172.17.0.2:53220] server connect 34.215.102.226:443
+[08:23:48.054][172.17.0.2:53220] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:48.056][172.17.0.2:53220] client disconnect
+[08:23:48.056][172.17.0.2:53220] server disconnect 34.215.102.226:443
+[08:23:48.061][172.17.0.2:47044] client connect
+[08:23:48.097][172.17.0.2:47044] server connect 54.200.194.69:443
+[08:23:48.172][172.17.0.2:47044] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:48.172][172.17.0.2:47044] client disconnect
+[08:23:48.173][172.17.0.2:47044] server disconnect 54.200.194.69:443
+[08:23:48.229][172.17.0.2:44004] client connect
+[08:23:48.265][172.17.0.2:44004] server connect 35.84.59.110:443
+[08:23:48.376][172.17.0.2:44004] client disconnect
+[08:23:48.376][172.17.0.2:44004] server disconnect 35.84.59.110:443
+[08:23:48.746][172.17.0.2:44006] client connect
+[08:23:48.783][172.17.0.2:44006] server connect 35.84.59.110:443
+[08:23:48.862][172.17.0.2:44006] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:48.862][172.17.0.2:44006] client disconnect
+[08:23:48.863][172.17.0.2:44006] server disconnect 35.84.59.110:443
+[08:23:48.866][172.17.0.2:34108] client connect
+[08:23:48.901][172.17.0.2:34108] server connect 32.189.186.108:443
+[08:23:48.977][172.17.0.2:34108] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:48.978][172.17.0.2:34108] client disconnect
+[08:23:48.978][172.17.0.2:34108] server disconnect 32.189.186.108:443
+[08:23:48.980][172.17.0.2:33442] client connect
+[08:23:49.016][172.17.0.2:33442] server connect 35.162.122.19:443
+[08:23:49.094][172.17.0.2:33442] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:49.095][172.17.0.2:33442] client disconnect
+[08:23:49.095][172.17.0.2:33442] server disconnect 35.162.122.19:443
+[08:23:49.097][172.17.0.2:53076] client connect
+[08:23:49.132][172.17.0.2:53076] server connect 35.81.17.106:443
+[08:23:49.210][172.17.0.2:53076] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:49.210][172.17.0.2:53076] client disconnect
+[08:23:49.210][172.17.0.2:53076] server disconnect 35.81.17.106:443
+[08:23:49.213][172.17.0.2:32984] client connect
+[08:23:49.249][172.17.0.2:32984] server connect 184.34.183.36:443
+[08:23:49.326][172.17.0.2:32984] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:49.326][172.17.0.2:32984] client disconnect
+[08:23:49.327][172.17.0.2:32984] server disconnect 184.34.183.36:443
+[08:23:49.330][172.17.0.2:57220] client connect
+[08:23:49.365][172.17.0.2:57220] server connect 44.226.252.93:443
+[08:23:49.448][172.17.0.2:57220] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:49.449][172.17.0.2:57220] client disconnect
+[08:23:49.449][172.17.0.2:57220] server disconnect 44.226.252.93:443
+[08:23:49.451][172.17.0.2:53236] client connect
+[08:23:49.488][172.17.0.2:53236] server connect 34.215.102.226:443
+[08:23:49.565][172.17.0.2:53236] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:49.566][172.17.0.2:53236] client disconnect
+[08:23:49.566][172.17.0.2:53236] server disconnect 34.215.102.226:443
+[08:23:49.567][172.17.0.2:47056] client connect
+[08:23:49.603][172.17.0.2:47056] server connect 54.200.194.69:443
+[08:23:49.679][172.17.0.2:47056] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:49.679][172.17.0.2:47056] client disconnect
+[08:23:49.680][172.17.0.2:47056] server disconnect 54.200.194.69:443
+[08:23:49.737][172.17.0.2:44012] client connect
+[08:23:49.772][172.17.0.2:44012] server connect 35.84.59.110:443
+[08:23:49.829][172.17.0.2:44012] client disconnect
+[08:23:49.830][172.17.0.2:44012] server disconnect 35.84.59.110:443
+[08:23:54.811][172.17.0.2:44014] client connect
+[08:23:54.847][172.17.0.2:44014] server connect 35.84.59.110:443
+[08:23:54.925][172.17.0.2:44014] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:54.927][172.17.0.2:44014] client disconnect
+[08:23:54.927][172.17.0.2:44014] server disconnect 35.84.59.110:443
+[08:23:54.929][172.17.0.2:34118] client connect
+[08:23:54.967][172.17.0.2:34118] server connect 32.189.186.108:443
+[08:23:55.044][172.17.0.2:34118] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:55.044][172.17.0.2:34118] client disconnect
+[08:23:55.045][172.17.0.2:34118] server disconnect 32.189.186.108:443
+[08:23:55.047][172.17.0.2:33452] client connect
+[08:23:55.083][172.17.0.2:33452] server connect 35.162.122.19:443
+[08:23:55.161][172.17.0.2:33452] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:55.161][172.17.0.2:33452] client disconnect
+[08:23:55.162][172.17.0.2:33452] server disconnect 35.162.122.19:443
+[08:23:55.163][172.17.0.2:53078] client connect
+[08:23:55.199][172.17.0.2:53078] server connect 35.81.17.106:443
+[08:23:55.276][172.17.0.2:53078] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:55.277][172.17.0.2:53078] client disconnect
+[08:23:55.277][172.17.0.2:53078] server disconnect 35.81.17.106:443
+[08:23:55.278][172.17.0.2:32990] client connect
+[08:23:55.314][172.17.0.2:32990] server connect 184.34.183.36:443
+[08:23:55.389][172.17.0.2:32990] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:55.390][172.17.0.2:32990] client disconnect
+[08:23:55.390][172.17.0.2:32990] server disconnect 184.34.183.36:443
+[08:23:55.395][172.17.0.2:57232] client connect
+[08:23:55.431][172.17.0.2:57232] server connect 44.226.252.93:443
+[08:23:55.508][172.17.0.2:57232] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:55.508][172.17.0.2:57232] client disconnect
+[08:23:55.509][172.17.0.2:53248] client connect
+[08:23:55.510][172.17.0.2:57232] server disconnect 44.226.252.93:443
+[08:23:55.548][172.17.0.2:53248] server connect 34.215.102.226:443
+[08:23:55.625][172.17.0.2:53248] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:55.625][172.17.0.2:53248] client disconnect
+[08:23:55.626][172.17.0.2:53248] server disconnect 34.215.102.226:443
+[08:23:55.630][172.17.0.2:47064] client connect
+[08:23:55.666][172.17.0.2:47064] server connect 54.200.194.69:443
+[08:23:55.741][172.17.0.2:47064] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:55.742][172.17.0.2:47064] client disconnect
+[08:23:55.742][172.17.0.2:47064] server disconnect 54.200.194.69:443
+[08:23:55.807][172.17.0.2:44020] client connect
+[08:23:55.842][172.17.0.2:44020] server connect 35.84.59.110:443
+[08:23:55.843][172.17.0.2:44020] client disconnect
+[08:23:55.843][172.17.0.2:44020] server disconnect 35.84.59.110:443
+[08:23:56.211][172.17.0.2:44022] client connect
+[08:23:56.248][172.17.0.2:44022] server connect 35.84.59.110:443
+[08:23:56.324][172.17.0.2:44022] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:56.325][172.17.0.2:44022] client disconnect
+[08:23:56.325][172.17.0.2:44022] server disconnect 35.84.59.110:443
+[08:23:56.327][172.17.0.2:34134] client connect
+[08:23:56.362][172.17.0.2:34134] server connect 32.189.186.108:443
+[08:23:56.439][172.17.0.2:34134] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:56.439][172.17.0.2:34134] client disconnect
+[08:23:56.440][172.17.0.2:34134] server disconnect 32.189.186.108:443
+[08:23:56.441][172.17.0.2:33462] client connect
+[08:23:56.477][172.17.0.2:33462] server connect 35.162.122.19:443
+[08:23:56.555][172.17.0.2:33462] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:56.556][172.17.0.2:33462] client disconnect
+[08:23:56.556][172.17.0.2:33462] server disconnect 35.162.122.19:443
+[08:23:56.559][172.17.0.2:53084] client connect
+[08:23:56.595][172.17.0.2:53084] server connect 35.81.17.106:443
+[08:23:56.673][172.17.0.2:53084] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:56.673][172.17.0.2:53084] client disconnect
+[08:23:56.675][172.17.0.2:53084] server disconnect 35.81.17.106:443
+[08:23:56.677][172.17.0.2:33004] client connect
+[08:23:56.712][172.17.0.2:33004] server connect 184.34.183.36:443
+[08:23:56.788][172.17.0.2:33004] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:56.789][172.17.0.2:33004] client disconnect
+[08:23:56.789][172.17.0.2:33004] server disconnect 184.34.183.36:443
+[08:23:56.793][172.17.0.2:57240] client connect
+[08:23:56.829][172.17.0.2:57240] server connect 44.226.252.93:443
+[08:23:56.905][172.17.0.2:57240] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:56.905][172.17.0.2:57240] client disconnect
+[08:23:56.905][172.17.0.2:57240] server disconnect 44.226.252.93:443
+[08:23:56.912][172.17.0.2:53254] client connect
+[08:23:56.948][172.17.0.2:53254] server connect 34.215.102.226:443
+[08:23:57.026][172.17.0.2:53254] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:57.026][172.17.0.2:53254] client disconnect
+[08:23:57.027][172.17.0.2:53254] server disconnect 34.215.102.226:443
+[08:23:57.029][172.17.0.2:47080] client connect
+[08:23:57.065][172.17.0.2:47080] server connect 54.200.194.69:443
+[08:23:57.142][172.17.0.2:47080] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:23:57.142][172.17.0.2:47080] client disconnect
+[08:23:57.143][172.17.0.2:47080] server disconnect 54.200.194.69:443
+[08:24:01.402][172.17.0.2:42714] client connect
+[08:24:01.437][172.17.0.2:42714] server connect 35.84.59.110:443
+[08:24:01.536][172.17.0.2:42714] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:24:01.536][172.17.0.2:47936] client connect
+[08:24:01.537][172.17.0.2:42714] client disconnect
+[08:24:01.537][172.17.0.2:42714] server disconnect 35.84.59.110:443
+[08:24:01.573][172.17.0.2:47936] server connect 32.189.186.108:443
+[08:24:01.650][172.17.0.2:47936] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:24:01.650][172.17.0.2:47936] client disconnect
+[08:24:01.651][172.17.0.2:47936] server disconnect 32.189.186.108:443
+[08:24:01.651][172.17.0.2:47412] client connect
+[08:24:01.687][172.17.0.2:47412] server connect 35.162.122.19:443
+[08:24:01.763][172.17.0.2:47412] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:24:01.763][172.17.0.2:47412] client disconnect
+[08:24:01.764][172.17.0.2:47412] server disconnect 35.162.122.19:443
+[08:24:01.766][172.17.0.2:60916] client connect
+[08:24:01.802][172.17.0.2:60916] server connect 35.81.17.106:443
+[08:24:01.877][172.17.0.2:60916] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:24:01.878][172.17.0.2:60916] client disconnect
+[08:24:01.878][172.17.0.2:60916] server disconnect 35.81.17.106:443
+[08:24:01.880][172.17.0.2:43694] client connect
+[08:24:01.917][172.17.0.2:43694] server connect 184.34.183.36:443
+[08:24:01.995][172.17.0.2:43694] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:24:01.997][172.17.0.2:43694] client disconnect
+[08:24:01.997][172.17.0.2:43694] server disconnect 184.34.183.36:443
+[08:24:01.999][172.17.0.2:37784] client connect
+[08:24:02.035][172.17.0.2:37784] server connect 44.226.252.93:443
+[08:24:02.113][172.17.0.2:37784] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:24:02.113][172.17.0.2:39922] client connect
+[08:24:02.114][172.17.0.2:37784] client disconnect
+[08:24:02.114][172.17.0.2:37784] server disconnect 44.226.252.93:443
+[08:24:02.149][172.17.0.2:39922] server connect 34.215.102.226:443
+[08:24:02.231][172.17.0.2:39922] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:24:02.231][172.17.0.2:37738] client connect
+[08:24:02.233][172.17.0.2:39922] client disconnect
+[08:24:02.233][172.17.0.2:39922] server disconnect 34.215.102.226:443
+[08:24:02.268][172.17.0.2:37738] server connect 54.200.194.69:443
+[08:24:02.344][172.17.0.2:37738] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:24:02.344][172.17.0.2:37738] client disconnect
+[08:24:02.344][172.17.0.2:37738] server disconnect 54.200.194.69:443
+[08:24:02.775][172.17.0.2:42720] client connect
+[08:24:02.811][172.17.0.2:42720] server connect 35.84.59.110:443
+[08:24:02.890][172.17.0.2:42720] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:24:02.890][172.17.0.2:42720] client disconnect
+[08:24:02.891][172.17.0.2:42720] server disconnect 35.84.59.110:443
+[08:24:02.891][172.17.0.2:47940] client connect
+[08:24:02.927][172.17.0.2:47940] server connect 32.189.186.108:443
+[08:24:03.003][172.17.0.2:47940] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:24:03.003][172.17.0.2:47940] client disconnect
+[08:24:03.003][172.17.0.2:47940] server disconnect 32.189.186.108:443
+[08:24:03.007][172.17.0.2:47426] client connect
+[08:24:03.044][172.17.0.2:47426] server connect 35.162.122.19:443
+[08:24:03.121][172.17.0.2:47426] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:24:03.122][172.17.0.2:47426] client disconnect
+[08:24:03.122][172.17.0.2:47426] server disconnect 35.162.122.19:443
+[08:24:03.124][172.17.0.2:60926] client connect
+[08:24:03.160][172.17.0.2:60926] server connect 35.81.17.106:443
+[08:24:03.238][172.17.0.2:60926] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:24:03.238][172.17.0.2:60926] client disconnect
+[08:24:03.239][172.17.0.2:60926] server disconnect 35.81.17.106:443
+[08:24:03.239][172.17.0.2:43702] client connect
+[08:24:03.275][172.17.0.2:43702] server connect 184.34.183.36:443
+[08:24:03.355][172.17.0.2:43702] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:24:03.356][172.17.0.2:43702] client disconnect
+[08:24:03.356][172.17.0.2:43702] server disconnect 184.34.183.36:443
+[08:24:03.360][172.17.0.2:37790] client connect
+[08:24:03.397][172.17.0.2:37790] server connect 44.226.252.93:443
+[08:24:03.475][172.17.0.2:37790] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:24:03.475][172.17.0.2:37790] client disconnect
+[08:24:03.476][172.17.0.2:37790] server disconnect 44.226.252.93:443
+[08:24:03.476][172.17.0.2:39930] client connect
+[08:24:03.512][172.17.0.2:39930] server connect 34.215.102.226:443
+[08:24:03.592][172.17.0.2:39930] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:24:03.592][172.17.0.2:39930] client disconnect
+[08:24:03.593][172.17.0.2:39930] server disconnect 34.215.102.226:443
+[08:24:03.595][172.17.0.2:37742] client connect
+[08:24:03.631][172.17.0.2:37742] server connect 54.200.194.69:443
+[08:24:03.707][172.17.0.2:37742] Client TLS handshake failed. The client disconnected during the handshake. If this happens consistently for pes22-game.cs.konami.net, this may indicate that the client does not trust the proxy's certificate.
+[08:24:03.708][172.17.0.2:37742] client disconnect
+[08:24:03.708][172.17.0.2:37742] server disconnect 54.200.194.69:443
+172.17.0.2:56142: POST https://34.218.97.216/pes22/gate/gate_CMD_SET_GAMERELAY…
+               << 200 OK 96b
+[08:25:05.379][172.17.0.2:56142] server disconnect 34.218.97.216:443
+[08:25:16.699][172.17.0.2:56142] server connect 34.218.97.216:443
+172.17.0.2:56142: POST https://34.218.97.216/pes22/gate/gate_CMD_SET_GAMERELAY…
+               << 200 OK 96b
+[08:25:34.306][172.17.0.2:52438] client connect
+[08:25:34.309][172.17.0.2:52438] server connect 34.111.40.119:443
+172.17.0.2:52438 <- tcp <- 34.111.40.119:443
+[08:25:34.328][172.17.0.2:52438] server disconnect 34.111.40.119:443
+[08:25:34.329][172.17.0.2:52438] client disconnect
+[08:26:08.672][172.17.0.2:57928] client connect
+[08:26:08.676][172.17.0.2:57928] server connect 172.217.119.4:443
+172.17.0.2:57928: POST https://172.217.119.4/play/log?format=raw&proto_v2=true
+               << 200 OK 38b
