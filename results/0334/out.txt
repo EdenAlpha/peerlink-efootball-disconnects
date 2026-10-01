@@ -1,0 +1,10 @@
+cmd: exec bash -c true; echo HN; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; $A shell am force-stop org.chromium.webview_shell; sleep 3; $A shell am start -n jp.konami.pesam/com.epicgames.ue4.GameActivity >/dev/null 2>&1; sleep 18; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== foreground =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -2; echo "flows=$(grep -c "^### " $W/flows.log)"
+at: 11:55:51
+$ bash -c true; echo HN; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; $A shell am force-stop org.chromium.webview_shell; sleep 3; $A shell am start -n jp.konami.pesam/com.epicgames.ue4.GameActivity >/dev/null 2>&1; sleep 18; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== foreground =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -2; echo "flows=$(grep -c "^### " $W/flows.log)"
+HN
+== foreground ==
+  mCurrentFocus=Window{489d45b u0 jp.konami.pesam/com.epicgames.ue4.GameActivity}
+flows=14
+rc=0
+gamepid: 10290
+flows: 14
