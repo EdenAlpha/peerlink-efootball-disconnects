@@ -1,1 +1,1 @@
-exec bash -c true; echo LF; A="adb -s 127.0.0.1:5555"; $A shell input swipe 640 640 640 640 250; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== keyhunt =="; tail -3 /tmp/live-res/seg/keyhunt.log 2>/dev/null; echo done
+exec bash -c true; echo LG; A="adb -s 127.0.0.1:5555"; $A shell input swipe 968 637 968 637 250; sleep 3; $A exec-out screencap -p > /tmp/live-res/screen.png; echo done
