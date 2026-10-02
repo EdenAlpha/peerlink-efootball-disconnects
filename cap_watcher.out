@@ -2,3 +2,5 @@ sort: fflush failed: 'standard output': Broken pipe
 sort: write error
 sort: fflush failed: 'standard output': Broken pipe
 sort: write error
+sort: fflush failed: 'standard output': Broken pipe
+sort: write error
