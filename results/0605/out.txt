@@ -1,0 +1,16 @@
+cmd: exec bash -c true; echo KZ; mkdir -p /tmp/live-res/seg; dd if=/tmp/kgs/full/full.bin of=/tmp/live-res/seg/sign_region.bin bs=1048576 skip=5 count=2 2>&1 | tail -1; ls -l /tmp/live-res/seg/; python3 -c "b=open(\"/tmp/live-res/seg/sign_region.bin\",\"rb\").read(); import re; print(\"slice bytes:\",len(b)); [print(\"rel 0x%x: %r\"%(m.start(),b[m.start()-40:m.start()+120])) for m in list(re.finditer(b\"sign=\",b))[:4]]"; A="adb -s 127.0.0.1:5555"; $A exec-out screencap -p > /tmp/live-res/screen.png; echo done
+at: 06:14:47
+$ bash -c true; echo KZ; mkdir -p /tmp/live-res/seg; dd if=/tmp/kgs/full/full.bin of=/tmp/live-res/seg/sign_region.bin bs=1048576 skip=5 count=2 2>&1 | tail -1; ls -l /tmp/live-res/seg/; python3 -c "b=open(\"/tmp/live-res/seg/sign_region.bin\",\"rb\").read(); import re; print(\"slice bytes:\",len(b)); [print(\"rel 0x%x: %r\"%(m.start(),b[m.start()-40:m.start()+120])) for m in list(re.finditer(b\"sign=\",b))[:4]]"; A="adb -s 127.0.0.1:5555"; $A exec-out screencap -p > /tmp/live-res/screen.png; echo done
+KZ
+2097152 bytes (2.1 MB, 2.0 MiB) copied, 0.000753826 s, 2.8 GB/s
+total 2048
+-rw-r--r-- 1 runner runner 2097152 Oct  2 06:14 sign_region.bin
+slice bytes: 2097152
+rel 0xb2a0: b'\x0e\xae`[Am|\xae\xdb@d_\xf9N&\x0f\x05\xedPB\x00\x00\x00\x00\xf8\x1dnp\x00\x00\x00\x00|\x00\x00\x00\x00\x00\x00\x00sign=tmbpb+Gdxd2jVdPGjo7Ox3cR3veaXaFPxE39wKWs77Y3dKUJghtyEw==;\x00\x00\xc8\x93pp\x00\x00\x00\x00 \xb3\x10\x13Z\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x000\xf9kp\x00\x00\x00\x00\x1c\x00\x00\x00  uri     = \x00\x00\x00\x00\x00\x00\x00\x00'
+rel 0xb4b0: b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x000\xf9kp\x00\x00\x00\x00J\x00\x00\x00  cookie  = sign=tmbpb+Gdxd2jVdPGjo7Ox3cR3veaXaFPxE39wKWs77Y3dKUJghtyEw==;\x00\x00\xf8\x1dnp\x00\x00\x00\x00\x94\x00\x00\x00\x00\x00\x00\x00  cookie  = sign=tmbpb+Gdxd2jVdPGjo7Ox3c'
+rel 0xb50c: b'JghtyEw==;\x00\x00\xf8\x1dnp\x00\x00\x00\x00\x94\x00\x00\x00\x00\x00\x00\x00  cookie  = sign=tmbpb+Gdxd2jVdPGjo7Ox3cR3veaXaFPxE39wKWs77Y3dKUJghtyEw==;\x00\x00\x00\x00\x00\x00\xc8\x93pp\x00\x00\x00\x00h\xb5\x10\x13\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x000\xf9kp\x00\x00\x00\x00\x1c\x00\x00\x00  isPost  = true'
+rel 0xc7c8: b"D\xa4:6\x9bx\xc8\xc7\xd7>\xe7B\xae\xc6\xe4>b'LZ\x00\x00\x00\x00\xf8\x1dnp\x00\x00\x00\x00|\x00\x00\x00\x00\x00\x00\x00sign=jRPDV4dMecFjEMeIxXuyiPINZ5WRLNBCYHejrO+XDh8FQSug/VypGw==;\x00\x00\xc8\x93pp\x00\x00\x00\x00H\xc8\x10\x13Z\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x000\xf9kp\x00\x00\x00\x00\x1c\x00\x00\x00  uri     = \x00\x00\x00\x00\x00\x00\x00\x00"
+done
+rc=0
+gamepid: 6597
+flows: 0
