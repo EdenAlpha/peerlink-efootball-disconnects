@@ -1,0 +1,8 @@
+cmd: exec bash -c true; echo IV; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; P=$(cat $W/creds/GPASS 2>/dev/null); $A shell input text "$P" >/dev/null 2>&1; sleep 2; $A shell input keyevent 66; sleep 22; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+at: 05:04:05
+$ bash -c true; echo IV; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; P=$(cat $W/creds/GPASS 2>/dev/null); $A shell input text "$P" >/dev/null 2>&1; sleep 2; $A shell input keyevent 66; sleep 22; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+IV
+== shot ==
+rc=0
+gamepid: 
+flows: 0
