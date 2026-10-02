@@ -1,0 +1,10 @@
+cmd: exec bash -c true; echo KM; A="adb -s 127.0.0.1:5555"; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== watcher =="; tail -1 /tmp/live-res/cap/loop.log 2>/dev/null; echo "== shot =="
+at: 05:59:18
+$ bash -c true; echo KM; A="adb -s 127.0.0.1:5555"; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== watcher =="; tail -1 /tmp/live-res/cap/loop.log 2>/dev/null; echo "== shot =="
+KM
+== watcher ==
+1790920756 cycle=28 pid=6597 regions=6
+== shot ==
+rc=0
+gamepid: 6597
+flows: 0
