@@ -1,0 +1,13 @@
+cmd: exec bash -c true; echo KI; A="adb -s 127.0.0.1:5555"; sleep 30; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== watcher =="; tail -3 /tmp/live-res/cap/loop.log 2>/dev/null; echo "== hits =="; grep -h "hits=" /tmp/live-res/cap/loop.log 2>/dev/null | head -10; echo "== shot =="
+at: 05:52:57
+$ bash -c true; echo KI; A="adb -s 127.0.0.1:5555"; sleep 30; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== watcher =="; tail -3 /tmp/live-res/cap/loop.log 2>/dev/null; echo "== hits =="; grep -h "hits=" /tmp/live-res/cap/loop.log 2>/dev/null | head -10; echo "== shot =="
+KI
+== watcher ==
+1790920394 cycle=79 pid=6597 regions=6
+1790920400 cycle=80 pid=6597 regions=6
+1790920406 cycle=81 pid=6597 regions=6
+== hits ==
+== shot ==
+rc=0
+gamepid: 6597
+flows: 0
