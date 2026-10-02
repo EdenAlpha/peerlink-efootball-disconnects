@@ -1,0 +1,16 @@
+cmd: exec bash -c true; echo JI; A="adb -s 127.0.0.1:5555"; $A shell input swipe 1079 648 1079 648 250; for i in $(seq 1 8); do sleep 9; F=$($A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1); echo "t=$((i*9)) $F"; case "$F" in *SignInActivity*) ;; *) echo "LEFT SIGNIN"; break ;; esac; done; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+at: 05:27:12
+$ bash -c true; echo JI; A="adb -s 127.0.0.1:5555"; $A shell input swipe 1079 648 1079 648 250; for i in $(seq 1 8); do sleep 9; F=$($A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1); echo "t=$((i*9)) $F"; case "$F" in *SignInActivity*) ;; *) echo "LEFT SIGNIN"; break ;; esac; done; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+JI
+t=9   mCurrentFocus=Window{6c0b7d7 u0 com.google.android.gms/com.google.android.gms.games.ui.signinflow.SignInActivity}
+t=18   mCurrentFocus=Window{6c0b7d7 u0 com.google.android.gms/com.google.android.gms.games.ui.signinflow.SignInActivity}
+t=27   mCurrentFocus=Window{6c0b7d7 u0 com.google.android.gms/com.google.android.gms.games.ui.signinflow.SignInActivity}
+t=36   mCurrentFocus=Window{6c0b7d7 u0 com.google.android.gms/com.google.android.gms.games.ui.signinflow.SignInActivity}
+t=45   mCurrentFocus=Window{6c0b7d7 u0 com.google.android.gms/com.google.android.gms.games.ui.signinflow.SignInActivity}
+t=54   mCurrentFocus=Window{6c0b7d7 u0 com.google.android.gms/com.google.android.gms.games.ui.signinflow.SignInActivity}
+t=63   mCurrentFocus=Window{6c0b7d7 u0 com.google.android.gms/com.google.android.gms.games.ui.signinflow.SignInActivity}
+t=72   mCurrentFocus=Window{6c0b7d7 u0 com.google.android.gms/com.google.android.gms.games.ui.signinflow.SignInActivity}
+== shot ==
+rc=0
+gamepid: 6597
+flows: 0
