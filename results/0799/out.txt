@@ -1,0 +1,12 @@
+cmd: exec bash -c true; echo LR; A="adb -s 127.0.0.1:5555"; sleep 20; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== snaps =="; cat /tmp/kgs/full/snaps.log 2>/dev/null | tail -5; ls -d /tmp/kgs/full/snap_1790923319 2>/dev/null | head -5; echo done
+at: 06:42:49
+$ bash -c true; echo LR; A="adb -s 127.0.0.1:5555"; sleep 20; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== snaps =="; cat /tmp/kgs/full/snaps.log 2>/dev/null | tail -5; ls -d /tmp/kgs/full/snap_1790923319 2>/dev/null | head -5; echo done
+LR
+== snaps ==
+snaploop start N=24 every=300s keep=3 2026-10-02T06:41:59Z
+1790923319 pid=6597 regions=0 skipped=0 MB=0 pulled=0
+/tmp/kgs/full/snap_1790923319
+done
+rc=0
+gamepid: 71322
+flows: 0
