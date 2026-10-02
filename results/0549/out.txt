@@ -1,0 +1,11 @@
+cmd: exec bash -c true; echo KS; A="adb -s 127.0.0.1:5555"; $A shell input swipe 370 224 370 224 250; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== FULL HIT AUDIT =="; grep -h "hits=" /tmp/live-res/cap/loop.log 2>/dev/null | head -20; echo "== cycles =="; grep -c "regions=" /tmp/live-res/cap/loop.log 2>/dev/null; echo "== shot =="
+at: 06:03:47
+$ bash -c true; echo KS; A="adb -s 127.0.0.1:5555"; $A shell input swipe 370 224 370 224 250; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== FULL HIT AUDIT =="; grep -h "hits=" /tmp/live-res/cap/loop.log 2>/dev/null | head -20; echo "== cycles =="; grep -c "regions=" /tmp/live-res/cap/loop.log 2>/dev/null; echo "== shot =="
+KS
+== FULL HIT AUDIT ==
+== cycles ==
+255
+== shot ==
+rc=0
+gamepid: 6597
+flows: 0
