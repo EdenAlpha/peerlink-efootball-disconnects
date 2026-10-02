@@ -1,28 +1,4 @@
 ts
-   20f4a04..fdcd21f  HEAD -> live-res-j
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   fdcd21f..f1ce3cb  HEAD -> live-res-j
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   f1ce3cb..ceff134  HEAD -> live-res-j
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   ceff134..e54f62b  HEAD -> live-res-j
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   e54f62b..fe5dfab  HEAD -> live-res-j
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   fe5dfab..7d690b4  HEAD -> live-res-j
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   7d690b4..b8d90d4  HEAD -> live-res-j
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   b8d90d4..1691b2e  HEAD -> live-res-j
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   1691b2e..d5999ac  HEAD -> live-res-j
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   d5999ac..9570025  HEAD -> live-res-j
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   9570025..3ba8540  HEAD -> live-res-j
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   3ba8540..07df16d  HEAD -> live-res-j
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    07df16d..f8bcf21  HEAD -> live-res-j
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    f8bcf21..8f258f9  HEAD -> live-res-j
@@ -38,3 +14,27 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    be51b0e..571fa6c  HEAD -> live-res-j
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    571fa6c..47213f2  HEAD -> live-res-j
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   47213f2..47c0f29  HEAD -> live-res-j
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   47c0f29..a8277de  HEAD -> live-res-j
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   a8277de..e2a00ca  HEAD -> live-res-j
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   e2a00ca..ed20d5a  HEAD -> live-res-j
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   ed20d5a..ebdce97  HEAD -> live-res-j
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   ebdce97..a764915  HEAD -> live-res-j
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   a764915..53e19ba  HEAD -> live-res-j
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   53e19ba..841bb0e  HEAD -> live-res-j
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   841bb0e..2724f5f  HEAD -> live-res-j
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   2724f5f..e0d7a9c  HEAD -> live-res-j
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   e0d7a9c..405368b  HEAD -> live-res-j
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   405368b..b986690  HEAD -> live-res-j
