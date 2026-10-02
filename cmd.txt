@@ -1,1 +1,1 @@
-exec bash -c true; echo LR; A="adb -s 127.0.0.1:5555"; sleep 20; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== snaps =="; cat /tmp/kgs/full/snaps.log 2>/dev/null | tail -5; ls -d /tmp/kgs/full/snap_* 2>/dev/null | head -5; echo done
+exec bash -c true; echo LS; A="adb -s 127.0.0.1:5555"; $A shell input swipe 640 546 640 546 250; $A exec-out screencap -p > /tmp/live-res/screen.png; echo done
