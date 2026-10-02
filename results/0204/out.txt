@@ -1,0 +1,10 @@
+cmd: exec bash -c true; echo IS; A="adb -s 127.0.0.1:5555"; $A shell input swipe 578 1095 578 1095 250; for i in $(seq 1 12); do sleep 5; F=$($A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1); case "$F" in *MinuteMaidActivity*) ;; *) echo "left auth after $((i*5))s"; break ;; esac; done; echo "== focus =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+at: 05:00:01
+$ bash -c true; echo IS; A="adb -s 127.0.0.1:5555"; $A shell input swipe 578 1095 578 1095 250; for i in $(seq 1 12); do sleep 5; F=$($A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1); case "$F" in *MinuteMaidActivity*) ;; *) echo "left auth after $((i*5))s"; break ;; esac; done; echo "== focus =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+IS
+== focus ==
+  mCurrentFocus=Window{44ca9d6 u0 com.google.android.gms/com.google.android.gms.auth.uiflows.minutemaid.MinuteMaidActivity}
+== shot ==
+rc=0
+gamepid: 
+flows: 0
