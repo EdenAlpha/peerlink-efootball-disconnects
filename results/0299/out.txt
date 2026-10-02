@@ -1,0 +1,10 @@
+cmd: exec bash -c true; echo JG; A="adb -s 127.0.0.1:5555"; sleep 150; $A shell pm list packages 2>/dev/null | tr -d "\r" | grep -i pesam || echo "not yet"; $A shell su 0 du -sm /data/data/jp.konami.pesam 2>/dev/null | tr -d "\r" || echo "-"; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+at: 05:18:28
+$ bash -c true; echo JG; A="adb -s 127.0.0.1:5555"; sleep 150; $A shell pm list packages 2>/dev/null | tr -d "\r" | grep -i pesam || echo "not yet"; $A shell su 0 du -sm /data/data/jp.konami.pesam 2>/dev/null | tr -d "\r" || echo "-"; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+JG
+package:jp.konami.pesam
+1	/data/data/jp.konami.pesam
+== shot ==
+rc=0
+gamepid: 
+flows: 0
