@@ -1,0 +1,14 @@
+cmd: exec bash -c true; echo KY; dd if=/tmp/kgs/full/full.bin of=/tmp/live-res/seg/sign_region.bin bs=1048576 skip=5 count=2 2>&1 | tail -1; ls -l /tmp/live-res/seg/; echo "== context =="; python3 -c "b=open(\"/tmp/live-res/seg/sign_region.bin\",\"rb\").read(); import re; print(\"slice bytes:\",len(b)); [print(\"rel 0x%x: %r\"%(m.start(),b[m.start()-40:m.start()+120])) for m in list(re.finditer(b\"sign=\",b))[:4]]"; A="adb -s 127.0.0.1:5555"; $A exec-out screencap -p > /tmp/live-res/screen.png; echo done
+at: 06:14:12
+$ bash -c true; echo KY; dd if=/tmp/kgs/full/full.bin of=/tmp/live-res/seg/sign_region.bin bs=1048576 skip=5 count=2 2>&1 | tail -1; ls -l /tmp/live-res/seg/; echo "== context =="; python3 -c "b=open(\"/tmp/live-res/seg/sign_region.bin\",\"rb\").read(); import re; print(\"slice bytes:\",len(b)); [print(\"rel 0x%x: %r\"%(m.start(),b[m.start()-40:m.start()+120])) for m in list(re.finditer(b\"sign=\",b))[:4]]"; A="adb -s 127.0.0.1:5555"; $A exec-out screencap -p > /tmp/live-res/screen.png; echo done
+KY
+dd: failed to open '/tmp/live-res/seg/sign_region.bin': No such file or directory
+ls: cannot access '/tmp/live-res/seg/': No such file or directory
+== context ==
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/live-res/seg/sign_region.bin'
+done
+rc=0
+gamepid: 6597
+flows: 0
