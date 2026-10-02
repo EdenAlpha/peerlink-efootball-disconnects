@@ -1,1 +1,1 @@
-exec bash -c true; echo IT; A="adb -s 127.0.0.1:5555"; $A shell input swipe 596 1104 596 1104 250; sleep 18; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+exec bash -c true; echo IU; A="adb -s 127.0.0.1:5555"; $A shell input tap 360 631; sleep 3; $A shell input text "efootballudp@gmail.com" >/dev/null 2>&1; sleep 2; $A shell input keyevent 66; sleep 16; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
