@@ -1,0 +1,14 @@
+cmd: exec bash -c true; echo PROBE1; A="adb -s 127.0.0.1:5555"; echo "=== apk installed? ==="; $A shell pm path jp.konami.pesam 2>&1 | tr -d "\r"; echo "=== focused app ==="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; echo "=== any game pid ==="; $A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r" || echo "no game"; echo "=== frida ==="; $A shell ps -A 2>/dev/null | tr -d "\r" | grep -iE "frida|mitm" | head -5; echo END
+at: 15:30:39
+$ bash -c true; echo PROBE1; A="adb -s 127.0.0.1:5555"; echo "=== apk installed? ==="; $A shell pm path jp.konami.pesam 2>&1 | tr -d "\r"; echo "=== focused app ==="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; echo "=== any game pid ==="; $A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r" || echo "no game"; echo "=== frida ==="; $A shell ps -A 2>/dev/null | tr -d "\r" | grep -iE "frida|mitm" | head -5; echo END
+PROBE1
+=== apk installed? ===
+=== focused app ===
+  mCurrentFocus=Window{3527681 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+=== any game pid ===
+no game
+=== frida ===
+END
+rc=0
+gamepid: 
+flows: 0
