@@ -1,0 +1,8 @@
+cmd: exec bash -c true; echo LJ; A="adb -s 127.0.0.1:5555"; $A shell input swipe 160 625 160 625 250; $A exec-out screencap -p > /tmp/live-res/screen.png; echo done
+at: 06:29:27
+$ bash -c true; echo LJ; A="adb -s 127.0.0.1:5555"; $A shell input swipe 160 625 160 625 250; $A exec-out screencap -p > /tmp/live-res/screen.png; echo done
+LJ
+done
+rc=0
+gamepid: 6597
+flows: 0
