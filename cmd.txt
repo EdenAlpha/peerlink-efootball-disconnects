@@ -1,1 +1,1 @@
-exec bash -c true; echo JW; echo "== watcher hits so far =="; grep -h "hits=" /tmp/live-res/cap/loop.log 2>/dev/null | head -20; echo "== cycles =="; grep -c "regions=" /tmp/live-res/cap/loop.log 2>/dev/null; echo "== last =="; tail -2 /tmp/live-res/cap/loop.log 2>/dev/null
+exec bash -c true; echo JX; A="adb -s 127.0.0.1:5555"; $A shell input swipe 640 620 640 620 250; sleep 5; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
