@@ -1,0 +1,11 @@
+cmd: exec bash -c true; echo JQ; A="adb -s 127.0.0.1:5555"; $A shell input swipe 807 460 807 460 250; sleep 5; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== watcher =="; tail -2 /tmp/live-res/cap/loop.log 2>/dev/null; echo "== shot =="
+at: 05:35:12
+$ bash -c true; echo JQ; A="adb -s 127.0.0.1:5555"; $A shell input swipe 807 460 807 460 250; sleep 5; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== watcher =="; tail -2 /tmp/live-res/cap/loop.log 2>/dev/null; echo "== shot =="
+JQ
+== watcher ==
+1790919308 cycle=27 pid=6597 regions=6
+1790919314 cycle=28 pid=6597 regions=6
+== shot ==
+rc=0
+gamepid: 6597
+flows: 0
