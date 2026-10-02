@@ -1,0 +1,12 @@
+cmd: exec bash -c true; echo KB; A="adb -s 127.0.0.1:5555"; nohup bash /tmp/cont.sh 90 > /tmp/live-res/cap_watcher2.out 2>&1 & echo "watcher2 pid $!"; $A shell input swipe 640 268 640 268 250; sleep 5; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== watcher =="; tail -2 /tmp/live-res/cap/loop.log 2>/dev/null; echo "== shot =="
+at: 05:45:46
+$ bash -c true; echo KB; A="adb -s 127.0.0.1:5555"; nohup bash /tmp/cont.sh 90 > /tmp/live-res/cap_watcher2.out 2>&1 & echo "watcher2 pid $!"; $A shell input swipe 640 268 640 268 250; sleep 5; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== watcher =="; tail -2 /tmp/live-res/cap/loop.log 2>/dev/null; echo "== shot =="
+KB
+watcher2 pid 39949
+== watcher ==
+loop start N=90 2026-10-02T05:45:46Z
+1790919946 cycle=1 pid=6597 regions=6
+== shot ==
+rc=0
+gamepid: 6597
+flows: 0
