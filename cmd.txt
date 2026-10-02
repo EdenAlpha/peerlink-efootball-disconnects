@@ -1,1 +1,1 @@
-exec bash -c true; echo IK; A="adb -s 127.0.0.1:5555"; sleep 40; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+exec bash -c true; echo IL; A="adb -s 127.0.0.1:5555"; sleep 60; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot after 60s =="
