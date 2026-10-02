@@ -65,6 +65,10 @@ def load_index(path):
             off = int(p[3])
         except ValueError:
             continue
+        if off < 0:
+            # index.txt out_off was computed on-device with 32-bit arithmetic
+            # and wrapped past 2GB. full.bin is <8GB so one wrap is exact.
+            off += 1 << 32
         rng = p[0]
         if "-" not in rng:
             continue
@@ -135,7 +139,11 @@ def main():
         f = open(full, "rb")
         n_c = n_s = checked = 0
         for (off, s, e) in heap:
-            f.seek(off)
+            try:
+                f.seek(off)
+            except OSError as ex:
+                print("SEEK FAIL off=%r s=%x e=%x: %s" % (off, s, e, ex))
+                continue
             size = (e - s)
             # stream in 16MB pieces
             got = 0
@@ -163,4 +171,5 @@ def main():
         print("DONE cands=%d sched=%d" % (n_c, n_s))
 
 
-main()
+if __name__ == "__main__":
+    main()
