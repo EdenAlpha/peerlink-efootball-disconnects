@@ -1,0 +1,8 @@
+cmd: exec bash -c true; echo IL; A="adb -s 127.0.0.1:5555"; sleep 60; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot after 60s =="
+at: 04:43:56
+$ bash -c true; echo IL; A="adb -s 127.0.0.1:5555"; sleep 60; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot after 60s =="
+IL
+== shot after 60s ==
+rc=0
+gamepid: 
+flows: 0
