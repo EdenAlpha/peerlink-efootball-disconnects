@@ -1,5 +1,3 @@
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   ef464e5..abc586d  HEAD -> live-res-k
 live: probe published OK; live-res is live
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    abc586d..9b750c7  HEAD -> live-res-k
@@ -37,3 +35,5 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    c80bece..5820c90  HEAD -> live-res-k
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    5820c90..d714b8d  HEAD -> live-res-k
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   d714b8d..ecbe671  HEAD -> live-res-k
