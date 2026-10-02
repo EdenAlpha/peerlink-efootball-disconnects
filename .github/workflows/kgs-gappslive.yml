@@ -62,6 +62,9 @@ jobs:
       # into live-cmd on 2026-09-30 are in that branch's PUBLIC history and
       # must never be repeated.
       PEERLINK_GCODE: ${{ secrets.PEERLINK_GCODE }}
+      # Token gating the direct-control relay (kgs-login/live/relay.py).
+      # Staged to $W/creds/RTOKEN; never a commit, same as the rest.
+      RELAY_TOKEN: ${{ secrets.RELAY_TOKEN }}
       DEV_MODE: adb
       # REQUIRED in adb mode. dev.sh calls plain `adb shell ...` with no -s,
       # and on this runner adb reports no default device, so every tap and
@@ -199,6 +202,12 @@ jobs:
           mkdir -p $W/creds
           printf '%s' "$PEERLINK_GMAIL" > $W/creds/GMAIL
           printf '%s' "$PEERLINK_GPASS" > $W/creds/GPASS
+          chmod 600 $W/creds/GMAIL $W/creds/GPASS
+          if [ -n "${RELAY_TOKEN:-}" ]; then
+            printf '%s' "$RELAY_TOKEN" > $W/creds/RTOKEN
+            chmod 600 $W/creds/RTOKEN
+            echo "relay token staged: $(wc -c < $W/creds/RTOKEN) bytes"
+          fi
           # The Konami account is what gets past the tutorial/mission gate, which
           # otherwise blocks entering a match and creating a room. Staged the
           # same way as the Google credentials for the same reason: the live
