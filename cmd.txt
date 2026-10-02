@@ -1,1 +1,1 @@
-exec bash -c true; echo JO; A="adb -s 127.0.0.1:5555"; $A shell input swipe 1139 678 1139 678 250; sleep 5; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="; echo "== watcher =="; tail -4 /tmp/live-res/cap/loop.log 2>/dev/null || echo "no loop log yet"
+exec bash -c true; echo JP; A="adb -s 127.0.0.1:5555"; $A shell input swipe 1112 678 1112 678 250; sleep 5; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== watcher =="; tail -3 /tmp/live-res/cap/loop.log 2>/dev/null; echo "== shot =="
