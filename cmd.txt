@@ -1,1 +1,1 @@
-exec bash -c true; echo LT; A="adb -s 127.0.0.1:5555"; $A shell input swipe 640 620 640 620 400; sleep 3; $A exec-out screencap -p > /tmp/live-res/screen.png; echo done
+exec bash -c true; echo LU; A="adb -s 127.0.0.1:5555"; $A shell input swipe 640 620 640 620 400; $A exec-out screencap -p > /tmp/live-res/screen.png; echo done
