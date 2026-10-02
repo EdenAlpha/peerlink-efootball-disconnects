@@ -1,0 +1,28 @@
+cmd: exec bash -c true; echo KH; A="adb -s 127.0.0.1:5555"; $A shell input swipe 807 460 807 460 250; for i in $(seq 1 20); do sleep 15; D=$($A shell su 0 du -sm /data/data/jp.konami.pesam 2>/dev/null | tr -d "\r" | cut -f1); F=$($A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1); echo "t=$((i*15))s data=${D:-?}MB $F"; done; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+at: 04:18:03
+$ bash -c true; echo KH; A="adb -s 127.0.0.1:5555"; $A shell input swipe 807 460 807 460 250; for i in $(seq 1 20); do sleep 15; D=$($A shell su 0 du -sm /data/data/jp.konami.pesam 2>/dev/null | tr -d "\r" | cut -f1); F=$($A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1); echo "t=$((i*15))s data=${D:-?}MB $F"; done; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+KH
+t=15s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=30s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=45s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=60s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=75s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=90s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=105s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=120s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=135s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=150s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=165s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=180s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=195s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=210s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=225s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=240s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=255s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=270s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=285s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+t=300s data=?MB   mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+== shot ==
+rc=0
+gamepid: 
+flows: 0
