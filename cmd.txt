@@ -1,1 +1,1 @@
-exec bash -c true; echo JB; A="adb -s 127.0.0.1:5555"; $A shell input swipe 201 1114 201 1114 250; sleep 5; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+exec bash -c true; echo JC; A="adb -s 127.0.0.1:5555"; $A shell input swipe 161 668 161 668 250; sleep 4; $A shell am start -a android.intent.action.VIEW -d "market://details?id=jp.konami.pesam" >/dev/null 2>&1; sleep 12; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
