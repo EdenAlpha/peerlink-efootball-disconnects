@@ -1,1 +1,1 @@
-exec bash -c true; echo IJ; A="adb -s 127.0.0.1:5555"; $A shell input swipe 103 786 103 786 250; sleep 20; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+exec bash -c true; echo IK; A="adb -s 127.0.0.1:5555"; sleep 40; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
