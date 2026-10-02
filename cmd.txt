@@ -1,1 +1,1 @@
-exec bash -c true; echo IM; A="adb -s 127.0.0.1:5555"; sleep 90; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot after 90s =="
+exec bash -c true; echo IN; A="adb -s 127.0.0.1:5555"; $A shell am force-stop com.android.vending; sleep 3; $A shell am start -n com.android.vending/com.google.android.finsky.activities.MainActivity >/dev/null 2>&1; sleep 14; echo "== focus =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
