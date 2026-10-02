@@ -1,0 +1,11 @@
+cmd: exec bash -c true; echo ID; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; G=$(cat $W/creds/GMAIL 2>/dev/null); echo "email chars: ${#G}"; $A shell input tap 360 631; sleep 3; $A shell input text "$G" >/dev/null 2>&1; sleep 2; $A shell input keyevent 66; sleep 16; echo "== focus =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+at: 04:30:50
+$ bash -c true; echo ID; W=/tmp/kgs; A="adb -s 127.0.0.1:5555"; G=$(cat $W/creds/GMAIL 2>/dev/null); echo "email chars: ${#G}"; $A shell input tap 360 631; sleep 3; $A shell input text "$G" >/dev/null 2>&1; sleep 2; $A shell input keyevent 66; sleep 16; echo "== focus =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+ID
+email chars: 21
+== focus ==
+  mCurrentFocus=Window{97621 u0 com.google.android.gms/com.google.android.gms.auth.uiflows.minutemaid.MinuteMaidActivity}
+== shot ==
+rc=0
+gamepid: 
+flows: 0
