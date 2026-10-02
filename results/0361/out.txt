@@ -1,0 +1,10 @@
+cmd: exec bash -c true; echo JN; W=/tmp/kgs; R=https://raw.githubusercontent.com/EdenAlpha/peerlink-efootball-disconnects/main; B="?cb=$(date +%s)"; curl -fsSL --max-time 60 "$R/cont_cap.sh$B" -o /tmp/cont.sh && echo "cont $(wc -c < /tmp/cont.sh) bytes"; nohup bash /tmp/cont.sh 90 > /tmp/live-res/cap_watcher.out 2>&1 & echo "watcher pid $!"; sleep 3; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+at: 05:32:42
+$ bash -c true; echo JN; W=/tmp/kgs; R=https://raw.githubusercontent.com/EdenAlpha/peerlink-efootball-disconnects/main; B="?cb=$(date +%s)"; curl -fsSL --max-time 60 "$R/cont_cap.sh$B" -o /tmp/cont.sh && echo "cont $(wc -c < /tmp/cont.sh) bytes"; nohup bash /tmp/cont.sh 90 > /tmp/live-res/cap_watcher.out 2>&1 & echo "watcher pid $!"; sleep 3; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+JN
+cont 2536 bytes
+watcher pid 31013
+== shot ==
+rc=0
+gamepid: 6597
+flows: 0
