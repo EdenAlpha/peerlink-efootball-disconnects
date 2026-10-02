@@ -14,3 +14,5 @@ sort: write failed: 'standard output': Broken pipe
 sort: write error
 sort: write failed: 'standard output': Broken pipe
 sort: write error
+sort: write failed: 'standard output': Broken pipe
+sort: write error
