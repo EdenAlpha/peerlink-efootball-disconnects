@@ -1,0 +1,13 @@
+cmd: exec bash -c true; echo IA; A="adb -s 127.0.0.1:5555"; $A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r" || echo "game: not running"; echo "== focus =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; echo "== installed? =="; $A shell pm list packages 2>/dev/null | tr -d "\r" | grep -i pesam || echo "NOT INSTALLED"; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+at: 04:23:14
+$ bash -c true; echo IA; A="adb -s 127.0.0.1:5555"; $A shell pidof jp.konami.pesam 2>/dev/null | tr -d "\r" || echo "game: not running"; echo "== focus =="; $A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1; echo "== installed? =="; $A shell pm list packages 2>/dev/null | tr -d "\r" | grep -i pesam || echo "NOT INSTALLED"; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+IA
+game: not running
+== focus ==
+  mCurrentFocus=Window{9af1153 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+== installed? ==
+NOT INSTALLED
+== shot ==
+rc=0
+gamepid: 
+flows: 0
