@@ -1,0 +1,18 @@
+cmd: exec bash -c true; echo JH; A="adb -s 127.0.0.1:5555"; $A shell input swipe 533 458 533 458 250; for i in $(seq 1 10); do sleep 9; F=$($A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1); D=$($A shell su 0 du -sm /data/data/jp.konami.pesam 2>/dev/null | tr -d "\r" | cut -f1); echo "t=$((i*9)) data=${D:-?}MB $F"; case "$F" in *pesam*) echo "GAME UP"; break ;; esac; done; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+at: 05:24:43
+$ bash -c true; echo JH; A="adb -s 127.0.0.1:5555"; $A shell input swipe 533 458 533 458 250; for i in $(seq 1 10); do sleep 9; F=$($A shell dumpsys window 2>/dev/null | tr -d "\r" | grep -iE "mCurrentFocus" | head -1); D=$($A shell su 0 du -sm /data/data/jp.konami.pesam 2>/dev/null | tr -d "\r" | cut -f1); echo "t=$((i*9)) data=${D:-?}MB $F"; case "$F" in *pesam*) echo "GAME UP"; break ;; esac; done; $A exec-out screencap -p > /tmp/live-res/screen.png; echo "== shot =="
+JH
+t=9 data=1974MB   mCurrentFocus=Window{6c0b7d7 u0 com.google.android.gms/com.google.android.gms.games.ui.signinflow.SignInActivity}
+t=18 data=1974MB   mCurrentFocus=Window{6c0b7d7 u0 com.google.android.gms/com.google.android.gms.games.ui.signinflow.SignInActivity}
+t=27 data=1974MB   mCurrentFocus=Window{6c0b7d7 u0 com.google.android.gms/com.google.android.gms.games.ui.signinflow.SignInActivity}
+t=36 data=1974MB   mCurrentFocus=Window{6c0b7d7 u0 com.google.android.gms/com.google.android.gms.games.ui.signinflow.SignInActivity}
+t=45 data=1974MB   mCurrentFocus=Window{6c0b7d7 u0 com.google.android.gms/com.google.android.gms.games.ui.signinflow.SignInActivity}
+t=54 data=1974MB   mCurrentFocus=Window{6c0b7d7 u0 com.google.android.gms/com.google.android.gms.games.ui.signinflow.SignInActivity}
+t=63 data=1974MB   mCurrentFocus=Window{6c0b7d7 u0 com.google.android.gms/com.google.android.gms.games.ui.signinflow.SignInActivity}
+t=72 data=1974MB   mCurrentFocus=Window{6c0b7d7 u0 com.google.android.gms/com.google.android.gms.games.ui.signinflow.SignInActivity}
+t=81 data=1974MB   mCurrentFocus=Window{6c0b7d7 u0 com.google.android.gms/com.google.android.gms.games.ui.signinflow.SignInActivity}
+t=90 data=1974MB   mCurrentFocus=Window{6c0b7d7 u0 com.google.android.gms/com.google.android.gms.games.ui.signinflow.SignInActivity}
+== shot ==
+rc=0
+gamepid: 6597
+flows: 0
