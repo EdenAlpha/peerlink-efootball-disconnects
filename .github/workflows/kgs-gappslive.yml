@@ -363,4 +363,5 @@ jobs:
             /tmp/kgs/flows.mitm
             /tmp/kgs/mitm.log
             /tmp/kgs/game2.pcap
+            /tmp/kgs/full/
             /tmp/live-res/
