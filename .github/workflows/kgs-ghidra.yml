@@ -112,16 +112,18 @@ jobs:
           file libUE4.so || true
           echo "=== BINARY VERIFIED ==="
 
-      - name: 04 stage analysis script (Linux OUT path)
+      - name: 04 stage analysis scripts (Java only; .py needs PyGhidra)
         run: |
           set -x
-          echo "=== STAGE SCRIPT ==="
+          echo "=== STAGE SCRIPTS ==="
           mkdir -p /tmp/gscripts /tmp/ghidra_proj
-          cp "$GITHUB_WORKSPACE/efootball-apk/FindKillRule.py" /tmp/gscripts/
-          # The repo copy hardcodes a Windows OUT path; point it at /tmp.
-          sed -i "s|^OUT = .*|OUT = \"/tmp/killrule_out.txt\"|" /tmp/gscripts/FindKillRule.py
-          grep -n "^OUT" /tmp/gscripts/FindKillRule.py
-          echo "=== SCRIPT STAGED ==="
+          # Only .java GhidraScripts run under analyzeHeadless. The repo's
+          # FindKillRule.py cannot run there (verified: SCRIPT ERROR on the
+          # previous run), so FindKillRule.java is its Java port.
+          cp "$GITHUB_WORKSPACE/efootball-apk/ghidra_scripts/FindKillRule.java" /tmp/gscripts/
+          cp "$GITHUB_WORKSPACE/efootball-apk/ghidra_scripts/FindEncryptKey.java" /tmp/gscripts/
+          ls -la /tmp/gscripts/
+          echo "=== SCRIPTS STAGED ==="
 
       - name: 05 run analyzeHeadless (long, foreground, streamed)
         run: |
@@ -133,11 +135,22 @@ jobs:
             /tmp/ghidra_proj KillRule \
             -import /tmp/work/libUE4.so \
             -analysisTimeoutPerFile "${{ inputs.analysis_timeout }}" \
-            -postScript FindKillRule.py -scriptPath /tmp/gscripts \
+            -postScript FindKillRule.java -postScript FindEncryptKey.java \
+            -scriptPath /tmp/gscripts \
             -deleteProject 2>&1 | tee /tmp/ghidra_run.log
           echo "ANALYSIS_RC=${PIPESTATUS[0]}"
           echo "=== ANALYSIS END $(date -u +%FT%TZ) ==="
           ls -la /tmp/killrule_out.txt /tmp/ghidra_run.log || true
+          echo "=== RESULT GATE (fail loudly, never false-green) ==="
+          if grep -q "SCRIPT ERROR" /tmp/ghidra_run.log; then
+            echo "GATE FAIL: a post-script errored; see log"
+            exit 1
+          fi
+          if [ ! -s /tmp/killrule_out.txt ]; then
+            echo "GATE FAIL: killrule_out.txt missing or empty"
+            exit 1
+          fi
+          echo "GATE PASS: $(wc -l < /tmp/killrule_out.txt) result lines"
 
       - name: 06 upload results (always, even on timeout/failure)
         if: always()
