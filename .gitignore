@@ -25,3 +25,9 @@ efootball-apk/ue4_strings.txt
 # python bytecode
 __pycache__/
 
+
+# RSA private key extracted from libUE4.so. Never commit credential literals.
+pesam_rsa_private.pem
+pesam_rsa_private.der
+*_rsa_private.*
+*.b64.txt

@@ -1,0 +1,148 @@
+name: kgs-ghidra
+
+# Headless Ghidra analysis of libUE4.so on a free 4-CPU/16GB cloud runner.
+#
+# Why this exists: the local box (1 core, ~8GB) pages through the 160MB
+# binary for hours and may OOM. ubuntu-24.04 gives 4 vCPU + 16GB RAM free
+# on this public repo. Same job lands in ~30-90 min instead of 3-6 h.
+#
+# The binary is KONAMI property (see .gitignore: efootball-apk/native/ is
+# excluded, do-not-redistribute). It is NEVER committed. It travels via a
+# DRAFT GitHub release (collaborators-only, unpublished) that this workflow
+# downloads with GITHUB_TOKEN, verifies by SHA256, and analyzes ephemerally.
+# Delete the draft release when done so nothing persists.
+#
+# No-waste design (explicit user requirement):
+#   * every step echoes progress markers -> visible live in the Actions log
+#   * fail-fast gates (Java, Ghidra SHA, binary SHA) run BEFORE the long job
+#   * the long analysis runs in the FOREGROUND so Ghidra's own progress lines
+#     stream to the log; nothing hides in a file you only see at the end
+#   * upload-artifact runs with if: always(), so a timeout still saves the
+#     partial log + any partial script output (the FindKillRule script also
+#     prints every line to stdout, so even a killed run keeps its progress
+#     in the Actions log itself)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Draft release tag holding libUE4.so"
+        required: false
+        default: "libue4-local"
+      expected_sha:
+        description: "Expected SHA256 of libUE4.so (fail fast on mismatch)"
+        required: false
+        default: "2AC4FF17AC8AD713D9531C2601E38A3C8335E02EA882BA2DC4445C191C1298CD"
+      expected_size:
+        description: "Expected byte size of libUE4.so"
+        required: false
+        default: "160822968"
+      analysis_timeout:
+        description: "Per-file analysis cap in seconds for Ghidra"
+        required: false
+        default: "5400"
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 340
+    steps:
+      - name: checkout (scripts only, binary comes from draft release)
+        uses: actions/checkout@v4
+
+      - name: 00 environment probe
+        run: |
+          set -x
+          echo "=== PROBE ==="
+          nproc
+          free -g
+          df -h /tmp | tail -2
+          java -version 2>&1 | head -2 || echo "no java yet (expected)"
+          echo "inputs: tag=${{ inputs.tag }} size=${{ inputs.expected_size }}"
+          echo "=== PROBE DONE ==="
+
+      - name: 01 install Java 21
+        run: |
+          set -x
+          echo "=== JAVA INSTALL ==="
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq openjdk-21-jdk-headless
+          export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+          echo "JAVA_HOME=$JAVA_HOME"
+          "$JAVA_HOME/bin/java" -version 2>&1
+          echo "=== JAVA OK ==="
+
+      - name: 02 download Ghidra (pinned, SHA-checked)
+        run: |
+          set -x
+          echo "=== GHIDRA DOWNLOAD ==="
+          cd /tmp
+          URL="https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_12.1.4_build/ghidra_12.1.4_PUBLIC_20260921.zip"
+          for i in 1 2 3; do
+            echo "attempt $i..."
+            curl -L --retry 3 -o ghidra.zip "$URL" && break
+            sleep 15
+          done
+          ls -la ghidra.zip
+          echo "ddac49f903da9d5bac833e5cc79395098b9c33cfd3279be5f31bd00387d2d4db  ghidra.zip" | sha256sum -c -
+          unzip -q ghidra.zip
+          ls -d /tmp/ghidra_12.1.4_PUBLIC
+          df -h /tmp | tail -1
+          echo "=== GHIDRA READY ==="
+
+      - name: 03 fetch libUE4.so from draft release (fail fast)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -x
+          echo "=== FETCH BINARY ==="
+          mkdir -p /tmp/work && cd /tmp/work
+          gh release download "${{ inputs.tag }}" --pattern 'libUE4.so' --clobber
+          ls -la libUE4.so
+          ACTUAL_SIZE=$(stat -c%s libUE4.so)
+          echo "size: $ACTUAL_SIZE (expect ${{ inputs.expected_size }})"
+          [ "$ACTUAL_SIZE" = "${{ inputs.expected_size }}" ] || { echo "SIZE MISMATCH, aborting before the long run"; exit 1; }
+          echo "${{ inputs.expected_sha }}  libUE4.so" | sha256sum -c -
+          file libUE4.so || true
+          echo "=== BINARY VERIFIED ==="
+
+      - name: 04 stage analysis script (Linux OUT path)
+        run: |
+          set -x
+          echo "=== STAGE SCRIPT ==="
+          mkdir -p /tmp/gscripts /tmp/ghidra_proj
+          cp "$GITHUB_WORKSPACE/efootball-apk/FindKillRule.py" /tmp/gscripts/
+          # The repo copy hardcodes a Windows OUT path; point it at /tmp.
+          sed -i "s|^OUT = .*|OUT = \"/tmp/killrule_out.txt\"|" /tmp/gscripts/FindKillRule.py
+          grep -n "^OUT" /tmp/gscripts/FindKillRule.py
+          echo "=== SCRIPT STAGED ==="
+
+      - name: 05 run analyzeHeadless (long, foreground, streamed)
+        run: |
+          set -x
+          echo "=== ANALYSIS START $(date -u +%FT%TZ) ==="
+          export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+          cd /tmp
+          stdbuf -o0 -e0 ./ghidra_12.1.4_PUBLIC/support/analyzeHeadless \
+            /tmp/ghidra_proj KillRule \
+            -import /tmp/work/libUE4.so \
+            -analysisTimeoutPerFile "${{ inputs.analysis_timeout }}" \
+            -postScript FindKillRule.py -scriptPath /tmp/gscripts \
+            -deleteProject 2>&1 | tee /tmp/ghidra_run.log
+          echo "ANALYSIS_RC=${PIPESTATUS[0]}"
+          echo "=== ANALYSIS END $(date -u +%FT%TZ) ==="
+          ls -la /tmp/killrule_out.txt /tmp/ghidra_run.log || true
+
+      - name: 06 upload results (always, even on timeout/failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgs-ghidra-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            /tmp/killrule_out.txt
+            /tmp/ghidra_run.log
