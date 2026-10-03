@@ -10,10 +10,13 @@ efootball-apk/*.jar
 efootball-apk/*.zip
 efootball-apk/efootball-11.0.1-full.apk
 
-# generated analysis artefacts (regenerable, huge)
+# generated analysis artefacts (regenerable, huge). NOTE: ghidra_scripts/ holds
+# small hand-written .java scripts and MUST stay tracked; only the big
+# install/project dirs are ignored.
 efootball-apk/jadx_out/
 efootball-apk/apktool_out/
-efootball-apk/ghidra_*/
+efootball-apk/ghidra_12.1.4_PUBLIC/
+efootball-apk/ghidra_proj*/
 efootball-apk/kaggle_*/
 efootball-apk/win_dump.txt
 efootball-apk/xref_dump.txt
