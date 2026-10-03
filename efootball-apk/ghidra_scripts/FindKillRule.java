@@ -48,12 +48,10 @@ public class FindKillRule extends GhidraScript {
             log("TARGET: " + t);
             List<Address> found = new ArrayList<Address>();
             try {
-                AddressSetView hits = findBytes(currentProgram.getMinAddress(), t, 5, monitor);
+                AddressSetView hits = findBytes(currentProgram.getMinAddress(), t, 5, 1);
                 if (hits != null) {
-                    for (Address h : hits) {
-                        if (found.size() >= 5) break;
-                        found.add(h);
-                    }
+                    AddressIterator ai = hits.getAddresses(true);
+                    while (ai.hasNext() && found.size() < 5) found.add(ai.next());
                 }
             } catch (Exception e) {
                 log("  find error: " + e);

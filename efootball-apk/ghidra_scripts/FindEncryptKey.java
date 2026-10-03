@@ -78,7 +78,7 @@ public class FindEncryptKey extends GhidraScript {
 
     private Address find(Memory mem, String needle) {
         // FlatProgramAPI.findBytes(String) returns the match set; take first.
-        AddressSetView v = findBytes(currentProgram.getMinAddress(), needle, 1, monitor);
+        AddressSetView v = findBytes(currentProgram.getMinAddress(), needle, 1, 1);
         if (v == null || v.isEmpty()) return null;
         return v.getMinAddress();
     }
