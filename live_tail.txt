@@ -1,40 +1,8 @@
-ts
-   e9c0711..1b43207  HEAD -> live-res-m
+live: live control loop starting (poll 8s, max 1400 rounds)
+live: write commands to live-cmd/cmd.txt ; read live-res/results + status.txt
+live: ignoring the already-queued command (not re-running it): []
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   1b43207..cd9a4fd  HEAD -> live-res-m
+   f1f1743..d2c316f  HEAD -> live-res-m
+live: probe published OK; live-res is live
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   cd9a4fd..d748252  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   d748252..d36c2d7  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   d36c2d7..9808079  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   9808079..973502f  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   973502f..af08e69  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   af08e69..2692833  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   2692833..16cf35c  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   16cf35c..fa32ea4  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   fa32ea4..70d324a  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   70d324a..376d23a  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   376d23a..5a0f9b1  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   5a0f9b1..84e77ae  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   84e77ae..698c6f5  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   698c6f5..bd5fe71  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   bd5fe71..eb03095  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   eb03095..2d2af53  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   2d2af53..c30fd56  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   c30fd56..e5e092a  HEAD -> live-res-m
+   d2c316f..420ba47  HEAD -> live-res-m
