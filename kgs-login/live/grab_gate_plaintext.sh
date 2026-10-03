@@ -146,7 +146,11 @@ index=0
 #    because recovering one plaintext body would validate the whole model.
 #
 # Set SIGN_B64 to the captured sign value to enable anchor 1.
-SIGN_B64=${SIGN_B64:-bTf0PnCf0wICPjEPX+PRyIPBaUpkwx5L8oa4+zxOq0VfuvYY3xVYAg==}
+# No default value on purpose: this token is a LIVE gate session cookie and the
+# repo is public. Supply it at run time from the runner's secrets:
+#   SIGN_B64=$(cat "$W/creds/sign_b64")
+# Or read a fresh one straight out of a capture (grep -m1 -o 'sign=[A-Za-z0-9+/=]\{40,\}' flows.mitm | cut -d= -f2-).
+: "${SIGN_B64:?set SIGN_B64 (see comment above) - it is a live session cookie, not a constant}"
 
 while read -r size range _name; do
   index=$((index + 1))

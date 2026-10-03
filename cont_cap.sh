@@ -9,7 +9,8 @@ mkdir -p "$W"
 A="adb -s 127.0.0.1:5555"
 LOG="$W/loop.log"
 ANCHORS="sign= gate_CMD_ CMD_LOGIN session_id pes-custom-encrypt"
-KNOWN_SIGN="bTf0PnCf0wICPjEPX+PRyIPBaUpkwx5L8oa4+zxOq0VfuvYY3xVYAg=="
+# Live gate session cookie - injected at run time, never committed.
+: "${KNOWN_SIGN:?set KNOWN_SIGN (grep -m1 -o 'sign=[A-Za-z0-9+/=]\{40,\}' flows.mitm | cut -d= -f2-)}"
 N=${1:-60}
 echo "loop start N=$N $(date -u +%FT%TZ)" >> "$LOG"
 for ((i=1; i<=N; i++)); do

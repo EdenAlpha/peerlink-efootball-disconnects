@@ -4,6 +4,7 @@
 full.bin is ~4GB; use grep (fast, 64-bit) for byte offsets, then map each hit
 back to its source region via index.txt (range, perms, name, out_offset).
 """
+import os
 import subprocess
 import sys
 
@@ -11,8 +12,11 @@ FULL = "/tmp/kgs/full/full.bin"
 INDEX = "/tmp/kgs/full/index.txt"
 
 ANCHORS = ["sign=", "gate_CMD_", "CMD_LOGIN", "session_id",
-           "pes-custom-encrypt", "s_keyword",
-           "bTf0PnCf0wICPjEPX+PRyIPBaUpkwx5L8oa4+zxOq0VfuvYY3xVYAg=="]
+           "pes-custom-encrypt", "s_keyword"]
+# A captured sign= cookie value is a live session token. Supply it via the
+# environment (SIGN_B64) rather than committing it; the repo is public.
+if os.environ.get("SIGN_B64"):
+    ANCHORS.append(os.environ["SIGN_B64"])
 
 
 def load_index():

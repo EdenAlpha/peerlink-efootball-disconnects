@@ -9,7 +9,7 @@ mkdir -p "$W"
 PID=$(pidof jp.konami.pesam | awk '{print $1}')
 echo "pid=$PID"
 
-SIGN=bTf0PnCf0wICPjEPX+PRyIPBaUpkwx5L8oa4+zxOq0VfuvYY3xVYAg==
+: "${SIGN:?set SIGN to a live sign= cookie value read from a capture - never committed}"
 TOTAL=0
 GOOD=0
 BAD=0
