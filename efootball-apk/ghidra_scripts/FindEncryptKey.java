@@ -77,10 +77,10 @@ public class FindEncryptKey extends GhidraScript {
     }
 
     private Address find(Memory mem, String needle) {
-        // FlatProgramAPI.findBytes(String) returns the match set; take first.
-        AddressSetView v = findBytes(currentProgram.getMinAddress(), needle, 1, 1);
-        if (v == null || v.isEmpty()) return null;
-        return v.getMinAddress();
+        // FlatProgramAPI.findBytes returns matches; take first.
+        Address[] v = findBytes(currentProgram.getMinAddress(), needle, 1, 1);
+        if (v == null || v.length == 0) return null;
+        return v[0];
     }
 
     private String readAscii(Memory mem, Address a, int max) throws Exception {
