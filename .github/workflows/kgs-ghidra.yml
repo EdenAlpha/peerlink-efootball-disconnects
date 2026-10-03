@@ -135,15 +135,25 @@ jobs:
           set -x
           echo "=== ANALYSIS START $(date -u +%FT%TZ) ==="
           export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+          export _JAVA_OPTIONS="-Xmx8g"
           cd /tmp
+          # Heartbeat: proves the job is alive even when Ghidra goes
+          # quiet. Without this, a silent analyzer phase is
+          # indistinguishable from a wedge (run 37098303440 wedged
+          # 60 min with zero output).
+          ( while true; do echo "HEARTBEAT $(date -u +%T)Z job-alive"; sleep 60; done ) &
+          HB_PID=$!
           stdbuf -o0 -e0 ./ghidra_12.1.4_PUBLIC/support/analyzeHeadless \
             /tmp/ghidra_proj KillRule \
             -import /tmp/work/libUE4.so \
+            -preScript TuneAnalysis.java \
             -analysisTimeoutPerFile "${{ inputs.analysis_timeout }}" \
             -postScript FindKillRule.java -postScript FindEncryptKey.java \
             -scriptPath /tmp/gscripts \
             -deleteProject 2>&1 | tee /tmp/ghidra_run.log
-          echo "ANALYSIS_RC=${PIPESTATUS[0]}"
+          RC=${PIPESTATUS[0]}
+          kill $HB_PID 2>/dev/null || true
+          echo "ANALYSIS_RC=$RC"
           echo "=== ANALYSIS END $(date -u +%FT%TZ) ==="
           ls -la /tmp/killrule_out.txt /tmp/ghidra_run.log || true
           echo "=== RESULT GATE (fail loudly, never false-green) ==="
