@@ -48,13 +48,11 @@ public class FindKillRule extends GhidraScript {
             log("TARGET: " + t);
             List<Address> found = new ArrayList<Address>();
             try {
-                Address a = find(currentProgram.getMinAddress(), t);
-                while (a != null && found.size() < 5) {
-                    found.add(a);
-                    try {
-                        a = find(a.add(1), t);
-                    } catch (Exception e) {
-                        break;
+                AddressSetView hits = findBytes(currentProgram.getMinAddress(), t, 5, monitor);
+                if (hits != null) {
+                    for (Address h : hits) {
+                        if (found.size() >= 5) break;
+                        found.add(h);
                     }
                 }
             } catch (Exception e) {
@@ -76,8 +74,7 @@ public class FindKillRule extends GhidraScript {
                             + r.getReferenceType() + ") func=" + fa);
                     if (fa != null) {
                         try {
-                            DecompileResults res = decomp.decompileFunction(fa, 60,
-                                    ConsoleTaskMonitor.CONSOLE);
+                            DecompileResults res = decomp.decompileFunction(fa, 60, monitor);
                             if (res != null && res.getDecompiledFunction() != null) {
                                 String[] code = res.getDecompiledFunction().getC().split("\n");
                                 for (int i = 0; i < Math.min(code.length, 120); i++) {
