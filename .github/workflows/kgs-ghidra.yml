@@ -76,6 +76,10 @@ jobs:
           export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
           mkdir -p /tmp/gscripts /tmp/smoke_proj
           cp "$GITHUB_WORKSPACE/efootball-apk/ghidra_scripts/"*.java /tmp/gscripts/
+          echo "=== JAVAC GATE (real compiler errors, seconds) ==="
+          CP=$(find /tmp/ghidra_12.1.4_PUBLIC -name '*.jar' | tr '\n' ':')
+          "$JAVA_HOME/bin/javac" -nowarn -cp "$CP" -d /tmp/gscripts /tmp/gscripts/*.java
+          echo "JAVAC_RC=$? (nonzero above = compile error, shown in full)"
           cp /bin/ls /tmp/tiny
           cd /tmp
           stdbuf -o0 -e0 ./ghidra_12.1.4_PUBLIC/support/analyzeHeadless \
