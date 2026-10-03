@@ -6,3 +6,8 @@ install: opening the Play Store
 install: email field present: 0
 install: password
 install: NO 2FA CODE STAGED -- a human is required at this screen
+install: set the PEERLINK_GCODE secret to a freshly requested code and re-dispatch
+install: STOPPING: needs a human for 2FA (exit 2)
+rc=2
+gamepid: 
+flows: 0
