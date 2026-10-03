@@ -3,3 +3,6 @@ at: 12:36:09
 $ bash kgs-login/live/play_install.sh
 install: device: redroid14_arm64_only
 install: opening the Play Store
+install: email field present: 0
+install: password
+install: NO 2FA CODE STAGED -- a human is required at this screen

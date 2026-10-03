@@ -1,4 +1,4 @@
 stage=play_install
-label=after sign-in tap
-time=12:36:38
+label=HUMAN NEEDED - google 2FA code screen
+time=12:37:24
 mb=?
