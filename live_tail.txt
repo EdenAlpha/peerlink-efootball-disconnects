@@ -2,31 +2,7 @@ live: live control loop starting (poll 8s, max 1400 rounds)
 live: write commands to live-cmd/cmd.txt ; read live-res/results + status.txt
 live: ignoring the already-queued command (not re-running it): []
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   f1f1743..d2c316f  HEAD -> live-res-m
+   9018caa..61c5628  HEAD -> live-res-m
 live: probe published OK; live-res is live
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   d2c316f..420ba47  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   420ba47..aadeb8b  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   aadeb8b..037d97f  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   037d97f..99d8bbd  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   99d8bbd..7e78fce  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   7e78fce..1e9ece7  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   1e9ece7..855a5fb  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   855a5fb..96d05f3  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   96d05f3..fdaa982  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   fdaa982..35abc00  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   35abc00..756d047  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   756d047..6c0e3d6  HEAD -> live-res-m
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   6c0e3d6..5c22e38  HEAD -> live-res-m
+   6e7de15..ad1a2f2  HEAD -> live-res-m
