@@ -1,4 +1,4 @@
-time=08:20:03
+time=08:22:09
 gamepid=none
 flows=0
-round=15
+round=30
