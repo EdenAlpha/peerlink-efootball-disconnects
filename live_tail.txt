@@ -6,3 +6,5 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
 live: probe published OK; live-res is live
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    aabccf6..82d70cb  HEAD -> live-res-m
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   82d70cb..30ca156  HEAD -> live-res-m
