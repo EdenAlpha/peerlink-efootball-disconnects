@@ -100,7 +100,7 @@ jobs:
           set -x
           echo "=== FETCH BINARY ==="
           mkdir -p /tmp/work && cd /tmp/work
-          gh release download "${{ inputs.tag }}" --pattern 'libUE4.so' --clobber
+          gh release download "${{ inputs.tag }}" --repo "$GITHUB_REPOSITORY" --pattern 'libUE4.so' --clobber
           ls -la libUE4.so
           ACTUAL_SIZE=$(stat -c%s libUE4.so)
           echo "size: $ACTUAL_SIZE (expect ${{ inputs.expected_size }})"
