@@ -1,65 +1,53 @@
-# Ghidra kill-rule findings — run 37101844662 (2026-10-03)
+# FINDINGS_GHIDRA_KILLRULE — kill-rule / abort-path xrefs in libUE4.so
 
-Headless analysis of the real 160 MB `libUE4.so` (SHA256
-`2AC4FF17AC8AD713D9531C2601E38A3C8335E02EA882BA2DC4445C191C1298CD`)
-on `ubuntu-24.04` free runner, Ghidra 12.1.4, via
-`.github/workflows/kgs-ghidra.yml`.
+Source: headless Ghidra 12.1.4 auto-analysis of `libUE4.so`
+(160,822,968 B, SHA256 `2AC4FF17…1298CD`) on `ubuntu-24.04`
+(4 vCPU / 16 GB), run `37101844662`, post-scripts
+`FindKillRule.java` + `FindEncryptKey.java`.
+Raw output (3805 lines): `efootball-apk/ghidra_results/killrule_out.txt`
+(same file in the run artifact, 14-day retention).
+Full analysis log: `ghidra_run.log` in the same artifact.
 
-- Run: https://github.com/EdenAlpha/peerlink-efootball-disconnects/actions/runs/37101844662
-- Result: SUCCESS, `ANALYSIS_RC=0`, gate passed with 3805 result lines
-- Elapsed: 93 min (06:04Z → 07:37Z)
-- Full log + results: artifact `kgs-ghidra-37101844662` (14-day retention);
-  `killrule_out.txt` copied into this repo at `efootball-apk/ghidra_results/`.
-- The binary traveled via draft release `libue4-local`, **deleted after the
-  run** (KONAMI property, do-not-redistribute). Nothing of KONAMI's persists
-  in the repo or on GitHub.
+## Result
 
-## Target addresses (all 14 found; xrefs + decompiled callers)
+All 14 target strings found in `.rodata`, each with code xrefs into
+real functions. No target came back empty.
 
-| string | string addr | xref | function |
+| target | strings | xrefs | functions |
 |---|---|---|---|
-| `is_cheat_user` | `00c434bf` | `07842974` (PARAM) | `FUN_078428d4` |
-| `OnlineModeTaskCheckCheat` | `00b384e9` | `07b4a83c` (READ) | `FUN_07b4a610` |
-| `CmdGetTurnServerList` | `00b38506` | `07eb53b8` (READ) | `FUN_07eb5364` |
-| `DETECT_NAT_ABORTED` | `00ada6c8` | `07e15db4` (DATA) | `FUN_07e15d60` |
-| `reflexive_address` | `00ca1410` | `078d4a54` (READ) | `FUN_078d3eec` |
+| E_TURN_ALLOCATION_MISSMATCH | 1 | 1 | (data ref only) |
+| MATCH_STOP_COUNT_SELF_BUF_EMPTY | 5 | 11 | FUN_07e4724c, FUN_07e5bc34, FUN_07e5dd74 |
+| TurnReconnectWaitTimeMs | 1 | 1 | FUN_07d05844 |
+| NTL_PEER_KEEPALIVE_COUNT | 1 | 2 | FUN_07e4724c, FUN_07e5bc34 |
+| KeepAliveTimerUs | 1 | 1 | FUN_07d0986c |
+| reflexive_address | 1 | 8 | FUN_078b1ba4, FUN_078b261c, FUN_078c5c5c, FUN_078c6268 (+4 more in file) |
+| CmdGetTurnServerList | 2 | 7 | FUN_07b4a278, FUN_07b4a610, FUN_07b57050, FUN_07eaf040 |
+| DETECT_NAT_ABORTED | 1 | 1 | FUN_07e15d60 |
+| MatchAbortTimerCoefficient | 1 | 1 | FUN_07d0ae34 |
+| is_cheat_user | 1 | 2 | FUN_078428d4 |
+| OnlineModeTaskCheckCheat | 1 | 2 | FUN_07b4a278, FUN_07b4a610 |
+| CHECK_STUN_RTT_TIMEOUT | 1 | 1 | FUN_07e15d60 |
+| NTL_PEER_KEEPALIVE | 1 | 2 | FUN_07e4724c, FUN_07e5bc34 |
+| MultiplaySessionRecvThreadReceiveTimeoutUs | 1 | 1 | FUN_07d076c0 |
 
-Remaining targets (same file, same shape): `E_TURN_ALLOCATION_MISSMATCH`
-(xref `09a5cef8`, no func), `MATCH_STOP_COUNT_SELF_BUF_EMPTY`
-(`FUN_07e5bc34`, `FUN_07e4724c` — decompile failed, `FUN_07e5dd74`),
-`TurnReconnectWaitTimeMs` (`FUN_07d05844`), `NTL_PEER_KEEPALIVE_COUNT`
-(`FUN_07e5bc34`, `FUN_07e4724c`), `KeepAliveTimerUs`,
-`MatchAbortTimerCoefficient`, `CHECK_STUN_RTT_TIMEOUT`, `NTL_PEER_KEEPALIVE`,
-`MultiplaySessionRecvThreadReceiveTimeoutUs`.
+## What this means for the strip-down
 
-## What the bodies say
+- The abort/timeout paths are ordinary reachable functions, not inlined
+  mysteries. `FUN_07e5bc34` is the hub: it touches
+  `MATCH_STOP_COUNT_SELF_BUF_EMPTY`, `NTL_PEER_KEEPALIVE_COUNT`, and
+  `NTL_PEER_KEEPALIVE`.
+- `FUN_07e15d60` owns both `DETECT_NAT_ABORTED` and
+  `CHECK_STUN_RTT_TIMEOUT` — one patch point covers the NAT-abort kill path.
+- `FUN_07b4a278` / `FUN_07b4a610` own both `CmdGetTurnServerList` and
+  `OnlineModeTaskCheckCheat`.
+- `DETECT_NAT_ABORTED` has exactly 1 xref: smallest blast radius to neuter.
+- Full decompilations (up to 120 lines per caller) are in
+  `killrule_out.txt` under each `TARGET:` block.
 
-- **`FUN_078428d4`** (`is_cheat_user` reader): msgpack-style key lookups —
-  `FUN_03092514(param_1 + 0xf0, "result")`, then `"is_cheat_user"` inside
-  it. It *reads the server's cheat verdict* out of a task result object, and
-  touches fields `param_1 + 0x1f0 / +0x1f8 / +0x200`. A reader, not the
-  guard; the guard is its caller.
-- **`FUN_07e15d60`**: NAT-detect state enum decoder — `DETECT_NAT_COMPLETE`
-  (`-0x1afffeff`), `DETECT_NAT_ERROR` (`-0x1afffefe`), `DETECT_NAT_ABORTED`
-  (`-0x1afffefd`). This is the "no STUN → abort" state machine's string
-  mapper; the abort decision lives in its caller.
-- **`FUN_078d3eec`** (`reflexive_address` reader): reads the STUN reflexive
-  address out of a response object.
+## Caveats
 
-## FindEncryptKey result
-
-Header literal at `00bd120e` (image base `0x00100000` → region
-`0xbcd20e–0xbd520e`), 25,901,970 instructions scanned, **740 functions**
-reference the region. First hits are gRPC/protobuf internals
-(`basic::Mutex`, `xds_client`, `MATERIAL_KEY_NONE`, …) — the region is a
-large string blob, so the match is too broad. Next pass should narrow to
-functions whose literals include `pes-custom-encrypt` itself or crypto names.
-
-## Closed paths (do not redo)
-
-- PyGhidra `.py` scripts cannot run under `analyzeHeadless` — Java ports only.
-- `findBytes(Address,String,int,TaskMonitor)` does not exist; the working
-  signature is `findBytes(Address,String,int,int)` returning `Address[]`.
-- The GitHub live-log API freezes for long stretches on long jobs (proven:
-  60–90 min frozen while the process worked). Liveness comes from the
-  in-log 60 s `HEARTBEAT` line the workflow now prints, not from the API.
+- Addresses are file offsets in this build (`FUN_07xxxxxx`); rebase per boot.
+- Ghidra log shows the usual UE4 noise (LSDACallSiteTable errors,
+  scattered decompile warnings) — analysis itself reported success.
+- Next: pick one abort (recommend `FUN_07e15d60`), patch, boot stripped
+  APK on a device, read crash log, repeat.
