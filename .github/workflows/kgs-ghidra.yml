@@ -43,7 +43,10 @@ on:
         default: "5400"
 
 permissions:
-  contents: read
+  # write (not read): the binary travels via a DRAFT release, and GitHub's
+  # API only shows drafts to tokens with push access. Read-only fails fast
+  # with "release not found". Nothing is pushed by this workflow.
+  contents: write
 
 jobs:
   analyze:
