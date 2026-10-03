@@ -1,0 +1,5 @@
+cmd: exec bash kgs-login/live/play_install.sh
+at: 12:36:09
+$ bash kgs-login/live/play_install.sh
+install: device: redroid14_arm64_only
+install: opening the Play Store
