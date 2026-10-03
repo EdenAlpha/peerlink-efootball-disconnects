@@ -1,4 +1,4 @@
 stage=play_install
-label=play store open
-time=12:36:23
+label=after sign-in tap
+time=12:36:38
 mb=?
