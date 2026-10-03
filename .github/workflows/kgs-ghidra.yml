@@ -148,14 +148,14 @@ jobs:
             -import /tmp/work/libUE4.so \
             -preScript TuneAnalysis.java \
             -analysisTimeoutPerFile "${{ inputs.analysis_timeout }}" \
-            -postScript FindKillRule.java -postScript FindEncryptKey.java \
+            -postScript FindKillRule.java -postScript FindEncryptKey.java -postScript FindFullDump.java \
             -scriptPath /tmp/gscripts \
             -deleteProject 2>&1 | tee /tmp/ghidra_run.log
           RC=${PIPESTATUS[0]}
           kill $HB_PID 2>/dev/null || true
           echo "ANALYSIS_RC=$RC"
           echo "=== ANALYSIS END $(date -u +%FT%TZ) ==="
-          ls -la /tmp/killrule_out.txt /tmp/ghidra_run.log || true
+          ls -la /tmp/killrule_out.txt /tmp/fulldump_out.txt /tmp/ghidra_run.log || true
           echo "=== RESULT GATE (fail loudly, never false-green) ==="
           if grep -q "SCRIPT ERROR" /tmp/ghidra_run.log; then
             echo "GATE FAIL: a post-script errored; see log"
@@ -166,6 +166,11 @@ jobs:
             exit 1
           fi
           echo "GATE PASS: $(wc -l < /tmp/killrule_out.txt) result lines"
+          if [ ! -s /tmp/fulldump_out.txt ]; then
+            echo "GATE FAIL: fulldump_out.txt missing or empty"
+            exit 1
+          fi
+          echo "FULLDUMP: $(wc -l < /tmp/fulldump_out.txt) lines, $(du -h /tmp/fulldump_out.txt | cut -f1)"
 
       - name: 06 upload results (always, even on timeout/failure)
         if: always()
@@ -176,4 +181,5 @@ jobs:
           retention-days: 14
           path: |
             /tmp/killrule_out.txt
+            /tmp/fulldump_out.txt
             /tmp/ghidra_run.log
