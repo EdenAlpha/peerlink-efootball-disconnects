@@ -1,11 +1,5 @@
-cmd: exec bash -c 'echo N1; date -u +%H:%M:%S; echo boot=$(adb -s 127.0.0.1:5555 shell getprop sys.boot_completed | tr -d "\r"); adb -s 127.0.0.1:5555 shell pm list packages 2>/dev/null | tr -d "\r" | grep -iE "vending|konami|finsky"; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo shot=$(wc -c < /tmp/live-res/screen.png 2>/dev/null)'
-at: 12:09:03
-$ bash -c 'echo N1; date -u +%H:%M:%S; echo boot=$(adb -s 127.0.0.1:5555 shell getprop sys.boot_completed | tr -d "\r"); adb -s 127.0.0.1:5555 shell pm list packages 2>/dev/null | tr -d "\r" | grep -iE "vending|konami|finsky"; adb -s 127.0.0.1:5555 exec-out screencap -p > /tmp/live-res/screen.png; echo shot=$(wc -c < /tmp/live-res/screen.png 2>/dev/null)'
-N1
-12:09:03
-boot=1
-package:com.android.vending
-shot=687682
-rc=0
-gamepid: 
-flows: 0
+cmd: exec bash kgs-login/live/play_install.sh
+at: 15:43:24
+$ bash kgs-login/live/play_install.sh
+install: device: redroid14_arm64_only
+install: opening the Play Store
