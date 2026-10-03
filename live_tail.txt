@@ -28,3 +28,5 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    35abc00..756d047  HEAD -> live-res-m
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    756d047..6c0e3d6  HEAD -> live-res-m
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   6c0e3d6..5c22e38  HEAD -> live-res-m
