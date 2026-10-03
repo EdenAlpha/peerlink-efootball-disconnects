@@ -49,7 +49,50 @@ permissions:
   contents: write
 
 jobs:
+  # Cheap gate: prove both scripts COMPILE and load before the 70-min run.
+  # Uses /bin/ls as a throwaway binary (analyzes in seconds). Any SCRIPT
+  # ERROR here fails in ~8 min instead of ~80.
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: checkout scripts
+        uses: actions/checkout@v4
+
+      - name: java + ghidra
+        run: |
+          set -x
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq openjdk-21-jdk-headless
+          export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+          cd /tmp
+          curl -L --retry 3 -o ghidra.zip "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_12.1.4_build/ghidra_12.1.4_PUBLIC_20260921.zip"
+          echo "ddac49f903da9d5bac833e5cc79395098b9c33cfd3279be5f31bd00387d2d4db  ghidra.zip" | sha256sum -c -
+          unzip -q ghidra.zip
+
+      - name: compile-load check on throwaway binary
+        run: |
+          set -x
+          export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+          mkdir -p /tmp/gscripts /tmp/smoke_proj
+          cp "$GITHUB_WORKSPACE/efootball-apk/ghidra_scripts/"*.java /tmp/gscripts/
+          cp /bin/ls /tmp/tiny
+          cd /tmp
+          stdbuf -o0 -e0 ./ghidra_12.1.4_PUBLIC/support/analyzeHeadless \
+            /tmp/smoke_proj Smoke \
+            -import /tmp/tiny \
+            -postScript FindKillRule.java -postScript FindEncryptKey.java \
+            -scriptPath /tmp/gscripts \
+            -deleteProject 2>&1 | tee /tmp/smoke.log
+          echo "SMOKE_RC=${PIPESTATUS[0]}"
+          if grep -q "SCRIPT ERROR\|LoadException\|ClassNotFound" /tmp/smoke.log; then
+            echo "SMOKE FAIL: a script does not compile/load"
+            exit 1
+          fi
+          echo "SMOKE PASS: both scripts loaded and ran"
+
   analyze:
+    needs: [smoke]
     runs-on: ubuntu-24.04
     timeout-minutes: 340
     steps:

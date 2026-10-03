@@ -77,11 +77,9 @@ public class FindEncryptKey extends GhidraScript {
     }
 
     private Address find(Memory mem, String needle) {
-        Address a = mem.findBytes(
-            currentProgram.getMinAddress(),
-            needle.getBytes(),
-            null, true, null);
-        return a;
+        // GhidraScript.find returns the first Address holding the string.
+        // (Memory.findBytes with null args risks NPEs; avoid it.)
+        return find(currentProgram.getMinAddress(), needle);
     }
 
     private String readAscii(Memory mem, Address a, int max) throws Exception {
