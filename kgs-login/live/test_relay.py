@@ -113,6 +113,25 @@ check("space typed as %%s", rc == 200 and any(
 rc, _ = post("/text", {"token": "wrong", "s": "abc"})
 check("text bad token -> 403", rc == 403)
 
+# --- /cred: types the login straight out of this process's environment ---
+os.environ["PEERLINK_GMAIL"] = "efootballudp@gmail.com"
+os.environ["PEERLINK_GPASS"] = "Pass-w0rd!2026"
+CALLS.clear()
+rc, body = post("/cred", {"token": TOKEN, "which": "gmail"})
+check("cred gmail ok", rc == 200 and "dt_ms" in (json.loads(body) if rc == 200 else {}))
+check("cred gmail typed from env", any(
+    "efootballudp@gmail.com" in " ".join(c) for c in CALLS))
+rc, _ = post("/cred", {"token": TOKEN, "which": "gpass"})
+check("cred gpass ok", rc == 200)
+rc, _ = post("/cred", {"token": TOKEN, "which": "nope"})
+check("cred unknown key -> 403", rc == 403)
+rc, _ = post("/cred", {"token": "wrong", "which": "gmail"})
+check("cred bad token -> 403", rc == 403)
+_saved = os.environ.pop("PEERLINK_GPASS")
+rc, _ = post("/cred", {"token": TOKEN, "which": "gpass"})
+check("cred with missing env -> 403", rc == 403)
+os.environ["PEERLINK_GPASS"] = _saved
+
 # --- shot / unknown ---
 rc, body = get("/shot")
 check("shot returns png", rc == 200 and body[:4] == b"\x89PNG")
@@ -128,6 +147,9 @@ check("taps.log written", "tap\t" in log and "shot\t" in log and "text\t" in log
 check("text logged by length only",
       "len=" in log and "player.one" not in log
       and "Pass-w0rd" not in log and "hi there" not in log)
+check("cred logged as WHICH, never as value",
+      "cred:gmail" in log and "cred:gpass" in log
+      and "efootballudp" not in log and "Pass-w0rd" not in log)
 
 srv.shutdown()
 print("\n%d failed" % len(fails))

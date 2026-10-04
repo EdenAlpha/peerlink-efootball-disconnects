@@ -10,9 +10,13 @@ Security (non-negotiable):
   * Binds 127.0.0.1 ONLY. The only ingress is the tunnel, started explicitly.
   * Every request must carry the token (from $RELAY_TOKEN, staged as a GitHub
     secret, never committed). Compared with hmac.compare_digest.
-  * Raw adb/shell is NEVER exposed. Exactly four operations exist:
+  * Raw adb/shell is NEVER exposed. Exactly five operations exist:
       POST /tap   {token, x, y, ms?}  -> 250ms-hold tap, returns {ok, dt_ms}
       POST /text  {token, s}          -> type a whitelisted string (see TEXT_RE)
+      POST /cred  {token, which}      -> type $PEERLINK_GMAIL / $PEERLINK_GPASS
+                                         straight out of THIS process's own
+                                         environment, so the login never
+                                         reaches a log, a branch or a chat
       GET  /shot?token=...            -> PNG screenshot bytes
       GET  /state?token=...           -> {pid, focus, flows}
   * No shell passthrough, no file access, no command execution. Anything else
@@ -47,6 +51,9 @@ TAPS = "/tmp/kgs/taps.log"
 # outside this set is typed on the on-screen keyboard instead - a denial costs
 # one extra tap, a mistake costs the run.
 TEXT_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 @%+,.:/_=~^!#-]{0,119}$")
+# Which environment variable each /cred key types. The VALUE is never echoed,
+# never logged and never leaves this process.
+CRED_ENV = {"gmail": "PEERLINK_GMAIL", "gpass": "PEERLINK_GPASS"}
 
 
 def tap_log(kind, detail):
@@ -92,7 +99,7 @@ class H(BaseHTTPRequestHandler):
         return hmac.compare_digest(token, TOKEN)
 
     def do_POST(self):
-        if self.path not in ("/tap", "/text"):
+        if self.path not in ("/tap", "/text", "/cred"):
             return deny(self)
         try:
             n = int(self.headers.get("Content-Length", 0))
@@ -117,14 +124,24 @@ class H(BaseHTTPRequestHandler):
             ok200(self, ('{"ok":true,"dt_ms":%d}' % dt).encode())
             return
 
-        # /text - type a whitelisted string; length only in the log.
-        s = req.get("s", "")
-        if not isinstance(s, str) or not TEXT_RE.match(s):
+        # /text and /cred both end in one `input text`; only the SOURCE differs.
+        if self.path == "/cred":
+            which = req.get("which", "")
+            envname = CRED_ENV.get(which, "")
+            val = os.environ.get(envname, "")
+            if not envname or not val:
+                return deny(self)          # unknown key, or the secret is absent
+            kind = "cred:" + which
+        else:
+            val = req.get("s", "")
+            kind = "text"
+        if not isinstance(val, str) or not TEXT_RE.match(val):
+            tap_log(kind, "refused by whitelist len=%d" % len(val))
             return deny(self)
         t = time.time()
-        run(*(ADB + ["shell", "input", "text", s.replace(" ", "%s")]))
+        run(*(ADB + ["shell", "input", "text", val.replace(" ", "%s")]))
         dt = int((time.time() - t) * 1000)
-        tap_log("text", "len=%d dt=%d" % (len(s), dt))
+        tap_log(kind, "len=%d dt=%d" % (len(val), dt))
         ok200(self, ('{"ok":true,"dt_ms":%d}' % dt).encode())
 
     def do_GET(self):
