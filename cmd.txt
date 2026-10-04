@@ -1,1 +1,1 @@
-exec tail -3 /tmp/kgs/sweep.log; ls /tmp/kgs/sweep 2>/dev/null | tail -4; du -sh /tmp/kgs/sweep 2>/dev/null; tail -c 300 /tmp/kgs/flows.log 2>/dev/null | tr '\n' '|'
+exec adb -s 127.0.0.1:5555 shell input swipe 640 500 640 200 300
