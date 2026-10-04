@@ -1,1 +1,1 @@
-exec adb -s 127.0.0.1:5555 shell input swipe 640 500 640 200 300
+exec P=; echo pidof=[]; adb -s 127.0.0.1:5555 shell su 0 cat /proc//status 2>&1 | tr -d '\r' | head -3; echo ---maps---; adb -s 127.0.0.1:5555 shell su 0 cat /proc//maps 2>&1 | tr -d '\r' | head -3; echo ---mapscount---; adb -s 127.0.0.1:5555 shell su 0 cat /proc//maps 2>/dev/null | tr -d '\r' | wc -l
