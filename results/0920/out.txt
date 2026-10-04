@@ -1,0 +1,10 @@
+cmd: exec P=$(adb -s 127.0.0.1:5555 shell pidof jp.konami.pesam | tr -d \r); echo pidof=[$P]; adb -s 127.0.0.1:5555 shell su 0 cat /proc/$P/maps 2>&1 | head -2; adb -s 127.0.0.1:5555 shell su 0 cat /proc/$P/maps 2>/dev/null | wc -l
+at: 17:35:49
+$ P=$(adb -s 127.0.0.1:5555 shell pidof jp.konami.pesam | tr -d \r); echo pidof=[$P]; adb -s 127.0.0.1:5555 shell su 0 cat /proc/$P/maps 2>&1 | head -2; adb -s 127.0.0.1:5555 shell su 0 cat /proc/$P/maps 2>/dev/null | wc -l
+pidof=[9540]
+12c00000-32c00000 rw-p 00000000 00:00 0                                  [anon:dalvik-main space (region space)]
+70189000-70442000 rw-p 00000000 00:00 0                                  [anon:dalvik-/system/framework/boot.art]
+6123
+rc=0
+gamepid: 9540
+flows: 34
