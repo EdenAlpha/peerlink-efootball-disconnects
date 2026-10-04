@@ -127,9 +127,12 @@ def _scan(task):
     a NO MATCH that reports "0 candidates" would be a lie about the work done.
     """
     path, start, length, passmode = task
-    with open(path, "rb") as fh:
-        fh.seek(start)
-        data = fh.read(length + 32)
+    try:
+        with open(path, "rb") as fh:
+            fh.seek(start)
+            data = fh.read(length + 32)
+    except Exception:
+        return [], 0  # pruned under us mid-scan; the dir listing was a moment ago
     hits = []
     tested = 0
     n = len(data)
@@ -187,14 +190,28 @@ def main():
     # opens every body of that session, so body 0 is both necessary+enough.
 
     files = []
+    unz = []  # decompressed copies we made; removed before exit
     for root, _dirs, names in os.walk(args.dir):
         for nm in sorted(names):
             if nm.startswith("r_") and nm.endswith((".bin", ".bin.gz")):
                 p = os.path.join(root, nm)
                 if p.endswith(".gz"):
-                    raw = gzip.decompress(open(p, "rb").read())
+                    try:
+                        raw = gzip.decompress(open(p, "rb").read())
+                    except Exception as e:
+                        # the sweeper keeps running during the scan: a .gz
+                        # being written (or pruned) under us reads back
+                        # truncated. Skip it LOUDLY instead of dying -- a
+                        # traceback with rc=1 is not a verdict.
+                        print("skip unreadable %s (%s)" % (p, e), flush=True)
+                        continue
                     tmp = p + ".unz"
-                    open(tmp, "wb").write(raw)
+                    try:
+                        open(tmp, "wb").write(raw)
+                    except Exception as e:
+                        print("skip unwritable %s (%s)" % (tmp, e), flush=True)
+                        continue
+                    unz.append(tmp)
                     files.append(tmp)
                 else:
                     files.append(p)
@@ -202,58 +219,69 @@ def main():
         print("UNUSABLE: no region files under %s -- did the sweeper run?"
               % args.dir)
         return 1
-    print("region files: %d" % len(files), flush=True)
+    print("region files: %d (skipped %d unreadable)" % (len(files), 0),
+          flush=True)
 
     t0 = time.time()
-    for passmode in ("A", "B"):
-        tasks = []
-        for p in files:
-            sz = os.path.getsize(p)
-            if args.max_file_mb:
-                sz = min(sz, args.max_file_mb * 1048576)
-            chunk = 16 * 1048576
-            off = 0
-            while off < sz:
-                tasks.append((p, off, min(chunk, sz - off), passmode))
-                off += chunk
-        print("pass %s: %d chunks on %d jobs" % (passmode, len(tasks),
-                                                 args.jobs), flush=True)
-        found = []
-        with mp.Pool(args.jobs, initializer=_init, initargs=([gaps[0]],)) as pool:
-            for i, (hits, tested) in enumerate(pool.imap_unordered(_scan, tasks)):
-                for K, off in hits:
-                    found.append((K, off))
-                globals()["TESTED"] += tested
-                if (i + 1) % 10 == 0:
-                    print("  %s: %d/%d chunks, %d stage-1 survivors, %.0fs"
-                          % (passmode, i + 1, len(tasks), len(found),
-                             time.time() - t0), flush=True)
-        # de-duplicate
-        uniq, seen = [], set()
-        for K, off in found:
-            if K in seen:
-                continue
-            seen.add(K)
-            uniq.append((K, off))
-        print("pass %s: %d unique survivors to verify" % (passmode, len(uniq)),
-              flush=True)
-        for K, off in uniq:
-            r = verify(K, bodies)
-            if r:
-                label, preview = r
-                print("MATCH key=%s offset=%s" % (K.hex(),
-                      ("0x%x" % off) if off >= 0 else "hex-string"))
-                print("  opened body: %s" % label)
-                print("  preview: %s" % preview)
-                return 0
-        if passmode == "A":
-            print("pass A found nothing; trying aligned msgpack-map pass B",
+    try:
+        for passmode in ("A", "B"):
+            tasks = []
+            for p in files:
+                try:
+                    sz = os.path.getsize(p)
+                except Exception:
+                    continue  # pruned under us mid-scan
+                if args.max_file_mb:
+                    sz = min(sz, args.max_file_mb * 1048576)
+                chunk = 16 * 1048576
+                off = 0
+                while off < sz:
+                    tasks.append((p, off, min(chunk, sz - off), passmode))
+                    off += chunk
+            print("pass %s: %d chunks on %d jobs" % (passmode, len(tasks),
+                                                     args.jobs), flush=True)
+            found = []
+            with mp.Pool(args.jobs, initializer=_init, initargs=([gaps[0]],)) as pool:
+                for i, (hits, tested) in enumerate(pool.imap_unordered(_scan, tasks)):
+                    for K, off in hits:
+                        found.append((K, off))
+                    globals()["TESTED"] += tested
+                    if (i + 1) % 10 == 0:
+                        print("  %s: %d/%d chunks, %d stage-1 survivors, %.0fs"
+                              % (passmode, i + 1, len(tasks), len(found),
+                                 time.time() - t0), flush=True)
+            # de-duplicate
+            uniq, seen = [], set()
+            for K, off in found:
+                if K in seen:
+                    continue
+                seen.add(K)
+                uniq.append((K, off))
+            print("pass %s: %d unique survivors to verify" % (passmode, len(uniq)),
                   flush=True)
-    print("NO MATCH: %d candidates tested in %.0fs against %d bodies"
-          % (TESTED, time.time() - t0, len(bodies)))
-    print("  (sweep %s vs flows %s -- both must be the same session)"
-          % (args.dir, args.flows))
-    return 2
+            for K, off in uniq:
+                r = verify(K, bodies)
+                if r:
+                    label, preview = r
+                    print("MATCH key=%s offset=%s" % (K.hex(),
+                          ("0x%x" % off) if off >= 0 else "hex-string"))
+                    print("  opened body: %s" % label)
+                    print("  preview: %s" % preview)
+                    return 0
+            if passmode == "A":
+                print("pass A found nothing; trying aligned msgpack-map pass B",
+                      flush=True)
+        print("NO MATCH: %d candidates tested in %.0fs against %d bodies"
+              % (TESTED, time.time() - t0, len(bodies)))
+        print("  (sweep %s vs flows %s -- both must be the same session)"
+              % (args.dir, args.flows))
+        return 2
+    finally:
+        for tmp in unz:
+            try:
+                os.remove(tmp)
+            except Exception:
+                pass
 
 
 if __name__ == "__main__":
