@@ -1,6 +1,4 @@
 ts
-   2260eeb..5107547  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    5107547..f165825  HEAD -> live-res-k
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    f165825..4766825  HEAD -> live-res-k
@@ -38,3 +36,5 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    8339c95..8f203a7  HEAD -> live-res-k
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    8f203a7..bb78169  HEAD -> live-res-k
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   bb78169..66fbab1  HEAD -> live-res-k
