@@ -1,0 +1,12 @@
+cmd: exec P=; echo pidof=[]; adb -s 127.0.0.1:5555 shell su 0 cat /proc//status 2>&1 | tr -d '\r' | head -3; echo ---maps---; adb -s 127.0.0.1:5555 shell su 0 cat /proc//maps 2>&1 | tr -d '\r' | head -3; echo ---mapscount---; adb -s 127.0.0.1:5555 shell su 0 cat /proc//maps 2>/dev/null | tr -d '\r' | wc -l
+at: 17:33:44
+$ P=; echo pidof=[]; adb -s 127.0.0.1:5555 shell su 0 cat /proc//status 2>&1 | tr -d '\r' | head -3; echo ---maps---; adb -s 127.0.0.1:5555 shell su 0 cat /proc//maps 2>&1 | tr -d '\r' | head -3; echo ---mapscount---; adb -s 127.0.0.1:5555 shell su 0 cat /proc//maps 2>/dev/null | tr -d '\r' | wc -l
+pidof=[]
+cat: /proc//status: No such file or directory
+---maps---
+cat: /proc//maps: No such file or directory
+---mapscount---
+0
+rc=1
+gamepid: 9540
+flows: 34
