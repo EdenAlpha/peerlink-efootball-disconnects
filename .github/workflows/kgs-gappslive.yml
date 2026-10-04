@@ -373,4 +373,13 @@ jobs:
             /tmp/kgs/mitm.log
             /tmp/kgs/game2.pcap
             /tmp/kgs/full/
+            # The key finder's own record. Small, and the only place the
+            # verdict survives if the job wall kills the run: without it a
+            # lost capture is indistinguishable from a finder that never ran.
+            /tmp/kgs/findkey.log
+            /tmp/kgs/keyfound.txt
+            # The sweep itself is huge (MAXGB=6), so only the cycles that
+            # actually held login material are uploaded, and only while
+            # there is disk headroom to build the archive.
+            /tmp/kgs/sweep/
             /tmp/live-res/
