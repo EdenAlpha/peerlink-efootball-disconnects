@@ -35,17 +35,36 @@ A() { adb -s "$S" "$@"; }
 dir_kb() { du -sk "$DIR" 2>/dev/null | cut -f1; }
 
 prune() {
-  # delete oldest ordinary cycles until under KEEP count and MAXGB
+  # ordinary cycles rotate out under KEEP count and MAXGB. Flagged cycles
+  # (login material) survive up to FLAGKEEP -- the old filter was
+  # `! -name HAS_MARKERS`, which never matched because HAS_MARKERS is a file
+  # INSIDE the dir, so the newest-4 rule silently ate login cycles too.
+  # Disk always wins: over MAXGB the oldest of anything goes first.
   local kb=$((MAXGB * 1024)) d n
-  n=$(find "$DIR" -maxdepth 1 -type d -name 'c[0-9]*' | wc -l)
+  ord() { find "$DIR" -maxdepth 1 -type d -name 'c[0-9]*' \
+            ! -exec test -e {}/HAS_MARKERS \; | sort; }
+  flag() { find "$DIR" -maxdepth 1 -type d -name 'c[0-9]*' \
+            -exec test -e {}/HAS_MARKERS \; | sort; }
+
+  n=$(ord | wc -l)
   while :; do
     [ "$n" -le "$KEEP" ] && [ "$(dir_kb)" -le "$kb" ] && break
-    d=$(find "$DIR" -maxdepth 1 -type d -name 'c[0-9]*' ! -name HAS_MARKERS \
-        | sort | head -1)
-    [ -z "$d" ] && break
+    d=$(ord | head -1); [ -z "$d" ] && break
+    rm -rf "$d"; n=$((n - 1))
+    say "pruned ordinary $(basename "$d") (over count or ${MAXGB}GB cap)"
+  done
+
+  n=$(flag | wc -l)
+  while [ "$n" -gt "${FLAGKEEP:-8}" ]; do
+    d=$(flag | head -1); [ -z "$d" ] && break
+    rm -rf "$d"; n=$((n - 1))
+    say "pruned flagged $(basename "$d") (over ${FLAGKEEP:-8} flagged)"
+  done
+
+  while [ "$(dir_kb)" -gt "$kb" ]; do
+    d=$(ord | head -1); [ -z "$d" ] && d=$(flag | head -1); [ -z "$d" ] && break
     rm -rf "$d"
-    n=$((n - 1))
-    say "pruned $(basename "$d") (over count or ${MAXGB}GB cap)"
+    say "pruned $(basename "$d") (still over ${MAXGB}GB cap)"
   done
 }
 
@@ -93,15 +112,23 @@ while :; do
     [ "$sz" -ge "$MIN_REGION" ] || continue
     skip=$((s / 4096)); count=$((sz / 4096))
     rfile=$(printf '%s/r_%012x.bin' "$cdir" "$s")
-    A shell su 0 sh -c "dd if=/proc/$pid/mem of=/data/local/tmp/sw.bin bs=4096 skip=$skip count=$count 2>/data/local/tmp/sw.err"
+    # The dd must reach the device as ONE argument holding LITERAL quotes.
+    # `A shell su 0 sh -c "dd ..."` loses the quotes: adb joins its argv with
+    # spaces and does not re-quote, so the device parsed `sh -c dd` (operand-
+    # less) -> dd read empty stdin -> no sw.bin -> PULL FAILED on every region,
+    # 5462 cycles of 0 bytes. dump_game_mem.py documents this same trap and
+    # fixes it with embedded quotes; copied verbatim.
+    A shell "su 0 sh -c \"dd if=/proc/$pid/mem of=/data/local/tmp/sw.bin bs=4096 skip=$skip count=$count 2>/data/local/tmp/sw.err\""
     if ! A pull /data/local/tmp/sw.bin "$rfile" >/dev/null 2>&1; then
       say "  PULL FAILED region 0x$hex_s"
       rm -f "$rfile"
       continue
     fi
-    rm -f /data/local/tmp/sw.bin
+    A shell su 0 rm -f /data/local/tmp/sw.bin
     got=$(wc -c < "$rfile" 2>/dev/null | tr -d ' \r')
-    if [ "${got:-0}" -lt "$count" ]; then
+    # bytes on the left, PAGES on the right: comparing bytes to count made
+    # every partial read look complete, so a gap could vanish silently.
+    if [ "${got:-0}" -lt $((count * 4096)) ]; then
       # partial read is kept and logged; a gap must be visible, never silent
       echo "$hex_s wanted=$((count * 4096)) got=${got:-0}" >> "$cdir/truncated.log"
     fi
@@ -121,6 +148,6 @@ while :; do
   prune
 done
 
-rm -f /data/local/tmp/sw.bin /data/local/tmp/sw.err 2>/dev/null
+A shell su 0 rm -f /data/local/tmp/sw.bin /data/local/tmp/sw.err 2>/dev/null
 say "sweeper ended: $cycle cycles, $(dir_kb) KB on disk"
 exit 0
