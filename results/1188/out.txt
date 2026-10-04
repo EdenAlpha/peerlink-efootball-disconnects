@@ -1,0 +1,19 @@
+cmd: exec pip install -q --break-system-packages pycryptodome msgpack && python3 /tmp/kgs/find_key.py --dir /tmp/kgs/sweep --flows /tmp/kgs/flows.log ; echo FINDER-RC:True; echo ---END---
+at: 18:13:34
+$ pip install -q --break-system-packages pycryptodome msgpack && python3 /tmp/kgs/find_key.py --dir /tmp/kgs/sweep --flows /tmp/kgs/flows.log ; echo FINDER-RC:True; echo ---END---
+test bodies: 32 (first: ### REQ POST /pes22/gate/gate_CMD_GET_SERVER_ENV.php, 176 bytes)
+Traceback (most recent call last):
+  File "/tmp/kgs/find_key.py", line 260, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/tmp/kgs/find_key.py", line 195, in main
+    raw = gzip.decompress(open(p, "rb").read())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/gzip.py", line 634, in decompress
+    raise EOFError("Compressed file ended before the end-of-stream "
+EOFError: Compressed file ended before the end-of-stream marker was reached
+FINDER-RC:True
+---END---
+rc=0
+gamepid: 133063
+flows: 64
