@@ -1,0 +1,14 @@
+cmd: exec tail -3 /tmp/kgs/sweep.log; ls /tmp/kgs/sweep 2>/dev/null | tail -4; du -sh /tmp/kgs/sweep 2>/dev/null; tail -c 300 /tmp/kgs/flows.log 2>/dev/null | tr '\n' '|'
+at: 17:31:46
+$ tail -3 /tmp/kgs/sweep.log; ls /tmp/kgs/sweep 2>/dev/null | tail -4; du -sh /tmp/kgs/sweep 2>/dev/null; tail -c 300 /tmp/kgs/flows.log 2>/dev/null | tr '\n' '|'
+[sweep 17:31:46]   PULL FAILED region 0x12c00000
+[sweep 17:31:46] cycle 5462: 0 regions 0 bytes 0s markers: none
+[sweep 17:31:46] pruned c5458 (over count or 6GB cap)
+c5459
+c5460
+c5461
+c5462
+2.1M	/tmp/kgs/sweep
+f43c3bab480b454b0|### RESP POST /pes22/gate/gate_CMD_SET_GAMERELAY_QUALITY.php -> 200|RESPLEN: 96|RESPHEX: 47ffc5d5d023ebc399c159796bba8846ab353c22b7231417bf23fd296243782b1d3739d0738e2e429b2f468f4d33820a4f07837202c90df760e51fdd29a2267c094e9ccb2e28b3576832605a885fa6c53632ba6ef36535130e9fd165b6aa0867|rc=0
+gamepid: 9540
+flows: 30
