@@ -1,40 +1,9 @@
-ts
-   78ab084..8339c95  HEAD -> live-res-k
+live: live control loop starting (poll 8s, max 1400 rounds)
+live: write commands to live-cmd/cmd.txt ; read live-res/results + status.txt
+live: ignoring the already-queued command (not re-running it): []
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   8339c95..8f203a7  HEAD -> live-res-k
+   ef113ef..c01b441  HEAD -> live-res-k
+live: probe published OK; live-res is live
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   8f203a7..bb78169  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   bb78169..66fbab1  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   66fbab1..9bd237c  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   9bd237c..6a64d07  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   6a64d07..90dff42  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   90dff42..c34e0f2  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   c34e0f2..6927f83  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   6927f83..d99c22a  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   d99c22a..de7ea4e  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   de7ea4e..c1b4202  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   c1b4202..73cadad  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   73cadad..2a26e0e  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   2a26e0e..e564829  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   e564829..e10f775  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   e10f775..98974a9  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   98974a9..66a36dc  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   66a36dc..60a8315  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   60a8315..c4b0816  HEAD -> live-res-k
+   c01b441..242ca95  HEAD -> live-res-k
+kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
