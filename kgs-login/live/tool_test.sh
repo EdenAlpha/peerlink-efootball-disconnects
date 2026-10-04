@@ -33,7 +33,12 @@ say "eBPF: $EBPF  (btf=[${BTF:-<empty>}] unprivileged_bpf_disabled=[${DIS:-<empt
 # door 2 -- ptrace: can a tracer attach to a live process on this device?
 say "--- door 2: ptrace"
 STRACE=$(adb -s "$S" shell su 0 which strace 2>/dev/null | tr -d '\r')
-TPID=$(adb -s "$S" shell su 0 sh -c 'sleep 60 & echo $!' 2>/dev/null | tr -d '\r' | head -1)
+# The pid must be started with the WHOLE command as ONE adb-shell string:
+# adb joins separate argv with spaces and drops the quotes, so the device
+# would run `sh -c sleep` (no operand) and the pid would die before strace
+# ever saw it -- which is how the first run reported two false NOs.
+START_SLEEP="su 0 sh -c 'sleep 60 & echo \$!'"
+TPID=$(adb -s "$S" shell "$START_SLEEP" 2>/dev/null | tr -d '\r' | head -1)
 say "strace=[${STRACE:-<empty>}] our sleep pid=[${TPID:-<empty>}]"
 PTRACE="UNTESTED"
 if [ -n "${STRACE:-}" ] && [ -n "${TPID:-}" ]; then
@@ -52,7 +57,7 @@ adb -s "$S" shell su 0 kill -9 "$TPID" >/dev/null 2>&1
 
 # door 3 -- SIGSTOP + read /proc/<pid>/mem: the sweeper's own mechanism.
 say "--- door 3: SIGSTOP + /proc/pid/mem"
-MPID=$(adb -s "$S" shell su 0 sh -c 'sleep 60 & echo $!' 2>/dev/null | tr -d '\r' | head -1)
+MPID=$(adb -s "$S" shell "$START_SLEEP" 2>/dev/null | tr -d '\r' | head -1)
 say "our sleep pid=[${MPID:-<empty>}]"
 SIG="NO"
 if [ -n "${MPID:-}" ]; then
