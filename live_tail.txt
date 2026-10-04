@@ -1,5 +1,4 @@
-h: line 71: echo: write error: Broken pipe
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+ts
    554f1ef..2c954f0  HEAD -> live-res-k
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    2c954f0..2260eeb  HEAD -> live-res-k
@@ -37,3 +36,5 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    260b51c..c02307d  HEAD -> live-res-k
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    c02307d..78ab084  HEAD -> live-res-k
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   78ab084..8339c95  HEAD -> live-res-k
