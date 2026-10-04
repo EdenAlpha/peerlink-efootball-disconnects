@@ -10,12 +10,16 @@ Security (non-negotiable):
   * Binds 127.0.0.1 ONLY. The only ingress is the tunnel, started explicitly.
   * Every request must carry the token (from $RELAY_TOKEN, staged as a GitHub
     secret, never committed). Compared with hmac.compare_digest.
-  * Raw adb/shell is NEVER exposed. Exactly three operations exist:
+  * Raw adb/shell is NEVER exposed. Exactly four operations exist:
       POST /tap   {token, x, y, ms?}  -> 250ms-hold tap, returns {ok, dt_ms}
+      POST /text  {token, s}          -> type a whitelisted string (see TEXT_RE)
       GET  /shot?token=...            -> PNG screenshot bytes
       GET  /state?token=...           -> {pid, focus, flows}
   * No shell passthrough, no file access, no command execution. Anything else
     still goes through the audited git channel.
+  * Every tap/shot/text is appended to TAPS (one line, coordinates + timing
+    only; text is logged by LENGTH, never by content, because the artifact is
+    public). Run 36985235319 left no trace at all - that is what this fixes.
 
 Self-test (no device needed): test_relay.py pattern - fake adb on PATH,
 check state/tap with good token and 403 with bad token. Verified 2026-10-02:
@@ -24,6 +28,7 @@ state ok, bad token -> 403, tap ok.
 import hmac
 import json
 import os
+import re
 import subprocess
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -32,6 +37,25 @@ from urllib.parse import urlparse, parse_qs
 TOKEN = os.environ.get("RELAY_TOKEN", "")
 ADB = ["adb", "-s", "127.0.0.1:5555"]
 FLOWS = "/tmp/kgs/flows.log"
+TAPS = "/tmp/kgs/taps.log"
+# What /text will type. The value is passed to `adb shell input text` WITHOUT
+# quotes, so only characters a shell treats literally are allowed: no space
+# (typed as %s, which is what Android's input expects), no `' " ` $ & | ; < >
+# ( ) { } * ? [ ] \ and no leading - or # (those would be read as flags or a
+# comment). First char must be alphanumeric. A space is allowed anywhere but
+# the front, because it is rewritten to %s before it reaches adb. Anything
+# outside this set is typed on the on-screen keyboard instead - a denial costs
+# one extra tap, a mistake costs the run.
+TEXT_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 @%+,.:/_=~^!#-]{0,119}$")
+
+
+def tap_log(kind, detail):
+    """One append-only line per action. Content of /text is never logged."""
+    try:
+        with open(TAPS, "a") as fh:
+            fh.write("%s\t%s\t%s\n" % (int(time.time()), kind, detail))
+    except OSError:
+        pass
 
 
 def run(*args, timeout=30):
@@ -68,7 +92,7 @@ class H(BaseHTTPRequestHandler):
         return hmac.compare_digest(token, TOKEN)
 
     def do_POST(self):
-        if self.path != "/tap":
+        if self.path not in ("/tap", "/text"):
             return deny(self)
         try:
             n = int(self.headers.get("Content-Length", 0))
@@ -77,16 +101,30 @@ class H(BaseHTTPRequestHandler):
             return deny(self)
         if not self._token_ok(req.get("token", "")):
             return deny(self)
-        try:
-            x, y, ms = int(req["x"]), int(req["y"]), int(req.get("ms", 250))
-        except Exception:
-            return deny(self)
-        if not (0 <= x <= 2000 and 0 <= y <= 2000 and 50 <= ms <= 2000):
+
+        if self.path == "/tap":
+            try:
+                x, y, ms = int(req["x"]), int(req["y"]), int(req.get("ms", 250))
+            except Exception:
+                return deny(self)
+            if not (0 <= x <= 2000 and 0 <= y <= 2000 and 50 <= ms <= 2000):
+                return deny(self)
+            t = time.time()
+            run(*(ADB + ["shell", "input", "swipe",
+                          str(x), str(y), str(x), str(y), str(ms)]))
+            dt = int((time.time() - t) * 1000)
+            tap_log("tap", "%d,%d ms=%d dt=%d" % (x, y, ms, dt))
+            ok200(self, ('{"ok":true,"dt_ms":%d}' % dt).encode())
+            return
+
+        # /text - type a whitelisted string; length only in the log.
+        s = req.get("s", "")
+        if not isinstance(s, str) or not TEXT_RE.match(s):
             return deny(self)
         t = time.time()
-        run(*(ADB + ["shell", "input", "swipe",
-                      str(x), str(y), str(x), str(y), str(ms)]))
+        run(*(ADB + ["shell", "input", "text", s.replace(" ", "%s")]))
         dt = int((time.time() - t) * 1000)
+        tap_log("text", "len=%d dt=%d" % (len(s), dt))
         ok200(self, ('{"ok":true,"dt_ms":%d}' % dt).encode())
 
     def do_GET(self):
@@ -101,6 +139,7 @@ class H(BaseHTTPRequestHandler):
                 self.send_header("Content-Length", "0")
                 self.end_headers()
                 return
+            tap_log("shot", "bytes=%d" % len(png))
             ok200(self, png, "image/png")
         elif u.path == "/state":
             _, pid = run(*(ADB + ["shell", "pidof", "jp.konami.pesam"]))
