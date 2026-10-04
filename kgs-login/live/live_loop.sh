@@ -70,6 +70,66 @@ game_alive() {
 
 flows_seen() { { grep -c '^### ' "$W/flows.log" 2>/dev/null || echo 0; } | head -1; }
 
+# ---- automatic key finder -------------------------------------------------
+#
+# Why this exists: the sweep (the game's whole writable memory, taken while it
+# is logging in) lives on this runner's /tmp, and the JOB WALL kills the run at
+# `timeout-minutes` WITHOUT running any later step. So a finder that only runs
+# when an operator queues it has no verdict at all when the wall is what ends
+# the run -- which is exactly how a 449 MB capture was lost on 2026-10-04. The
+# finder therefore runs from INSIDE the loop, repeatedly, and republishes into
+# the results branch every time: a key found at minute 20 is already on the
+# branch long before minute 350.
+#
+# Rules it obeys:
+#   * `timeout` -- it must never wedge the control loop.
+#   * rate limited -- one full scan of hundreds of MB is expensive.
+#   * once a MATCH is recorded it stops scanning and just republishes the key.
+#   * deps installed once, guarded by a marker file.
+KEYFOUND="$W/keyfound.txt"
+KEYLOG="$W/findkey.log"
+
+auto_find_key() {
+  local sweep_bytes verdict now last
+  sweep_bytes=$(du -sb "$W/sweep" 2>/dev/null | cut -f1)
+  case "${sweep_bytes:-0}" in ''|*[!0-9]*) sweep_bytes=0 ;; esac
+  [ "$sweep_bytes" -gt 20000000 ] || return 0        # nothing worth scanning
+  [ -s "$KEYFOUND" ] && return 0                     # already have it
+  now=$(date -u +%s)
+  last=$(cat "$W/keyfind_last" 2>/dev/null || echo 0)
+  case "$last" in ''|*[!0-9]*) last=0 ;; esac
+  [ $((now - last)) -ge 1200 ] || return 0           # at most every 20 min
+  printf '%s' "$now" > "$W/keyfind_last" 2>/dev/null || true
+
+  say "auto find_key: scanning $sweep_bytes bytes of sweep"
+  if [ ! -e "$W/.kfdeps" ]; then
+    if python3 -c 'import Crypto, msgpack' 2>/dev/null; then
+      : > "$W/.kfdeps"
+    else
+      python3 -m pip install -q --break-system-packages pycryptodome msgpack \
+        >>"$KEYLOG" 2>&1 && : > "$W/.kfdeps"
+    fi
+  fi
+  {
+    echo "=== $(date -u +%H:%M:%S) auto find_key over $sweep_bytes bytes ==="
+    timeout 1500 python3 "$(dirname "$0")/find_key.py" \
+      --dir "$W/sweep" --flows "$W/flows.log"
+    echo "rc=$?"
+  } >> "$KEYLOG" 2>&1
+  verdict=$(grep -m1 '^MATCH key=' "$KEYLOG" 2>/dev/null || true)
+  {
+    echo "time=$(date -u +%H:%M:%S) sweep_bytes=$sweep_bytes"
+    echo "--- last attempt (tail of $KEYLOG) ---"
+    tail -8 "$KEYLOG" 2>/dev/null
+    [ -n "$verdict" ] && echo "KEY: $verdict"
+  } > "$LIVE_RES_DIR/keyfinder.txt"
+  if [ -n "$verdict" ] && [ ! -s "$KEYFOUND" ]; then
+    printf '%s\n' "$verdict" > "$KEYFOUND"
+    say "KEY FOUND: $verdict"
+  fi
+  return 0
+}
+
 LAST_PUSH=0
 
 push_res() { # commit + push whatever is staged in LIVE_RES_DIR
@@ -110,6 +170,11 @@ push_res() { # commit + push whatever is staged in LIVE_RES_DIR
 
 heartbeat() {
   local alive flows
+  # The finder runs HERE, inside the loop, because the job wall ends the run
+  # without executing any later step: a verdict that only appears on request
+  # is a verdict that never arrives. Cheap no-op when there is nothing to scan
+  # or the key is already found.
+  auto_find_key || true
   alive=$(game_alive); flows=$(flows_seen)
   { echo "time=$(date -u +%H:%M:%S)";
     echo "gamepid=${alive:-none}";
