@@ -1,0 +1,8 @@
+cmd: exec adb -s 127.0.0.1:5555 shell input swipe 668 480 640 280 400; echo SWIPED; sleep 3; adb -s 127.0.0.1:5555 shell input swipe 668 480 640 280 400; echo SWIPED2
+at: 11:51:31
+$ adb -s 127.0.0.1:5555 shell input swipe 668 480 640 280 400; echo SWIPED; sleep 3; adb -s 127.0.0.1:5555 shell input swipe 668 480 640 280 400; echo SWIPED2
+SWIPED
+SWIPED2
+rc=0
+gamepid: 9847
+flows: 30
