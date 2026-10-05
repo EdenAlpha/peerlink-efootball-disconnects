@@ -1,7 +1,4 @@
-.a10f88a  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   a10f88a..095bc01  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+lpha/peerlink-efootball-disconnects
    095bc01..f532532  HEAD -> live-res-k
 SWEEPER_STARTED cycles= bytes= 
 WATCHER_SET
@@ -46,5 +43,9 @@ SWEEP bytes= cycles= game=
 SWEEP bytes= cycles= game= 
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    3f9b2ce..866daa6  HEAD -> live-res-k
+SWEEP bytes= cycles= game= 
+SWEEP bytes= cycles= game= 
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   866daa6..469dde3  HEAD -> live-res-k
 SWEEP bytes= cycles= game= 
 SWEEP bytes= cycles= game= 
