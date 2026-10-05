@@ -1,11 +1,8 @@
-cmd: exec adb -s 127.0.0.1:5555 shell "su 0 sh -c \"tar -czf /sdcard/oat.tgz /data/app/~~wo-owJo4zCy1SaLCIhxbaQ==/jp.konami.pesam-wB8m6uKPjxvgFG7WPF4eaA==/oat\""; adb -s 127.0.0.1:5555 shell ls -la /sdcard/oat.tgz; adb -s 127.0.0.1:5555 pull /sdcard/oat.tgz /tmp/kgs/full/; ls -la /tmp/kgs/full/
-at: 14:03:25
-$ adb -s 127.0.0.1:5555 shell "su 0 sh -c \"tar -czf /sdcard/oat.tgz /data/app/~~wo-owJo4zCy1SaLCIhxbaQ==/jp.konami.pesam-wB8m6uKPjxvgFG7WPF4eaA==/oat\""; adb -s 127.0.0.1:5555 shell ls -la /sdcard/oat.tgz; adb -s 127.0.0.1:5555 pull /sdcard/oat.tgz /tmp/kgs/full/; ls -la /tmp/kgs/full/
-tar: /data/app/~~wo-owJo4zCy1SaLCIhxbaQ==/jp.konami.pesam-wB8m6uKPjxvgFG7WPF4eaA==/oat: No such file or directory
-tar: had errors
--rw-rw---- 1 u0_a96 media_rw 29 2026-10-05 10:03 /sdcard/oat.tgz
-adb: error: cannot create '/tmp/kgs/full/': Is a directory
-ls: cannot access '/tmp/kgs/full/': No such file or directory
-rc=2
+cmd: exec echo PING; date -u +%H:%M:%S
+at: 15:07:54
+$ echo PING; date -u +%H:%M:%S
+PING
+15:07:54
+rc=0
 gamepid: 
 flows: 0
