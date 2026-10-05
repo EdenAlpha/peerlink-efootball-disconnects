@@ -7,3 +7,8 @@ live: probe published OK; live-res is live
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    3b6dd5a..5619e93  HEAD -> live-res-k
 kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   5619e93..d343933  HEAD -> live-res-k
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   d343933..2da1774  HEAD -> live-res-k
+kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
