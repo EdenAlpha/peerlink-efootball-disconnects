@@ -1,0 +1,40 @@
+cmd: exec echo MITMLOG; tail -30 /tmp/kgs/mitm.log 2>&1; echo PROCS; pgrep -af mitmdump | head -2; echo FLOWS; wc -l /tmp/kgs/flows.log 2>/dev/null
+at: 18:15:51
+$ echo MITMLOG; tail -30 /tmp/kgs/mitm.log 2>&1; echo PROCS; pgrep -af mitmdump | head -2; echo FLOWS; wc -l /tmp/kgs/flows.log 2>/dev/null
+rc=0
+MITMLOG
+[18:12:25.553][172.17.0.2:42320] Client TLS handshake failed. The client does not trust the proxy's certificate for play.googleapis.com (OpenSSL Error([('SSL routines', '', 'tls alert certificate unknown')]))
+[18:12:25.553][172.17.0.2:42320] client disconnect
+[18:12:25.554][172.17.0.2:42320] server disconnect 172.217.117.4:443
+[18:12:40.010][172.17.0.2:34290] client connect
+[18:12:40.017][172.17.0.2:34290] server connect 172.217.113.4:443
+[18:12:40.036][172.17.0.2:34290] Client TLS handshake failed. The client does not trust the proxy's certificate for play.googleapis.com (OpenSSL Error([('SSL routines', '', 'tls alert certificate unknown')]))
+[18:12:40.037][172.17.0.2:34290] client disconnect
+[18:12:40.037][172.17.0.2:34290] server disconnect 172.217.113.4:443
+[18:12:40.038][172.17.0.2:34306] client connect
+[18:12:40.046][172.17.0.2:34306] server connect 172.217.113.4:443
+[18:12:40.061][172.17.0.2:34306] Client TLS handshake failed. The client does not trust the proxy's certificate for play.googleapis.com (OpenSSL Error([('SSL routines', '', 'tls alert certificate unknown')]))
+[18:12:40.062][172.17.0.2:34306] client disconnect
+[18:12:40.062][172.17.0.2:34306] server disconnect 172.217.113.4:443
+[18:12:45.131][172.17.0.2:55244] client connect
+[18:12:45.139][172.17.0.2:55244] server connect 142.251.152.119:443
+[18:12:45.153][172.17.0.2:55244] Client TLS handshake failed. The client does not trust the proxy's certificate for www.google.com (OpenSSL Error([('SSL routines', '', 'tls alert certificate unknown')]))
+[18:12:45.154][172.17.0.2:55244] client disconnect
+[18:12:45.154][172.17.0.2:55244] server disconnect 142.251.152.119:443
+[18:13:40.198][172.17.0.2:43908] client connect
+[18:13:40.205][172.17.0.2:43908] server connect 172.217.113.4:443
+[18:13:40.220][172.17.0.2:43908] Client TLS handshake failed. The client does not trust the proxy's certificate for play.googleapis.com (OpenSSL Error([('SSL routines', '', 'tls alert certificate unknown')]))
+[18:13:40.220][172.17.0.2:43908] client disconnect
+[18:13:40.221][172.17.0.2:43908] server disconnect 172.217.113.4:443
+[18:13:40.245][172.17.0.2:43924] client connect
+[18:13:40.252][172.17.0.2:43924] server connect 172.217.113.4:443
+[18:13:40.272][172.17.0.2:43924] Client TLS handshake failed. The client does not trust the proxy's certificate for play.googleapis.com (OpenSSL Error([('SSL routines', '', 'tls alert certificate unknown')]))
+[18:13:40.273][172.17.0.2:43924] client disconnect
+[18:13:40.273][172.17.0.2:43924] server disconnect 172.217.113.4:443
+[18:14:03.101][172.17.0.2:45232] client connect
+[18:14:03.179][172.17.0.2:45232] server connect 44.226.216.2:443PROCS
+42175 /usr/bin/python3 /home/runner/.local/bin/mitmdump --mode transparent --listen-port 8080 --set confdir=/tmp/kgs/mitm -s /tmp/kgs/mitm_addon.py -w /tmp/kgs/flows.mitm
+FLOWS
+2 /tmp/kgs/flows.log
+gamepid: 12644
+flows: 0
