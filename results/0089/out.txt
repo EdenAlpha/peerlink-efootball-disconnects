@@ -1,0 +1,9 @@
+cmd: exec echo LIVECHECK; date -u +%H:%M:%S; git -C /home/runner/work rev-parse --short HEAD 2>&1 | head -1
+at: 15:20:20
+$ echo LIVECHECK; date -u +%H:%M:%S; git -C /home/runner/work rev-parse --short HEAD 2>&1 | head -1
+LIVECHECK
+15:20:20
+fatal: not a git repository (or any of the parent directories): .git
+rc=128
+gamepid: 
+flows: 0
