@@ -1,0 +1,29 @@
+cmd: exec adb -s 127.0.0.1:5555 shell "su 0 sh -c \"tar -czf /sdcard/oat.tgz /data/app/~~FaEZBEU_sdxxwtHBe1yLsw==/jp.konami.pesam-saURS_E1UmBUbYZpewkk9A==/oat\""; adb -s 127.0.0.1:5555 pull /sdcard/oat.tgz /tmp/kgs/full/; adb -s 127.0.0.1:5555 shell rm -f /sdcard/oat.tgz; adb -s 127.0.0.1:5555 shell "su 0 sh -c \"tar -czf /sdcard/sdcarddata.tgz /sdcard/Android/data/jp.konami.pesam\""; adb -s 127.0.0.1:5555 pull /sdcard/sdcarddata.tgz /tmp/kgs/full/; adb -s 127.0.0.1:5555 shell rm -f /sdcard/sdcarddata.tgz; echo RESTREADY; ls -la /tmp/kgs/full/; du -sh /tmp/kgs/full
+at: 22:30:40
+$ adb -s 127.0.0.1:5555 shell "su 0 sh -c \"tar -czf /sdcard/oat.tgz /data/app/~~FaEZBEU_sdxxwtHBe1yLsw==/jp.konami.pesam-saURS_E1UmBUbYZpewkk9A==/oat\""; adb -s 127.0.0.1:5555 pull /sdcard/oat.tgz /tmp/kgs/full/; adb -s 127.0.0.1:5555 shell rm -f /sdcard/oat.tgz; adb -s 127.0.0.1:5555 shell "su 0 sh -c \"tar -czf /sdcard/sdcarddata.tgz /sdcard/Android/data/jp.konami.pesam\""; adb -s 127.0.0.1:5555 pull /sdcard/sdcarddata.tgz /tmp/kgs/full/; adb -s 127.0.0.1:5555 shell rm -f /sdcard/sdcarddata.tgz; echo RESTREADY; ls -la /tmp/kgs/full/; du -sh /tmp/kgs/full
+rc=0
+tar: /data/app/~~FaEZBEU_sdxxwtHBe1yLsw==/jp.konami.pesam-saURS_E1UmBUbYZpewkk9A==/oat: No such file or directory
+tar: had errors
+/sdcard/oat.tgz: 1 file pulled, 0 skipped. 0.0 MB/s (29 bytes in 0.001s)
+removing leading '/' from member names
+/sdcard/sdcarddata.tgz: 1 file pulled, 0 skipped. 0.0 MB/s (259 bytes in 0.008s)
+RESTREADY
+total 2911472
+drwxr-xr-x  2 runner runner       4096 Oct  5 22:30 .
+drwxr-xr-x 10 runner runner       4096 Oct  5 22:25 ..
+-rw-r--r--  1 runner runner   22335209 Oct  5 22:27 base.apk
+-rw-r--r--  1 runner runner    3145728 Oct  5 21:40 blob.bin
+-rw-r--r--  1 runner runner 2116453936 Oct  5 22:30 gamedata.tgz
+-rw-r--r--  1 runner runner         29 Oct  5 22:30 oat.tgz
+-rw-r--r--  1 runner runner         18 Oct  5 21:40 probe.txt
+-rw-r--r--  1 runner runner        259 Oct  5 22:30 sdcarddata.tgz
+-rw-r--r--  1 runner runner   57148181 Oct  5 22:27 split_config.arm64_v8a.apk
+-rw-r--r--  1 runner runner      32978 Oct  5 22:27 split_config.en.apk
+-rw-r--r--  1 runner runner      95905 Oct  5 22:27 split_config.xhdpi.apk
+-rw-r--r--  1 runner runner     114953 Oct  5 22:27 split_gpdeku.apk
+-rw-r--r--  1 runner runner     168158 Oct  5 22:27 split_gpdeku.config.arm64_v8a.apk
+-rw-r--r--  1 runner runner  386375435 Oct  5 22:27 split_pad_it_0.apk
+-rw-r--r--  1 runner runner  395420368 Oct  5 22:27 split_pad_it_1.apk
+2.8G	/tmp/kgs/full
+gamepid: 8174
+flows: 38
