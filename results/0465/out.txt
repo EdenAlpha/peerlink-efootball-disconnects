@@ -4,3 +4,4 @@ $ echo IyEvdXNyL2Jpbi9lbnYgYmFzaAojIENvbnRpbnVvdXMgbWVtb3J5IHN3ZWVwZXI6IGNvcHkgd
 rc=0
 gamepid: 9847
 flows: 8
+Terminated
