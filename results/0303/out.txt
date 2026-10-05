@@ -1,0 +1,21 @@
+cmd: exec echo SIZE-CHECK; adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam; echo OBB; adb -s 127.0.0.1:5555 shell ls -la /sdcard/Android/obb/jp.konami.pesam; echo DATA; adb -s 127.0.0.1:5555 shell dumpsys package jp.konami.pesam | grep -E versionName
+at: 10:34:30
+$ echo SIZE-CHECK; adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam; echo OBB; adb -s 127.0.0.1:5555 shell ls -la /sdcard/Android/obb/jp.konami.pesam; echo DATA; adb -s 127.0.0.1:5555 shell dumpsys package jp.konami.pesam | grep -E versionName
+SIZE-CHECK
+package:/data/app/~~wo-owJo4zCy1SaLCIhxbaQ==/jp.konami.pesam-wB8m6uKPjxvgFG7WPF4eaA==/base.apk
+package:/data/app/~~wo-owJo4zCy1SaLCIhxbaQ==/jp.konami.pesam-wB8m6uKPjxvgFG7WPF4eaA==/split_config.arm64_v8a.apk
+package:/data/app/~~wo-owJo4zCy1SaLCIhxbaQ==/jp.konami.pesam-wB8m6uKPjxvgFG7WPF4eaA==/split_config.en.apk
+package:/data/app/~~wo-owJo4zCy1SaLCIhxbaQ==/jp.konami.pesam-wB8m6uKPjxvgFG7WPF4eaA==/split_config.xhdpi.apk
+package:/data/app/~~wo-owJo4zCy1SaLCIhxbaQ==/jp.konami.pesam-wB8m6uKPjxvgFG7WPF4eaA==/split_gpdeku.apk
+package:/data/app/~~wo-owJo4zCy1SaLCIhxbaQ==/jp.konami.pesam-wB8m6uKPjxvgFG7WPF4eaA==/split_gpdeku.config.arm64_v8a.apk
+package:/data/app/~~wo-owJo4zCy1SaLCIhxbaQ==/jp.konami.pesam-wB8m6uKPjxvgFG7WPF4eaA==/split_pad_it_0.apk
+package:/data/app/~~wo-owJo4zCy1SaLCIhxbaQ==/jp.konami.pesam-wB8m6uKPjxvgFG7WPF4eaA==/split_pad_it_1.apk
+OBB
+total 8
+drwxrws--- 2 u0_a104  ext_obb_rw 4096 2026-10-05 05:29 .
+drwxrws--x 3 media_rw ext_obb_rw 4096 2026-10-05 05:29 ..
+DATA
+    versionName=11.0.1
+rc=0
+gamepid: 6832
+flows: 0
