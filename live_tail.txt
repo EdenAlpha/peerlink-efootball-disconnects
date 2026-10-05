@@ -10,3 +10,8 @@ kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    84bc60a..1dd49a8  HEAD -> live-res-k
 kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   1dd49a8..ae26440  HEAD -> live-res-k
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   ae26440..aa12234  HEAD -> live-res-k
+kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
