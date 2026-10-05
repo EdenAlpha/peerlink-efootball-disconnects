@@ -1,1 +1,1 @@
-exec echo DIAG; tail -25 /tmp/kgs/sweep.log 2>&1; echo MAPS; P=$(pidof jp.konami.pesam); adb -s 127.0.0.1:5555 shell su 0 cat /proc/$P/maps 2>&1 | tr -d '\r' | wc -l
+exec adb -s 127.0.0.1:5555 shell input swipe 245 150 640 110 600; echo DRAG1; sleep 2; adb -s 127.0.0.1:5555 shell input swipe 245 150 830 250 600; echo DRAG2
