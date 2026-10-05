@@ -1,1 +1,1 @@
-exec echo DIAG; tail -25 /tmp/kgs/sweep.log 2>&1; echo MAPS; P=$(pidof jp.konami.pesam); adb -s 127.0.0.1:5555 shell su 0 cat /proc/$P/maps 2>&1 | tr -d '\r' | wc -l
+exec P=$(adb -s 127.0.0.1:5555 shell pidof jp.konami.pesam | tr -d '\r' | awk '{print $1}'); echo PID=$P; adb -s 127.0.0.1:5555 shell "su 0 sh -c \"dd if=/proc/$P/mem of=/data/local/tmp/t1.bin bs=4096 skip=76800 count=8\""; echo RC=$?; adb -s 127.0.0.1:5555 shell ls -l /data/local/tmp/t1.bin
