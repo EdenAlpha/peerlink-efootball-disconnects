@@ -1,5 +1,4 @@
-live: live control loop starting (poll 8s, max 99999 rounds)
-live: write commands to live-cmd/cmd.txt ; read live-res/results + status.txt
+results + status.txt
 live: ignoring the already-queued command (not re-running it): []
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    d704923..9262518  HEAD -> live-res-k
@@ -31,3 +30,6 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    2a167c9..7448f3c  HEAD -> live-res-k
 kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
 kgs-login/live/live_loop.sh: line 71: echo: write error: Broken pipe
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   7448f3c..a540fe5  HEAD -> live-res-k
+kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
