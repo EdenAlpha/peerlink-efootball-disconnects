@@ -1,35 +1,9 @@
-.com/EdenAlpha/peerlink-efootball-disconnects
-   e5eba90..495a86d  HEAD -> live-res-k
-kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
+live: live control loop starting (poll 8s, max 1400 rounds)
+live: write commands to live-cmd/cmd.txt ; read live-res/results + status.txt
+live: ignoring the already-queued command (not re-running it): []
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   495a86d..eb41ba9  HEAD -> live-res-k
-kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
+   dae78b6..40bfaf1  HEAD -> live-res-k
+live: probe published OK; live-res is live
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   eb41ba9..0ea6a49  HEAD -> live-res-k
-kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   0ea6a49..835d9fd  HEAD -> live-res-k
-kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   835d9fd..19a2a11  HEAD -> live-res-k
-kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   19a2a11..86222ed  HEAD -> live-res-k
-kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   86222ed..ba6c1d6  HEAD -> live-res-k
-kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   ba6c1d6..7100ae2  HEAD -> live-res-k
-kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   7100ae2..facebfc  HEAD -> live-res-k
-kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   facebfc..ca696aa  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   ca696aa..6ba91e2  HEAD -> live-res-k
-kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   6ba91e2..945f7e0  HEAD -> live-res-k
+   40bfaf1..84bc60a  HEAD -> live-res-k
 kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
