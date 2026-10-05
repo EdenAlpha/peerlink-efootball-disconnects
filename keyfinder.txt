@@ -1,10 +1,10 @@
-time=23:22:12 sweep_bytes=45365591500
+time=23:42:25 sweep_bytes=45365591500
 --- last attempt (tail of /tmp/kgs/findkey.log) ---
-  A: 10/2656 chunks, 4940 stage-1 survivors, 909s
-rc=124
-=== 23:01:58 auto find_key over 45365591500 bytes ===
 python3: can't open file '/tmp/kgs/kgs-login/live/find_key.py': [Errno 2] No such file or directory
 rc=2
 === 23:22:12 auto find_key over 45365591500 bytes ===
+python3: can't open file '/tmp/kgs/kgs-login/live/find_key.py': [Errno 2] No such file or directory
+rc=2
+=== 23:42:25 auto find_key over 45365591500 bytes ===
 python3: can't open file '/tmp/kgs/kgs-login/live/find_key.py': [Errno 2] No such file or directory
 rc=2
