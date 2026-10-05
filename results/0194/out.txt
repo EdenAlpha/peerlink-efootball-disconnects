@@ -1,0 +1,31 @@
+cmd: exec mkdir -p /tmp/kgs/full/rec; cd /tmp/kgs; ls -la /tmp/kgs/flows.mitm /tmp/kgs/*.csv /tmp/kgs/findkey.log /tmp/kgs/flows.log /tmp/kgs/live.log /tmp/kgs/mitm.log /tmp/kgs/pipeline.log /tmp/kgs/step01.log /tmp/kgs/sweep2.log /tmp/kgs/taps.log 2>/dev/null | head -20; echo ---SIZE---; du -sh /tmp/kgs/flows.log /tmp/kgs/flows.mitm /tmp/kgs/udp_trace.csv 2>/dev/null; cp -f /tmp/kgs/flows.log /tmp/kgs/flows.mitm /tmp/kgs/udp_trace.csv /tmp/kgs/full/rec/ 2>/dev/null; cp -f /tmp/kgs/keyfinder.txt /tmp/kgs/keyfound.txt /tmp/kgs/findkey.log /tmp/kgs/full/rec/ 2>/dev/null; mkdir -p /tmp/kgs/full/rec/shots; cp -f /tmp/kgs/*.png /tmp/kgs/full/rec/shots/ 2>/dev/null; cp -f /tmp/kgs/live_loop.sh /tmp/kgs/sweep2.sh /tmp/kgs/find_key.py /tmp/kgs/arm_recorder.sh /tmp/kgs/full/rec/ 2>/dev/null; adb -s 127.0.0.1:5555 shell "su 0 sh -c \"tar -czf /sdcard/prefs.tgz /data/data/jp.konami.pesam/shared_prefs /data/data/jp.konami.pesam/databases 2>/dev/null; tar -czf /sdcard/udat.tgz /data/data/jp.konami.pesam/files/online_user_id_data.dat /data/data/jp.konami.pesam/files 2>/dev/null\""; adb -s 127.0.0.1:5555 pull /sdcard/prefs.tgz /tmp/kgs/full/ 2>&1 | tail -1; adb -s 127.0.0.1:5555 pull /sdcard/udat.tgz /tmp/kgs/full/ 2>&1 | tail -1; adb -s 127.0.0.1:5555 shell rm -f /sdcard/prefs.tgz /sdcard/udat.tgz; echo STAGED; ls -la /tmp/kgs/full/rec/; du -sh /tmp/kgs/full
+at: 22:57:55
+$ mkdir -p /tmp/kgs/full/rec; cd /tmp/kgs; ls -la /tmp/kgs/flows.mitm /tmp/kgs/*.csv /tmp/kgs/findkey.log /tmp/kgs/flows.log /tmp/kgs/live.log /tmp/kgs/mitm.log /tmp/kgs/pipeline.log /tmp/kgs/step01.log /tmp/kgs/sweep2.log /tmp/kgs/taps.log 2>/dev/null | head -20; echo ---SIZE---; du -sh /tmp/kgs/flows.log /tmp/kgs/flows.mitm /tmp/kgs/udp_trace.csv 2>/dev/null; cp -f /tmp/kgs/flows.log /tmp/kgs/flows.mitm /tmp/kgs/udp_trace.csv /tmp/kgs/full/rec/ 2>/dev/null; cp -f /tmp/kgs/keyfinder.txt /tmp/kgs/keyfound.txt /tmp/kgs/findkey.log /tmp/kgs/full/rec/ 2>/dev/null; mkdir -p /tmp/kgs/full/rec/shots; cp -f /tmp/kgs/*.png /tmp/kgs/full/rec/shots/ 2>/dev/null; cp -f /tmp/kgs/live_loop.sh /tmp/kgs/sweep2.sh /tmp/kgs/find_key.py /tmp/kgs/arm_recorder.sh /tmp/kgs/full/rec/ 2>/dev/null; adb -s 127.0.0.1:5555 shell "su 0 sh -c \"tar -czf /sdcard/prefs.tgz /data/data/jp.konami.pesam/shared_prefs /data/data/jp.konami.pesam/databases 2>/dev/null; tar -czf /sdcard/udat.tgz /data/data/jp.konami.pesam/files/online_user_id_data.dat /data/data/jp.konami.pesam/files 2>/dev/null\""; adb -s 127.0.0.1:5555 pull /sdcard/prefs.tgz /tmp/kgs/full/ 2>&1 | tail -1; adb -s 127.0.0.1:5555 pull /sdcard/udat.tgz /tmp/kgs/full/ 2>&1 | tail -1; adb -s 127.0.0.1:5555 shell rm -f /sdcard/prefs.tgz /sdcard/udat.tgz; echo STAGED; ls -la /tmp/kgs/full/rec/; du -sh /tmp/kgs/full
+rc=0
+-rw-r--r-- 1 runner runner     4209 Oct  5 22:57 /tmp/kgs/findkey.log
+-rw-r--r-- 1 runner runner    87945 Oct  5 22:51 /tmp/kgs/flows.log
+-rw-r--r-- 1 runner runner 70784883 Oct  5 22:51 /tmp/kgs/flows.mitm
+-rw-r--r-- 1 runner runner     3125 Oct  5 22:57 /tmp/kgs/live.log
+-rw-r--r-- 1 runner runner   105322 Oct  5 22:51 /tmp/kgs/mitm.log
+-rw-r--r-- 1 runner runner     5312 Oct  5 21:36 /tmp/kgs/pipeline.log
+-rw-r--r-- 1 runner runner     2792 Oct  5 21:35 /tmp/kgs/step01.log
+-rw-r--r-- 1 runner runner     5092 Oct  5 22:17 /tmp/kgs/sweep2.log
+-rw-r--r-- 1 runner runner    24605 Oct  5 22:43 /tmp/kgs/taps.log
+---SIZE---
+92K	/tmp/kgs/flows.log
+68M	/tmp/kgs/flows.mitm
+/sdcard/prefs.tgz: 1 file pulled, 0 skipped. 0.1 MB/s (3322 bytes in 0.044s)
+adb: error: cannot write '/tmp/kgs/full//udat.tgz': No space left on device
+STAGED
+total 67388
+drwxr-xr-x 3 runner runner     4096 Oct  5 22:57 .
+drwxr-xr-x 3 runner runner     4096 Oct  5 22:59 ..
+-rw-r--r-- 1 runner runner     4259 Oct  5 22:57 arm_recorder.sh
+-rw-r--r-- 1 runner runner     4209 Oct  5 22:57 findkey.log
+-rw-r--r-- 1 runner runner    87945 Oct  5 22:57 flows.log
+-rw-r--r-- 1 runner runner 68878336 Oct  5 22:57 flows.mitm
+drwxr-xr-x 2 runner runner     4096 Oct  5 22:57 shots
+-rw-r--r-- 1 runner runner     1797 Oct  5 22:57 sweep2.sh
+2.9G	/tmp/kgs/full
+gamepid: 8174
+flows: 44
