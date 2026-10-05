@@ -1,0 +1,6 @@
+cmd: exec bash /tmp/kgs/sweep_fixed.sh >/tmp/kgs/sweep.log 2>&1 & sleep 45; echo SWEEPER_STARTED cycles=\ bytes=\ >> /tmp/kgs/live.log; (while true; do sleep 60; echo SWEEP bytes=\ cycles=\ game=\ >> /tmp/kgs/live.log; done &) ; echo WATCHER_SET >> /tmp/kgs/live.log
+at: 11:47:08
+$ bash /tmp/kgs/sweep_fixed.sh >/tmp/kgs/sweep.log 2>&1 & sleep 45; echo SWEEPER_STARTED cycles=\ bytes=\ >> /tmp/kgs/live.log; (while true; do sleep 60; echo SWEEP bytes=\ cycles=\ game=\ >> /tmp/kgs/live.log; done &) ; echo WATCHER_SET >> /tmp/kgs/live.log
+rc=0
+gamepid: 9847
+flows: 30
