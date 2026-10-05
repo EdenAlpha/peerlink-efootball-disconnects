@@ -41,6 +41,9 @@ from urllib.parse import urlparse, parse_qs
 TOKEN = os.environ.get("RELAY_TOKEN", "")
 ADB = ["adb", "-s", "127.0.0.1:5555"]
 FLOWS = "/tmp/kgs/flows.log"
+# Root for /dl and /ls. Everything the operator may pull is staged under here.
+DL_ROOT = "/tmp/kgs/full"
+DL_CHUNK = 8 * 1024 * 1024      # 8 MiB per request; Cloudflare caps far above
 TAPS = "/tmp/kgs/taps.log"
 # What /text will type. The value is passed to `adb shell input text` WITHOUT
 # quotes, so only characters a shell treats literally are allowed: no space
@@ -146,9 +149,67 @@ class H(BaseHTTPRequestHandler):
 
     def do_GET(self):
         u = urlparse(self.path)
-        token = parse_qs(u.query).get("token", [""])[0]
+        q = parse_qs(u.query)
+        token = q.get("token", [""])[0]
         if not self._token_ok(token):
             return deny(self)
+
+        # /dl streams a byte range of one allowlisted file, so capture data can
+        # be pulled to the operator's own machine WHILE the runner is alive.
+        #
+        # Why this exists: the only route home used to be the end-of-job
+        # artifact upload, and the hosted runner has now died mid-session three
+        # times, each time destroying everything written to /tmp (a 341 MB
+        # memory sweep among it). A dead runner uploads nothing. Chunked
+        # ranges over the same tunnel that already carries screenshots do not
+        # depend on the job surviving.
+        if u.path == "/dl":
+            rel = q.get("path", [""])[0]
+            try:
+                off = int(q.get("off", ["0"])[0])
+                ln = int(q.get("len", ["1"])[0])
+            except ValueError:
+                return deny(self)
+            full = os.path.realpath(os.path.join(DL_ROOT, rel.lstrip("/")))
+            # Containment: only files that really live under DL_ROOT.
+            if os.path.commonpath([full, os.path.realpath(DL_ROOT)]) \
+                    != os.path.realpath(DL_ROOT):
+                tap_log("dl", "refused traversal %r" % rel)
+                return deny(self)
+            if not os.path.isfile(full):
+                return deny(self)
+            if off < 0 or ln < 1 or ln > DL_CHUNK:
+                return deny(self)
+            try:
+                with open(full, "rb") as fh:
+                    fh.seek(off)
+                    data = fh.read(ln)
+            except OSError:
+                return deny(self)
+            tap_log("dl", "%s off=%d bytes=%d" % (rel, off, len(data)))
+            self.send_response(200)
+            self.send_header("Content-Length", str(len(data)))
+            self.send_header("Content-Type", "application/octet-stream")
+            self.send_header("X-DL-Total", str(os.path.getsize(full)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
+
+        if u.path == "/ls":
+            root = os.path.realpath(DL_ROOT)
+            try:
+                names = sorted(os.listdir(root))
+                listing = []
+                for n in names:
+                    p = os.path.join(root, n)
+                    listing.append("%s\t%d" % (n, os.path.getsize(p)
+                                               if os.path.isfile(p) else -1))
+                body = "\n".join(listing).encode()
+            except OSError as e:
+                return deny(self)
+            ok200(self, body, "text/plain")
+            return
+
         if u.path == "/shot":
             rc, png = run(*(ADB + ["exec-out", "screencap", "-p"]), timeout=30)
             if rc != 0 or png[:4] != b"\x89PNG":
