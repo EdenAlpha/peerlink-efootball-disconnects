@@ -1,0 +1,16 @@
+cmd: exec echo SWEEPNOW; tail -4 /tmp/kgs/sweep2.log 2>&1; echo KBTOTAL; du -sk /tmp/kgs/sweep2 2>/dev/null; echo FLOWCOUNT; grep -c '^### ' /tmp/kgs/flows.log 2>/dev/null; echo KEYLOG; tail -3 /tmp/kgs/findkey.log 2>/dev/null
+at: 20:51:49
+$ echo SWEEPNOW; tail -4 /tmp/kgs/sweep2.log 2>&1; echo KBTOTAL; du -sk /tmp/kgs/sweep2 2>/dev/null; echo FLOWCOUNT; grep -c '^### ' /tmp/kgs/flows.log 2>/dev/null; echo KEYLOG; tail -3 /tmp/kgs/findkey.log 2>/dev/null
+rc=1
+SWEEPNOW
+[sw2 20:51:32] cycle 73: 1 regions 4652KB
+[sw2 20:51:37] cycle 74: 1 regions 4656KB
+[sw2 20:51:43] cycle 75: 1 regions 4660KB
+[sw2 20:51:49] cycle 76: 1 regions 4664KB
+KBTOTAL
+341928	/tmp/kgs/sweep2
+FLOWCOUNT
+8
+KEYLOG
+gamepid: 8937
+flows: 8
