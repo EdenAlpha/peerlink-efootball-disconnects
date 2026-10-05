@@ -1,10 +1,4 @@
-com/EdenAlpha/peerlink-efootball-disconnects
-   cfb03b2..076e219  HEAD -> live-res-k
-live: probe published OK; live-res is live
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   076e219..39a8dc1  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   39a8dc1..f1c7453  HEAD -> live-res-k
+s-k
 kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    f1c7453..1f4b49a  HEAD -> live-res-k
@@ -33,3 +27,9 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    0c9031a..45fdd5a  HEAD -> live-res-k
 kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
 kgs-login/live/live_loop.sh: line 71: echo: write error: Broken pipe
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   45fdd5a..178ec70  HEAD -> live-res-k
+kgs-login/live/live_loop.sh: line 71: echo: write error: Broken pipe
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   178ec70..07b38fb  HEAD -> live-res-k
+live: auto find_key: scanning 671816990 bytes of sweep

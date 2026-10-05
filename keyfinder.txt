@@ -1,0 +1,8 @@
+time=22:25:40 sweep_bytes=671816990
+--- last attempt (tail of /tmp/kgs/findkey.log) ---
+=== 22:00:39 auto find_key over 671816990 bytes ===
+test bodies: 3 (first: ### REQ POST /pes22/gate/gate_CMD_GET_SERVER_ENV.php, 176 bytes)
+region files: 31 (skipped 0 unreadable)
+pass A: 992 chunks on 3 jobs
+  A: 10/992 chunks, 5000 stage-1 survivors, 858s
+rc=124
