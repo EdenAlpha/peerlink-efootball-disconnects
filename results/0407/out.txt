@@ -1,0 +1,8 @@
+cmd: exec echo PING; date -u +%H:%M:%S
+at: 14:59:49
+$ echo PING; date -u +%H:%M:%S
+PING
+14:59:49
+rc=0
+gamepid: 
+flows: 0
