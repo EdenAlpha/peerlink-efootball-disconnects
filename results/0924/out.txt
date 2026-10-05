@@ -1,0 +1,25 @@
+cmd: exec adb -s 127.0.0.1:5555 shell "su 0 sh -c \"tar -czf /sdcard/gamedata.tgz /data/data/jp.konami.pesam\""; adb -s 127.0.0.1:5555 shell "su 0 sh -c \"du -sh /sdcard/gamedata.tgz\""; adb -s 127.0.0.1:5555 pull /sdcard/gamedata.tgz /tmp/kgs/full/; adb -s 127.0.0.1:5555 pull /sdcard/Android/data/jp.konami.pesam /tmp/kgs/full/sdcard-data; echo FULL; ls -la /tmp/kgs/full/
+at: 12:02:49
+$ adb -s 127.0.0.1:5555 shell "su 0 sh -c \"tar -czf /sdcard/gamedata.tgz /data/data/jp.konami.pesam\""; adb -s 127.0.0.1:5555 shell "su 0 sh -c \"du -sh /sdcard/gamedata.tgz\""; adb -s 127.0.0.1:5555 pull /sdcard/gamedata.tgz /tmp/kgs/full/; adb -s 127.0.0.1:5555 pull /sdcard/Android/data/jp.konami.pesam /tmp/kgs/full/sdcard-data; echo FULL; ls -la /tmp/kgs/full/
+removing leading '/' from member names
+1.9G	/sdcard/gamedata.tgz
+/sdcard/gamedata.tgz: 1 file pulled, 0 skipped. 70.2 MB/s (2116457591 bytes in 28.737s)
+adb: warning: skipping special file '/sdcard/Android/data/jp.konami.pesam/files/UE4Game/PesMobile' (mode = 0o0)
+/sdcard/Android/data/jp.konami.pesam/: 0 files pulled, 1 skipped.
+FULL
+total 2908392
+drwxr-xr-x 3 runner runner       4096 Oct  5 12:05 .
+drwxr-xr-x 8 runner runner       4096 Oct  5 11:54 ..
+-rw-r--r-- 1 runner runner   22335209 Oct  5 11:54 base.apk
+-rw-r--r-- 1 runner runner 2116457591 Oct  5 12:05 gamedata.tgz
+drwxr-xr-x 3 runner runner       4096 Oct  5 12:05 sdcard-data
+-rw-r--r-- 1 runner runner   57148181 Oct  5 11:54 split_config.arm64_v8a.apk
+-rw-r--r-- 1 runner runner      32978 Oct  5 11:54 split_config.en.apk
+-rw-r--r-- 1 runner runner      95905 Oct  5 11:54 split_config.xhdpi.apk
+-rw-r--r-- 1 runner runner     114953 Oct  5 11:54 split_gpdeku.apk
+-rw-r--r-- 1 runner runner     168158 Oct  5 11:54 split_gpdeku.config.arm64_v8a.apk
+-rw-r--r-- 1 runner runner  386375435 Oct  5 11:54 split_pad_it_0.apk
+-rw-r--r-- 1 runner runner  395420368 Oct  5 11:54 split_pad_it_1.apk
+rc=0
+gamepid: 9847
+flows: 38
