@@ -1,0 +1,8 @@
+cmd: exec adb -s 127.0.0.1:5555 shell am force-stop com.google.android.gms; adb -s 127.0.0.1:5555 shell am force-stop com.android.vending; sleep 3; adb -s 127.0.0.1:5555 shell am start -n com.android.vending/com.google.android.finsky.activities.MainActivity; echo RESTARTED
+at: 17:38:03
+$ adb -s 127.0.0.1:5555 shell am force-stop com.google.android.gms; adb -s 127.0.0.1:5555 shell am force-stop com.android.vending; sleep 3; adb -s 127.0.0.1:5555 shell am start -n com.android.vending/com.google.android.finsky.activities.MainActivity; echo RESTARTED
+rc=0
+Starting: Intent { cmp=com.android.vending/com.google.android.finsky.activities.MainActivity }
+RESTARTED
+gamepid: 
+flows: 0
