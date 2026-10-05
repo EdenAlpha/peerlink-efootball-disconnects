@@ -1,0 +1,29 @@
+cmd: exec pip install -q --break-system-packages pycryptodome msgpack 2>&1 | tail -1; curl -fsSL --max-time 120 https://raw.githubusercontent.com/EdenAlpha/peerlink-efootball-disconnects/main/kgs-login/live/find_key.py -o /tmp/kgs/find_key.py && echo FINDER_DEPLOYED; ls /tmp/kgs/sweep2 | tail -3; du -sh /tmp/kgs/sweep2; timeout 1500 python3 /tmp/kgs/find_key.py --dir /tmp/kgs/sweep2 --flows /tmp/kgs/flows.log; echo FINDER-RC:$?
+at: 20:54:22
+$ pip install -q --break-system-packages pycryptodome msgpack 2>&1 | tail -1; curl -fsSL --max-time 120 https://raw.githubusercontent.com/EdenAlpha/peerlink-efootball-disconnects/main/kgs-login/live/find_key.py -o /tmp/kgs/find_key.py && echo FINDER_DEPLOYED; ls /tmp/kgs/sweep2 | tail -3; du -sh /tmp/kgs/sweep2; timeout 1500 python3 /tmp/kgs/find_key.py --dir /tmp/kgs/sweep2 --flows /tmp/kgs/flows.log; echo FINDER-RC:$?
+rc=0
+FINDER_DEPLOYED
+cycle97
+cycle98
+cycle99
+852M	/tmp/kgs/sweep2
+test bodies: 4 (first: ### REQ POST /pes22/gate/gate_CMD_GET_SERVER_ENV.php, 176 bytes)
+skip unwritable /tmp/kgs/sweep2/cycle93/r_314572800.bin.gz.unz ([Errno 28] No space left on device)
+skip unwritable /tmp/kgs/sweep2/cycle11/r_314572800.bin.gz.unz ([Errno 28] No space left on device)
+skip unwritable /tmp/kgs/sweep2/cycle39/r_314572800.bin.gz.unz ([Errno 28] No space left on device)
+skip unwritable /tmp/kgs/sweep2/cycle103/r_314572800.bin.gz.unz ([Errno 28] No space left on device)
+skip unwritable /tmp/kgs/sweep2/cycle36/r_314572800.bin.gz.unz ([Errno 28] No space left on device)
+skip unwritable /tmp/kgs/sweep2/cycle48/r_314572800.bin.gz.unz ([Errno 28] No space left on device)
+skip unwritable /tmp/kgs/sweep2/cycle77/r_314572800.bin.gz.unz ([Errno 28] No space left on device)
+skip unwritable /tmp/kgs/sweep2/cycle99/r_314572800.bin.gz.unz ([Errno 28] No space left on device)
+skip unwritable /tmp/kgs/sweep2/cycle42/r_314572800.bin.gz.unz ([Errno 28] No space left on device)
+skip unwritable /tmp/kgs/sweep2/cycle27/r_314572800.bin.gz.unz ([Errno 28] No space left on device)
+skip unwritable /tmp/kgs/sweep2/cycle82/r_314572800.bin.gz.unz ([Errno 28] No space left on device)
+skip unwritable /tmp/kgs/sweep2/cycle91/r_314572800.bin.gz.unz ([Errno 28] No space left on device)
+skip unwritable /tmp/kgs/sweep2/cycle20/r_314572800.bin.gz.unz ([Errno 28] No space left on device)
+region files: 94 (skipped 0 unreadable)
+pass A: 3008 chunks on 3 jobs
+  A: 10/3008 chunks, 5083 stage-1 survivors, 836s
+FINDER-RC:124
+gamepid: 8937
+flows: 32
