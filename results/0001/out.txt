@@ -1,8 +1,9 @@
-cmd: exec echo PING; date -u +%H:%M:%S
-at: 15:07:54
-$ echo PING; date -u +%H:%M:%S
-PING
-15:07:54
-rc=0
+cmd: exec echo LIVECHECK; date -u +%H:%M:%S; git -C /home/runner/work rev-parse --short HEAD 2>&1 | head -1
+at: 15:28:33
+$ echo LIVECHECK; date -u +%H:%M:%S; git -C /home/runner/work rev-parse --short HEAD 2>&1 | head -1
+rc=128
+LIVECHECK
+15:28:33
+fatal: not a git repository (or any of the parent directories): .git
 gamepid: 
 flows: 0
