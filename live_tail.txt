@@ -1,8 +1,4 @@
-ger expression expected
-kgs-login/live/live_loop.sh: line 71: echo: write error: Broken pipe
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   853892f..733e0aa  HEAD -> live-res-k
-kgs-login/live/live_loop.sh: line 71: echo: write error: Broken pipe
+te error: Broken pipe
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    733e0aa..e61a641  HEAD -> live-res-k
 kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
@@ -30,5 +26,9 @@ kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
 kgs-login/live/live_loop.sh: line 71: echo: write error: Broken pipe
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    4a1a4fb..e255697  HEAD -> live-res-k
+kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
+kgs-login/live/live_loop.sh: line 71: echo: write error: Broken pipe
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   e255697..2532d9b  HEAD -> live-res-k
 kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
 kgs-login/live/live_loop.sh: line 71: echo: write error: Broken pipe
