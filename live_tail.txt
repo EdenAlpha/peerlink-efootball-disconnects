@@ -1,5 +1,4 @@
-live: live control loop starting (poll 8s, max 1400 rounds)
-live: write commands to live-cmd/cmd.txt ; read live-res/results + status.txt
+md/cmd.txt ; read live-res/results + status.txt
 live: ignoring the already-queued command (not re-running it): []
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    341d452..a6f8861  HEAD -> live-res-k
@@ -30,4 +29,7 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
 kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    b6e82c7..e3fa691  HEAD -> live-res-k
+kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   e3fa691..3fea94c  HEAD -> live-res-k
 kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
