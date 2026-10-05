@@ -1,8 +1,10 @@
-time=22:25:40 sweep_bytes=671816990
+time=22:57:45 sweep_bytes=17154702796
 --- last attempt (tail of /tmp/kgs/findkey.log) ---
-=== 22:00:39 auto find_key over 671816990 bytes ===
-test bodies: 3 (first: ### REQ POST /pes22/gate/gate_CMD_GET_SERVER_ENV.php, 176 bytes)
-region files: 31 (skipped 0 unreadable)
-pass A: 992 chunks on 3 jobs
-  A: 10/992 chunks, 5000 stage-1 survivors, 858s
+skip unwritable /tmp/kgs/sweep/cycle99/r_314572800.bin.gz.unz ([Errno 28] No space left on device)
+skip unwritable /tmp/kgs/sweep/cycle42/r_314572800.bin.gz.unz ([Errno 28] No space left on device)
+skip unwritable /tmp/kgs/sweep/cycle82/r_314572800.bin.gz.unz ([Errno 28] No space left on device)
+skip unwritable /tmp/kgs/sweep/cycle91/r_314572800.bin.gz.unz ([Errno 28] No space left on device)
+region files: 83 (skipped 0 unreadable)
+pass A: 2656 chunks on 3 jobs
+  A: 10/2656 chunks, 4940 stage-1 survivors, 909s
 rc=124
