@@ -1,13 +1,4 @@
-4e098f..7c67969  HEAD -> live-res-k
-SWEEP bytes= cycles= game= 
-SWEEP bytes= cycles= game= 
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   7c67969..ce52612  HEAD -> live-res-k
-SWEEP bytes= cycles= game= 
-SWEEP bytes= cycles= game= 
-SWEEP bytes= cycles= game= 
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   ce52612..50d9672  HEAD -> live-res-k
+e52612..50d9672  HEAD -> live-res-k
 SWEEP bytes= cycles= game= 
 SWEEP bytes= cycles= game= 
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
@@ -47,5 +38,14 @@ SWEEP bytes= cycles= game=
 SWEEP bytes= cycles= game= 
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    3aad036..4d78bb3  HEAD -> live-res-k
+SWEEP bytes= cycles= game= 
+SWEEP bytes= cycles= game= 
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   4d78bb3..713beb2  HEAD -> live-res-k
+SWEEP bytes= cycles= game= 
+SWEEP bytes= cycles= game= 
+SWEEP bytes= cycles= game= 
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   713beb2..ad07621  HEAD -> live-res-k
 SWEEP bytes= cycles= game= 
 SWEEP bytes= cycles= game= 
