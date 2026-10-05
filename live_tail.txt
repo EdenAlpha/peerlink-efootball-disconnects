@@ -1,6 +1,4 @@
-ite error: Broken pipe
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   178ec70..07b38fb  HEAD -> live-res-k
+fb  HEAD -> live-res-k
 live: auto find_key: scanning 671816990 bytes of sweep
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    07b38fb..7a72f08  HEAD -> live-res-k
@@ -37,3 +35,5 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
 live: auto find_key: scanning 45365591500 bytes of sweep
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    1156551..68297ed  HEAD -> live-res-k
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   68297ed..3e0910a  HEAD -> live-res-k
