@@ -1,0 +1,34 @@
+cmd: exec echo DIAG; tail -25 /tmp/kgs/sweep.log 2>&1; echo MAPS; P=$(pidof jp.konami.pesam); adb -s 127.0.0.1:5555 shell su 0 cat /proc/$P/maps 2>&1 | tr -d '\r' | wc -l
+at: 12:27:41
+$ echo DIAG; tail -25 /tmp/kgs/sweep.log 2>&1; echo MAPS; P=$(pidof jp.konami.pesam); adb -s 127.0.0.1:5555 shell su 0 cat /proc/$P/maps 2>&1 | tr -d '\r' | wc -l
+DIAG
+fe891a320000-fe891a328000 rw-p 00000000 00:00 0 
+fe891a328000-fe891a329000 ---p 00000000 00:00 0 
+fe891a329000-fe891a41d000 r-xp 00050000 00:30 5790728                    /apex/com.android.runtime/bin/linker64
+fe891a41d000-fe891a420000 rw-p 00000000 00:00 0                          [anon:System property context nodes]
+fe891a420000-fe891a421000 ---p 00000000 00:00 0 
+fe891a421000-fe891a429000 rw-p 00000000 00:00 0                          [anon:thread signal stack]
+fe891a429000-fe891a432000 r--p 00150000 00:30 5790728                    /apex/com.android.runtime/bin/linker64
+fe891a432000-fe891a434000 rw-p 00000000 00:00 0                          [anon:bionic_alloc_small_objects]
+fe891a434000-fe891a435000 r--p 00000000 00:00 0                          [anon:atexit handlers]
+fe891a435000-fe891a437000 rw-p 00000000 00:00 0                          [anon:bionic_alloc_small_objects]
+fe891a437000-fe891a438000 rw-p 00000000 00:00 0                          [anon:arc4random data]
+fe891a438000-fe891a439000 rw-p 00000000 00:00 0                          [anon:Allocate]
+fe891a439000-fe891a43a000 rw-p 00000000 00:00 0                          [anon:ReadFileToBuffer]
+fe891a43a000-fe891a43b000 rw-p 00000000 00:00 0                          [anon:arc4random data]
+fe891a43b000-fe891a43f000 r--p 00000000 00:00 0                          [vvar]
+fe891a43f000-fe891a441000 r-xp 00000000 00:00 0                          [vdso]
+fe891a441000-fe891a443000 rw-p 00158000 00:30 5790728                    /apex/com.android.runtime/bin/linker64
+fe891a443000-fe891a44d000 rw-p 00000000 00:00 0                          [anon:.bss]
+fe891a44d000-fe891a44e000 r--p 00000000 00:00 0                          [anon:.bss]
+fe891a44e000-fe891a450000 rw-p 00000000 00:00 0                          [anon:.bss]
+ffffda5ba000-ffffda5bb000 ---p 00000000 00:00 0 
+ffffda5bb000-ffffdb5ba000 rw-p 00000000 00:00 0                          [stack]
+[sweep 12:27:41]   PULL FAILED region 0x12c00000
+[sweep 12:27:41] cycle 23536: 0 regions 0 bytes 0s markers: none
+[sweep 12:27:41] pruned c23536 (over count or 6GB cap)
+MAPS
+1
+rc=1
+gamepid: 9847
+flows: 46
