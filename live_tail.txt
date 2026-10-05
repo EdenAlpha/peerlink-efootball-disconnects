@@ -1,5 +1,4 @@
-kgs-login/live/live_loop.sh: line 71: echo: write error: Broken pipe
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+erlink-efootball-disconnects
    c9cbcb1..a751be8  HEAD -> live-res-k
 kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
 kgs-login/live/live_loop.sh: line 71: echo: write error: Broken pipe
@@ -33,3 +32,5 @@ live: auto find_key: scanning 17154702796 bytes of sweep
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    8943ffc..6e71598  HEAD -> live-res-k
 live: auto find_key: scanning 45365591500 bytes of sweep
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   6e71598..1105716  HEAD -> live-res-k
