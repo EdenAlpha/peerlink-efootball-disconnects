@@ -252,8 +252,18 @@ run_cmd() { # $1 = round dir, $2... = command words
       # `$S` once killed a 2-hour session instantly via `set -u`.)
       echo "\$ $*" >> "$out"
       set +u
-      eval "$*" >> "$out" 2>&1
+      # `timeout` is load-bearing here, not decoration. A command containing
+      # `nohup ... &` (the relay and the mitm recorder both do) leaves a
+      # background child holding this command's stdout/stderr redirect open
+      # forever, so the redirection never reports EOF and the whole `eval`
+      # blocks -- the round never ends, so no heartbeat, no status, and no
+      # later command is ever processed. Observed twice: heartbeats froze
+      # while the loop was plainly still alive and pushing. Redirect the eval
+      # through a file and cap it, so a stuck round can only cost one round.
+      eval "$*" >"$out.exec" 2>&1
       echo "rc=$?" >> "$out"
+      cat "$out.exec" >> "$out" 2>/dev/null || true
+      rm -f "$out.exec"
       set -u
       ;;
     flows)
