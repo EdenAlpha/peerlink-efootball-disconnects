@@ -1,9 +1,16 @@
-cmd: exec echo LIVECHECK; date -u +%H:%M:%S; git -C /home/runner/work rev-parse --short HEAD 2>&1 | head -1
-at: 15:28:33
-$ echo LIVECHECK; date -u +%H:%M:%S; git -C /home/runner/work rev-parse --short HEAD 2>&1 | head -1
-rc=128
-LIVECHECK
-15:28:33
-fatal: not a git repository (or any of the parent directories): .git
+cmd: exec D=$(docker inspect -f '{{.Name}}' redroid 2>/dev/null | tr -d /); echo CONTAINER=$D; docker exec $D sh -c "ls /system/etc/security/cacerts/ | grep -c ."; docker exec $D sh -c "mount | grep -c 'cacerts'"; echo SYSTEMCA; docker exec $D sh -c "ls /system/etc/security/cacerts/ | grep -iE 'mitm|928a|setup' | head -5"; echo USERCA; adb -s 127.0.0.1:5555 shell su 0 sh -c "ls /data/misc/user/0/cacerts-added/ | head -5"
+at: 20:28:37
+$ D=$(docker inspect -f '{{.Name}}' redroid 2>/dev/null | tr -d /); echo CONTAINER=$D; docker exec $D sh -c "ls /system/etc/security/cacerts/ | grep -c ."; docker exec $D sh -c "mount | grep -c 'cacerts'"; echo SYSTEMCA; docker exec $D sh -c "ls /system/etc/security/cacerts/ | grep -iE 'mitm|928a|setup' | head -5"; echo USERCA; adb -s 127.0.0.1:5555 shell su 0 sh -c "ls /data/misc/user/0/cacerts-added/ | head -5"
+rc=0
+CONTAINER=redroid
+134
+0
+SYSTEMCA
+USERCA
+acct
+apex
+bin
+bugreports
+cache
 gamepid: 
 flows: 0
