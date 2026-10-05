@@ -1,7 +1,4 @@
-results + status.txt
-live: ignoring the already-queued command (not re-running it): []
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   d704923..9262518  HEAD -> live-res-k
+D -> live-res-k
 live: probe published OK; live-res is live
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    9262518..90f429f  HEAD -> live-res-k
@@ -32,4 +29,7 @@ kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
 kgs-login/live/live_loop.sh: line 71: echo: write error: Broken pipe
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    7448f3c..a540fe5  HEAD -> live-res-k
+kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   a540fe5..cbc1db8  HEAD -> live-res-k
 kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
