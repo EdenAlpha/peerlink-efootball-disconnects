@@ -1,0 +1,11 @@
+cmd: exec mkdir -p /tmp/kgs/full; echo PROBE-OK-20261005 > /tmp/kgs/full/probe.txt; dd if=/dev/urandom of=/tmp/kgs/full/blob.bin bs=1048576 count=3 2>/dev/null; ls -la /tmp/kgs/full/
+at: 21:40:30
+$ mkdir -p /tmp/kgs/full; echo PROBE-OK-20261005 > /tmp/kgs/full/probe.txt; dd if=/dev/urandom of=/tmp/kgs/full/blob.bin bs=1048576 count=3 2>/dev/null; ls -la /tmp/kgs/full/
+rc=0
+total 3084
+drwxr-xr-x 2 runner runner    4096 Oct  5 21:40 .
+drwxr-xr-x 5 runner runner    4096 Oct  5 21:40 ..
+-rw-r--r-- 1 runner runner 3145728 Oct  5 21:40 blob.bin
+-rw-r--r-- 1 runner runner      18 Oct  5 21:40 probe.txt
+gamepid: 
+flows: 0
