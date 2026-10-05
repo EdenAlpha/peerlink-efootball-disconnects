@@ -1,6 +1,4 @@
-ball-disconnects
-   45fdd5a..178ec70  HEAD -> live-res-k
-kgs-login/live/live_loop.sh: line 71: echo: write error: Broken pipe
+ite error: Broken pipe
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    178ec70..07b38fb  HEAD -> live-res-k
 live: auto find_key: scanning 671816990 bytes of sweep
@@ -37,3 +35,5 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    3ea524b..1156551  HEAD -> live-res-k
 live: auto find_key: scanning 45365591500 bytes of sweep
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   1156551..68297ed  HEAD -> live-res-k
