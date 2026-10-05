@@ -1,0 +1,18 @@
+cmd: exec echo SWEEPPROBE; tail -3 /tmp/kgs/sweep.log 2>&1; echo CYCLES; ls /tmp/kgs/sweep 2>/dev/null | tail -3; du -sh /tmp/kgs/sweep 2>/dev/null; echo PROCS; pgrep -af sweep.sh | head -3; echo FINDERLOG; tail -5 /tmp/kgs/findkey.log 2>/dev/null
+at: 12:07:12
+$ echo SWEEPPROBE; tail -3 /tmp/kgs/sweep.log 2>&1; echo CYCLES; ls /tmp/kgs/sweep 2>/dev/null | tail -3; du -sh /tmp/kgs/sweep 2>/dev/null; echo PROCS; pgrep -af sweep.sh | head -3; echo FINDERLOG; tail -5 /tmp/kgs/findkey.log 2>/dev/null
+SWEEPPROBE
+[sweep 12:07:12]   PULL FAILED region 0x12c00000
+[sweep 12:07:12] cycle 19136: 0 regions 0 bytes 1s markers: none
+[sweep 12:07:12] pruned c19136 (over count or 6GB cap)
+CYCLES
+c9997
+c9998
+c9999
+2.0M	/tmp/kgs/sweep
+PROCS
+34191 bash /tmp/kgs/sweep.sh
+FINDERLOG
+rc=1
+gamepid: 9847
+flows: 38
