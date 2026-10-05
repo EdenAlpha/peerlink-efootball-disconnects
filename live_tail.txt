@@ -1,7 +1,4 @@
-ts + status.txt
-live: ignoring the already-queued command (not re-running it): []
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   21cf15c..2c35e99  HEAD -> live-res-k
+live-res-k
 live: probe published OK; live-res is live
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    2c35e99..25afc61  HEAD -> live-res-k
@@ -33,4 +30,7 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    8f9160b..57d406e  HEAD -> live-res-k
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    57d406e..e873eb6  HEAD -> live-res-k
+kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   e873eb6..23af3f5  HEAD -> live-res-k
 kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
