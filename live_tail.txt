@@ -1,6 +1,4 @@
 -k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   0934827..1cd8235  HEAD -> live-res-k
  ! [remote rejected] HEAD -> live-res-k (Internal Server Error)
 error: failed to push some refs to 'https://github.com/EdenAlpha/peerlink-efootball-disconnects'
 live: push attempt 1 failed for [heartbeat 629]; rebasing onto live-res-k
@@ -36,3 +34,5 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    399c40c..2fa0cbe  HEAD -> live-res-k
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    2fa0cbe..0426234  HEAD -> live-res-k
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   0426234..f9a7538  HEAD -> live-res-k
