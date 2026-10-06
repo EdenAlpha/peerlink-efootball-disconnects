@@ -1,7 +1,5 @@
 -k
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   cd56de8..cadb528  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    cadb528..db5ea29  HEAD -> live-res-k
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    db5ea29..616f8bd  HEAD -> live-res-k
@@ -36,3 +34,5 @@ live: push attempt 1 failed for [heartbeat 629]; rebasing onto live-res-k
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    1cd8235..efdf546  HEAD -> live-res-k
 live: auto find_key: scanning 45365591500 bytes of sweep
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   efdf546..87ccc60  HEAD -> live-res-k
