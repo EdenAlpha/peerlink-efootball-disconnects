@@ -1,6 +1,4 @@
-35..efdf546  HEAD -> live-res-k
-live: auto find_key: scanning 45365591500 bytes of sweep
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+hub.com/EdenAlpha/peerlink-efootball-disconnects
    efdf546..87ccc60  HEAD -> live-res-k
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    87ccc60..2dcbe48  HEAD -> live-res-k
@@ -37,3 +35,5 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    37f9bce..0c297ee  HEAD -> live-res-k
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    0c297ee..7bf75b5  HEAD -> live-res-k
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   7bf75b5..2cf9743  HEAD -> live-res-k
