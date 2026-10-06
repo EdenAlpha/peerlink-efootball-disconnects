@@ -1,6 +1,4 @@
 ootball-disconnects
-   30ec11b..7f586af  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    7f586af..2255a03  HEAD -> live-res-k
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    2255a03..cdfbb9b  HEAD -> live-res-k
@@ -36,3 +34,5 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    eff1a6f..a277ab3  HEAD -> live-res-k
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    a277ab3..6e1e54f  HEAD -> live-res-k
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   6e1e54f..5c8e987  HEAD -> live-res-k
