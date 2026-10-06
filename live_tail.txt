@@ -1,8 +1,4 @@
-4b..1156551  HEAD -> live-res-k
-live: auto find_key: scanning 45365591500 bytes of sweep
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   1156551..68297ed  HEAD -> live-res-k
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+ootball-disconnects
    68297ed..3e0910a  HEAD -> live-res-k
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    3e0910a..cd56de8  HEAD -> live-res-k
@@ -37,3 +33,6 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    7d37a9a..0934827  HEAD -> live-res-k
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    0934827..1cd8235  HEAD -> live-res-k
+ ! [remote rejected] HEAD -> live-res-k (Internal Server Error)
+error: failed to push some refs to 'https://github.com/EdenAlpha/peerlink-efootball-disconnects'
+live: push attempt 1 failed for [heartbeat 629]; rebasing onto live-res-k
