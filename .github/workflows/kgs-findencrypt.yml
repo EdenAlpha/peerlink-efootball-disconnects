@@ -1,0 +1,198 @@
+name: kgs-findencrypt
+
+# Headless Ghidra pass that answers exactly one question: which functions in
+# libUE4.so reference the "pes-custom-encrypt" header region, and what string
+# literals do they load?  The AES-256 body key should be among those literals.
+#
+# Photocopier rule: read the key out of the game's own binary. Never guess it.
+#
+# Why a separate workflow instead of touching kgs-ghidra.yml:
+#   * kgs-ghidra.yml must never be rewritten (working rule). It runs three
+#     post-scripts, one of which emits a multi-GB dump, and its gate therefore
+#     requires that dump to exist.
+#   * This one runs ONLY FindEncryptKey.java. Cheaper, faster, and its pass/fail
+#     depends solely on the output of this script.
+#   * FindEncryptKey.java writes no file of its own -- it only println()s. So the
+#     script section is copied out of the headless log into findencrypt_out.txt,
+#     and the result gate judges THAT, never the whole log.
+#
+# The binary is KONAMI property (.gitignore excludes efootball-apk/native/).
+# It is NEVER committed. It travels via a DRAFT release (collaborators-only),
+# is fetched with GITHUB_TOKEN, verified by size + SHA256, and analysed
+# ephemerally.
+#
+# No-waste design:
+#   * fail-fast gates (Java, Ghidra SHA, binary size, binary SHA) run BEFORE
+#     the long analysis
+#   * the analysis runs in the FOREGROUND with a heartbeat, so progress streams
+#     live into the Actions log instead of hiding in a file seen at the end
+#   * upload-artifact runs with if: always(), so a timeout still saves the log
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Draft release tag holding libUE4.so"
+        required: false
+        default: "libue4-local"
+      expected_sha:
+        description: "Expected SHA256 of libUE4.so (fail fast on mismatch)"
+        required: false
+        default: "2AC4FF17AC8AD713D9531C2601E38A3C8335E02EA882BA2DC4445C191C1298CD"
+      expected_size:
+        description: "Expected byte size of libUE4.so"
+        required: false
+        default: "160822968"
+      analysis_timeout:
+        description: "Per-file analysis cap in seconds for Ghidra"
+        required: false
+        default: "5400"
+
+permissions:
+  # write (not read): the binary travels via a DRAFT release, and GitHub's API
+  # only shows drafts to tokens with push access. Read-only fails fast with
+  # "release not found". Nothing is pushed by this workflow.
+  contents: write
+
+jobs:
+  findencrypt:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: checkout (scripts only, binary comes from draft release)
+        uses: actions/checkout@v4
+
+      - name: 00 environment probe
+        run: |
+          set -x
+          echo "=== PROBE ==="
+          nproc
+          free -g
+          df -h /tmp | tail -2
+          java -version 2>&1 | head -2 || echo "no java yet (expected)"
+          echo "inputs: tag=${{ inputs.tag }} size=${{ inputs.expected_size }}"
+          echo "=== PROBE DONE ==="
+
+      - name: 01 install Java 21
+        run: |
+          set -x
+          echo "=== JAVA INSTALL ==="
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq openjdk-21-jdk-headless
+          export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+          echo "JAVA_HOME=$JAVA_HOME"
+          "$JAVA_HOME/bin/java" -version 2>&1
+          echo "=== JAVA OK ==="
+
+      - name: 02 download Ghidra (pinned, SHA-checked)
+        run: |
+          set -x
+          echo "=== GHIDRA DOWNLOAD ==="
+          cd /tmp
+          URL="https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_12.1.4_build/ghidra_12.1.4_PUBLIC_20260921.zip"
+          for i in 1 2 3; do
+            echo "attempt $i..."
+            curl -L --retry 3 -o ghidra.zip "$URL" && break
+            sleep 15
+          done
+          ls -la ghidra.zip
+          echo "ddac49f903da9d5bac833e5cc79395098b9c33cfd3279be5f31bd00387d2d4db  ghidra.zip" | sha256sum -c -
+          unzip -q ghidra.zip
+          ls -d /tmp/ghidra_12.1.4_PUBLIC
+          df -h /tmp | tail -1
+          echo "=== GHIDRA READY ==="
+
+      - name: 03 fetch libUE4.so from draft release (fail fast)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -x
+          echo "=== FETCH BINARY ==="
+          mkdir -p /tmp/work && cd /tmp/work
+          gh release download "${{ inputs.tag }}" --repo "$GITHUB_REPOSITORY" --pattern 'libUE4.so' --clobber
+          ls -la libUE4.so
+          ACTUAL_SIZE=$(stat -c%s libUE4.so)
+          echo "size: $ACTUAL_SIZE (expect ${{ inputs.expected_size }})"
+          [ "$ACTUAL_SIZE" = "${{ inputs.expected_size }}" ] || { echo "SIZE MISMATCH, aborting before the long run"; exit 1; }
+          echo "${{ inputs.expected_sha }}  libUE4.so" | sha256sum -c -
+          file libUE4.so || true
+          echo "=== BINARY VERIFIED ==="
+
+      - name: 04 stage scripts (Java only; .py would need PyGhidra)
+        run: |
+          set -x
+          echo "=== STAGE SCRIPTS ==="
+          mkdir -p /tmp/gscripts /tmp/ghidra_proj
+          cp "$GITHUB_WORKSPACE/efootball-apk/ghidra_scripts/"*.java /tmp/gscripts/
+          ls -la /tmp/gscripts/
+          test -f /tmp/gscripts/FindEncryptKey.java || { echo "FindEncryptKey.java missing"; exit 1; }
+          echo "=== JAVAC CHECK (seconds; real errors print here) ==="
+          export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+          CP=$(find /tmp/ghidra_12.1.4_PUBLIC -name '*.jar' | tr '\n' ':')
+          "$JAVA_HOME/bin/javac" -nowarn -cp "$CP" -d /tmp/gscripts /tmp/gscripts/*.java
+          echo "JAVAC_RC=$? (nonzero = compile error above; run stops here, minutes not hours)"
+          echo "=== SCRIPTS STAGED ==="
+
+      - name: 05 run analyzeHeadless (foreground, streamed)
+        run: |
+          set -x
+          echo "=== ANALYSIS START $(date -u +%FT%TZ) ==="
+          export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+          export _JAVA_OPTIONS="-Xmx8g"
+          cd /tmp
+          # Heartbeat: distinguishes a slow analyzer from a wedged job, which
+          # otherwise look identical (run 37098303440 wedged 60 min silent).
+          ( while true; do echo "HEARTBEAT $(date -u +%T)Z job-alive"; sleep 60; done ) &
+          HB_PID=$!
+          # set +e: Actions runs this with `bash -eo pipefail`, so a failing
+          # pipeline would abort the step right here and the RESULT GATE below
+          # would never print -- a wedged run and a script error would then
+          # look identical. Capture the code, restore -e, and let the gate judge.
+          set +e
+          stdbuf -o0 -e0 ./ghidra_12.1.4_PUBLIC/support/analyzeHeadless \
+            /tmp/ghidra_proj FindEncrypt \
+            -import /tmp/work/libUE4.so \
+            -preScript TuneAnalysis.java \
+            -analysisTimeoutPerFile "${{ inputs.analysis_timeout }}" \
+            -postScript FindEncryptKey.java \
+            -scriptPath /tmp/gscripts \
+            -deleteProject 2>&1 | tee /tmp/ghidra_run.log
+          RC=${PIPESTATUS[0]}
+          set -e
+          kill $HB_PID 2>/dev/null || true
+          echo "ANALYSIS_RC=$RC"
+          if [ "$RC" -ne 0 ]; then
+            echo "NOTE: analyzeHeadless exited $RC; the gate below still judges the output"
+          fi
+          echo "=== ANALYSIS END $(date -u +%FT%TZ) ==="
+          # FindEncryptKey.java only prints. Lift its section out of the log so
+          # the gate judges this script's output and nothing else.
+          awk '/header literal at:/{f=1} f' /tmp/ghidra_run.log > /tmp/findencrypt_out.txt
+          echo "=== FINDENCRYPT SECTION: $(wc -l < /tmp/findencrypt_out.txt) lines ==="
+          echo "=== RESULT GATE (fail loudly, never false-green) ==="
+          if grep -q "SCRIPT ERROR" /tmp/ghidra_run.log; then
+            echo "GATE FAIL: a script errored; see log"
+            exit 1
+          fi
+          if [ ! -s /tmp/findencrypt_out.txt ]; then
+            echo "GATE FAIL: FindEncryptKey produced no output"
+            exit 1
+          fi
+          if ! grep -q "functions referencing the header region:" /tmp/findencrypt_out.txt; then
+            echo "GATE FAIL: scan never completed (marker absent)"
+            exit 1
+          fi
+          echo "GATE PASS"
+          echo "=== TOP OF RESULT ==="
+          head -40 /tmp/findencrypt_out.txt
+
+      - name: 06 upload results (always, even on timeout/failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgs-findencrypt-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            /tmp/findencrypt_out.txt
+            /tmp/ghidra_run.log
