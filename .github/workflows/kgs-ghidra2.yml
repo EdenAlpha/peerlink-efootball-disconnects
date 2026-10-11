@@ -1,0 +1,152 @@
+name: kgs-ghidra2
+
+# Continuation of the FindFullDump decompile: the first run hit its 200-min
+# deadline at entry ~0x753b414, leaving the online/room/NTL region
+# (0x753b414-0x8c35207: createjoin room, recruit code, game_sycom, natType,
+# sync tasks, negotiator, gate command objects) without decompiled C.
+# This run re-imports, re-analyses, and decompiles ONLY entries >= START.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Draft release tag holding libUE4.so"
+        required: false
+        default: "libue4-local"
+      expected_sha:
+        description: "Expected SHA256 of libUE4.so (fail fast on mismatch)"
+        required: false
+        default: "2AC4FF17AC8AD713D9531C2601E38A3C8335E02EA882BA2DC4445C191C1298CD"
+      expected_size:
+        description: "Expected byte size of libUE4.so"
+        required: false
+        default: "160822968"
+      decomp_start:
+        description: "Hex entry address to start decompiling at"
+        required: false
+        default: "7530000"
+      analysis_timeout:
+        description: "Per-file analysis cap in seconds for Ghidra"
+        required: false
+        default: "5400"
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 340
+    steps:
+      - name: checkout (scripts only, binary comes from draft release)
+        uses: actions/checkout@v4
+
+      - name: 00 environment probe
+        run: |
+          set -x
+          echo "=== PROBE ==="
+          nproc
+          free -g
+          df -h /tmp | tail -2
+          echo "inputs: tag=${{ inputs.tag }} start=${{ inputs.decomp_start }}"
+          echo "=== PROBE DONE ==="
+
+      - name: 01 install Java 21
+        run: |
+          set -x
+          echo "=== JAVA INSTALL ==="
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq openjdk-21-jdk-headless
+          export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+          "$JAVA_HOME/bin/java" -version 2>&1
+          echo "=== JAVA OK ==="
+
+      - name: 02 download Ghidra (pinned, SHA-checked)
+        run: |
+          set -x
+          echo "=== GHIDRA DOWNLOAD ==="
+          cd /tmp
+          URL="https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_12.1.4_build/ghidra_12.1.4_PUBLIC_20260921.zip"
+          for i in 1 2 3; do
+            echo "attempt $i..."
+            curl -L --retry 3 -o ghidra.zip "$URL" && break
+            sleep 15
+          done
+          ls -la ghidra.zip
+          echo "ddac49f903da9d5bac833e5cc79395098b9c33cfd3279be5f31bd00387d2d4db  ghidra.zip" | sha256sum -c -
+          unzip -q ghidra.zip
+          ls -d /tmp/ghidra_12.1.4_PUBLIC
+          echo "=== GHIDRA READY ==="
+
+      - name: 03 fetch libUE4.so from draft release (fail fast)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -x
+          echo "=== FETCH BINARY ==="
+          mkdir -p /tmp/work && cd /tmp/work
+          gh release download "${{ inputs.tag }}" --repo "$GITHUB_REPOSITORY" --pattern 'libUE4.so' --clobber
+          ls -la libUE4.so
+          ACTUAL_SIZE=$(stat -c%s libUE4.so)
+          [ "$ACTUAL_SIZE" = "${{ inputs.expected_size }}" ] || { echo "SIZE MISMATCH, aborting"; exit 1; }
+          echo "${{ inputs.expected_sha }}  libUE4.so" | sha256sum -c -
+          echo "=== BINARY VERIFIED ==="
+
+      - name: 04 stage analysis scripts (Java only)
+        run: |
+          set -x
+          echo "=== STAGE SCRIPTS ==="
+          mkdir -p /tmp/gscripts
+          cp "$GITHUB_WORKSPACE/efootball-apk/ghidra_scripts/"*.java /tmp/gscripts/
+          ls -la /tmp/gscripts/
+          export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+          CP=$(find /tmp/ghidra_12.1.4_PUBLIC -name '*.jar' | tr '\n' ':')
+          "$JAVA_HOME/bin/javac" -nowarn -cp "$CP" -d /tmp/gscripts /tmp/gscripts/*.java
+          echo "JAVAC_RC=$?"
+          echo "=== SCRIPTS STAGED ==="
+
+      - name: 05 run analyzeHeadless (long, foreground, streamed)
+        run: |
+          set -x
+          echo "=== ANALYSIS START $(date -u +%FT%TZ) ==="
+          export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+          export _JAVA_OPTIONS="-Xmx8g"
+          export FULLDUMP2_OUT=/tmp/fulldump2_out.txt
+          export FULLDUMP_DECOMP_START="${{ inputs.decomp_start }}"
+          cd /tmp
+          ( while true; do echo "HEARTBEAT $(date -u +%T)Z job-alive"; sleep 60; done ) & HB_PID=$!
+          stdbuf -o0 -e0 ./ghidra_12.1.4_PUBLIC/support/analyzeHeadless \
+            /tmp/ghidra_proj KillRule2 \
+            -import /tmp/work/libUE4.so \
+            -preScript TuneAnalysis.java \
+            -analysisTimeoutPerFile "${{ inputs.analysis_timeout }}" \
+            -postScript DecompPart2.java \
+            -scriptPath /tmp/gscripts \
+            -deleteProject 2>&1 | tee /tmp/ghidra_run.log
+          RC=${PIPESTATUS[0]}
+          kill $HB_PID 2>/dev/null || true
+          echo "ANALYSIS_RC=$RC"
+          echo "=== ANALYSIS END $(date -u +%FT%TZ) ==="
+          ls -la /tmp/fulldump2_out.txt || true
+          echo "=== RESULT GATE ==="
+          if grep -q "SCRIPT ERROR" /tmp/ghidra_run.log; then
+            echo "GATE FAIL: post-script errored; see log"
+            exit 1
+          fi
+          if [ ! -s /tmp/fulldump2_out.txt ]; then
+            echo "GATE FAIL: fulldump2_out.txt missing or empty"
+            exit 1
+          fi
+          echo "PART2: $(wc -l < /tmp/fulldump2_out.txt) lines, $(du -h /tmp/fulldump2_out.txt | cut -f1)"
+          echo "GATE PASS"
+
+      - name: 06 upload results (always, even on timeout/failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgs-ghidra2-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            /tmp/fulldump2_out.txt
+            /tmp/ghidra_run.log
