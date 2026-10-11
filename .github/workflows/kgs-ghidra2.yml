@@ -96,7 +96,7 @@ jobs:
         run: |
           set -x
           echo "=== STAGE SCRIPTS ==="
-          mkdir -p /tmp/gscripts
+          mkdir -p /tmp/gscripts /tmp/ghidra_proj
           cp "$GITHUB_WORKSPACE/efootball-apk/ghidra_scripts/"*.java /tmp/gscripts/
           ls -la /tmp/gscripts/
           export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
