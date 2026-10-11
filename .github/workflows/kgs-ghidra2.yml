@@ -25,6 +25,10 @@ on:
         description: "Hex entry address to start decompiling at"
         required: false
         default: "7530000"
+      decomp_deadline:
+        description: "Decomp phase budget in minutes (FULLDUMP_DEADLINE_MIN)"
+        required: false
+        default: "230"
       analysis_timeout:
         description: "Per-file analysis cap in seconds for Ghidra"
         required: false
@@ -36,7 +40,7 @@ permissions:
 jobs:
   analyze:
     runs-on: ubuntu-24.04
-    timeout-minutes: 340
+    timeout-minutes: 355
     steps:
       - name: checkout (scripts only, binary comes from draft release)
         uses: actions/checkout@v4
@@ -113,6 +117,7 @@ jobs:
           export _JAVA_OPTIONS="-Xmx8g"
           export FULLDUMP2_OUT=/tmp/fulldump2_out.txt
           export FULLDUMP_DECOMP_START="${{ inputs.decomp_start }}"
+          export FULLDUMP_DEADLINE_MIN="${{ inputs.decomp_deadline }}"
           cd /tmp
           ( while true; do echo "HEARTBEAT $(date -u +%T)Z job-alive"; sleep 60; done ) & HB_PID=$!
           stdbuf -o0 -e0 ./ghidra_12.1.4_PUBLIC/support/analyzeHeadless \
