@@ -1,0 +1,27 @@
+cmd: exec tail -15 /tmp/kgs/mitm.log 2>&1; echo ---FLOWS---; tail -5 /tmp/kgs/flows.log 2>&1 | cut -c1-200
+at: 17:06:51
+$ tail -15 /tmp/kgs/mitm.log 2>&1; echo ---FLOWS---; tail -5 /tmp/kgs/flows.log 2>&1 | cut -c1-200
+rc=0
+[16:51:13.280][172.17.0.2:41626] server disconnect 3.162.163.121:443
+[16:51:13.281][172.17.0.2:41640] server disconnect 3.162.163.121:443
+[16:51:13.281][172.17.0.2:60876] server disconnect 3.162.163.74:443
+[16:51:13.791][172.17.0.2:46392] server disconnect 172.253.155.138:443
+[16:52:13.268][172.17.0.2:41618] client disconnect
+[16:52:13.283][172.17.0.2:41626] client disconnect
+[16:52:13.287][172.17.0.2:41640] client disconnect
+[16:52:13.293][172.17.0.2:60876] client disconnect
+[16:52:13.786][172.17.0.2:46392] client disconnect
+[16:58:44.591][172.17.0.2:60538] client connect
+[16:58:44.617][172.17.0.2:60538] server connect 172.217.114.4:443
+172.17.0.2:60538: POST https://172.217.114.4/google.cryptauth.devicesync.v1.De… HTTP/2.0
+      << HTTP/2.0 200 OK 3.4k
+172.17.0.2:60538: POST https://172.217.114.4/google.cryptauth.devicesync.v1.De… HTTP/2.0
+      << HTTP/2.0 200 OK 8.6k
+---FLOWS---
+### RESP POST /pes22/gate/gate_CMD_GET_ADVERTISEMENT.php -> 200
+RESPLEN: 304
+RESPHEX: e98b41357a0f61659c4b620f2318fc0cc097e2b1dc9b900d9f800a0b897c62f753b9a5cccefa8bc4c574d3924f3371957b08e5d928d0bcdd4df6a52fe88964cdad94c9460ee33d2f544a463e02c5ebfa3d67bc96a73b52fc19898e2195cbee4
+HOST-SEEN: fundingchoicesmessages.google.com
+HOST-SEEN: cryptauthdevicesync.googleapis.com
+gamepid: 14630
+flows: 12
