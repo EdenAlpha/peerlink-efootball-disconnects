@@ -1,12 +1,4 @@
-/github.com/EdenAlpha/peerlink-efootball-disconnects
-   6f2b664..75ec2ce  HEAD -> live-res-a
-kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   75ec2ce..55a3a6b  HEAD -> live-res-a
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   55a3a6b..bafe74b  HEAD -> live-res-a
-kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+football-disconnects
    bafe74b..59ecf35  HEAD -> live-res-a
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    59ecf35..9fc4957  HEAD -> live-res-a
@@ -33,4 +25,13 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    54ae87d..0bae7b1  HEAD -> live-res-a
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    0bae7b1..62a83f0  HEAD -> live-res-a
+kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   62a83f0..f9acbc0  HEAD -> live-res-a
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   f9acbc0..9b89899  HEAD -> live-res-a
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   9b89899..9ce84a4  HEAD -> live-res-a
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   9ce84a4..45acd9b  HEAD -> live-res-a
 kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
