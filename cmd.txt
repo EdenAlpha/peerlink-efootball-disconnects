@@ -1,1 +1,1 @@
-exec adb -s 127.0.0.1:5555 shell input swipe 1000 350 300 350 400
+exec adb -s 127.0.0.1:5555 shell input swipe 1050 350 250 350 500; sleep 1; adb -s 127.0.0.1:5555 shell input swipe 1050 350 250 350 500
