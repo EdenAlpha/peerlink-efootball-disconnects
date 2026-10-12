@@ -1,0 +1,16 @@
+cmd: exec adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam; adb -s 127.0.0.1:5555 shell su 0 nohup tar -cf /tmp/kgs/full/game-data.tar /data/data/jp.konami.pesam >/tmp/tar1.log 2>&1 & echo tar-data pid $!; adb -s 127.0.0.1:5555 shell su 0 nohup tar -cf /tmp/kgs/full/game-apk.tar /data/app/~~/*pesam* >/tmp/tar2.log 2>&1 & echo tar-apk pid $!
+at: 18:45:06
+$ adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam; adb -s 127.0.0.1:5555 shell su 0 nohup tar -cf /tmp/kgs/full/game-data.tar /data/data/jp.konami.pesam >/tmp/tar1.log 2>&1 & echo tar-data pid $!; adb -s 127.0.0.1:5555 shell su 0 nohup tar -cf /tmp/kgs/full/game-apk.tar /data/app/~~/*pesam* >/tmp/tar2.log 2>&1 & echo tar-apk pid $!
+rc=0
+package:/data/app/~~cL_30A6HSbZrQeqSuyCgAQ==/jp.konami.pesam-H-iHE6IK8L9ucEzxw-_-5g==/base.apk
+package:/data/app/~~cL_30A6HSbZrQeqSuyCgAQ==/jp.konami.pesam-H-iHE6IK8L9ucEzxw-_-5g==/split_config.arm64_v8a.apk
+package:/data/app/~~cL_30A6HSbZrQeqSuyCgAQ==/jp.konami.pesam-H-iHE6IK8L9ucEzxw-_-5g==/split_config.en.apk
+package:/data/app/~~cL_30A6HSbZrQeqSuyCgAQ==/jp.konami.pesam-H-iHE6IK8L9ucEzxw-_-5g==/split_config.xhdpi.apk
+package:/data/app/~~cL_30A6HSbZrQeqSuyCgAQ==/jp.konami.pesam-H-iHE6IK8L9ucEzxw-_-5g==/split_gpdeku.apk
+package:/data/app/~~cL_30A6HSbZrQeqSuyCgAQ==/jp.konami.pesam-H-iHE6IK8L9ucEzxw-_-5g==/split_gpdeku.config.arm64_v8a.apk
+package:/data/app/~~cL_30A6HSbZrQeqSuyCgAQ==/jp.konami.pesam-H-iHE6IK8L9ucEzxw-_-5g==/split_pad_it_0.apk
+package:/data/app/~~cL_30A6HSbZrQeqSuyCgAQ==/jp.konami.pesam-H-iHE6IK8L9ucEzxw-_-5g==/split_pad_it_1.apk
+tar-data pid 127070
+tar-apk pid 127071
+gamepid: 17928
+flows: 499
