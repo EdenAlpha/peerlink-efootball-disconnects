@@ -1,1 +1,1 @@
-exec nohup bash -c 'while true; do adb -s 127.0.0.1:5555 shell input swipe 200 500 640 500 300; adb -s 127.0.0.1:5555 shell input tap 1050 470; sleep 1; done' >/tmp/swiped.log 2>&1 & echo daemon pid $!
+exec mkdir -p /tmp/kgs/full; cp /tmp/kgs/flows.log /tmp/kgs/full/flows-snap.log; cp /tmp/kgs/flows.mitm /tmp/kgs/full/flows-snap.mitm; ls -la /tmp/kgs/full/ | head -10
