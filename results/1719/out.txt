@@ -1,0 +1,6 @@
+cmd: exec adb -s 127.0.0.1:5555 shell input swipe 1000 350 300 350 400
+at: 17:51:36
+$ adb -s 127.0.0.1:5555 shell input swipe 1000 350 300 350 400
+rc=0
+gamepid: 17928
+flows: 90
