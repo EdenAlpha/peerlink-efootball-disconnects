@@ -1,1 +1,1 @@
-exec adb -s 127.0.0.1:5555 shell wm size; adb -s 127.0.0.1:5555 shell input tap 231 541
+exec for i in 1 2 3 4 5; do adb -s 127.0.0.1:5555 shell input keyevent KEYCODE_TAB; sleep 0.4; done; adb -s 127.0.0.1:5555 shell input keyevent KEYCODE_SPACE
