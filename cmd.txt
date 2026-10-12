@@ -1,1 +1,1 @@
-exec adb -s 127.0.0.1:5555 shell input tap 700 590
+exec adb -s 127.0.0.1:5555 shell su 0 ls -R /data/data/jp.konami.pesam/shared_prefs 2>&1 | head -20
