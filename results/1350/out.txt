@@ -1,0 +1,12 @@
+cmd: exec adb -s 127.0.0.1:5555 shell su 0 cat /data/data/jp.konami.pesam/shared_prefs/jp.konami.pesam_preferences.xml
+at: 16:59:42
+$ adb -s 127.0.0.1:5555 shell su 0 cat /data/data/jp.konami.pesam/shared_prefs/jp.konami.pesam_preferences.xml
+rc=0
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <int name="IABTCF_gdprApplies" value="0" />
+    <string name="UMP_consentModeValues">4444</string>
+    <int name="IABTCF_CmpSdkID" value="300" />
+</map>
+gamepid: 14630
+flows: 12
