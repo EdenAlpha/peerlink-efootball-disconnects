@@ -1,0 +1,7 @@
+cmd: exec nohup bash -c 'while true; do adb -s 127.0.0.1:5555 shell input swipe 200 500 640 500 300; adb -s 127.0.0.1:5555 shell input tap 1050 470; sleep 1; done' >/tmp/swiped.log 2>&1 & echo daemon pid $!
+at: 18:17:49
+$ nohup bash -c 'while true; do adb -s 127.0.0.1:5555 shell input swipe 200 500 640 500 300; adb -s 127.0.0.1:5555 shell input tap 1050 470; sleep 1; done' >/tmp/swiped.log 2>&1 & echo daemon pid $!
+rc=0
+daemon pid 85546
+gamepid: 17928
+flows: 234
