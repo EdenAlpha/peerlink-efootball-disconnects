@@ -1,0 +1,30 @@
+cmd: exec bash kgs-login/live/arm_recorder.sh redroid /tmp/kgs
+at: 14:32:13
+$ bash kgs-login/live/arm_recorder.sh redroid /tmp/kgs
+rc=0
+rec: fetching setup_ca.sh
+rec: installing the CA
+ca-setup: subject hash: 928a8368
+ca-setup: system store is writable, installing
+ca-setup: INSTALLED into /system/etc/security/cacerts/928a8368.0
+-rw-r--r-- 1 root root 1155 2026-10-12 09:32 /system/etc/security/cacerts/928a8368.0
+ca-setup: RESULT: installed without remount
+rec: ca hash: 928a8368
+rec: binding the system trust store over the Conscrypt apex
+rec:   system store: 135 certs
+rec:   apex store:   135 certs
+-rw-r--r-- 1 root root 1155 2026-10-12 09:32 /apex/com.android.conscrypt/cacerts/928a8368.0
+rec: restarting zygote so the trust store is re-read
+already connected to 127.0.0.1:5555
+rec:   phone back after 5s
+rec: starting mitmproxy, signing with OUR ca
+rec:   proxy up, addon loaded
+rec: arming DNAT on the docker bridge
+rec:   docker0 gateway: [172.17.0.1]
+Chain PREROUTING (policy ACCEPT)
+target     prot opt source               destination         
+DNAT       6    --  0.0.0.0/0            0.0.0.0/0            tcp dpt:443 to:172.17.0.1:8080
+rec: packet capture for the whole session
+rec: RECORDER ARMED
+gamepid: 
+flows: 0
