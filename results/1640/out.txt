@@ -1,0 +1,10 @@
+cmd: exec adb -s 127.0.0.1:5555 shell am force-stop jp.konami.pesam; sleep 2; echo 127.0.0.1 fundingchoicesmessages.google.com | adb -s 127.0.0.1:5555 shell su 0 tee -a /system/etc/hosts; adb -s 127.0.0.1:5555 shell su 0 grep fundingchoices /system/etc/hosts; adb -s 127.0.0.1:5555 shell su 0 grep consent_status /data/data/jp.konami.pesam/shared_prefs/__GOOGLE_FUNDING_CHOICE_SDK_INTERNAL__.xml; adb -s 127.0.0.1:5555 shell am start -n jp.konami.pesam/com.epicgames.ue4.SplashActivity
+at: 17:40:29
+$ adb -s 127.0.0.1:5555 shell am force-stop jp.konami.pesam; sleep 2; echo 127.0.0.1 fundingchoicesmessages.google.com | adb -s 127.0.0.1:5555 shell su 0 tee -a /system/etc/hosts; adb -s 127.0.0.1:5555 shell su 0 grep fundingchoices /system/etc/hosts; adb -s 127.0.0.1:5555 shell su 0 grep consent_status /data/data/jp.konami.pesam/shared_prefs/__GOOGLE_FUNDING_CHOICE_SDK_INTERNAL__.xml; adb -s 127.0.0.1:5555 shell am start -n jp.konami.pesam/com.epicgames.ue4.SplashActivity
+rc=0
+127.0.0.1 fundingchoicesmessages.google.com
+127.0.0.1 fundingchoicesmessages.google.com
+    <int name="consent_status" value="1" />
+Starting: Intent { cmp=jp.konami.pesam/com.epicgames.ue4.SplashActivity }
+gamepid: 
+flows: 48
