@@ -1,0 +1,35 @@
+cmd: exec adb -s 127.0.0.1:5555 shell su 0 cat "/data/data/jp.konami.pesam/shared_prefs/__GOOGLE_FUNDING_CHOICE_SDK_INTERNAL__.xml"; echo ---FILES---; adb -s 127.0.0.1:5555 shell su 0 ls /data/data/jp.konami.pesam/files 2>&1 | head -30
+at: 17:03:45
+$ adb -s 127.0.0.1:5555 shell su 0 cat "/data/data/jp.konami.pesam/shared_prefs/__GOOGLE_FUNDING_CHOICE_SDK_INTERNAL__.xml"; echo ---FILES---; adb -s 127.0.0.1:5555 shell su 0 ls /data/data/jp.konami.pesam/files 2>&1 | head -30
+rc=0
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <boolean name="is_pub_misconfigured" value="false" />
+    <set name="stored_info">
+        <string>IDFA_freqCapNumViews</string>
+        <string>UMP_CoMoAdStoragePurposeConsentStatus</string>
+        <string>IABTCF_TCString</string>
+        <string>UMP_CoMoAnalyticsStoragePurposeConsentStatus</string>
+        <string>UMP_CoMoAdPersonalizationPurposeConsentStatus</string>
+        <string>UMP_CoMoAdUserDataPurposeConsentStatus</string>
+        <string>IABTCF_AddtlConsent</string>
+        <string>IABTCF_idfaFlowControl</string>
+    </set>
+    <int name="consent_status" value="1" />
+    <string name="privacy_options_requirement_status">NOT_REQUIRED</string>
+    <set name="written_values">
+        <string>IABTCF_gdprApplies</string>
+        <string>UMP_consentModeValues</string>
+        <string>IABTCF_CmpSdkID</string>
+    </set>
+</map>
+---FILES---
+PersistedInstallation.W0RFRkFVTFRd+MTozMDY0NDIyMTIwNTY6YW5kcm9pZDo1ZjAxNWQwNWFlODI1ZWFi.json
+SaveData
+assetpacks
+datastore
+generatefid.lock
+phenotype
+phenotype_storage_info
+gamepid: 14630
+flows: 12
