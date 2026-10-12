@@ -1,0 +1,19 @@
+cmd: exec P=$(adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam 2>/dev/null | sed s/package:// | tr -d '\r'); adb -s 127.0.0.1:5555 shell su 0 tar -cf /data/local/tmp/game-data.tar /data/data/jp.konami.pesam; adb -s 127.0.0.1:5555 shell su 0 tar -cf /data/local/tmp/game-apk.tar $P; adb -s 127.0.0.1:5555 pull /data/local/tmp/game-data.tar /tmp/kgs/full/ 2>&1 | tail -1; adb -s 127.0.0.1:5555 pull /data/local/tmp/game-apk.tar /tmp/kgs/full/ 2>&1 | tail -1; ls -la /tmp/kgs/full/game-*.tar
+at: 18:56:30
+$ P=$(adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam 2>/dev/null | sed s/package:// | tr -d '\r'); adb -s 127.0.0.1:5555 shell su 0 tar -cf /data/local/tmp/game-data.tar /data/data/jp.konami.pesam; adb -s 127.0.0.1:5555 shell su 0 tar -cf /data/local/tmp/game-apk.tar $P; adb -s 127.0.0.1:5555 pull /data/local/tmp/game-data.tar /tmp/kgs/full/ 2>&1 | tail -1; adb -s 127.0.0.1:5555 pull /data/local/tmp/game-apk.tar /tmp/kgs/full/ 2>&1 | tail -1; ls -la /tmp/kgs/full/game-*.tar
+rc=0
+removing leading '/' from member names
+removing leading '/' from member names
+removing leading '/' from member names
+removing leading '/' from member names
+removing leading '/' from member names
+removing leading '/' from member names
+removing leading '/' from member names
+removing leading '/' from member names
+removing leading '/' from member names
+/data/local/tmp/game-data.tar: 1 file pulled, 0 skipped. 124.7 MB/s (2158866944 bytes in 16.516s)
+/data/local/tmp/game-apk.tar: 1 file pulled, 0 skipped. 136.9 MB/s (867865088 bytes in 6.046s)
+-rw-r--r-- 1 runner runner  867865088 Oct 12 18:56 /tmp/kgs/full/game-apk.tar
+-rw-r--r-- 1 runner runner 2158866944 Oct 12 18:56 /tmp/kgs/full/game-data.tar
+gamepid: 17928
+flows: 639
