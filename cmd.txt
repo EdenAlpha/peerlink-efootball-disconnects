@@ -1,1 +1,1 @@
-exec adb -s 127.0.0.1:5555 shell su 0 ls -R /data/data/jp.konami.pesam/files/SaveData /data/data/jp.konami.pesam/files/datastore 2>&1 | head -40
+exec tail -15 /tmp/kgs/mitm.log 2>&1; echo ---FLOWS---; tail -5 /tmp/kgs/flows.log 2>&1 | cut -c1-200
