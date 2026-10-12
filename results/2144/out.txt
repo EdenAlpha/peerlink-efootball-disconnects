@@ -1,0 +1,9 @@
+cmd: exec P=$(adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam 2>/dev/null | sed s/package:// | tr -d '\r'); adb -s 127.0.0.1:5555 shell su 0 tar -cf /tmp/kgs/full/game-data.tar /data/data/jp.konami.pesam; adb -s 127.0.0.1:5555 shell su 0 tar -cf /tmp/kgs/full/game-apk.tar $P; ls -la /tmp/kgs/full/game-*.tar
+at: 18:55:46
+$ P=$(adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam 2>/dev/null | sed s/package:// | tr -d '\r'); adb -s 127.0.0.1:5555 shell su 0 tar -cf /tmp/kgs/full/game-data.tar /data/data/jp.konami.pesam; adb -s 127.0.0.1:5555 shell su 0 tar -cf /tmp/kgs/full/game-apk.tar $P; ls -la /tmp/kgs/full/game-*.tar
+rc=2
+tar: /tmp/kgs/full/game-data.tar: No such file or directory
+tar: /tmp/kgs/full/game-apk.tar: No such file or directory
+ls: cannot access '/tmp/kgs/full/game-*.tar': No such file or directory
+gamepid: 17928
+flows: 625
