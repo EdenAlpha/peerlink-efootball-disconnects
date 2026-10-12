@@ -1,0 +1,12 @@
+cmd: exec F=/data/data/jp.konami.pesam/shared_prefs/__GOOGLE_FUNDING_CHOICE_SDK_INTERNAL__.xml; adb -s 127.0.0.1:5555 shell su 0 "lsattr $F; md5sum $F; sed -i /consent_status/s/value=1/value=3/ $F; echo sed_rc=$?; md5sum $F; grep consent_status $F"
+at: 17:32:18
+$ F=/data/data/jp.konami.pesam/shared_prefs/__GOOGLE_FUNDING_CHOICE_SDK_INTERNAL__.xml; adb -s 127.0.0.1:5555 shell su 0 "lsattr $F; md5sum $F; sed -i /consent_status/s/value=1/value=3/ $F; echo sed_rc=$?; md5sum $F; grep consent_status $F"
+rc=2
+--------------e----- /data/data/jp.konami.pesam/shared_prefs/__GOOGLE_FUNDING_CHOICE_SDK_INTERNAL__.xml
+md5sum: /data/data/jp.konami.pesam/shared_prefs/__GOOGLE_FUNDING_CHOICE_SDK_INTERNAL__.xml: Permission denied
+sed: /data/data/jp.konami.pesam/shared_prefs/__GOOGLE_FUNDING_CHOICE_SDK_INTERNAL__.xml: Permission denied
+sed_rc=0
+md5sum: /data/data/jp.konami.pesam/shared_prefs/__GOOGLE_FUNDING_CHOICE_SDK_INTERNAL__.xml: Permission denied
+grep: /data/data/jp.konami.pesam/shared_prefs/__GOOGLE_FUNDING_CHOICE_SDK_INTERNAL__.xml: Permission denied
+gamepid: 16814
+flows: 36
