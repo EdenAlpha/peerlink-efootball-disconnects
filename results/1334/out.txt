@@ -1,0 +1,19 @@
+cmd: exec adb -s 127.0.0.1:5555 shell su 0 ls -R /data/data/jp.konami.pesam/shared_prefs 2>&1 | head -20
+at: 16:57:27
+$ adb -s 127.0.0.1:5555 shell su 0 ls -R /data/data/jp.konami.pesam/shared_prefs 2>&1 | head -20
+rc=0
+/data/data/jp.konami.pesam/shared_prefs:
+AnalysisNetwork.xml
+ApplilinkNetwork.xml
+FirebaseHeartBeatW0RFRkFVTFRd+MTozMDY0NDIyMTIwNTY6YW5kcm9pZDo1ZjAxNWQwNWFlODI1ZWFi.xml
+RecommendNetwork.xml
+RewordNetwork.xml
+WebViewChromiumPrefs.xml
+__GOOGLE_FUNDING_CHOICE_SDK_INTERNAL__.xml
+com.google.android.gms.appid.xml
+com.google.android.gms.measurement.prefs.xml
+com.google.firebase.crashlytics.xml
+com.google.firebase.messaging.xml
+jp.konami.pesam_preferences.xml
+gamepid: 14630
+flows: 12
