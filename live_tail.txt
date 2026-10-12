@@ -1,10 +1,4 @@
-8b  HEAD -> live-res-a
-kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
-kgs-login/live/live_loop.sh: line 71: echo: write error: Broken pipe
-To https://github.com/EdenAlpha/peerlink-efootball-disconnects
-   02bf58b..890b7c1  HEAD -> live-res-a
-kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
-kgs-login/live/live_loop.sh: line 71: echo: write error: Broken pipe
+ write error: Broken pipe
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    890b7c1..6edbffb  HEAD -> live-res-a
 kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
@@ -32,4 +26,11 @@ To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    78621cc..b1a7b84  HEAD -> live-res-a
 To https://github.com/EdenAlpha/peerlink-efootball-disconnects
    b1a7b84..1bd3b2f  HEAD -> live-res-a
+kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   1bd3b2f..9f957a4  HEAD -> live-res-a
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   9f957a4..0bcc789  HEAD -> live-res-a
+To https://github.com/EdenAlpha/peerlink-efootball-disconnects
+   0bcc789..33d47f9  HEAD -> live-res-a
 kgs-login/live/live_loop.sh: line 96: [: : integer expression expected
