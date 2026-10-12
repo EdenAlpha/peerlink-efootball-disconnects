@@ -1,0 +1,13 @@
+cmd: exec adb -s 127.0.0.1:5555 shell su 0 du -sm /data/app/*pesam* /data/data/jp.konami.pesam /sdcard/Android/obb/jp.konami.pesam /sdcard/Android/data/jp.konami.pesam 2>&1; adb -s 127.0.0.1:5555 shell df -h /tmp /data 2>&1 | head -6
+at: 18:41:14
+$ adb -s 127.0.0.1:5555 shell su 0 du -sm /data/app/*pesam* /data/data/jp.konami.pesam /sdcard/Android/obb/jp.konami.pesam /sdcard/Android/data/jp.konami.pesam 2>&1; adb -s 127.0.0.1:5555 shell df -h /tmp /data 2>&1 | head -6
+rc=1
+du: /data/app/*pesam*: No such file or directory
+2060	/data/data/jp.konami.pesam
+1	/sdcard/Android/obb/jp.konami.pesam
+1	/sdcard/Android/data/jp.konami.pesam
+Filesystem      Size Used Avail Use% Mounted on
+df: '/tmp': No such file or directory
+/dev/root       144G  45G  100G  31% /storage/emulated/0/Android/obb
+gamepid: 17928
+flows: 455
