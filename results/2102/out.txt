@@ -1,0 +1,9 @@
+cmd: exec ls -la /tmp/kgs/full/game-*.tar; which gh; H=$(git config --get http.https://github.com/.extraheader); echo header_len=$(echo -n "$H" | wc -c)
+at: 18:49:46
+$ ls -la /tmp/kgs/full/game-*.tar; which gh; H=$(git config --get http.https://github.com/.extraheader); echo header_len=$(echo -n "$H" | wc -c)
+rc=0
+ls: cannot access '/tmp/kgs/full/game-*.tar': No such file or directory
+/usr/bin/gh
+header_len=545
+gamepid: 17928
+flows: 553
