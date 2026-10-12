@@ -1,1 +1,1 @@
-exec adb -s 127.0.0.1:5555 shell su 0 du -sm /data/app/*pesam* /data/data/jp.konami.pesam /sdcard/Android/obb/jp.konami.pesam /sdcard/Android/data/jp.konami.pesam 2>&1; adb -s 127.0.0.1:5555 shell df -h /tmp /data 2>&1 | head -6
+exec adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam; adb -s 127.0.0.1:5555 shell su 0 tar -cf /tmp/kgs/full/game-apk.tar /data/app/~~/*pesam* 2>&1 | head -3; adb -s 127.0.0.1:5555 shell su 0 tar -cf /tmp/kgs/full/game-data.tar /data/data/jp.konami.pesam 2>&1 | head -3; sleep 120; ls -la /tmp/kgs/full/game-*.tar
