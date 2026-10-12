@@ -1,0 +1,20 @@
+cmd: exec adb -s 127.0.0.1:5555 shell am force-stop jp.konami.pesam; sleep 2; adb -s 127.0.0.1:5555 shell monkey -p jp.konami.pesam -c android.intent.category.LAUNCHER 1
+at: 16:18:32
+$ adb -s 127.0.0.1:5555 shell am force-stop jp.konami.pesam; sleep 2; adb -s 127.0.0.1:5555 shell monkey -p jp.konami.pesam -c android.intent.category.LAUNCHER 1
+rc=251
+  bash arg: -p
+  bash arg: jp.konami.pesam
+  bash arg: -c
+  bash arg: android.intent.category.LAUNCHER
+  bash arg: 1
+args: [-p, jp.konami.pesam, -c, android.intent.category.LAUNCHER, 1]
+ arg: "-p"
+ arg: "jp.konami.pesam"
+ arg: "-c"
+ arg: "android.intent.category.LAUNCHER"
+ arg: "1"
+data="jp.konami.pesam"
+data="android.intent.category.LAUNCHER"
+** SYS_KEYS has no physical keys but with factor 2.0%.
+gamepid: 
+flows: 0
