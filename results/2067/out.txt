@@ -1,0 +1,17 @@
+cmd: exec adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam; adb -s 127.0.0.1:5555 shell su 0 tar -cf /tmp/kgs/full/game-apk.tar /data/app/~~/*pesam* 2>&1 | head -3; adb -s 127.0.0.1:5555 shell su 0 tar -cf /tmp/kgs/full/game-data.tar /data/data/jp.konami.pesam 2>&1 | head -3; sleep 120; ls -la /tmp/kgs/full/game-*.tar
+at: 18:42:47
+$ adb -s 127.0.0.1:5555 shell pm path jp.konami.pesam; adb -s 127.0.0.1:5555 shell su 0 tar -cf /tmp/kgs/full/game-apk.tar /data/app/~~/*pesam* 2>&1 | head -3; adb -s 127.0.0.1:5555 shell su 0 tar -cf /tmp/kgs/full/game-data.tar /data/data/jp.konami.pesam 2>&1 | head -3; sleep 120; ls -la /tmp/kgs/full/game-*.tar
+rc=2
+package:/data/app/~~cL_30A6HSbZrQeqSuyCgAQ==/jp.konami.pesam-H-iHE6IK8L9ucEzxw-_-5g==/base.apk
+package:/data/app/~~cL_30A6HSbZrQeqSuyCgAQ==/jp.konami.pesam-H-iHE6IK8L9ucEzxw-_-5g==/split_config.arm64_v8a.apk
+package:/data/app/~~cL_30A6HSbZrQeqSuyCgAQ==/jp.konami.pesam-H-iHE6IK8L9ucEzxw-_-5g==/split_config.en.apk
+package:/data/app/~~cL_30A6HSbZrQeqSuyCgAQ==/jp.konami.pesam-H-iHE6IK8L9ucEzxw-_-5g==/split_config.xhdpi.apk
+package:/data/app/~~cL_30A6HSbZrQeqSuyCgAQ==/jp.konami.pesam-H-iHE6IK8L9ucEzxw-_-5g==/split_gpdeku.apk
+package:/data/app/~~cL_30A6HSbZrQeqSuyCgAQ==/jp.konami.pesam-H-iHE6IK8L9ucEzxw-_-5g==/split_gpdeku.config.arm64_v8a.apk
+package:/data/app/~~cL_30A6HSbZrQeqSuyCgAQ==/jp.konami.pesam-H-iHE6IK8L9ucEzxw-_-5g==/split_pad_it_0.apk
+package:/data/app/~~cL_30A6HSbZrQeqSuyCgAQ==/jp.konami.pesam-H-iHE6IK8L9ucEzxw-_-5g==/split_pad_it_1.apk
+tar: /tmp/kgs/full/game-apk.tar: No such file or directory
+tar: /tmp/kgs/full/game-data.tar: No such file or directory
+ls: cannot access '/tmp/kgs/full/game-*.tar': No such file or directory
+gamepid: 17928
+flows: 497
