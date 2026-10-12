@@ -1,1 +1,1 @@
-exec adb -s 127.0.0.1:5555 shell su 0 cat /data/data/jp.konami.pesam/shared_prefs/jp.konami.pesam_preferences.xml
+exec adb -s 127.0.0.1:5555 shell su 0 cat "/data/data/jp.konami.pesam/shared_prefs/__GOOGLE_FUNDING_CHOICE_SDK_INTERNAL__.xml"; echo ---FILES---; adb -s 127.0.0.1:5555 shell su 0 ls /data/data/jp.konami.pesam/files 2>&1 | head -30
