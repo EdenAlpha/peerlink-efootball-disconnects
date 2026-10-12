@@ -1,0 +1,8 @@
+cmd: exec adb -s 127.0.0.1:5555 shell su 0 "echo hello1 > /data/local/tmp/sedtest; sed -i s/hello1/hello3/ /data/local/tmp/sedtest; echo sed_rc=$?; cat /data/local/tmp/sedtest"
+at: 17:28:22
+$ adb -s 127.0.0.1:5555 shell su 0 "echo hello1 > /data/local/tmp/sedtest; sed -i s/hello1/hello3/ /data/local/tmp/sedtest; echo sed_rc=$?; cat /data/local/tmp/sedtest"
+rc=0
+sed_rc=0
+hello3
+gamepid: 16814
+flows: 36
