@@ -1,0 +1,8 @@
+cmd: exec adb -s 127.0.0.1:5555 shell pidof jp.konami.pesam 2>&1 | tr -d '\r'; adb -s 127.0.0.1:5555 shell su 0 grep consent_status /data/data/jp.konami.pesam/shared_prefs/__GOOGLE_FUNDING_CHOICE_SDK_INTERNAL__.xml | cat -A
+at: 17:33:55
+$ adb -s 127.0.0.1:5555 shell pidof jp.konami.pesam 2>&1 | tr -d '\r'; adb -s 127.0.0.1:5555 shell su 0 grep consent_status /data/data/jp.konami.pesam/shared_prefs/__GOOGLE_FUNDING_CHOICE_SDK_INTERNAL__.xml | cat -A
+rc=0
+17411
+    <int name="consent_status" value="3" />$
+gamepid: 17411
+flows: 48
