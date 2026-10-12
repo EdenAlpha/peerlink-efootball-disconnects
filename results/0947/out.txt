@@ -1,0 +1,7 @@
+cmd: exec adb -s 127.0.0.1:5555 shell wm size; adb -s 127.0.0.1:5555 shell input tap 231 541
+at: 16:03:05
+$ adb -s 127.0.0.1:5555 shell wm size; adb -s 127.0.0.1:5555 shell input tap 231 541
+rc=0
+Physical size: 720x1280
+gamepid: 13104
+flows: 0
