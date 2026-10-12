@@ -1,0 +1,8 @@
+cmd: exec F=/data/data/jp.konami.pesam/shared_prefs/__GOOGLE_FUNDING_CHOICE_SDK_INTERNAL__.xml; adb -s 127.0.0.1:5555 shell am force-stop jp.konami.pesam; sleep 3; adb -s 127.0.0.1:5555 shell su 0 sed -i /consent_status/s/1"/3"/ $F; adb -s 127.0.0.1:5555 shell su 0 grep consent_status $F; adb -s 127.0.0.1:5555 shell am start -n jp.konami.pesam/com.epicgames.ue4.SplashActivity
+at: 17:32:44
+$ F=/data/data/jp.konami.pesam/shared_prefs/__GOOGLE_FUNDING_CHOICE_SDK_INTERNAL__.xml; adb -s 127.0.0.1:5555 shell am force-stop jp.konami.pesam; sleep 3; adb -s 127.0.0.1:5555 shell su 0 sed -i /consent_status/s/1"/3"/ $F; adb -s 127.0.0.1:5555 shell su 0 grep consent_status $F; adb -s 127.0.0.1:5555 shell am start -n jp.konami.pesam/com.epicgames.ue4.SplashActivity
+rc=0
+    <int name="consent_status" value="3" />
+Starting: Intent { cmp=jp.konami.pesam/com.epicgames.ue4.SplashActivity }
+gamepid: 17411
+flows: 36
