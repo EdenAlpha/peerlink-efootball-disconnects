@@ -1,0 +1,12 @@
+cmd: uidump 
+at: 17:43:11
+UIDUMP-MAC: 6 nodes
+  -----  ( 640,360 )  FrameLayout                                     
+  -----  ( 640,360 )  LinearLayout                                    
+  -----  ( 640,360 )  FrameLayout        content                      
+  -----  ( 640,360 )  FrameLayout                                     
+  -----  ( 640,360 )  View                                            
+  -----  ( 640,360 )  LinearLayout                                    
+UIDUMP-MAC: 0 clickable
+gamepid: 17928
+flows: 60
