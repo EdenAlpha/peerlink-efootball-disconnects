@@ -1,1 +1,1 @@
-exec adb -s 127.0.0.1:5555 shell su 0 id; adb -s 127.0.0.1:5555 shell su 0 touch /data/data/jp.konami.pesam/shared_prefs/WTEST 2>&1; adb -s 127.0.0.1:5555 shell su 0 ls -l /data/data/jp.konami.pesam/shared_prefs/WTEST 2>&1; adb -s 127.0.0.1:5555 shell su 0 rm -f /data/data/jp.konami.pesam/shared_prefs/WTEST
+exec adb -s 127.0.0.1:5555 shell su 0 "echo hello1 > /data/local/tmp/sedtest; sed -i s/hello1/hello3/ /data/local/tmp/sedtest; echo sed_rc=$?; cat /data/local/tmp/sedtest"
