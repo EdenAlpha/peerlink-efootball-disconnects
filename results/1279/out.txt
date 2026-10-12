@@ -1,0 +1,6 @@
+cmd: exec for i in 1 2 3; do adb -s 127.0.0.1:5555 shell input swipe 640 600 640 150 300; sleep 1; done
+at: 16:49:33
+$ for i in 1 2 3; do adb -s 127.0.0.1:5555 shell input swipe 640 600 640 150 300; sleep 1; done
+rc=0
+gamepid: 14630
+flows: 12
