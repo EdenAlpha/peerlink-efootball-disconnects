@@ -1,0 +1,22 @@
+cmd: exec adb -s 127.0.0.1:5555 shell su 0 ls -R /data/data/jp.konami.pesam/files/SaveData /data/data/jp.konami.pesam/files/datastore 2>&1 | head -40
+at: 17:04:45
+$ adb -s 127.0.0.1:5555 shell su 0 ls -R /data/data/jp.konami.pesam/files/SaveData /data/data/jp.konami.pesam/files/datastore 2>&1 | head -40
+rc=0
+/data/data/jp.konami.pesam/files/SaveData:
+AUTH
+SCREENSHOT
+SYSTEM
+
+/data/data/jp.konami.pesam/files/SaveData/AUTH:
+online_user_id_data.dat
+
+/data/data/jp.konami.pesam/files/SaveData/SCREENSHOT:
+
+/data/data/jp.konami.pesam/files/SaveData/SYSTEM:
+SYSTEM000
+
+/data/data/jp.konami.pesam/files/datastore:
+firebase_session_anAua29uYW1pLnBlc2Ft_data.preferences_pb
+firebase_session_anAua29uYW1pLnBlc2Ft_settings.preferences_pb
+gamepid: 14630
+flows: 12
