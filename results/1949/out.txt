@@ -1,0 +1,17 @@
+cmd: exec mkdir -p /tmp/kgs/full; cp /tmp/kgs/flows.log /tmp/kgs/full/flows-final.log; cp /tmp/kgs/flows.mitm /tmp/kgs/full/flows-final.mitm; cp /tmp/kgs/taps.log /tmp/kgs/full/taps-final.log; cp /tmp/kgs/mitm.log /tmp/kgs/full/mitm-final.log; cp /tmp/kgs/live.log /tmp/kgs/full/live-final.log; sudo docker cp redroid:/data/local/tmp/game2.pcap /tmp/kgs/full/game-final.pcap; ls -la /tmp/kgs/full/
+at: 18:26:06
+$ mkdir -p /tmp/kgs/full; cp /tmp/kgs/flows.log /tmp/kgs/full/flows-final.log; cp /tmp/kgs/flows.mitm /tmp/kgs/full/flows-final.mitm; cp /tmp/kgs/taps.log /tmp/kgs/full/taps-final.log; cp /tmp/kgs/mitm.log /tmp/kgs/full/mitm-final.log; cp /tmp/kgs/live.log /tmp/kgs/full/live-final.log; sudo docker cp redroid:/data/local/tmp/game2.pcap /tmp/kgs/full/game-final.pcap; ls -la /tmp/kgs/full/
+rc=0
+total 180408
+drwxr-xr-x 2 runner runner      4096 Oct 12 18:26 .
+drwxr-xr-x 6 runner runner      4096 Oct 12 18:20 ..
+-rw-r--r-- 1 runner runner    505368 Oct 12 18:26 flows-final.log
+-rw-r--r-- 1 runner runner  35626296 Oct 12 18:26 flows-final.mitm
+-rw-r--r-- 1 runner runner    448336 Oct 12 18:20 flows-snap.log
+-rw-r--r-- 1 runner runner  35433025 Oct 12 18:20 flows-snap.mitm
+-rw-r--r-- 1 root   root   112455680 Oct 12 18:26 game-final.pcap
+-rw-r--r-- 1 runner runner     27269 Oct 12 18:26 live-final.log
+-rw-r--r-- 1 runner runner    201902 Oct 12 18:26 mitm-final.log
+-rw-r--r-- 1 runner runner     18304 Oct 12 18:26 taps-final.log
+gamepid: 17928
+flows: 276
