@@ -1,1 +1,1 @@
-exec for i in 1 2 3 4 5 6; do adb -s 127.0.0.1:5555 shell input swipe 640 600 640 150 300; sleep 1; done
+exec adb -s 127.0.0.1:5555 shell input tap 700 590
