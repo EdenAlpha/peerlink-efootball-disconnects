@@ -2281,3 +2281,56 @@ Collateral findings from the same diff, fixed in the same run:
   next log proves the rule fired on our own squads (whose `parameters[147]`
   are present -- run #40's START_GAME echo shows them).
 
+### 23.22 Run #42: NORMAL_END / NOERR / 2-1 -- the match resolves (2026-10-13)
+
+```
+goal 16' HOME -> NOERR      (phase 1ST_15MIN, gtimer 3000)
+goal 34' HOME -> NOERR      (phase 1ST_30MIN, gtimer 7000)
+goal 61' AWAY -> NOERR      (phase 2ND_15MIN, gtimer 12000)
+foul 92' AWAY -> NOERR      (phase 2ND_30MIN, gtimer 15449, capture-verbatim)
+sgr checksums: 46/46 from real parameters (both reports)
+set_result [both NOERR] -> ['own:NOERR', 'bot:NOERR']
+get_result [bot] -> YES  gameend=NORMAL_END abnormal=NOERR
+                     game_res=LOSE score={home 2, away 1}
+```
+
+The `CHEAT` is gone twice over (checksums + countable goals), the 0-0 is
+gone (goals filed mid-ladder with live phases are counted), and `LOSE` from
+the bot's side is the CORRECT reading of a 2-1 home win.  Every defect found
+since §23.19 mattered: one-sided battery, fabricated checksums, END-phased
+goals, sender-uid mismatch, GK scorer, self-assist.
+
+One asymmetry survives: the owner's side polls `NO` x6 while the bot reads
+`YES` on try 1 (runs #41 and #42 alike).  The capture's block order is
+`123 SET -> 124 GET(NO) -> 125 CHANGE END -> 126 GET(YES)` -- the `END`
+phase lands AFTER the submit and the client only sees `YES` after that.
+chain3 sent `END` before the battery and never again.  Run #43 re-sends one
+owner-channel `END` (gtimer 15772, verbatim block 125) between the battery
+and the polls.
+
+### 23.23 The P2P lever confirmed + verdict-thread close (2026-10-14)
+
+Run #46 reverted exactly one field -- bot `nat_type` 268435711 back to
+270532787, everything else identical to #45 -- and the session came back
+`game_sycom: P2P`, `gamerelay: NotImplement`.  Scoreboard across the flip:
+
+| runs | nat_type pair | server says |
+|---|---|---|
+| #34-37 | same/same (270532787) | P2P |
+| #38-45 | mixed (270532787/268435711) | SC us-east4, every time |
+| #46 | same/same again | **P2P** |
+
+The rule is the pair, not the IP (reflexive `3.80.79.52` shared throughout)
+and not the hosts (distinct capture hosts kept in #46).  For the AGENTS.md
+deliverable this is the precondition that matters: same NAT both sides --
+which two phones behind one hotspot produce by construction -- keeps game
+content phone-to-phone inside the WiFi tunnel; mixed NATs hand the server a
+relay that bypasses it.
+
+Run #45 also closed the owner's-verdict thread: bot reported FIRST and the
+owner still polled `NO` x20.  Not report order, not poll timing (20 rounds x
+3 s), not the post-submit END (#43).  The owner's per-side copy never
+materializes while the bot's reads `NORMAL_END / NOERR / 2-1` on try 1 --
+the match is resolved server-side regardless.  No further runs on this;
+per the plan the far-side bot never files reports anyway.
+

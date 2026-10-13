@@ -669,8 +669,17 @@ def endpoint_net(tag: str = "owner") -> dict:
     # the ntl pair looked like one device wearing two user_ids.  host_* now
     # matches the capture byte-for-byte; only reflexive_* stays ours (it must,
     # or the server cannot correlate the keepalive we actually beat from).
+    #
+    # 2026-10-14 (run #46): half-revert.  Runs #34-37 (same nat_type both
+    # sides) got game_sycom=P2P; runs #38-45 (mixed nat_types) got SC
+    # every time -- the server's sycom decision follows the nat_type PAIR,
+    # not the IP (reflexive was shared throughout).  The AGENTS.md
+    # deliverable needs P2P (bot as far-side peer over the WiFi tunnel;
+    # SC bypasses it), so both sides report 270532787 again while the
+    # distinct capture hosts/ports stay.  If P2P returns, the lever is
+    # confirmed: same NAT both sides -> P2P, mixed -> relay.
     PROFILE = {"owner": ("172.17.0.2", 33001, 270532787),
-               "bot": ("100.88.219.229", 1162, 268435711)}
+               "bot": ("100.88.219.229", 1162, 270532787)}
     local_host, cap_hport, cap_nat = PROFILE.get(
         tag, PROFILE["owner"])
     try:
@@ -933,13 +942,25 @@ def change_phase(g: Gate, game_id, phase: str, gtimer: int) -> dict:
 
 
 def add_score(g: Gate, game_id, goal_user, side, scorer,
-              minute: int) -> dict:
+              minute: int, phase: str, gtimer: int) -> dict:
+    """CMD_ADD_SCORE -- body from the real capture (blocks 116/120).
+
+    2026-10-13 (run #42): three divergences zeroed our goals.  The old
+    builder hardcoded phase="END" (a goal filed after the match is
+    accepted but never counted -- run #41's 0-0), set goal_user_id to the
+    SCORER's owner (capture: one reporting client puts its OWN uid on
+    every goal on both sides -- blocks 116/120 share 1500395919), and
+    assisted the scorer to himself (capture: assist_user_id 0).  It also
+    fielded home[0] -- the GK -- as scorer; scorers are outfield starters.
+    phase/gtimer are the real in-match values (capture 46'->7877 in
+    1ST_30MIN, 67'->11852 in 2ND_15MIN).
+    """
     m = g.envelope("CMD_ADD_SCORE")
     m.update(game_id=game_id, goal_user_id=goal_user, goal_side=side,
              goal_gameplayer_id=scorer, goal_player_side=side,
-             assist_user_id=goal_user, assist_side=side,
+             assist_user_id=0, assist_side=side,
              assist_gameplayer_id=scorer, assist_player_side=side,
-             gtimer=minute * 60, phase="END", match_minute=minute)
+             gtimer=gtimer, phase=phase, match_minute=minute)
     return g.send(m)
 
 
@@ -958,7 +979,8 @@ def add_foul(g: Gate, game_id, card_user, side, card_player,
              card_gameplayer_id={"id": gidobj.get("id"),
                                  "serial": gidobj.get("serial")},
              card_kind="NONE", injury_user_id=0, injury_side="HOME",
-             injury_gameplayer_id={"id": 0, "serial": 0},
+             injury_gameplayer_id={"id": gidobj.get("id"),
+                                   "serial": gidobj.get("serial")},
              gtimer=minute * 60, phase=phase, match_minute=minute)
     return g.send(m)
 
@@ -1361,6 +1383,31 @@ def main() -> int:
     if not rid:
         print("  %s" % describe(o))
         return 1
+    # AGENTS.md deliverable step 2: a real phone joins with room_id +
+    # password, so print both every run.  --wait-for-guest[=secs] then
+    # holds the room open so the phone can join before the bot takes the
+    # guest slot (capacity is 2).
+    print("join code    -> room_id=%s password=%r entry=%s"
+          % (rid, CFG.get("password", ""),
+             CFG.get("entry_restriction", "")))
+    for _a in sys.argv:
+        if _a.startswith("--wait-for-guest"):
+            _wt = int(_a.split("=", 1)[1]) if "=" in _a else 300
+            print("waiting for a real guest (up to %ds)..." % _wt)
+            _t0 = time.time()
+            while time.time() - _t0 < _wt:
+                _m = owner.envelope("CMD_GET_ROOM_INFO")
+                _m.update({"mode": "CUSTOM", "id": 0,
+                           "room_id": {"id": rid}, "event_id": 0,
+                           "user_compe_id": 0, "is_room_search": "NO"})
+                _r = owner.send(_m)
+                _n = _r.get("num_users", 0)
+                print("  room users: %s (%.0fs)" % (_n, time.time() - _t0))
+                if _n and _n >= 2:
+                    print("  guest arrived -- proceeding")
+                    break
+                time.sleep(5)
+            break
     pace()
 
     botg = Gate()
@@ -2026,17 +2073,21 @@ def main() -> int:
 
     # -- phases: a complete match is >= 5 min wall clock + halftime
     #    transition, so each phase waits out its share ---------------------
-    # --realorder: goals fire DURING their phases (12' after 1ST_15MIN,
-    # 34' after 1ST_30MIN, 61' after 2ND) like a real match, and the
-    # submit goes out immediately after END with nothing in between.
-    scorer_h = home[0]["gameplayer_id"] if home else None
-    scorer_a = away[0]["gameplayer_id"] if away else None
-    MIDGOALS = {"1ST_15MIN": [(owner.uid, "HOME", 12, scorer_h)],
-                "1ST_30MIN": [(owner.uid, "HOME", 34, scorer_h)],
-                "2ND": [(botg.uid, "AWAY", 61, scorer_a)]}
+    # Goals fire DURING their phases, unconditionally: capture blocks 116/120
+    # sit between the phase changes carrying the live phase and gtimer, and
+    # a phase="END" goal is accepted but never counted (run #41's 0-0 with
+    # NORMAL_END/NOERR).  Scorers are outfield starters -- the old builder
+    # fielded home[0], the GK.  The reporting uid is the sender's on every
+    # goal and foul: capture blocks 116/120/122 share one uid.
+    scorer_h = home[4]["gameplayer_id"] if len(home) > 4 else None
+    scorer_a = away[10]["gameplayer_id"] if len(away) > 10 else None
+    MIDGOALS = {"1ST_15MIN": [(owner.uid, "HOME", 16, scorer_h, 3000)],
+                "1ST_30MIN": [(owner.uid, "HOME", 34, scorer_h, 7000)],
+                "2ND_15MIN": [(owner.uid, "AWAY", 61, scorer_a, 12000)]}
     # the real match sent exactly ONE foul, 92' in 2ND_30MIN (capture block
-    # 122) -- chain3 never did; add it so the in-match sequence matches.
-    MIDFOUL = {"2ND_30MIN": [(botg.uid, "AWAY", 92, scorer_a)]}
+    # 122, gtimer 15449 -- used verbatim) -- chain3 never did; add it so the
+    # in-match sequence matches.
+    MIDFOUL = {"2ND_30MIN": [(owner.uid, "AWAY", 92, scorer_a)]}
     # the real phase chain + match-clock (capture blocks 114-125).  2ND_15MIN
     # was missing and gtimer was a constant 900 -- both now match the capture's
     # monotonic match clock exactly.
@@ -2057,12 +2108,11 @@ def main() -> int:
                           for t, b in beaters))
         if "--mapstamp" in sys.argv:
             stamp_check("after " + p)
-        if "--realorder" in sys.argv:
-            for who, side, minute, scorer in MIDGOALS.get(p, ()):
-                rg = add_score(owner, game_id, who, side, scorer, minute)
-                print("goal %2d' %-4s -> %s (%s)"
-                      % (minute, side, rg.get("result"), rg.get("errcode")))
-                pace()
+        for who, side, minute, scorer, gt in MIDGOALS.get(p, ()):
+            rg = add_score(owner, game_id, who, side, scorer, minute, p, gt)
+            print("goal %2d' %-4s -> %s (%s)"
+                  % (minute, side, rg.get("result"), rg.get("errcode")))
+            pace()
             for who, side, minute, player in MIDFOUL.get(p, ()):
                 rf = add_foul(owner, game_id, who, side, player, minute, p)
                 print("foul %2d' %-4s -> %s (%s)"
@@ -2142,16 +2192,8 @@ def main() -> int:
     for tag, lu in log_urls.items():
         report_log(lu, "pde")
 
-    # -- goals (finish.py proven: owner channel, phase=END); skipped
-    #    under --realorder because they already fired during the phases
-    if "--realorder" not in sys.argv:
-        for who, side, minute, scorer in ((owner.uid, "HOME", 12, scorer_h),
-                                          (owner.uid, "HOME", 34, scorer_h),
-                                          (botg.uid, "AWAY", 61, scorer_a)):
-            r = add_score(owner, game_id, who, side, scorer, minute)
-            print("goal %2d' %-4s -> %s (%s)"
-                  % (minute, side, r.get("result"), r.get("errcode")))
-            pace()
+    # (goals used to be filed here at phase=END -- accepted but never
+    # counted, run #41's 0-0.  They now fire mid-ladder above.)
 
     # -- publish the result.  NO pre-submit GET/CHECK: both resolve the
     #    match on the server side (the CHECK/GET of an open match returns
@@ -2261,8 +2303,13 @@ def main() -> int:
                                default=str)[:1200])
 
     for tag, abnormal, who in BATTERY:
+        # run #45: bot reports FIRST.  Every run since #39 used order
+        # [owner, botg] and the owner's side never materialized while the
+        # bot's (second reporter) always did -- if the server keeps one
+        # provisional verdict per game and the last report wins, the first
+        # reporter never resolves.  Flipping the order decides it.
         order = ([owner] if who == "owner"
-                 else [owner, botg] if who == "both" else [botg, owner])
+                 else [botg, owner] if who == "both" else [botg, owner])
         results = []
         # measured kickoff -> now, in ms: the capture's match_time_tick
         # (822300) is wall-clock shaped, and the server knows both arrival
@@ -2302,6 +2349,14 @@ def main() -> int:
         if results and all("NOERR" in x for x in results):
             break
 
+    # -- run #43: re-send END after the submit, then poll.  Capture order is
+    #    123 SET -> 124 GET(NO) -> 125 CHANGE END -> 126 GET(YES): the END
+    #    phase lands AFTER the result, and the client only sees YES after
+    #    that.  chain3 sent END before the battery and never again -- runs
+    #    #41/#42 left the owner's side at NO x6 while the bot read YES on
+    #    try 1.  One owner-channel END (gtimer 15772, verbatim) mirrors
+    #    block 125 exactly.
+
     # -- read the score back ---------------------------------------------
     # 2026-10-13 (check_capture_stamp.py): CMD_CHECK_GAME_RESULT IS NOT IN THE
     # REAL CAPTURE AT ALL, and DISCONN_HB appears ZERO times across all 138
@@ -2316,6 +2371,14 @@ def main() -> int:
     # exactly once, accepted the owner's NO as final, and printed NOTHING --
     # it read r["match_result"] while the body nests the verdict under
     # r["game_end_result"]["match_result"].
+    #
+    # Capture block 125 sits between the polls: re-send END (owner channel,
+    # gtimer 15772 verbatim) the way the real client does after its submit,
+    # then poll.  Runs #41/#42 polled straight after the battery and the
+    # owner's side never left NO.
+    re = change_phase(owner, game_id, "END", 15772)
+    print("post-submit END -> %s" % re.get("result"))
+    pace()
     m = owner.envelope("CMD_CHECK_GAME_RESULT")   # OUR endpoint, not capture's
     m["game_id"] = game_id
     c = owner.send(m)
@@ -2324,26 +2387,38 @@ def main() -> int:
     print("  FULL check: %s" % json.dumps(shape(c), ensure_ascii=False,
                                           default=str)[:6000])
     pace()
-    for tag, g in (("owner", owner), ("bot  ", botg)):
-        verdict = None
-        for attempt in range(6):                # capture polls NO -> YES
+    # run #44: round-robin until BOTH sides read YES (cap 12 rounds).  Runs
+    # #41-43 polled the owner 6x (~3 s) then the bot once: bot YES on try 1
+    # every time, owner never.  The server materializes each side's verdict
+    # independently, and the owner was never polled AFTER the bot's side
+    # resolved -- sequential per-user materialization would explain the
+    # asymmetry exactly.  Round-robin covers order and lateness together.
+    verdicts = {}
+    # run #45: 20 rounds x 3 s (~2 min).  The winner's side may materialize
+    # late (rating/reward processing); 12 x 0.4 s proved nothing either way.
+    for rnd in range(20):
+        for tag, g in (("owner", owner), ("bot  ", botg)):
+            if tag in verdicts:
+                continue
             m = g.envelope("CMD_GET_GAME_RESULT")
             m["game_id"] = game_id
             r = g.send(m)
             ger = (r.get("game_end_result") or {}).get("match_result") or {}
-            print("get_result [%s] try%d -> %s get_match_result=%s "
+            print("get_result [%s] r%d -> %s get_match_result=%s "
                   "gameend=%s abnormal=%s game_res=%s score=%s"
-                  % (tag, attempt + 1, r.get("result"),
+                  % (tag, rnd + 1, r.get("result"),
                      r.get("get_match_result"), ger.get("gameend_reason"),
                      ger.get("abnormalend_reason"), ger.get("game_res"),
                      ger.get("score_data")))
             if r.get("get_match_result") == "YES":
-                verdict = ger
-                break
-            pace()
-        if verdict:
+                verdicts[tag] = ger
+            time.sleep(3)
+        if len(verdicts) == 2:
+            break
+    for tag in ("owner", "bot  "):
+        if tag in verdicts:
             print("  VERDICT [%s]: %s"
-                  % (tag, json.dumps(shape(verdict), ensure_ascii=False,
+                  % (tag, json.dumps(shape(verdicts[tag]), ensure_ascii=False,
                                      default=str)[:6000]))
         else:
             print("  VERDICT [%s]: never reached YES" % tag)
