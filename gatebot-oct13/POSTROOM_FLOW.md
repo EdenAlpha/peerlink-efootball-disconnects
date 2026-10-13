@@ -2334,3 +2334,157 @@ materializes while the bot's reads `NORMAL_END / NOERR / 2-1` on try 1 --
 the match is resolved server-side regardless.  No further runs on this;
 per the plan the far-side bot never files reports anyway.
 
+### 23.24 PeerLink P2P captures: punch bytes recovered, tunnel is plaintext (2026-10-14)
+
+Three `peerlink_match_*.zip` (today's real matches through the PeerLink WiFi
+tunnel, phones `10.58.176.146:42010` and `10.58.176.246:1162`, fabricated
+`197.210.53.1/2`).  `plink/` holds the extracted `udp_trace.csv` (TUN-level
+*metadata only*: 31 columns, no payload), `passthrough_capture.csv`
+(internet side, full bytes) and `match_log.txt`.  m1 = 42010-side phone's
+full match (30,100 rows, 553 s); m3 = the 1162-side phone's mirrored view of
+the SAME match (identical pre-kickoff census); m2 = a short session that
+never reached gameplay (3,690 rows, T7 keepalive only).
+
+**Pre-kickoff is ~9,817 tunnelled packets, not ~1k** (rel < 182.4 s =
+session 12:26:13 to GAMEPLAY_T0 12:29:15, `pps=26`).  All of it runs
+42010<->1162 through the tunnel; exactly TWO punch packets went direct over
+the internet.  Sizes 67-103 dominate (STUN shapes) with 29 packets >400B in
+three bursts (t~10 s: 1182/821/464; t~18-26 s: 1220/833/788/865/850/865;
+t~36-43 s: 1004/948-cluster/1219) -- mirrored sizes both ways, i.e. DTLS-
+shaped handshake flights between the phones.  During the match the tunnel
+carries ~26-27 pps symmetric, almost all <=200 B (input exchange at the
+tracer's gameplay rate), with 5 outliers all match.
+
+**The punch packet byte format is fully recovered** from the two direct
+specimens (`10.58.176.146:42010 -> 100.88.219.229:1162`, 48 B):
+
+```
+080b 001c 2112a442 f06f07bc9db8b275ffb0ba28     STUN header + magic + txid
+9090 0018 0100000100000000 31303132313135373731 000000000000
+               attr 0x9090 len 24: flags + ASCII user_id + pad
+```
+
+Type `0x080b` = punch request, `0x090b` = punch response (second specimen,
+different txid, the OTHER phone's id `1012121571` vs `10121215771`).  Magic
+cookie standard.  This is a sendable template: header + txid + attr 0x9090
+with the sender's ASCII user_id.  (m2's log confirms the mapping:
+`STUN[T7:Signal]: 197.210.53.2:1162 from 54.64.79.140:3478
+100.88.219.229:1162` -- fabricated<->real.)
+
+**The supervisor DTLS runs DIRECT, not through the tunnel.** m1's internet
+side holds a full session to `35.230.139.74:32595`: t 3 hs + 339 appdata, r
+11 hs + 337 appdata over the whole match.  Appdata census is our ground
+truth's sibling -- t `167 x221` (143 B plaintext, the heartbeat) + `341 x1`
+(the 317 preamble), r `149 x221` + `187 x1`.  ClientHello (cookie-aware
+parse) offers the Konami cipher profile (`c030` present) with NO SNI
+extension -- an IP-addressed rendezvous, not the TURN hostname.  Ephemeral
+ECDHE: content unrecoverable, as established.
+
+**Two corrections to premises:**
+
+1. The PeerLink tunnel has NO AES. `peerlink-code/.../tunnel/` contains zero
+   crypto references; the only hashes in the app are SHA-256 digests and an
+   AES-128-GCM ADB-pairing exchange.  The WiFi underlay is plaintext UDP to
+   `peer:17024`.  There is nothing to decrypt -- but there was also nothing
+   captured: `udp_trace` has no payload column and `match_log` has zero hex
+   dumps (`diagnosticWritesSkipped=18738`).  Packet CONTENT of the tunnelled
+   P2P handshake is unrecoverable from these three zips.  What captures it:
+   TUN payload logging (or underlay wire bytes) on the next PeerLink match.
+2. The "256 AES" that exists is Konami's DTLS (`ECDHE-RSA-AES256-GCM-SHA384`,
+   ephemeral -- correctly deemed unbreakable in §23.17) and our own gate
+   cipher (recovered 10-10).  Neither yields P2P content.
+
+**What the bot can send today:** the punch (byte template above +
+`TURN-Allocate`-derived rendezvous already live in `dtls_hold.py`), a DTLS
+client handshake at whoever answers (our `Dtls` class speaks 1.2/ECDHE),
+T7 beats.  What remains unknown is exactly the far-side peer's appdata --
+the 143 B heartbeat token and the input frame -- both now precisely scoped
+to a payload-logging run, not more guessing (0/1280 closed that route).
+
+### 23.26 Tunnel pcapng: full signaling decode, encrypted game frames (2026-10-14)
+
+Two new zips included `tunnel_capture.pcapng` (m4 7k, m5 23k packets) --
+the underlay wire with full bytes, plaintext.  No AES anywhere on this
+path (confirmed again: inner IP/game bytes directly visible).
+
+**Transport header (8 B, proven):** `0000 | seq u16be | class | aux[3]`.
+`[2:4]` is a per-sender gapless counter (zero breaks in 200 rows); byte 4
+is `0x00` (98.6%), `0x40`/`0x80` (rare), `0xc0` (session-open, 6x).  Each
+phone numbers its own frames from 0 (peer's frame 0 = 272 B class-`c0`
+opener).
+
+**Signaling family, fully decoded** (`tun_game.py`, all txid-paired):
+
+| method | shape | role |
+|---|---|---|
+| `0x080b`/`0x090b` 48 B | `0x9090`/24 own ASCII user_id | punch req/resp (§23.25) |
+| `0x080a` 48 B / `0x090a` 56 B | req bare id; resp `0x909d`/4 status + id | capability query |
+| `0x080c` 256 B / `0x090c` 256 B | `0x0026`/188 zeros + id + `0x9091`/`0x909c`/12 counter | session heartbeat (189/187 exchanges, counters 0x13,0x14,0x15..) |
+| `0x080c`/`0x090c` 64 B | same minus the zero blob | short-form heartbeat |
+
+The bot can ANSWER all three today (echo txid + own id + same counter);
+it can initiate `080b`/`080a`; `080c` initiation needs the counter seed.
+
+**Game frames (22,511): full-entropy bodies.** Inner-type census over
+thousands of bodies is FLAT (top value 4 hits) -- no plaintext type field;
+entropy climbs 4.0 -> 7.6 with length (one encrypted stream, stream cipher
+preserving odd sizes 14..1197 -- no block cipher, no 16 B MAC).  Small
+frames carry short structured prefixes (`0000 4500 0700`, `0000 200c`...)
+then ciphertext: inner header + encrypted payload.  ~26 pps symmetric in
+match; 14 B keepalives (b5 ticking +10) to 1197 B blobs.
+
+**The key is not in these captures.** Pre-kickoff big bursts (587-1220 B)
+are entropy from byte 8 too -- no plaintext key exchange observable; no
+game_id/room id in any match_log (KDF hypotheses untestable); `0x0026` is
+188 zeros both ways (not a key transport as observed).  Candidates in
+order: pairing-time PSK (m2 log: sessions RESUME with preserved transport
+state -- the key may predate any match capture), Konami-shared values,
+ECDHE inside the big bursts (unbreakable if so).  Decisive next step is the
+P2P crypto in `libUE4.so` via the `0x080b`/`0x9090` constants -- BLOCKED:
+0.22 GB free on C:, no Ghidra install present (only pyghidra stubs).
+
+### 23.25 StunFabricator + the 4 direct punch packets (2026-10-14)
+
+`peerlink-code/.../tunnel/StunFabricator.kt` (810 lines, read in full) is the
+fake-open-NAT mastermind, exactly as suspected.  It intercepts the game's
+STUN Binding Requests (`0x0001` ONLY -- the parser returns null for any
+other type) to 4 hardcoded Konami clusters (ports 3478/3479) and answers
+LOCALLY with: `XOR-MAPPED-ADDRESS` = fabricated public IP:port,
+`SOFTWARE` = `TurnServer 0.7.2+03`, plain `MAPPED-ADDRESS`,
+`RESPONSE-ORIGIN`/`OTHER-ADDRESS` from the cluster partner, the `F000`
+Konami extension, and a correct `FINGERPRINT` (CRC32 ^ `0x5354554E`).  The
+game concludes it sits behind an open NAT with a public address, so it does
+direct P2P -- no relay needed, no internet STUN ever sent.  Request classes:
+CHANGE_REQUEST -> T4/T5/T6, RESPONSE_PORT -> T2, `0x9090`/`0x9091` attrs ->
+T7:Signal, `F000` -> T1 Konami, empty -> T3 bare; anything else keeps the
+normal internet path.
+
+The vendor punch (`0x080b`/`0x090b`) is STUN-framed but NOT type `0x0001`,
+so the fabricator never touches it -- it travels peer-to-peer (tunnel, or
+direct as fallback).  `punch_corpus.py` pulls every direct-path game packet
+from all three passthrough files: exactly 4 exist (m1 only), fully decoded
+and txid-paired:
+
+```
+A->B  080b req  txid f06f..  attr 0x9090: 01 000001 00000000 + "10121215771"
+B->A  090b resp txid f06f..  attr 0x9090: ... + "1500395919"
+B->A  080b req  txid 3bf5..  attr 0x9090: ... + "1500395919"
+A->B  090b resp txid 3bf5..  attr 0x9090: ... + "10121215771"
+```
+
+Class bits follow RFC 5389 (`0x080b` = request, `0x090b` = success
+response); each side always sends its OWN ASCII user_id; responses echo the
+request's txid.  This is a complete sendable template for the bot: emit
+`080b` with own id, answer incoming `080b` with `090b` + same txid + own id.
+Note `0x9090` is the same "signaling" attribute family the fabricator keys
+T7 on -- one consistent vendor protocol, two transports (Binding-embedded
+vs standalone).
+
+On the bytes question: the tunnelled 30k carry no bytes anywhere (udp_trace
+column census `{32:30100}`, zero hex in all three match_logs, 0 KB
+score_shots txt) -- that stands after the recheck.  What DOES exist is these
+4 direct specimens (above) plus the fabricator source, which together give
+the punch path byte-complete.  What remains byte-unknown is only the
+tunnelled P2P handshake flights and the input frames -- sizes/flights known
+(§23.24), content awaiting a payload-logging run.
+
