@@ -2443,6 +2443,23 @@ ECDHE inside the big bursts (unbreakable if so).  Decisive next step is the
 P2P crypto in `libUE4.so` via the `0x080b`/`0x9090` constants -- BLOCKED:
 0.22 GB free on C:, no Ghidra install present (only pyghidra stubs).
 
+### 23.27 Full byte extraction + transport integrity (2026-10-14)
+
+`tun_extract.py` dumps every inner packet of both pcapng files to
+`plink/m4_inner.jsonl` (7,076 rows) / `m5_inner.jsonl` (22,909 rows):
+`{i, dir, src, sport, dst, dport, len, seq, cls, hex}` plus `stun_type` +
+txid for signaling rows.  Zero rows unclassified (m4: 141 stun + 6,935
+game; m5: 398 stun + 22,511 game).
+
+Integrity over the full captures: m4 zero gaps and zero dups in 6,935
+frames.  m5 has exactly two anomalies, both structural, not loss: at pkt
+#7101/#7102 BOTH directions reset seq to 0 simultaneously (3411->0 out,
+3522->0 in) -- a session epoch restart, i.e. the 0x00 stream is
+per-period (halftime), as a lockstep input exchange should be; plus 2 lone
+duplicate inbound frames in 22,511 (retransmits).  Nothing is ever lost on
+the wire -- the tunnel delivers a perfect stream, so any bot-side
+retransmit/ACK logic only needs to match the header, not repair loss.
+
 ### 23.25 StunFabricator + the 4 direct punch packets (2026-10-14)
 
 `peerlink-code/.../tunnel/StunFabricator.kt` (810 lines, read in full) is the
