@@ -1,0 +1,64 @@
+0x07e37460  ldp      x8, x9, [x25, #0x1d0]
+0x07e37464  add      x0, sp, #1, lsl #12
+0x07e37468  adrp     x1, #0x9da000
+0x07e3746c  add      x1, x1, #0x69           ; STR 0xada069 'LATENCY_MODE_CONNECT_REVISION_CHECK'
+0x07e37470  add      x0, x0, #0x270
+0x07e37474  mov      w3, wzr
+0x07e37478  cmp      x8, #0
+0x07e3747c  ccmp     x9, x8, #0, ne
+0x07e37480  sub      x8, x9, x8
+0x07e37484  csel     x2, xzr, x8, ls
+0x07e37488  bl       #0x7e3e580
+0x07e3748c  ldp      x8, x9, [x25, #0x1d8]
+0x07e37490  add      x0, sp, #1, lsl #12
+0x07e37494  adrp     x1, #0x9ed000
+0x07e37498  add      x1, x1, #0x6d1           ; STR 0xaed6d1 'LATENCY_MODE_CONNECT_QUALITY_TEST'
+0x07e3749c  add      x0, x0, #0x270
+0x07e374a0  mov      w3, wzr
+0x07e374a4  cmp      x8, #0
+0x07e374a8  ccmp     x9, x8, #0, ne
+0x07e374ac  sub      x8, x9, x8
+0x07e374b0  csel     x2, xzr, x8, ls
+0x07e374b4  bl       #0x7e3e580
+0x07e374b8  ldp      x8, x9, [x25, #0x1e0]
+0x07e374bc  add      x0, sp, #1, lsl #12
+0x07e374c0  adrp     x1, #0xabe000
+0x07e374c4  add      x1, x1, #0xd40           ; STR 0xbbed40 'LATENCY_MODE_ANNTENA_WAIT_QUALITY_CHECK'
+0x07e374c8  add      x0, x0, #0x270
+0x07e374cc  mov      w3, wzr
+0x07e374d0  cmp      x8, #0
+0x07e374d4  ccmp     x9, x8, #0, ne
+0x07e374d8  sub      x8, x9, x8
+0x07e374dc  csel     x2, xzr, x8, ls
+0x07e374e0  bl       #0x7e3e580
+0x07e374e4  ldp      x8, x9, [x25, #0x1e8]
+0x07e374e8  add      x0, sp, #1, lsl #12
+0x07e374ec  adrp     x1, #0xbde000
+0x07e374f0  add      x1, x1, #0x707           ; STR 0xcde707 'LATENCY_MODE_ANNTENA_CMD_SET_GAME_SESSION_CHECK_RES'
+0x07e374f4  add      x0, x0, #0x270
+0x07e374f8  mov      w3, wzr
+0x07e374fc  cmp      x8, #0
+0x07e37500  ccmp     x9, x8, #0, ne
+0x07e37504  sub      x8, x9, x8
+0x07e37508  csel     x2, xzr, x8, ls
+0x07e3750c  bl       #0x7e3e580
+0x07e37510  add      x0, sp, #1, lsl #12
+0x07e37514  adrp     x1, #0x9ed000
+0x07e37518  add      x1, x1, #0x6f3           ; STR 0xaed6f3 'LATENCY_MODE_ANNTENA_PROCESS_CMD_GET_GAME_SESSION_CHECK_RES'
+0x07e3751c  add      x0, x0, #0x270
+0x07e37520  mov      x2, x20
+0x07e37524  mov      w3, wzr
+0x07e37528  bl       #0x7e3e580
+0x07e3752c  add      x0, sp, #1, lsl #12
+0x07e37530  ldr      x2, [x25, #0x248]
+0x07e37534  adrp     x1, #0xbb7000
+0x07e37538  add      x1, x1, #0xc40           ; STR 0xcb7c40 'LATENCY_MODE_ANNTENA_POLLING_CMD_GET_GAME_SESSION_CHECK_RES'
+0x07e3753c  add      x0, x0, #0x270
+0x07e37540  mov      w3, wzr
+0x07e37544  bl       #0x7e3e580
+0x07e37548  ldp      x8, x9, [x25, #0x1f8]
+0x07e3754c  add      x0, sp, #1, lsl #12
+0x07e37550  adrp     x1, #0xb6a000
+0x07e37554  add      x1, x1, #0xbd           ; STR 0xc6a0bd 'LATENCY_MODE_ANNTENA_USER_DATA_SYNC'
+0x07e37558  add      x0, x0, #0x270
+0x07e3755c  mov      w3, wzr

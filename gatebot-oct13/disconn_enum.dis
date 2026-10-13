@@ -1,0 +1,1024 @@
+0x07611400  str      w9, [x8]
+0x07611404  str      w11, [x19, #0xc04]
+0x07611408  ldarb    w8, [x19]
+0x0761140c  tbnz     w8, #0, #0x7611414
+0x07611410  b        #0x7630764
+0x07611414  adrp     x8, #0xa5a9000
+0x07611418  ldrb     w8, [x8, #0x3f8]
+0x0761141c  tbnz     w8, #0, #0x7611434
+0x07611420  mov      w9, #0xc
+0x07611424  adrp     x8, #0xa5a9000
+0x07611428  add      x8, x8, #0x3f8
+0x0761142c  strb     w9, [x8], #1
+0x07611430  b        #0x7611448
+0x07611434  adrp     x9, #0xa5a9000
+0x07611438  add      x9, x9, #0x400
+0x0761143c  mov      w10, #6
+0x07611440  ldr      x8, [x9, #8]
+0x07611444  str      x10, [x9]
+0x07611448  mov      w10, #0x4946
+0x0761144c  mov      w9, #0x4853
+0x07611450  movk     w10, #0x494e, lsl #16
+0x07611454  mov      w11, #2
+0x07611458  strb     wzr, [x8, #6]
+0x0761145c  strh     w9, [x8, #4]
+0x07611460  str      w10, [x8]
+0x07611464  str      w11, [x19, #0xc08]
+0x07611468  ldarb    w8, [x19]
+0x0761146c  tbnz     w8, #0, #0x7611474
+0x07611470  b        #0x76307c0
+0x07611474  adrp     x8, #0xa5a9000
+0x07611478  ldrb     w8, [x8, #0x410]
+0x0761147c  tbnz     w8, #0, #0x7611494
+0x07611480  mov      w9, #0xc
+0x07611484  adrp     x8, #0xa5a9000
+0x07611488  add      x8, x8, #0x410
+0x0761148c  strb     w9, [x8], #1
+0x07611490  b        #0x76114a8
+0x07611494  adrp     x9, #0xa5a9000
+0x07611498  add      x9, x9, #0x418
+0x0761149c  mov      w10, #6
+0x076114a0  ldr      x8, [x9, #8]
+0x076114a4  str      x10, [x9]
+0x076114a8  mov      w10, #0x4143
+0x076114ac  mov      w9, #0x4c45
+0x076114b0  movk     w10, #0x434e, lsl #16
+0x076114b4  mov      w11, #3
+0x076114b8  strb     wzr, [x8, #6]
+0x076114bc  strh     w9, [x8, #4]
+0x076114c0  str      w10, [x8]
+0x076114c4  str      w11, [x19, #0xc0c]
+0x076114c8  ldarb    w8, [x19]
+0x076114cc  tbnz     w8, #0, #0x76114d4
+0x076114d0  b        #0x763081c
+0x076114d4  adrp     x8, #0xa5a9000
+0x076114d8  ldrb     w8, [x8, #0x428]
+0x076114dc  tbnz     w8, #0, #0x76114f4
+0x076114e0  mov      w9, #0xe
+0x076114e4  adrp     x8, #0xa5a9000
+0x076114e8  add      x8, x8, #0x428
+0x076114ec  strb     w9, [x8], #1
+0x076114f0  b        #0x7611508
+0x076114f4  adrp     x9, #0xa5a9000
+0x076114f8  add      x9, x9, #0x430
+0x076114fc  mov      w10, #7
+0x07611500  ldr      x8, [x9, #8]
+0x07611504  str      x10, [x9]
+0x07611508  mov      w9, #0x4f45
+0x0761150c  mov      w10, #0x4954
+0x07611510  movk     w9, #0x5455, lsl #16
+0x07611514  movk     w10, #0x454d, lsl #16
+0x07611518  mov      w11, #4
+0x0761151c  strb     wzr, [x8, #7]
+0x07611520  stur     w9, [x8, #3]
+0x07611524  str      w10, [x8]
+0x07611528  str      w11, [x19, #0xc10]
+0x0761152c  ldarb    w8, [x19]
+0x07611530  tbnz     w8, #0, #0x7611538
+0x07611534  b        #0x7630878
+0x07611538  adrp     x8, #0xa5a9000
+0x0761153c  ldrb     w8, [x8, #0x440]
+0x07611540  tbnz     w8, #0, #0x7611558
+0x07611544  mov      w9, #0xc
+0x07611548  adrp     x8, #0xa5a9000
+0x0761154c  add      x8, x8, #0x440
+0x07611550  strb     w9, [x8], #1
+0x07611554  b        #0x761156c
+0x07611558  adrp     x9, #0xa5a9000
+0x0761155c  add      x9, x9, #0x448
+0x07611560  mov      w10, #6
+0x07611564  ldr      x8, [x9, #8]
+0x07611568  str      x10, [x9]
+0x0761156c  mov      w10, #0x4146
+0x07611570  mov      w9, #0x4445
+0x07611574  movk     w10, #0x4c49, lsl #16
+0x07611578  mov      w11, #5
+0x0761157c  strb     wzr, [x8, #6]
+0x07611580  strh     w9, [x8, #4]
+0x07611584  str      w10, [x8]
+0x07611588  str      w11, [x19, #0xc14]
+0x0761158c  ldarb    w8, [x19]
+0x07611590  tbnz     w8, #0, #0x7611598
+0x07611594  b        #0x76308d4
+0x07611598  adrp     x8, #0xa5a9000
+0x0761159c  ldrb     w8, [x8, #0x458]
+0x076115a0  tbnz     w8, #0, #0x76115b8
+0x076115a4  mov      w9, #0x18
+0x076115a8  adrp     x8, #0xa5a9000
+0x076115ac  add      x8, x8, #0x458
+0x076115b0  strb     w9, [x8], #1
+0x076115b4  b        #0x76115cc
+0x076115b8  adrp     x9, #0xa5a9000
+0x076115bc  add      x9, x9, #0x460
+0x076115c0  mov      w10, #0xc
+0x076115c4  ldr      x8, [x9, #8]
+0x076115c8  str      x10, [x9]
+0x076115cc  adrp     x10, #0xc2a000
+0x076115d0  add      x10, x10, #0x42c           ; STR 0xd2a42c 'CHANGE_VSCOM'
+0x076115d4  mov      w9, #0x4353
+0x076115d8  mov      w11, #6
+0x076115dc  movk     w9, #0x4d4f, lsl #16
+0x076115e0  adrp     x24, #0xa5a5000
+0x076115e4  add      x24, x24, #0xd0
+0x076115e8  ldr      x10, [x10]
+0x076115ec  strb     wzr, [x8, #0xc]
+0x076115f0  str      w9, [x8, #8]
+0x076115f4  str      x10, [x8]
+0x076115f8  str      w11, [x24, #0xc10]
+0x076115fc  ldarb    w8, [x24]
+0x07611600  tbnz     w8, #0, #0x7611608
+0x07611604  b        #0x7630930
+0x07611608  adrp     x8, #0xa5ad000
+0x0761160c  ldrb     w8, [x8, #0x610]
+0x07611610  tbnz     w8, #0, #0x7611628
+0x07611614  mov      w9, #0x14
+0x07611618  adrp     x8, #0xa5ad000
+0x0761161c  add      x8, x8, #0x610
+0x07611620  strb     w9, [x8], #1
+0x07611624  b        #0x761163c
+0x07611628  adrp     x9, #0xa5ad000
+0x0761162c  add      x9, x9, #0x618
+0x07611630  mov      w10, #0xa
+0x07611634  ldr      x8, [x9, #8]
+0x07611638  str      x10, [x9]
+0x0761163c  adrp     x10, #0xb30000
+0x07611640  add      x10, x10, #0xb21           ; STR 0xc30b21 'DISCONN_HB'
+0x07611644  mov      w9, #0x4248
+0x07611648  adrp     x11, #0xa5a8000
+0x0761164c  strb     wzr, [x8, #0xa]
+0x07611650  ldr      x10, [x10]
+0x07611654  strh     w9, [x8, #8]
+0x07611658  str      x10, [x8]
+0x0761165c  str      wzr, [x11, #0xb28]
+0x07611660  ldarb    w8, [x24]
+0x07611664  tbnz     w8, #0, #0x761166c
+0x07611668  b        #0x763097c
+0x0761166c  adrp     x8, #0xa5ad000
+0x07611670  ldrb     w8, [x8, #0x628]
+0x07611674  tbnz     w8, #0, #0x761168c
+0x07611678  mov      w9, #0x1a
+0x0761167c  adrp     x8, #0xa5ad000
+0x07611680  add      x8, x8, #0x628
+0x07611684  strb     w9, [x8], #1
+0x07611688  b        #0x76116a0
+0x0761168c  adrp     x9, #0xa5ad000
+0x07611690  add      x9, x9, #0x630
+0x07611694  mov      w10, #0xd
+0x07611698  ldr      x8, [x9, #8]
+0x0761169c  str      x10, [x9]
+0x076116a0  adrp     x9, #0xa71000
+0x076116a4  add      x9, x9, #0x550           ; STR 0xb71550 'DISCONN_SLEEP'
+0x076116a8  adrp     x11, #0xa5a8000
+0x076116ac  mov      w12, #1
+0x076116b0  strb     wzr, [x8, #0xd]
+0x076116b4  ldr      x10, [x9]
+0x076116b8  ldur     x9, [x9, #5]
+0x076116bc  str      x10, [x8]
+0x076116c0  stur     x9, [x8, #5]
+0x076116c4  str      w12, [x11, #0xb2c]
+0x076116c8  ldarb    w8, [x24]
+0x076116cc  tbnz     w8, #0, #0x76116d4
+0x076116d0  b        #0x76309c8
+0x076116d4  adrp     x8, #0xa5ad000
+0x076116d8  ldrb     w8, [x8, #0x640]
+0x076116dc  tbnz     w8, #0, #0x76116f4
+0x076116e0  mov      w9, #0x18
+0x076116e4  adrp     x8, #0xa5ad000
+0x076116e8  add      x8, x8, #0x640
+0x076116ec  strb     w9, [x8], #1
+0x076116f0  b        #0x7611708
+0x076116f4  adrp     x9, #0xa5ad000
+0x076116f8  add      x9, x9, #0x648
+0x076116fc  mov      w10, #0xc
+0x07611700  ldr      x8, [x9, #8]
+0x07611704  str      x10, [x9]
+0x07611708  adrp     x10, #0xb7c000
+0x0761170c  add      x10, x10, #0xce7           ; STR 0xc7cce7 'DISCONN_KILL'
+0x07611710  mov      w9, #0x494b
+0x07611714  adrp     x11, #0xa5a8000
+0x07611718  movk     w9, #0x4c4c, lsl #16
+0x0761171c  mov      w12, #2
+0x07611720  ldr      x10, [x10]
+0x07611724  strb     wzr, [x8, #0xc]
+0x07611728  str      w9, [x8, #8]
+0x0761172c  str      x10, [x8]
+0x07611730  str      w12, [x11, #0xb30]
+0x07611734  ldarb    w8, [x24]
+0x07611738  tbnz     w8, #0, #0x7611740
+0x0761173c  b        #0x7630a14
+0x07611740  adrp     x8, #0xa5ad000
+0x07611744  ldrb     w8, [x8, #0x658]
+0x07611748  tbnz     w8, #0, #0x7611760
+0x0761174c  mov      w9, #0xe
+0x07611750  adrp     x8, #0xa5ad000
+0x07611754  add      x8, x8, #0x658
+0x07611758  strb     w9, [x8], #1
+0x0761175c  b        #0x7611774
+0x07611760  adrp     x9, #0xa5ad000
+0x07611764  add      x9, x9, #0x660
+0x07611768  mov      w10, #7
+0x0761176c  ldr      x8, [x9, #8]
+0x07611770  str      x10, [x9]
+0x07611774  mov      w9, #0x4f47
+0x07611778  mov      w10, #0x574f
+0x0761177c  movk     w9, #0x4c41, lsl #16
+0x07611780  movk     w10, #0x474e, lsl #16
+0x07611784  adrp     x11, #0xa5a8000
+0x07611788  mov      w12, #3
+0x0761178c  strb     wzr, [x8, #7]
+0x07611790  stur     w9, [x8, #3]
+0x07611794  str      w10, [x8]
+0x07611798  str      w12, [x11, #0xb34]
+0x0761179c  ldarb    w8, [x24]
+0x076117a0  tbnz     w8, #0, #0x76117a8
+0x076117a4  b        #0x7630a60
+0x076117a8  adrp     x8, #0xa5ad000
+0x076117ac  ldrb     w8, [x8, #0x670]
+0x076117b0  tbnz     w8, #0, #0x76117c8
+0x076117b4  mov      w9, #0xa
+0x076117b8  adrp     x8, #0xa5ad000
+0x076117bc  add      x8, x8, #0x670
+0x076117c0  strb     w9, [x8], #1
+0x076117c4  b        #0x76117dc
+0x076117c8  adrp     x9, #0xa5ad000
+0x076117cc  add      x9, x9, #0x678
+0x076117d0  mov      w10, #5
+0x076117d4  ldr      x8, [x9, #8]
+0x076117d8  str      x10, [x9]
+0x076117dc  mov      w9, #0x4843
+0x076117e0  mov      w10, #0x54
+0x076117e4  movk     w9, #0x4145, lsl #16
+0x076117e8  adrp     x11, #0xa5a8000
+0x076117ec  mov      w12, #4
+0x076117f0  strh     w10, [x8, #4]
+0x076117f4  str      w9, [x8]
+0x076117f8  str      w12, [x11, #0xb38]
+0x076117fc  ldarb    w8, [x24]
+0x07611800  tbnz     w8, #0, #0x7611808
+0x07611804  b        #0x7630aac
+0x07611808  adrp     x8, #0xa5ad000
+0x0761180c  ldrb     w8, [x8, #0x688]
+0x07611810  tbnz     w8, #0, #0x7611828
+0x07611814  mov      w9, #0xc
+0x07611818  adrp     x8, #0xa5ad000
+0x0761181c  add      x8, x8, #0x688
+0x07611820  strb     w9, [x8], #1
+0x07611824  b        #0x761183c
+0x07611828  adrp     x9, #0xa5ad000
+0x0761182c  add      x9, x9, #0x690
+0x07611830  mov      w10, #6
+0x07611834  ldr      x8, [x9, #8]
+0x07611838  str      x10, [x9]
+0x0761183c  mov      w10, #0x4e49
+0x07611840  mov      w9, #0x5952
+0x07611844  movk     w10, #0x554a, lsl #16
+0x07611848  adrp     x11, #0xa5a8000
+0x0761184c  mov      w12, #5
+0x07611850  strb     wzr, [x8, #6]
+0x07611854  strh     w9, [x8, #4]
+0x07611858  str      w10, [x8]
+0x0761185c  str      w12, [x11, #0xb3c]
+0x07611860  ldarb    w8, [x24]
+0x07611864  tbnz     w8, #0, #0x761186c
+0x07611868  b        #0x7630af8
+0x0761186c  adrp     x8, #0xa5ad000
+0x07611870  ldrb     w8, [x8, #0x6a0]
+0x07611874  tbnz     w8, #0, #0x761188c
+0x07611878  mov      w9, #0xc
+0x0761187c  adrp     x8, #0xa5ad000
+0x07611880  add      x8, x8, #0x6a0
+0x07611884  strb     w9, [x8], #1
+0x07611888  b        #0x76118a0
+0x0761188c  adrp     x9, #0xa5ad000
+0x07611890  add      x9, x9, #0x6a8
+0x07611894  mov      w10, #6
+0x07611898  ldr      x8, [x9, #8]
+0x0761189c  str      x10, [x9]
+0x076118a0  mov      w10, #0x4947
+0x076118a4  mov      w9, #0x5055
+0x076118a8  movk     w10, #0x4556, lsl #16
+0x076118ac  adrp     x11, #0xa5a8000
+0x076118b0  mov      w12, #6
+0x076118b4  strb     wzr, [x8, #6]
+0x076118b8  strh     w9, [x8, #4]
+0x076118bc  str      w10, [x8]
+0x076118c0  str      w12, [x11, #0xb40]
+0x076118c4  ldarb    w8, [x24]
+0x076118c8  tbnz     w8, #0, #0x76118d0
+0x076118cc  b        #0x7630b44
+0x076118d0  adrp     x8, #0xa5ad000
+0x076118d4  ldrb     w8, [x8, #0x6b8]
+0x076118d8  tbnz     w8, #0, #0x76118f0
+0x076118dc  mov      w9, #0x1a
+0x076118e0  adrp     x8, #0xa5ad000
+0x076118e4  add      x8, x8, #0x6b8
+0x076118e8  strb     w9, [x8], #1
+0x076118ec  b        #0x7611904
+0x076118f0  adrp     x9, #0xa5ad000
+0x076118f4  add      x9, x9, #0x6c0
+0x076118f8  mov      w10, #0xd
+0x076118fc  ldr      x8, [x9, #8]
+0x07611900  str      x10, [x9]
+0x07611904  adrp     x9, #0xa5d000
+0x07611908  add      x9, x9, #0xe11           ; STR 0xb5de11 'NORMAL_GIVEUP'
+0x0761190c  mov      w10, #7
+0x07611910  strb     wzr, [x8, #0xd]
+0x07611914  ldr      x21, [x9]
+0x07611918  ldur     x19, [x9, #5]
+0x0761191c  adrp     x9, #0xa5a8000
+0x07611920  str      x21, [x8]
+0x07611924  stur     x19, [x8, #5]
+0x07611928  str      w10, [x9, #0xb44]
+0x0761192c  ldarb    w8, [x24]
+0x07611930  tbnz     w8, #0, #0x7611938
+0x07611934  b        #0x7630b90
+0x07611938  adrp     x8, #0xa5ad000
+0x0761193c  ldrb     w8, [x8, #0x6d0]
+0x07611940  tbnz     w8, #0, #0x7611958
+0x07611944  mov      w9, #8
+0x07611948  adrp     x8, #0xa5ad000
+0x0761194c  add      x8, x8, #0x6d0
+0x07611950  strb     w9, [x8], #1
+0x07611954  b        #0x761196c
+0x07611958  adrp     x9, #0xa5ad000
+0x0761195c  add      x9, x9, #0x6d8
+0x07611960  mov      w10, #4
+0x07611964  ldr      x8, [x9, #8]
+0x07611968  str      x10, [x9]
+0x0761196c  mov      w9, #0x5845
+0x07611970  adrp     x10, #0xa5a8000
+0x07611974  movk     w9, #0x5449, lsl #16
+0x07611978  mov      w11, #8
+0x0761197c  strb     wzr, [x8, #4]
+0x07611980  str      w9, [x8]
+0x07611984  str      w11, [x10, #0xb48]
+0x07611988  ldarb    w8, [x24]
+0x0761198c  tbnz     w8, #0, #0x7611994
+0x07611990  b        #0x7630bdc
+0x07611994  adrp     x8, #0xa5ad000
+0x07611998  ldrb     w8, [x8, #0x6e8]
+0x0761199c  tbnz     w8, #0, #0x76119b4
+0x076119a0  mov      w9, #0x10
+0x076119a4  adrp     x8, #0xa5ad000
+0x076119a8  add      x8, x8, #0x6e8
+0x076119ac  strb     w9, [x8], #1
+0x076119b0  b        #0x76119c8
+0x076119b4  adrp     x9, #0xa5ad000
+0x076119b8  add      x9, x9, #0x6f0
+0x076119bc  mov      w10, #8
+0x076119c0  ldr      x8, [x9, #8]
+0x076119c4  str      x10, [x9]
+0x076119c8  mov      x9, #0x4c53
+0x076119cc  adrp     x10, #0xa5a8000
+0x076119d0  movk     x9, #0x574f, lsl #16
+0x076119d4  mov      w11, #9
+0x076119d8  movk     x9, #0x4f44, lsl #32
+0x076119dc  strb     wzr, [x8, #8]
+0x076119e0  movk     x9, #0x4e57, lsl #48
+0x076119e4  str      x9, [x8]
+0x076119e8  str      w11, [x10, #0xb4c]
+0x076119ec  ldarb    w8, [x24]
+0x076119f0  tbnz     w8, #0, #0x76119f8
+0x076119f4  b        #0x7630c28
+0x076119f8  adrp     x8, #0xa5ad000
+0x076119fc  ldrb     w8, [x8, #0x700]
+0x07611a00  tbnz     w8, #0, #0x7611a18
+0x07611a04  mov      w9, #0x18
+0x07611a08  adrp     x8, #0xa5ad000
+0x07611a0c  add      x8, x8, #0x700
+0x07611a10  strb     w9, [x8], #1
+0x07611a14  b        #0x7611a2c
+0x07611a18  adrp     x9, #0xa5ad000
+0x07611a1c  add      x9, x9, #0x708
+0x07611a20  mov      w10, #0xc
+0x07611a24  ldr      x8, [x9, #8]
+0x07611a28  str      x10, [x9]
+0x07611a2c  adrp     x10, #0xb0a000
+0x07611a30  add      x10, x10, #0x48d           ; STR 0xc0a48d 'NO_OPERATION'
+0x07611a34  mov      w9, #0x4954
+0x07611a38  adrp     x11, #0xa5a8000
+0x07611a3c  movk     w9, #0x4e4f, lsl #16
+0x07611a40  mov      w12, #0xa
+0x07611a44  ldr      x10, [x10]
+0x07611a48  strb     wzr, [x8, #0xc]
+0x07611a4c  str      w9, [x8, #8]
+0x07611a50  str      x10, [x8]
+0x07611a54  str      w12, [x11, #0xb50]
+0x07611a58  ldarb    w8, [x24]
+0x07611a5c  tbnz     w8, #0, #0x7611a64
+0x07611a60  b        #0x7630c74
+0x07611a64  adrp     x8, #0xa5ad000
+0x07611a68  ldrb     w8, [x8, #0x718]
+0x07611a6c  tbnz     w8, #0, #0x7611a84
+0x07611a70  mov      w9, #0x24
+0x07611a74  adrp     x8, #0xa5ad000
+0x07611a78  add      x8, x8, #0x718
+0x07611a7c  strb     w9, [x8], #1
+0x07611a80  b        #0x7611a98
+0x07611a84  adrp     x9, #0xa5ad000
+0x07611a88  add      x9, x9, #0x720
+0x07611a8c  mov      w10, #0x12
+0x07611a90  ldr      x8, [x9, #8]
+0x07611a94  str      x10, [x9]
+0x07611a98  adrp     x10, #0xbf0000
+0x07611a9c  add      x10, x10, #0xc83           ; STR 0xcf0c83 'PES_CMD_SENDFAILED'
+0x07611aa0  mov      w9, #0x4445
+0x07611aa4  mov      w11, #0xb
+0x07611aa8  strb     wzr, [x8, #0x12]
+0x07611aac  ldr      q0, [x10]
+0x07611ab0  adrp     x10, #0xa5a8000
+0x07611ab4  strh     w9, [x8, #0x10]
+0x07611ab8  str      q0, [x8]
+0x07611abc  str      w11, [x10, #0xb54]
+0x07611ac0  ldarb    w8, [x24]
+0x07611ac4  tbnz     w8, #0, #0x7611acc
+0x07611ac8  b        #0x7630cc0
+0x07611acc  adrp     x8, #0xa5ad000
+0x07611ad0  ldrb     w8, [x8, #0x730]
+0x07611ad4  tbnz     w8, #0, #0x7611aec
+0x07611ad8  mov      w9, #0x1e
+0x07611adc  adrp     x8, #0xa5ad000
+0x07611ae0  add      x8, x8, #0x730
+0x07611ae4  strb     w9, [x8], #1
+0x07611ae8  b        #0x7611b00
+0x07611aec  adrp     x9, #0xa5ad000
+0x07611af0  add      x9, x9, #0x738
+0x07611af4  mov      w10, #0xf
+0x07611af8  ldr      x8, [x9, #8]
+0x07611afc  str      x10, [x9]
+0x07611b00  adrp     x9, #0xabd000
+0x07611b04  add      x9, x9, #0xf93           ; STR 0xbbdf93 'COMPE_TIMELIMIT'
+0x07611b08  adrp     x11, #0xa5a8000
+0x07611b0c  mov      w12, #0xc
+0x07611b10  strb     wzr, [x8, #0xf]
+0x07611b14  ldr      x10, [x9]
+0x07611b18  ldur     x9, [x9, #7]
+0x07611b1c  str      x10, [x8]
+0x07611b20  stur     x9, [x8, #7]
+0x07611b24  str      w12, [x11, #0xb58]
+0x07611b28  ldarb    w8, [x24]
+0x07611b2c  tbnz     w8, #0, #0x7611b34
+0x07611b30  b        #0x7630d0c
+0x07611b34  adrp     x8, #0xa5ad000
+0x07611b38  ldrb     w8, [x8, #0x748]
+0x07611b3c  tbnz     w8, #0, #0x7611b54
+0x07611b40  mov      w9, #0xe
+0x07611b44  adrp     x8, #0xa5ad000
+0x07611b48  add      x8, x8, #0x748
+0x07611b4c  strb     w9, [x8], #1
+0x07611b50  b        #0x7611b68
+0x07611b54  adrp     x9, #0xa5ad000
+0x07611b58  add      x9, x9, #0x750
+0x07611b5c  mov      w10, #7
+0x07611b60  ldr      x8, [x9, #8]
+0x07611b64  str      x10, [x9]
+0x07611b68  mov      w9, #0x455f
+0x07611b6c  mov      w10, #0x4d43
+0x07611b70  movk     w9, #0x5252, lsl #16
+0x07611b74  movk     w10, #0x5f44, lsl #16
+0x07611b78  adrp     x11, #0xa5a8000
+0x07611b7c  mov      w12, #0xd
+0x07611b80  strb     wzr, [x8, #7]
+0x07611b84  stur     w9, [x8, #3]
+0x07611b88  str      w10, [x8]
+0x07611b8c  str      w12, [x11, #0xb5c]
+0x07611b90  ldarb    w8, [x24]
+0x07611b94  tbnz     w8, #0, #0x7611b9c
+0x07611b98  b        #0x7630d58
+0x07611b9c  adrp     x8, #0xa5ad000
+0x07611ba0  ldrb     w8, [x8, #0x760]
+0x07611ba4  tbnz     w8, #0, #0x7611bbc
+0x07611ba8  mov      w9, #0x10
+0x07611bac  adrp     x8, #0xa5ad000
+0x07611bb0  add      x8, x8, #0x760
+0x07611bb4  strb     w9, [x8], #1
+0x07611bb8  b        #0x7611bd0
+0x07611bbc  adrp     x9, #0xa5ad000
+0x07611bc0  add      x9, x9, #0x768
+0x07611bc4  mov      w10, #8
+0x07611bc8  ldr      x8, [x9, #8]
+0x07611bcc  str      x10, [x9]
+0x07611bd0  mov      x9, #0x4f4d
+0x07611bd4  adrp     x10, #0xa5a8000
+0x07611bd8  movk     x9, #0x4544, lsl #16
+0x07611bdc  mov      w11, #0xe
+0x07611be0  movk     x9, #0x455f, lsl #32
+0x07611be4  strb     wzr, [x8, #8]
+0x07611be8  movk     x9, #0x5252, lsl #48
+0x07611bec  str      x9, [x8]
+0x07611bf0  str      w11, [x10, #0xb60]
+0x07611bf4  ldarb    w8, [x24]
+0x07611bf8  tbnz     w8, #0, #0x7611c00
+0x07611bfc  b        #0x7630da4
+0x07611c00  adrp     x8, #0xa5ad000
+0x07611c04  ldrb     w8, [x8, #0x778]
+0x07611c08  tbnz     w8, #0, #0x7611c20
+0x07611c0c  mov      w9, #0x16
+0x07611c10  adrp     x8, #0xa5ad000
+0x07611c14  add      x8, x8, #0x778
+0x07611c18  strb     w9, [x8], #1
+0x07611c1c  b        #0x7611c34
+0x07611c20  adrp     x9, #0xa5ad000
+0x07611c24  add      x9, x9, #0x780
+0x07611c28  mov      w10, #0xb
+0x07611c2c  ldr      x8, [x9, #8]
+0x07611c30  str      x10, [x9]
+0x07611c34  adrp     x10, #0xb69000
+0x07611c38  add      x10, x10, #0x27d           ; STR 0xc6927d 'SYNC_FAILED'
+0x07611c3c  mov      w9, #0x4c49
+0x07611c40  adrp     x11, #0xa5a8000
+0x07611c44  movk     w9, #0x4445, lsl #16
+0x07611c48  mov      w12, #0xf
+0x07611c4c  ldr      x10, [x10]
+0x07611c50  strb     wzr, [x8, #0xb]
+0x07611c54  stur     w9, [x8, #7]
+0x07611c58  str      x10, [x8]
+0x07611c5c  str      w12, [x11, #0xb64]
+0x07611c60  ldarb    w8, [x24]
+0x07611c64  tbnz     w8, #0, #0x7611c6c
+0x07611c68  b        #0x7630df0
+0x07611c6c  adrp     x8, #0xa5ad000
+0x07611c70  ldrb     w8, [x8, #0x790]
+0x07611c74  tbnz     w8, #0, #0x7611c8c
+0x07611c78  mov      w9, #0x10
+0x07611c7c  adrp     x8, #0xa5ad000
+0x07611c80  add      x8, x8, #0x790
+0x07611c84  strb     w9, [x8], #1
+0x07611c88  b        #0x7611ca0
+0x07611c8c  adrp     x9, #0xa5ad000
+0x07611c90  add      x9, x9, #0x798
+0x07611c94  mov      w10, #8
+0x07611c98  ldr      x8, [x9, #8]
+0x07611c9c  str      x10, [x9]
+0x07611ca0  mov      x9, #0x4f43
+0x07611ca4  adrp     x10, #0xa5a8000
+0x07611ca8  movk     x9, #0x464e, lsl #16
+0x07611cac  mov      w11, #0x10
+0x07611cb0  movk     x9, #0x494c, lsl #32
+0x07611cb4  strb     wzr, [x8, #8]
+0x07611cb8  movk     x9, #0x5443, lsl #48
+0x07611cbc  str      x9, [x8]
+0x07611cc0  str      w11, [x10, #0xb68]
+0x07611cc4  ldarb    w8, [x24]
+0x07611cc8  tbnz     w8, #0, #0x7611cd0
+0x07611ccc  b        #0x7630e3c
+0x07611cd0  adrp     x8, #0xa5ad000
+0x07611cd4  ldrb     w8, [x8, #0x7a8]
+0x07611cd8  tbnz     w8, #0, #0x7611cf0
+0x07611cdc  mov      w9, #0x18
+0x07611ce0  adrp     x8, #0xa5ad000
+0x07611ce4  add      x8, x8, #0x7a8
+0x07611ce8  strb     w9, [x8], #1
+0x07611cec  b        #0x7611d04
+0x07611cf0  adrp     x9, #0xa5ad000
+0x07611cf4  add      x9, x9, #0x7b0
+0x07611cf8  mov      w10, #0xc
+0x07611cfc  ldr      x8, [x9, #8]
+0x07611d00  str      x10, [x9]
+0x07611d04  adrp     x10, #0x9d9000
+0x07611d08  add      x10, x10, #0x15f           ; STR 0xad915f 'LOAD_TIMEOUT'
+0x07611d0c  mov      w9, #0x4f45
+0x07611d10  adrp     x11, #0xa5a8000
+0x07611d14  movk     w9, #0x5455, lsl #16
+0x07611d18  mov      w12, #0x11
+0x07611d1c  ldr      x10, [x10]
+0x07611d20  strb     wzr, [x8, #0xc]
+0x07611d24  str      w9, [x8, #8]
+0x07611d28  str      x10, [x8]
+0x07611d2c  str      w12, [x11, #0xb6c]
+0x07611d30  ldarb    w8, [x24]
+0x07611d34  tbnz     w8, #0, #0x7611d3c
+0x07611d38  b        #0x7630e88
+0x07611d3c  adrp     x8, #0xa5ad000
+0x07611d40  ldrb     w8, [x8, #0x7c0]
+0x07611d44  tbnz     w8, #0, #0x7611d5c
+0x07611d48  mov      w9, #0x12
+0x07611d4c  adrp     x8, #0xa5ad000
+0x07611d50  add      x8, x8, #0x7c0
+0x07611d54  strb     w9, [x8], #1
+0x07611d58  b        #0x7611d70
+0x07611d5c  adrp     x9, #0xa5ad000
+0x07611d60  add      x9, x9, #0x7c8
+0x07611d64  mov      w10, #9
+0x07611d68  ldr      x8, [x9, #8]
+0x07611d6c  str      x10, [x9]
+0x07611d70  adrp     x10, #0xbf0000
+0x07611d74  add      x10, x10, #0xc96           ; STR 0xcf0c96 'GAMERELAY'
+0x07611d78  mov      w9, #0x59
+0x07611d7c  adrp     x11, #0xa5a8000
+0x07611d80  mov      w12, #0x12
+0x07611d84  ldr      x10, [x10]
+0x07611d88  strh     w9, [x8, #8]
+0x07611d8c  str      x10, [x8]
+0x07611d90  str      w12, [x11, #0xb70]
+0x07611d94  ldarb    w8, [x24]
+0x07611d98  tbnz     w8, #0, #0x7611da0
+0x07611d9c  b        #0x7630ed4
+0x07611da0  adrp     x8, #0xa5ad000
+0x07611da4  ldrb     w8, [x8, #0x7d8]
+0x07611da8  tbnz     w8, #0, #0x7611dc0
+0x07611dac  mov      w9, #0x14
+0x07611db0  adrp     x8, #0xa5ad000
+0x07611db4  add      x8, x8, #0x7d8
+0x07611db8  strb     w9, [x8], #1
+0x07611dbc  b        #0x7611dd4
+0x07611dc0  adrp     x9, #0xa5ad000
+0x07611dc4  add      x9, x9, #0x7e0
+0x07611dc8  mov      w10, #0xa
+0x07611dcc  ldr      x8, [x9, #8]
+0x07611dd0  str      x10, [x9]
+0x07611dd4  adrp     x10, #0xa84000
+0x07611dd8  add      x10, x10, #0x7fd           ; STR 0xb847fd 'P2P_FAILED'
+0x07611ddc  mov      w9, #0x4445
+0x07611de0  adrp     x11, #0xa5a8000
+0x07611de4  mov      w12, #0x13
+0x07611de8  strb     wzr, [x8, #0xa]
+0x07611dec  ldr      x10, [x10]
+0x07611df0  strh     w9, [x8, #8]
+0x07611df4  str      x10, [x8]
+0x07611df8  str      w12, [x11, #0xb74]
+0x07611dfc  ldarb    w8, [x24]
+0x07611e00  tbnz     w8, #0, #0x7611e08
+0x07611e04  b        #0x7630f20
+0x07611e08  adrp     x8, #0xa5ad000
+0x07611e0c  ldrb     w8, [x8, #0x7f0]
+0x07611e10  tbnz     w8, #0, #0x7611e28
+0x07611e14  mov      w9, #0x16
+0x07611e18  adrp     x8, #0xa5ad000
+0x07611e1c  add      x8, x8, #0x7f0
+0x07611e20  strb     w9, [x8], #1
+0x07611e24  b        #0x7611e3c
+0x07611e28  adrp     x9, #0xa5ad000
+0x07611e2c  add      x9, x9, #0x7f8
+0x07611e30  mov      w10, #0xb
+0x07611e34  ldr      x8, [x9, #8]
+0x07611e38  str      x10, [x9]
+0x07611e3c  adrp     x10, #0xa71000
+0x07611e40  add      x10, x10, #0x55e           ; STR 0xb7155e 'BUFFER_OVER'
+0x07611e44  mov      w9, #0x564f
+0x07611e48  adrp     x11, #0xa5a8000
+0x07611e4c  movk     w9, #0x5245, lsl #16
+0x07611e50  mov      w12, #0x14
+0x07611e54  ldr      x10, [x10]
+0x07611e58  strb     wzr, [x8, #0xb]
+0x07611e5c  stur     w9, [x8, #7]
+0x07611e60  str      x10, [x8]
+0x07611e64  str      w12, [x11, #0xb78]
+0x07611e68  ldarb    w8, [x24]
+0x07611e6c  tbnz     w8, #0, #0x7611e74
+0x07611e70  b        #0x7630f6c
+0x07611e74  adrp     x8, #0xa5ad000
+0x07611e78  ldrb     w8, [x8, #0x808]
+0x07611e7c  tbnz     w8, #0, #0x7611e94
+0x07611e80  mov      w9, #0x14
+0x07611e84  adrp     x8, #0xa5ad000
+0x07611e88  add      x8, x8, #0x808
+0x07611e8c  strb     w9, [x8], #1
+0x07611e90  b        #0x7611ea8
+0x07611e94  adrp     x9, #0xa5ad000
+0x07611e98  add      x9, x9, #0x810
+0x07611e9c  mov      w10, #0xa
+0x07611ea0  ldr      x8, [x9, #8]
+0x07611ea4  str      x10, [x9]
+0x07611ea8  adrp     x10, #0xc16000
+0x07611eac  add      x10, x10, #0xd3a           ; STR 0xd16d3a 'DEGRADE_SC'
+0x07611eb0  mov      w9, #0x4353
+0x07611eb4  adrp     x11, #0xa5a8000
+0x07611eb8  mov      w12, #0x15
+0x07611ebc  strb     wzr, [x8, #0xa]
+0x07611ec0  ldr      x10, [x10]
+0x07611ec4  strh     w9, [x8, #8]
+0x07611ec8  str      x10, [x8]
+0x07611ecc  str      w12, [x11, #0xb7c]
+0x07611ed0  ldarb    w8, [x24]
+0x07611ed4  tbnz     w8, #0, #0x7611edc
+0x07611ed8  b        #0x7630fb8
+0x07611edc  adrp     x8, #0xa5ad000
+0x07611ee0  ldrb     w8, [x8, #0x820]
+0x07611ee4  tbnz     w8, #0, #0x7611efc
+0x07611ee8  mov      w9, #0x14
+0x07611eec  adrp     x8, #0xa5ad000
+0x07611ef0  add      x8, x8, #0x820
+0x07611ef4  strb     w9, [x8], #1
+0x07611ef8  b        #0x7611f10
+0x07611efc  adrp     x9, #0xa5ad000
+0x07611f00  add      x9, x9, #0x828
+0x07611f04  mov      w10, #0xa
+0x07611f08  ldr      x8, [x9, #8]
+0x07611f0c  str      x10, [x9]
+0x07611f10  adrp     x10, #0xa5d000
+0x07611f14  add      x10, x10, #0xe1f           ; STR 0xb5de1f 'DISCONN_SC'
+0x07611f18  mov      w9, #0x4353
+0x07611f1c  adrp     x11, #0xa5a8000
+0x07611f20  mov      w12, #0x16
+0x07611f24  strb     wzr, [x8, #0xa]
+0x07611f28  ldr      x10, [x10]
+0x07611f2c  strh     w9, [x8, #8]
+0x07611f30  str      x10, [x8]
+0x07611f34  str      w12, [x11, #0xb80]
+0x07611f38  ldarb    w8, [x24]
+0x07611f3c  tbnz     w8, #0, #0x7611f44
+0x07611f40  b        #0x7631004
+0x07611f44  adrp     x8, #0xa5ad000
+0x07611f48  ldrb     w8, [x8, #0x838]
+0x07611f4c  tbnz     w8, #0, #0x7611f64
+0x07611f50  mov      w9, #0x1c
+0x07611f54  adrp     x8, #0xa5ad000
+0x07611f58  add      x8, x8, #0x838
+0x07611f5c  strb     w9, [x8], #1
+0x07611f60  b        #0x7611f78
+0x07611f64  adrp     x9, #0xa5ad000
+0x07611f68  add      x9, x9, #0x840
+0x07611f6c  mov      w10, #0xe
+0x07611f70  ldr      x8, [x9, #8]
+0x07611f74  str      x10, [x9]
+0x07611f78  adrp     x9, #0xb57000
+0x07611f7c  add      x9, x9, #0x76c           ; STR 0xc5776c 'CMD_SENDFAILED'
+0x07611f80  adrp     x11, #0xa5a8000
+0x07611f84  mov      w12, #0x17
+0x07611f88  strb     wzr, [x8, #0xe]
+0x07611f8c  ldr      x10, [x9]
+0x07611f90  ldur     x9, [x9, #6]
+0x07611f94  str      x10, [x8]
+0x07611f98  stur     x9, [x8, #6]
+0x07611f9c  str      w12, [x11, #0xb84]
+0x07611fa0  ldarb    w8, [x24]
+0x07611fa4  tbnz     w8, #0, #0x7611fac
+0x07611fa8  b        #0x7631050
+0x07611fac  adrp     x8, #0xa5ad000
+0x07611fb0  ldrb     w8, [x8, #0x850]
+0x07611fb4  tbnz     w8, #0, #0x7611fcc
+0x07611fb8  mov      w9, #0x18
+0x07611fbc  adrp     x8, #0xa5ad000
+0x07611fc0  add      x8, x8, #0x850
+0x07611fc4  strb     w9, [x8], #1
+0x07611fc8  b        #0x7611fe0
+0x07611fcc  adrp     x9, #0xa5ad000
+0x07611fd0  add      x9, x9, #0x858
+0x07611fd4  mov      w10, #0xc
+0x07611fd8  ldr      x8, [x9, #8]
+0x07611fdc  str      x10, [x9]
+0x07611fe0  adrp     x10, #0xc16000
+0x07611fe4  add      x10, x10, #0xd45           ; STR 0xd16d45 'OUTPLAY_LONG'
+0x07611fe8  mov      w9, #0x4f4c
+0x07611fec  adrp     x11, #0xa5a8000
+0x07611ff0  movk     w9, #0x474e, lsl #16
+0x07611ff4  mov      w12, #0x18
+0x07611ff8  ldr      x10, [x10]
+0x07611ffc  strb     wzr, [x8, #0xc]
+0x07612000  str      w9, [x8, #8]
+0x07612004  str      x10, [x8]
+0x07612008  str      w12, [x11, #0xb88]
+0x0761200c  ldarb    w8, [x24]
+0x07612010  tbnz     w8, #0, #0x7612018
+0x07612014  b        #0x763109c
+0x07612018  adrp     x8, #0xa5ad000
+0x0761201c  ldrb     w8, [x8, #0x868]
+0x07612020  tbnz     w8, #0, #0x7612038
+0x07612024  mov      w9, #0x10
+0x07612028  adrp     x8, #0xa5ad000
+0x0761202c  add      x8, x8, #0x868
+0x07612030  strb     w9, [x8], #1
+0x07612034  b        #0x761204c
+0x07612038  adrp     x9, #0xa5ad000
+0x0761203c  add      x9, x9, #0x870
+0x07612040  mov      w10, #8
+0x07612044  ldr      x8, [x9, #8]
+0x07612048  str      x10, [x9]
+0x0761204c  mov      x9, #0x4d43
+0x07612050  adrp     x10, #0xa5a8000
+0x07612054  movk     x9, #0x5f44, lsl #16
+0x07612058  mov      w11, #0x19
+0x0761205c  movk     x9, #0x414c, lsl #32
+0x07612060  strb     wzr, [x8, #8]
+0x07612064  movk     x9, #0x4b43, lsl #48
+0x07612068  str      x9, [x8]
+0x0761206c  str      w11, [x10, #0xb8c]
+0x07612070  ldarb    w8, [x24]
+0x07612074  tbnz     w8, #0, #0x761207c
+0x07612078  b        #0x76310e8
+0x0761207c  adrp     x8, #0xa5ad000
+0x07612080  ldrb     w8, [x8, #0x880]
+0x07612084  tbnz     w8, #0, #0x761209c
+0x07612088  mov      w9, #0x10
+0x0761208c  adrp     x8, #0xa5ad000
+0x07612090  add      x8, x8, #0x880
+0x07612094  strb     w9, [x8], #1
+0x07612098  b        #0x76120b0
+0x0761209c  adrp     x9, #0xa5ad000
+0x076120a0  add      x9, x9, #0x888
+0x076120a4  mov      w10, #8
+0x076120a8  ldr      x8, [x9, #8]
+0x076120ac  str      x10, [x9]
+0x076120b0  mov      x9, #0x4954
+0x076120b4  adrp     x10, #0xa5a8000
+0x076120b8  movk     x9, #0x454d, lsl #16
+0x076120bc  mov      w11, #0x1a
+0x076120c0  movk     x9, #0x455f, lsl #32
+0x076120c4  strb     wzr, [x8, #8]
+0x076120c8  movk     x9, #0x5252, lsl #48
+0x076120cc  str      x9, [x8]
+0x076120d0  str      w11, [x10, #0xb90]
+0x076120d4  ldarb    w8, [x24]
+0x076120d8  tbnz     w8, #0, #0x76120e0
+0x076120dc  b        #0x7631134
+0x076120e0  adrp     x8, #0xa5ad000
+0x076120e4  ldrb     w8, [x8, #0x898]
+0x076120e8  tbnz     w8, #0, #0x7612100
+0x076120ec  mov      w9, #0xc
+0x076120f0  adrp     x8, #0xa5ad000
+0x076120f4  add      x8, x8, #0x898
+0x076120f8  strb     w9, [x8], #1
+0x076120fc  b        #0x7612114
+0x07612100  adrp     x9, #0xa5ad000
+0x07612104  add      x9, x9, #0x8a0
+0x07612108  mov      w10, #6
+0x0761210c  ldr      x8, [x9, #8]
+0x07612110  str      x10, [x9]
+0x07612114  mov      w10, #0x4f4e
+0x07612118  mov      w9, #0x4e55
+0x0761211c  movk     w10, #0x5254, lsl #16
+0x07612120  adrp     x11, #0xa5a8000
+0x07612124  mov      w12, #0x1b
+0x07612128  strb     wzr, [x8, #6]
+0x0761212c  strh     w9, [x8, #4]
+0x07612130  str      w10, [x8]
+0x07612134  str      w12, [x11, #0xb94]
+0x07612138  ldarb    w8, [x24]
+0x0761213c  tbnz     w8, #0, #0x7612144
+0x07612140  b        #0x7631180
+0x07612144  adrp     x8, #0xa5ad000
+0x07612148  ldrb     w8, [x8, #0x8b0]
+0x0761214c  tbnz     w8, #0, #0x7612164
+0x07612150  mov      w9, #0x1a
+0x07612154  adrp     x8, #0xa5ad000
+0x07612158  add      x8, x8, #0x8b0
+0x0761215c  strb     w9, [x8], #1
+0x07612160  b        #0x7612178
+0x07612164  adrp     x9, #0xa5ad000
+0x07612168  add      x9, x9, #0x8b8
+0x0761216c  mov      w10, #0xd
+0x07612170  ldr      x8, [x9, #8]
+0x07612174  str      x10, [x9]
+0x07612178  adrp     x9, #0xc2a000
+0x0761217c  add      x9, x9, #0x439           ; STR 0xd2a439 'READY_TIMEOUT'
+0x07612180  adrp     x11, #0xa5a8000
+0x07612184  mov      w12, #0x1c
+0x07612188  strb     wzr, [x8, #0xd]
+0x0761218c  ldr      x10, [x9]
+0x07612190  ldur     x9, [x9, #5]
+0x07612194  str      x10, [x8]
+0x07612198  stur     x9, [x8, #5]
+0x0761219c  str      w12, [x11, #0xb98]
+0x076121a0  ldarb    w8, [x24]
+0x076121a4  tbnz     w8, #0, #0x76121ac
+0x076121a8  b        #0x76311cc
+0x076121ac  adrp     x8, #0xa5ad000
+0x076121b0  ldrb     w8, [x8, #0x8c8]
+0x076121b4  tbnz     w8, #0, #0x76121cc
+0x076121b8  mov      w9, #0x1e
+0x076121bc  adrp     x8, #0xa5ad000
+0x076121c0  add      x8, x8, #0x8c8
+0x076121c4  strb     w9, [x8], #1
+0x076121c8  b        #0x76121e0
+0x076121cc  adrp     x9, #0xa5ad000
+0x076121d0  add      x9, x9, #0x8d0
+0x076121d4  mov      w10, #0xf
+0x076121d8  ldr      x8, [x9, #8]
+0x076121dc  str      x10, [x9]
+0x076121e0  adrp     x9, #0xa97000
+0x076121e4  add      x9, x9, #0x5d8           ; STR 0xb975d8 'DISCONN_P2P_NTL'
+0x076121e8  adrp     x11, #0xa5a8000
+0x076121ec  mov      w12, #0x1d
+0x076121f0  strb     wzr, [x8, #0xf]
+0x076121f4  ldr      x10, [x9]
+0x076121f8  ldur     x9, [x9, #7]
+0x076121fc  str      x10, [x8]
+0x07612200  stur     x9, [x8, #7]
+0x07612204  str      w12, [x11, #0xb9c]
+0x07612208  ldarb    w8, [x24]
+0x0761220c  tbnz     w8, #0, #0x7612214
+0x07612210  b        #0x7631218
+0x07612214  adrp     x8, #0xa5ad000
+0x07612218  ldrb     w8, [x8, #0x8e0]
+0x0761221c  tbnz     w8, #0, #0x7612234
+0x07612220  mov      w9, #0x16
+0x07612224  adrp     x8, #0xa5ad000
+0x07612228  add      x8, x8, #0x8e0
+0x0761222c  strb     w9, [x8], #1
+0x07612230  b        #0x7612248
+0x07612234  adrp     x9, #0xa5ad000
+0x07612238  add      x9, x9, #0x8e8
+0x0761223c  mov      w10, #0xb
+0x07612240  ldr      x8, [x9, #8]
+0x07612244  str      x10, [x9]
+0x07612248  adrp     x10, #0xa38000
+0x0761224c  add      x10, x10, #0x9e4           ; STR 0xb389e4 'DISCONN_P2P'
+0x07612250  mov      w9, #0x505f
+0x07612254  adrp     x11, #0xa5a8000
+0x07612258  movk     w9, #0x5032, lsl #16
+0x0761225c  mov      w12, #0x1e
+0x07612260  ldr      x10, [x10]
+0x07612264  strb     wzr, [x8, #0xb]
+0x07612268  stur     w9, [x8, #7]
+0x0761226c  str      x10, [x8]
+0x07612270  str      w12, [x11, #0xba0]
+0x07612274  ldarb    w8, [x24]
+0x07612278  tbnz     w8, #0, #0x7612280
+0x0761227c  b        #0x7631264
+0x07612280  adrp     x8, #0xa5ad000
+0x07612284  ldrb     w8, [x8, #0x8f8]
+0x07612288  tbnz     w8, #0, #0x76122a0
+0x0761228c  mov      w9, #0x16
+0x07612290  adrp     x8, #0xa5ad000
+0x07612294  add      x8, x8, #0x8f8
+0x07612298  strb     w9, [x8], #1
+0x0761229c  b        #0x76122b4
+0x076122a0  adrp     x9, #0xa5ad000
+0x076122a4  add      x9, x9, #0x900
+0x076122a8  mov      w10, #0xb
+0x076122ac  ldr      x8, [x9, #8]
+0x076122b0  str      x10, [x9]
+0x076122b4  adrp     x10, #0xbdd000
+0x076122b8  add      x10, x10, #0x9fc           ; STR 0xcdd9fc 'DEGRADE_P2P'
+0x076122bc  mov      w9, #0x505f
+0x076122c0  adrp     x11, #0xa5a8000
+0x076122c4  movk     w9, #0x5032, lsl #16
+0x076122c8  mov      w12, #0x1f
+0x076122cc  ldr      x10, [x10]
+0x076122d0  strb     wzr, [x8, #0xb]
+0x076122d4  stur     w9, [x8, #7]
+0x076122d8  str      x10, [x8]
+0x076122dc  str      w12, [x11, #0xba4]
+0x076122e0  ldarb    w8, [x24]
+0x076122e4  tbnz     w8, #0, #0x76122ec
+0x076122e8  b        #0x76312b0
+0x076122ec  adrp     x8, #0xa5ad000
+0x076122f0  ldrb     w8, [x8, #0x910]
+0x076122f4  tbnz     w8, #0, #0x761230c
+0x076122f8  mov      w9, #0x10
+0x076122fc  adrp     x8, #0xa5ad000
+0x07612300  add      x8, x8, #0x910
+0x07612304  strb     w9, [x8], #1
+0x07612308  b        #0x7612320
+0x0761230c  adrp     x9, #0xa5ad000
+0x07612310  add      x9, x9, #0x918
+0x07612314  mov      w10, #8
+0x07612318  ldr      x8, [x9, #8]
+0x0761231c  str      x10, [x9]
+0x07612320  mov      x9, #0x4f4e
+0x07612324  adrp     x10, #0xa5a8000
+0x07612328  movk     x9, #0x454e, lsl #16
+0x0761232c  mov      w11, #0x20
+0x07612330  movk     x9, #0x4f5f, lsl #32
+0x07612334  strb     wzr, [x8, #8]
+0x07612338  movk     x9, #0x5050, lsl #48
+0x0761233c  str      x9, [x8]
+0x07612340  str      w11, [x10, #0xba8]
+0x07612344  ldarb    w8, [x24]
+0x07612348  tbnz     w8, #0, #0x7612350
+0x0761234c  b        #0x76312fc
+0x07612350  adrp     x8, #0xa5ad000
+0x07612354  ldrb     w8, [x8, #0x928]
+0x07612358  tbnz     w8, #0, #0x7612370
+0x0761235c  mov      w9, #0xa
+0x07612360  adrp     x8, #0xa5ad000
+0x07612364  add      x8, x8, #0x928
+0x07612368  strb     w9, [x8], #1
+0x0761236c  b        #0x7612384
+0x07612370  adrp     x9, #0xa5ad000
+0x07612374  add      x9, x9, #0x930
+0x07612378  mov      w10, #5
+0x0761237c  ldr      x8, [x9, #8]
+0x07612380  str      x10, [x9]
+0x07612384  mov      w9, #0x4f4e
+0x07612388  mov      w10, #0x52
+0x0761238c  movk     w9, #0x5245, lsl #16
+0x07612390  adrp     x11, #0xa5a8000
+0x07612394  mov      w12, #0x21
+0x07612398  adrp     x24, #0xa5a5000
+0x0761239c  add      x24, x24, #0xd8
+0x076123a0  strh     w10, [x8, #4]
+0x076123a4  str      w9, [x8]
+0x076123a8  str      w12, [x11, #0xbac]
+0x076123ac  ldarb    w8, [x24]
+0x076123b0  tbnz     w8, #0, #0x76123b8
+0x076123b4  b        #0x7631348
+0x076123b8  adrp     x8, #0xa5a9000
+0x076123bc  ldrb     w8, [x8, #0xa70]
+0x076123c0  tbnz     w8, #0, #0x76123d8
+0x076123c4  mov      w9, #0x14
+0x076123c8  adrp     x8, #0xa5a9000
+0x076123cc  add      x8, x8, #0xa70
+0x076123d0  strb     w9, [x8], #1
+0x076123d4  b        #0x76123ec
+0x076123d8  adrp     x9, #0xa5a9000
+0x076123dc  add      x9, x9, #0xa78
+0x076123e0  mov      w10, #0xa
+0x076123e4  ldr      x8, [x9, #8]
+0x076123e8  str      x10, [x9]
+0x076123ec  adrp     x10, #0xb7c000
+0x076123f0  add      x10, x10, #0xcf4           ; STR 0xc7ccf4 'NORMAL_END'
+0x076123f4  mov      w9, #0x444e
+0x076123f8  strb     wzr, [x8, #0xa]
+0x076123fc  ldr      x10, [x10]

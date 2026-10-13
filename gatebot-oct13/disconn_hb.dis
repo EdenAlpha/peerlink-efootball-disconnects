@@ -1,0 +1,42 @@
+0x07611608  adrp     x8, #0xa5ad000
+0x0761160c  ldrb     w8, [x8, #0x610]
+0x07611610  tbnz     w8, #0, #0x7611628
+0x07611614  mov      w9, #0x14
+0x07611618  adrp     x8, #0xa5ad000
+0x0761161c  add      x8, x8, #0x610
+0x07611620  strb     w9, [x8], #1
+0x07611624  b        #0x761163c
+0x07611628  adrp     x9, #0xa5ad000
+0x0761162c  add      x9, x9, #0x618
+0x07611630  mov      w10, #0xa
+0x07611634  ldr      x8, [x9, #8]
+0x07611638  str      x10, [x9]
+0x0761163c  adrp     x10, #0xb30000
+0x07611640  add      x10, x10, #0xb21           ; STR 0xc30b21 'DISCONN_HB'
+0x07611644  mov      w9, #0x4248
+0x07611648  adrp     x11, #0xa5a8000
+0x0761164c  strb     wzr, [x8, #0xa]
+0x07611650  ldr      x10, [x10]
+0x07611654  strh     w9, [x8, #8]
+0x07611658  str      x10, [x8]
+0x0761165c  str      wzr, [x11, #0xb28]
+0x07611660  ldarb    w8, [x24]
+0x07611664  tbnz     w8, #0, #0x761166c
+0x07611668  b        #0x763097c
+0x0761166c  adrp     x8, #0xa5ad000
+0x07611670  ldrb     w8, [x8, #0x628]
+0x07611674  tbnz     w8, #0, #0x761168c
+0x07611678  mov      w9, #0x1a
+0x0761167c  adrp     x8, #0xa5ad000
+0x07611680  add      x8, x8, #0x628
+0x07611684  strb     w9, [x8], #1
+0x07611688  b        #0x76116a0
+0x0761168c  adrp     x9, #0xa5ad000
+0x07611690  add      x9, x9, #0x630
+0x07611694  mov      w10, #0xd
+0x07611698  ldr      x8, [x9, #8]
+0x0761169c  str      x10, [x9]
+0x076116a0  adrp     x9, #0xa71000
+0x076116a4  add      x9, x9, #0x550           ; STR 0xb71550 'DISCONN_SLEEP'
+0x076116a8  adrp     x11, #0xa5a8000
+0x076116ac  mov      w12, #1

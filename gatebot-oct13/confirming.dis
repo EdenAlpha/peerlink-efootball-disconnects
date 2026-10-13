@@ -1,0 +1,576 @@
+0x07e3cd00  bl       #0x7e3e694
+0x07e3cd04  ldr      x22, [sp, #0x20]
+0x07e3cd08  cbz      x22, #0x7e3cd34
+0x07e3cd0c  add      x1, x22, #8
+0x07e3cd10  mov      x0, #-1
+0x07e3cd14  bl       #0x8c1b910
+0x07e3cd18  cbnz     x0, #0x7e3cd34
+0x07e3cd1c  ldr      x8, [x22]
+0x07e3cd20  mov      x0, x22
+0x07e3cd24  ldr      x8, [x8, #0x10]
+0x07e3cd28  blr      x8
+0x07e3cd2c  mov      x0, x22
+0x07e3cd30  bl       #0x8c1f2f0
+0x07e3cd34  adrp     x1, #0xb1e000
+0x07e3cd38  add      x1, x1, #0xb17           ; STR 0xc1eb17 'GAME_PHASE'
+0x07e3cd3c  mov      x0, x19
+0x07e3cd40  bl       #0x7e3e694
+0x07e3cd44  adrp     x1, #0xb0b000
+0x07e3cd48  add      x1, x1, #0xe7           ; STR 0xc0b0e7 'MATCH_CATEGORY'
+0x07e3cd4c  mov      x0, x19
+0x07e3cd50  bl       #0x7e3e694
+0x07e3cd54  adrp     x1, #0xa4c000
+0x07e3cd58  add      x1, x1, #6
+0x07e3cd5c  mov      x0, x19
+0x07e3cd60  bl       #0x7e3e694
+0x07e3cd64  adrp     x1, #0xa26000
+0x07e3cd68  add      x1, x1, #0xa01           ; STR 0xb26a01 'AWAY_SCORE'
+0x07e3cd6c  mov      x0, x19
+0x07e3cd70  bl       #0x7e3e694
+0x07e3cd74  adrp     x1, #0xb7d000
+0x07e3cd78  add      x1, x1, #0x9f1           ; STR 0xc7d9f1 'MY_SIDE'
+0x07e3cd7c  mov      x0, x19
+0x07e3cd80  bl       #0x7e3e694
+0x07e3cd84  adrp     x1, #0xa13000
+0x07e3cd88  add      x1, x1, #0xdcd           ; STR 0xb13dcd 'SCORE_SITUATION'
+0x07e3cd8c  mov      x0, x19
+0x07e3cd90  bl       #0x7e3e694
+0x07e3cd94  adrp     x1, #0xc2b000
+0x07e3cd98  add      x1, x1, #0x141           ; STR 0xd2b141 'OPERATION_TYPE'
+0x07e3cd9c  mov      x0, x19
+0x07e3cda0  bl       #0x7e3e694
+0x07e3cda4  adrp     x1, #0xba4000
+0x07e3cda8  add      x1, x1, #0x242           ; STR 0xca4242 'QUALITY_SETTING_FOR_PLAYER'
+0x07e3cdac  mov      x0, x19
+0x07e3cdb0  bl       #0x7e3e694
+0x07e3cdb4  adrp     x1, #0xaf7000
+0x07e3cdb8  add      x1, x1, #0x837           ; STR 0xbf7837 'QUALITY_SETTING_FOR_STADIUM'
+0x07e3cdbc  mov      x0, x19
+0x07e3cdc0  bl       #0x7e3e694
+0x07e3cdc4  adrp     x1, #0x9da000
+0x07e3cdc8  add      x1, x1, #0x45           ; STR 0xada045 'FPS_SETTING'
+0x07e3cdcc  mov      x0, x19
+0x07e3cdd0  bl       #0x7e3e694
+0x07e3cdd4  adrp     x1, #0xb0b000
+0x07e3cdd8  add      x1, x1, #0xf6           ; STR 0xc0b0f6 'VSYNC_INTERVAL'
+0x07e3cddc  mov      x0, x19
+0x07e3cde0  bl       #0x7e3e694
+0x07e3cde4  adrp     x1, #0xb90000
+0x07e3cde8  add      x1, x1, #0xc6a           ; STR 0xc90c6a 'HOME_TEAM_ID_NO'
+0x07e3cdec  mov      x0, x19
+0x07e3cdf0  bl       #0x7e3e694
+0x07e3cdf4  adrp     x1, #0xba4000
+0x07e3cdf8  add      x1, x1, #0x181           ; STR 0xca4181 'HOME_TEAM_ID_ID'
+0x07e3cdfc  mov      x0, x19
+0x07e3ce00  bl       #0x7e3e694
+0x07e3ce04  adrp     x1, #0xb58000
+0x07e3ce08  add      x1, x1, #0x3e8           ; STR 0xc583e8 'AWAY_TEAM_ID_NO'
+0x07e3ce0c  mov      x0, x19
+0x07e3ce10  bl       #0x7e3e694
+0x07e3ce14  adrp     x1, #0xb7d000
+0x07e3ce18  add      x1, x1, #0x9f9           ; STR 0xc7d9f9 'AWAY_TEAM_ID_ID'
+0x07e3ce1c  mov      x0, x19
+0x07e3ce20  bl       #0x7e3e694
+0x07e3ce24  adrp     x1, #0xbcb000
+0x07e3ce28  add      x1, x1, #0x635           ; STR 0xccb635 'OFFICIAL_COMPETITION_TYPE'
+0x07e3ce2c  mov      x0, x19
+0x07e3ce30  bl       #0x7e3e694
+0x07e3ce34  adrp     x1, #0xb31000
+0x07e3ce38  add      x1, x1, #0x6db           ; STR 0xc316db 'IS_PK'
+0x07e3ce3c  mov      x0, x19
+0x07e3ce40  bl       #0x7e3e694
+0x07e3ce44  adrp     x1, #0xbcb000
+0x07e3ce48  add      x1, x1, #0x64f           ; STR 0xccb64f 'IS_EX'
+0x07e3ce4c  mov      x0, x19
+0x07e3ce50  bl       #0x7e3e694
+0x07e3ce54  adrp     x1, #0xbf1000
+0x07e3ce58  add      x1, x1, #0x6df           ; STR 0xcf16df 'MATCH_SETTING_TIMEZONE'
+0x07e3ce5c  mov      x0, x19
+0x07e3ce60  bl       #0x7e3e694
+0x07e3ce64  adrp     x1, #0xc17000
+0x07e3ce68  add      x1, x1, #0x9e8           ; STR 0xd179e8 'MATCH_SETTING_SEASON'
+0x07e3ce6c  mov      x0, x19
+0x07e3ce70  bl       #0x7e3e694
+0x07e3ce74  adrp     x1, #0xb31000
+0x07e3ce78  add      x1, x1, #0x6e1           ; STR 0xc316e1 'MATCH_SETTING_WEATHER'
+0x07e3ce7c  mov      x0, x19
+0x07e3ce80  bl       #0x7e3e694
+0x07e3ce84  adrp     x1, #0xa4b000
+0x07e3ce88  add      x1, x1, #0xf9d           ; STR 0xb4bf9d 'MATCH_SETTING_TURFLENGTH'
+0x07e3ce8c  mov      x0, x19
+0x07e3ce90  bl       #0x7e3e694
+0x07e3ce94  adrp     x1, #0xa00000
+0x07e3ce98  add      x1, x1, #0xb84           ; STR 0xb00b84 'MATCH_SETTING_STADIUM_ID'
+0x07e3ce9c  mov      x0, x19
+0x07e3cea0  bl       #0x7e3e694
+0x07e3cea4  adrp     x1, #0xbb7000
+0x07e3cea8  add      x1, x1, #0xc2b           ; STR 0xcb7c2b 'CURRENT_DIVISION'
+0x07e3ceac  mov      x0, x19
+0x07e3ceb0  bl       #0x7e3e694
+0x07e3ceb4  adrp     x1, #0xa39000
+0x07e3ceb8  add      x1, x1, #0x8b6           ; STR 0xb398b6 'LAST_IPADDR'
+0x07e3cebc  mov      x0, x19
+0x07e3cec0  bl       #0x7e3e694
+0x07e3cec4  adrp     x1, #0xc04000
+0x07e3cec8  add      x1, x1, #0xc1b           ; STR 0xd04c1b 'LAST_SERVNAME'
+0x07e3cecc  mov      x0, x19
+0x07e3ced0  bl       #0x7e3e694
+0x07e3ced4  adrp     x1, #0xb1e000
+0x07e3ced8  add      x1, x1, #0xbc5           ; STR 0xc1ebc5 'LAST_IPADDRV6'
+0x07e3cedc  mov      x0, x19
+0x07e3cee0  bl       #0x7e3e694
+0x07e3cee4  adrp     x1, #0xa72000
+0x07e3cee8  add      x1, x1, #0x102           ; STR 0xb72102 'LAST_SERVNAMEV6'
+0x07e3ceec  mov      x0, x19
+0x07e3cef0  bl       #0x7e3e694
+0x07e3cef4  adrp     x1, #0xa26000
+0x07e3cef8  add      x1, x1, #0xa8c           ; STR 0xb26a8c 'ADDR_CHANGED'
+0x07e3cefc  mov      x0, x19
+0x07e3cf00  bl       #0x7e3e694
+0x07e3cf04  adrp     x1, #0xa13000
+0x07e3cf08  add      x1, x1, #0xe57           ; STR 0xb13e57 'ADDRV6_CHANGED'
+0x07e3cf0c  mov      x0, x19
+0x07e3cf10  bl       #0x7e3e694
+0x07e3cf14  adrp     x1, #0xa00000
+0x07e3cf18  add      x1, x1, #0xc1f           ; STR 0xb00c1f 'SOCKET_ERRORS'
+0x07e3cf1c  mov      x0, x19
+0x07e3cf20  bl       #0x7e3e694
+0x07e3cf24  adrp     x1, #0xb31000
+0x07e3cf28  add      x1, x1, #0x732           ; STR 0xc31732 'BACKGROUND_MS_LIST'
+0x07e3cf2c  mov      x0, x19
+0x07e3cf30  bl       #0x7e3e694
+0x07e3cf34  adrp     x1, #0xc17000
+0x07e3cf38  add      x1, x1, #0xa06           ; STR 0xd17a06 'CS_SERVER_LABEL'
+0x07e3cf3c  mov      x0, x19
+0x07e3cf40  bl       #0x7e3e694
+0x07e3cf44  adrp     x1, #0xb0b000
+0x07e3cf48  add      x1, x1, #0x105           ; STR 0xc0b105 'CS_SERVER_REGION'
+0x07e3cf4c  mov      x0, x19
+0x07e3cf50  bl       #0x7e3e694
+0x07e3cf54  adrp     x1, #0xb31000
+0x07e3cf58  add      x1, x1, #0x745           ; STR 0xc31745 'CS_SERVER_REGION_PRIORITY'
+0x07e3cf5c  mov      x0, x19
+0x07e3cf60  bl       #0x7e3e694
+0x07e3cf64  adrp     x1, #0xc04000
+0x07e3cf68  add      x1, x1, #0xb2b           ; STR 0xd04b2b 'CS_SERVER_ADDRESS'
+0x07e3cf6c  mov      x0, x19
+0x07e3cf70  bl       #0x7e3e694
+0x07e3cf74  adrp     x1, #0xc2b000
+0x07e3cf78  add      x1, x1, #0x150           ; STR 0xd2b150 'CS_SERVER_NAME'
+0x07e3cf7c  mov      x0, x19
+0x07e3cf80  bl       #0x7e3e694
+0x07e3cf84  adrp     x1, #0xb31000
+0x07e3cf88  add      x1, x1, #0x75f           ; STR 0xc3175f 'GAME_SERVER_NAME'
+0x07e3cf8c  mov      x0, x19
+0x07e3cf90  bl       #0x7e3e694
+0x07e3cf94  adrp     x1, #0xc2b000
+0x07e3cf98  add      x1, x1, #0x15f           ; STR 0xd2b15f 'GAME_SERVER_STATS_URL'
+0x07e3cf9c  mov      x0, x19
+0x07e3cfa0  bl       #0x7e3e694
+0x07e3cfa4  adrp     x22, #0xa8a000
+0x07e3cfa8  add      x22, x22, #0x239
+0x07e3cfac  adrp     x1, #0xa72000
+0x07e3cfb0  add      x1, x1, #0xbd           ; STR 0xb720bd 'GAME_SERVER_STATS_'
+0x07e3cfb4  mov      x0, x19
+0x07e3cfb8  mov      x2, x22
+0x07e3cfbc  bl       #0x7e3f10c
+0x07e3cfc0  adrp     x1, #0xbf1000
+0x07e3cfc4  add      x1, x1, #0x739           ; STR 0xcf1739 'GAME_SERVER_STATS_SEND_URL'
+0x07e3cfc8  mov      x0, x19
+0x07e3cfcc  bl       #0x7e3e694
+0x07e3cfd0  adrp     x1, #0x9da000
+0x07e3cfd4  add      x1, x1, #0x51           ; STR 0xada051 'GAME_SERVER_STATS_SEND_'
+0x07e3cfd8  mov      x0, x19
+0x07e3cfdc  mov      x2, x22
+0x07e3cfe0  bl       #0x7e3f10c
+0x07e3cfe4  adrp     x1, #0xb31000
+0x07e3cfe8  add      x1, x1, #0x78f           ; STR 0xc3178f 'GAME_SERVER_STATS_RECV_URL'
+0x07e3cfec  mov      x0, x19
+0x07e3cff0  bl       #0x7e3e694
+0x07e3cff4  adrp     x1, #0xb6a000
+0x07e3cff8  add      x1, x1, #0x84           ; STR 0xc6a084 'GAME_SERVER_STATS_RECV_'
+0x07e3cffc  mov      x0, x19
+0x07e3d000  mov      x2, x22
+0x07e3d004  bl       #0x7e3f10c
+0x07e3d008  adrp     x1, #0xaf7000
+0x07e3d00c  add      x1, x1, #0x853           ; STR 0xbf7853 'DOWNLOAD_SERVER_STATS_URL'
+0x07e3d010  mov      x0, x19
+0x07e3d014  bl       #0x7e3e694
+0x07e3d018  adrp     x1, #0xba4000
+0x07e3d01c  add      x1, x1, #0x25d           ; STR 0xca425d 'DOWNLOAD_SERVER_STATS_'
+0x07e3d020  mov      x0, x19
+0x07e3d024  mov      x2, x22
+0x07e3d028  bl       #0x7e3f10c
+0x07e3d02c  adrp     x1, #0xb31000
+0x07e3d030  add      x1, x1, #0x770           ; STR 0xc31770 'DOWNLOAD_SERVER_STATS_SEND_URL'
+0x07e3d034  mov      x0, x19
+0x07e3d038  bl       #0x7e3e694
+0x07e3d03c  adrp     x1, #0xa26000
+0x07e3d040  add      x1, x1, #0xa0c           ; STR 0xb26a0c 'DOWNLOAD_SERVER_STATS_SEND_'
+0x07e3d044  mov      x0, x19
+0x07e3d048  mov      x2, x22
+0x07e3d04c  bl       #0x7e3f10c
+0x07e3d050  adrp     x1, #0xbcb000
+0x07e3d054  add      x1, x1, #0x673           ; STR 0xccb673 'DOWNLOAD_SERVER_STATS_RECV_URL'
+0x07e3d058  mov      x0, x19
+0x07e3d05c  bl       #0x7e3e694
+0x07e3d060  adrp     x1, #0xa85000
+0x07e3d064  add      x1, x1, #0x66a           ; STR 0xb8566a 'DOWNLOAD_SERVER_STATS_RECV_'
+0x07e3d068  mov      x0, x19
+0x07e3d06c  mov      x2, x22
+0x07e3d070  bl       #0x7e3f10c
+0x07e3d074  adrp     x1, #0xb44000
+0x07e3d078  add      x1, x1, #0xdab           ; STR 0xc44dab 'HTTP_WAITFORCONNECTIVITY'
+0x07e3d07c  mov      x0, x19
+0x07e3d080  bl       #0x7e3e694
+0x07e3d084  adrp     x1, #0xc17000
+0x07e3d088  add      x1, x1, #0xa16           ; STR 0xd17a16 'TURN_IO_SET_SESSION_ERROR'
+0x07e3d08c  mov      x0, x19
+0x07e3d090  bl       #0x7e3e694
+0x07e3d094  adrp     x1, #0xb7d000
+0x07e3d098  add      x1, x1, #0xa9f           ; STR 0xc7da9f 'CMD_RETRY_REC'
+0x07e3d09c  mov      x0, x19
+0x07e3d0a0  bl       #0x7e3e694
+0x07e3d0a4  adrp     x1, #0xbcb000
+0x07e3d0a8  add      x1, x1, #0x692           ; STR 0xccb692 'IPV4ONLY_ARPA'
+0x07e3d0ac  mov      x0, x19
+0x07e3d0b0  bl       #0x7e3e694
+0x07e3d0b4  adrp     x1, #0xaab000
+0x07e3d0b8  add      x1, x1, #0x40e           ; STR 0xbab40e 'LATENCY_MODE_MATCHING'
+0x07e3d0bc  mov      x0, x19
+0x07e3d0c0  bl       #0x7e3e694
+0x07e3d0c4  adrp     x1, #0xa39000
+0x07e3d0c8  add      x1, x1, #0x824           ; STR 0xb39824 'LATENCY_MODE_SESSION'
+0x07e3d0cc  mov      x0, x19
+0x07e3d0d0  bl       #0x7e3e694
+0x07e3d0d4  adrp     x1, #0xc04000
+0x07e3d0d8  add      x1, x1, #0xb65           ; STR 0xd04b65 'LATENCY_MODE_CONNECT'
+0x07e3d0dc  mov      x0, x19
+0x07e3d0e0  bl       #0x7e3e694
+0x07e3d0e4  adrp     x1, #0xbf1000
+0x07e3d0e8  add      x1, x1, #0x754           ; STR 0xcf1754 'LATENCY_MODE_ANNTENA'
+0x07e3d0ec  mov      x0, x19
+0x07e3d0f0  bl       #0x7e3e694
+0x07e3d0f4  adrp     x1, #0xb0b000
+0x07e3d0f8  add      x1, x1, #0x116           ; STR 0xc0b116 'LATENCY_MODE_PRE_MENU'
+0x07e3d0fc  mov      x0, x19
+0x07e3d100  bl       #0x7e3e694
+0x07e3d104  adrp     x1, #0xba4000
+0x07e3d108  add      x1, x1, #0x274           ; STR 0xca4274 'LATENCY_MODE_MATCH_SETTEING_INIT'
+0x07e3d10c  mov      x0, x19
+0x07e3d110  bl       #0x7e3e694
+0x07e3d114  adrp     x1, #0xb1e000
+0x07e3d118  add      x1, x1, #0xb22           ; STR 0xc1eb22 'LATENCY_MODE_WHOLE_CONNECTING'
+0x07e3d11c  mov      x0, x19
+0x07e3d120  bl       #0x7e3e694
+0x07e3d124  adrp     x1, #0xaf7000
+0x07e3d128  add      x1, x1, #0x86d           ; STR 0xbf786d 'LATENCY_MODE_CONFIRMING_RESULT'
+0x07e3d12c  mov      x0, x19
+0x07e3d130  bl       #0x7e3e694
+0x07e3d134  adrp     x1, #0xba4000
+0x07e3d138  add      x1, x1, #0x295           ; STR 0xca4295 'LATENCY_MODE_MATCHING_CMD_START_MATCHING'
+0x07e3d13c  mov      x0, x19
+0x07e3d140  bl       #0x7e3e694
+0x07e3d144  adrp     x1, #0xb1e000
+0x07e3d148  add      x1, x1, #0xb40           ; STR 0xc1eb40 'LATENCY_MODE_MATCHING_PROCESS_CMD_GET_MATCHING_RESULT'
+0x07e3d14c  mov      x0, x19
+0x07e3d150  bl       #0x7e3e694
+0x07e3d154  adrp     x1, #0xb0b000
+0x07e3d158  add      x1, x1, #0x12c           ; STR 0xc0b12c 'LATENCY_MODE_MATCHING_POLLING_CMD_GET_MATCHING_RESULT'
+0x07e3d15c  mov      x0, x19
+0x07e3d160  bl       #0x7e3e694
+0x07e3d164  adrp     x1, #0xc04000
+0x07e3d168  add      x1, x1, #0xb7a           ; STR 0xd04b7a 'LATENCY_MODE_MATCHING_CMD_GET_SERVER_ENV'
+0x07e3d16c  mov      x0, x19
+0x07e3d170  bl       #0x7e3e694
+0x07e3d174  adrp     x1, #0xc04000
+0x07e3d178  add      x1, x1, #0xba3           ; STR 0xd04ba3 'LATENCY_MODE_SESSION_PROCESS_CMD_GET_GAME_SESSION'
+0x07e3d17c  mov      x0, x19
+0x07e3d180  bl       #0x7e3e694
+0x07e3d184  adrp     x1, #0xa39000
+0x07e3d188  add      x1, x1, #0x839           ; STR 0xb39839 'LATENCY_MODE_SESSION_POLLING_CMD_GET_GAME_SESSION'
+0x07e3d18c  mov      x0, x19
+0x07e3d190  bl       #0x7e3e694
+0x07e3d194  adrp     x1, #0xa4c000
+0x07e3d198  add      x1, x1, #0x11           ; STR 0xb4c011 'LATENCY_MODE_SESSION_CMD_GET_TURN_SERVER_LIST'
+0x07e3d19c  mov      x0, x19
+0x07e3d1a0  bl       #0x7e3e694
+0x07e3d1a4  adrp     x1, #0xb6a000
+0x07e3d1a8  add      x1, x1, #0x9c           ; STR 0xc6a09c 'LATENCY_MODE_CONNECT_WAIT_SOCKET'
+0x07e3d1ac  mov      x0, x19
+0x07e3d1b0  bl       #0x7e3e694
+0x07e3d1b4  adrp     x1, #0xb7d000
+0x07e3d1b8  add      x1, x1, #0xaad           ; STR 0xc7daad 'LATENCY_MODE_CONNECT_CONNECT_SESSION'
+0x07e3d1bc  mov      x0, x19
+0x07e3d1c0  bl       #0x7e3e694
+0x07e3d1c4  adrp     x1, #0xa4c000
+0x07e3d1c8  add      x1, x1, #0x3f           ; STR 0xb4c03f 'LATENCY_MODE_CONNECT_MODE_MULTIPLAY'
+0x07e3d1cc  mov      x0, x19
+0x07e3d1d0  bl       #0x7e3e694
+0x07e3d1d4  adrp     x1, #0xb1e000
+0x07e3d1d8  add      x1, x1, #0xb76           ; STR 0xc1eb76 'LATENCY_MODE_CONNECT_WAIT_CONNECT_SESSION_CONTROLLER'
+0x07e3d1dc  mov      x0, x19
+0x07e3d1e0  bl       #0x7e3e694
+0x07e3d1e4  adrp     x1, #0x9da000
+0x07e3d1e8  add      x1, x1, #0x69           ; STR 0xada069 'LATENCY_MODE_CONNECT_REVISION_CHECK'
+0x07e3d1ec  mov      x0, x19
+0x07e3d1f0  bl       #0x7e3e694
+0x07e3d1f4  adrp     x1, #0x9ed000
+0x07e3d1f8  add      x1, x1, #0x6d1           ; STR 0xaed6d1 'LATENCY_MODE_CONNECT_QUALITY_TEST'
+0x07e3d1fc  mov      x0, x19
+0x07e3d200  bl       #0x7e3e694
+0x07e3d204  adrp     x1, #0xabe000
+0x07e3d208  add      x1, x1, #0xd40           ; STR 0xbbed40 'LATENCY_MODE_ANNTENA_WAIT_QUALITY_CHECK'
+0x07e3d20c  mov      x0, x19
+0x07e3d210  bl       #0x7e3e694
+0x07e3d214  adrp     x1, #0xbde000
+0x07e3d218  add      x1, x1, #0x707           ; STR 0xcde707 'LATENCY_MODE_ANNTENA_CMD_SET_GAME_SESSION_CHECK_RES'
+0x07e3d21c  mov      x0, x19
+0x07e3d220  bl       #0x7e3e694
+0x07e3d224  adrp     x1, #0x9ed000
+0x07e3d228  add      x1, x1, #0x6f3           ; STR 0xaed6f3 'LATENCY_MODE_ANNTENA_PROCESS_CMD_GET_GAME_SESSION_CHECK_RES'
+0x07e3d22c  mov      x0, x19
+0x07e3d230  bl       #0x7e3e694
+0x07e3d234  adrp     x1, #0xbb7000
+0x07e3d238  add      x1, x1, #0xc40           ; STR 0xcb7c40 'LATENCY_MODE_ANNTENA_POLLING_CMD_GET_GAME_SESSION_CHECK_RES'
+0x07e3d23c  mov      x0, x19
+0x07e3d240  bl       #0x7e3e694
+0x07e3d244  adrp     x1, #0xb6a000
+0x07e3d248  add      x1, x1, #0xbd           ; STR 0xc6a0bd 'LATENCY_MODE_ANNTENA_USER_DATA_SYNC'
+0x07e3d24c  mov      x0, x19
+0x07e3d250  bl       #0x7e3e694
+0x07e3d254  adrp     x1, #0xa5e000
+0x07e3d258  add      x1, x1, #0xb6a           ; STR 0xb5eb6a 'LATENCY_MODE_ANNTENA_CMD_GET_GAMEID'
+0x07e3d25c  mov      x0, x19
+0x07e3d260  bl       #0x7e3e694
+0x07e3d264  adrp     x1, #0xa00000
+0x07e3d268  add      x1, x1, #0xc59           ; STR 0xb00c59 'LATENCY_MODE_ANNTENA_DISP_MATCHING_RESULT'
+0x07e3d26c  mov      x0, x19
+0x07e3d270  bl       #0x7e3e694
+0x07e3d274  adrp     x1, #0xa26000
+0x07e3d278  add      x1, x1, #0xa42           ; STR 0xb26a42 'LATENCY_MODE_PRE_MENU_TEAM_DATA_SYNC'
+0x07e3d27c  mov      x0, x19
+0x07e3d280  bl       #0x7e3e694
+0x07e3d284  adrp     x1, #0xc17000
+0x07e3d288  add      x1, x1, #0xa30           ; STR 0xd17a30 'LATENCY_MODE_PRE_MENU_CMD_START_GAME'
+0x07e3d28c  mov      x0, x19
+0x07e3d290  bl       #0x7e3e694
+0x07e3d294  adrp     x1, #0xbb7000
+0x07e3d298  add      x1, x1, #0xc7c           ; STR 0xcb7c7c 'LATENCY_MODE_PRE_MENU_READY_ALL_PLAYER'
+0x07e3d29c  mov      x0, x19
+0x07e3d2a0  bl       #0x7e3e694
+0x07e3d2a4  adrp     x1, #0xa72000
+0x07e3d2a8  add      x1, x1, #0x2a           ; STR 0xb7202a 'LATENCY_SESSION_ESTABLISH'
+0x07e3d2ac  mov      x0, x19
+0x07e3d2b0  bl       #0x7e3e694
+0x07e3d2b4  adrp     x1, #0xa39000
+0x07e3d2b8  add      x1, x1, #0x80b           ; STR 0xb3980b 'LATENCY_NTL_PUNCHING_PRE'
+0x07e3d2bc  mov      x0, x19
+0x07e3d2c0  bl       #0x7e3e694
+0x07e3d2c4  adrp     x1, #0xa26000
+0x07e3d2c8  add      x1, x1, #0xa28           ; STR 0xb26a28 'LATENCY_NTL_PUNCHING_TIME'
+0x07e3d2cc  mov      x0, x19
+0x07e3d2d0  bl       #0x7e3e694
+0x07e3d2d4  adrp     x1, #0xa98000
+0x07e3d2d8  add      x1, x1, #0x2a2           ; STR 0xb982a2 'LATENCY_NTL_PUNCHING_PROCESS'
+0x07e3d2dc  mov      x0, x19
+0x07e3d2e0  bl       #0x7e3e694
+0x07e3d2e4  adrp     x1, #0xa13000
+0x07e3d2e8  add      x1, x1, #0xddd           ; STR 0xb13ddd 'LATENCY_NTL_PUNCHING_RETRY'
+0x07e3d2ec  mov      x0, x19
+0x07e3d2f0  bl       #0x7e3e694
+0x07e3d2f4  adrp     x1, #0xc04000
+0x07e3d2f8  add      x1, x1, #0xb3d           ; STR 0xd04b3d 'LATENCY_NTL_PUNCHING_PROCESS_ON_SUCCESS'
+0x07e3d2fc  mov      x0, x19
+0x07e3d300  bl       #0x7e3e694
+0x07e3d304  adrp     x1, #0xa00000
+0x07e3d308  add      x1, x1, #0xc3b           ; STR 0xb00c3b 'LATENCY_NTL_STUNCHECK_PROCESS'
+0x07e3d30c  mov      x0, x19
+0x07e3d310  bl       #0x7e3e694
+0x07e3d314  adrp     x1, #0xaf7000
+0x07e3d318  add      x1, x1, #0x7d1           ; STR 0xbf77d1 'LATENCY_TURN_GET_TURN_ADDRESS_MIN'
+0x07e3d31c  mov      x0, x19
+0x07e3d320  bl       #0x7e3e694
+0x07e3d324  adrp     x1, #0xad1000
+0x07e3d328  add      x1, x1, #0xdc5           ; STR 0xbd1dc5 'LATENCY_TURN_GET_TURN_ADDRESS_MAX'
+0x07e3d32c  mov      x0, x19
+0x07e3d330  bl       #0x7e3e694
+0x07e3d334  adrp     x1, #0xaab000
+0x07e3d338  add      x1, x1, #0x382           ; STR 0xbab382 'LATENCY_TURN_GET_TURN_ADDRESS_MEAN'
+0x07e3d33c  mov      x0, x19
+0x07e3d340  bl       #0x7e3e694
+0x07e3d344  adrp     x1, #0xa26000
+0x07e3d348  add      x1, x1, #0x9cd           ; STR 0xb269cd 'LATENCY_TURN_GET_TURN_ADDRESS_VARIANCE'
+0x07e3d34c  mov      x0, x19
+0x07e3d350  bl       #0x7e3e694
+0x07e3d354  adrp     x1, #0xa13000
+0x07e3d358  add      x1, x1, #0xdb0           ; STR 0xb13db0 'LATENCY_TURN_CONNECT_ANY_MIN'
+0x07e3d35c  mov      x0, x19
+0x07e3d360  bl       #0x7e3e694
+0x07e3d364  adrp     x1, #0xa00000
+0x07e3d368  add      x1, x1, #0xbd0           ; STR 0xb00bd0 'LATENCY_TURN_CONNECT_ANY_MAX'
+0x07e3d36c  mov      x0, x19
+0x07e3d370  bl       #0x7e3e694
+0x07e3d374  adrp     x1, #0xba4000
+0x07e3d378  add      x1, x1, #0x1ae           ; STR 0xca41ae 'LATENCY_TURN_CONNECT_ANY_MEAN'
+0x07e3d37c  mov      x0, x19
+0x07e3d380  bl       #0x7e3e694
+0x07e3d384  adrp     x1, #0xba4000
+0x07e3d388  add      x1, x1, #0x1cc           ; STR 0xca41cc 'LATENCY_TURN_CONNECT_ANY_VARIANCE'
+0x07e3d38c  mov      x0, x19
+0x07e3d390  bl       #0x7e3e694
+0x07e3d394  adrp     x1, #0xc04000
+0x07e3d398  add      x1, x1, #0xb06           ; STR 0xd04b06 'LATENCY_TURN_RESOLVING_NAME_MIN'
+0x07e3d39c  mov      x0, x19
+0x07e3d3a0  bl       #0x7e3e694
+0x07e3d3a4  adrp     x1, #0xbf1000
+0x07e3d3a8  add      x1, x1, #0x719           ; STR 0xcf1719 'LATENCY_TURN_RESOLVING_NAME_MAX'
+0x07e3d3ac  mov      x0, x19
+0x07e3d3b0  bl       #0x7e3e694
+0x07e3d3b4  adrp     x1, #0xa4b000
+0x07e3d3b8  add      x1, x1, #0xfe5           ; STR 0xb4bfe5 'LATENCY_TURN_RESOLVING_NAME_MEAN'
+0x07e3d3bc  mov      x0, x19
+0x07e3d3c0  bl       #0x7e3e694
+0x07e3d3c4  adrp     x1, #0xb0b000
+0x07e3d3c8  add      x1, x1, #0xa4           ; STR 0xc0b0a4 'LATENCY_TURN_RESOLVING_NAME_VARIANCE'
+0x07e3d3cc  mov      x0, x19
+0x07e3d3d0  bl       #0x7e3e694
+0x07e3d3d4  adrp     x1, #0xb31000
+0x07e3d3d8  add      x1, x1, #0x6f7           ; STR 0xc316f7 'LATENCY_TURN_RESOLVING_NAME_ANY_MIN'
+0x07e3d3dc  mov      x0, x19
+0x07e3d3e0  bl       #0x7e3e694
+0x07e3d3e4  adrp     x1, #0x9d9000
+0x07e3d3e8  add      x1, x1, #0xfa6           ; STR 0xad9fa6 'LATENCY_TURN_RESOLVING_NAME_ANY_MAX'
+0x07e3d3ec  mov      x0, x19
+0x07e3d3f0  bl       #0x7e3e694
+0x07e3d3f4  adrp     x1, #0xb90000
+0x07e3d3f8  add      x1, x1, #0xcb0           ; STR 0xc90cb0 'LATENCY_TURN_RESOLVING_NAME_ANY_MEAN'
+0x07e3d3fc  mov      x0, x19
+0x07e3d400  bl       #0x7e3e694
+0x07e3d404  adrp     x1, #0x9d9000
+0x07e3d408  add      x1, x1, #0xfca           ; STR 0xad9fca 'LATENCY_TURN_RESOLVING_NAME_ANY_VARIANCE'
+0x07e3d40c  mov      x0, x19
+0x07e3d410  bl       #0x7e3e694
+0x07e3d414  adrp     x1, #0xb7d000
+0x07e3d418  add      x1, x1, #0xa48           ; STR 0xc7da48 'LATENCY_TURN_CONNECT_UDP_MIN'
+0x07e3d41c  mov      x0, x19
+0x07e3d420  bl       #0x7e3e694
+0x07e3d424  adrp     x1, #0xaf7000
+0x07e3d428  add      x1, x1, #0x7f3           ; STR 0xbf77f3 'LATENCY_TURN_CONNECT_UDP_MAX'
+0x07e3d42c  mov      x0, x19
+0x07e3d430  bl       #0x7e3e694
+0x07e3d434  adrp     x1, #0xb0b000
+0x07e3d438  add      x1, x1, #0xc9           ; STR 0xc0b0c9 'LATENCY_TURN_CONNECT_UDP_MEAN'
+0x07e3d43c  mov      x0, x19
+0x07e3d440  bl       #0x7e3e694
+0x07e3d444  adrp     x1, #0xa85000
+0x07e3d448  add      x1, x1, #0x630           ; STR 0xb85630 'LATENCY_TURN_CONNECT_UDP_VARIANCE'
+0x07e3d44c  mov      x0, x19
+0x07e3d450  bl       #0x7e3e694
+0x07e3d454  adrp     x1, #0xb7d000
+0x07e3d458  add      x1, x1, #0xa65           ; STR 0xc7da65 'LATENCY_TURN_CONNECT_PEER_MIN'
+0x07e3d45c  mov      x0, x19
+0x07e3d460  bl       #0x7e3e694
+0x07e3d464  adrp     x1, #0xbcb000
+0x07e3d468  add      x1, x1, #0x655           ; STR 0xccb655 'LATENCY_TURN_CONNECT_PEER_MAX'
+0x07e3d46c  mov      x0, x19
+0x07e3d470  bl       #0x7e3e694
+0x07e3d474  adrp     x1, #0x9ed000
+0x07e3d478  add      x1, x1, #0x6a5           ; STR 0xaed6a5 'LATENCY_TURN_CONNECT_PEER_MEAN'
+0x07e3d47c  mov      x0, x19
+0x07e3d480  bl       #0x7e3e694
+0x07e3d484  adrp     x1, #0xabe000
+0x07e3d488  add      x1, x1, #0xcf6           ; STR 0xbbecf6 'LATENCY_TURN_CONNECT_PEER_VARIANCE'
+0x07e3d48c  mov      x0, x19
+0x07e3d490  bl       #0x7e3e694
+0x07e3d494  adrp     x1, #0xb1e000
+0x07e3d498  add      x1, x1, #0xbab           ; STR 0xc1ebab 'TIMING_CREATE_SESSION_UTC'
+0x07e3d49c  mov      x0, x19
+0x07e3d4a0  bl       #0x7e3e694
+0x07e3d4a4  adrp     x1, #0xae4000
+0x07e3d4a8  add      x1, x1, #0xb6f           ; STR 0xbe4b6f 'APP_YIELD_STATS_INACTIVITY_TIME_MS'
+0x07e3d4ac  mov      x0, x19
+0x07e3d4b0  bl       #0x7e3e694
+0x07e3d4b4  adrp     x1, #0xbf1000
+0x07e3d4b8  add      x1, x1, #0x769           ; STR 0xcf1769 'APP_YIELD_STATS_ACTIVITY_TIME_MS'
+0x07e3d4bc  mov      x0, x19
+0x07e3d4c0  bl       #0x7e3e694
+0x07e3d4c4  adrp     x1, #0xae4000
+0x07e3d4c8  add      x1, x1, #0xb92           ; STR 0xbe4b92 'BPS_SEND_'
+0x07e3d4cc  mov      x0, x19
+0x07e3d4d0  mov      x2, x22
+0x07e3d4d4  bl       #0x7e3f10c
+0x07e3d4d8  adrp     x1, #0xa39000
+0x07e3d4dc  add      x1, x1, #0x877           ; STR 0xb39877 'BPS_RECEIVE_'
+0x07e3d4e0  mov      x0, x19
+0x07e3d4e4  mov      x2, x22
+0x07e3d4e8  bl       #0x7e3f10c
+0x07e3d4ec  adrp     x1, #0xa85000
+0x07e3d4f0  add      x1, x1, #0x686           ; STR 0xb85686 'THERMAL_'
+0x07e3d4f4  mov      x0, x19
+0x07e3d4f8  mov      x2, x22
+0x07e3d4fc  bl       #0x7e3f10c
+0x07e3d500  adrp     x1, #0xa13000
+0x07e3d504  add      x1, x1, #0xdf8           ; STR 0xb13df8 'GAMRERELAY_MEASUARE_RESULT_AT_MATCHING'
+0x07e3d508  mov      x0, x19
+0x07e3d50c  bl       #0x7e3e694
+0x07e3d510  adrp     x1, #0xc04000
+0x07e3d514  add      x1, x1, #0xbd5           ; STR 0xd04bd5 'MEMPEAK_GAME_STATE_MISC_BITS'
+0x07e3d518  mov      x0, x19
+0x07e3d51c  bl       #0x7e3e694
+0x07e3d520  adrp     x1, #0xa13000
+0x07e3d524  add      x1, x1, #0xe1f           ; STR 0xb13e1f 'MEMPEAK_RENDER_TARGET_POOL_SIZE'
+0x07e3d528  mov      x0, x19
+0x07e3d52c  bl       #0x7e3e694
+0x07e3d530  adrp     x1, #0xbb7000
+0x07e3d534  add      x1, x1, #0xca3           ; STR 0xcb7ca3 'MEMPEAK_TEXTURE_STREAM_POOL_SIZE'
+0x07e3d538  mov      x0, x19
+0x07e3d53c  bl       #0x7e3e694
+0x07e3d540  adrp     x1, #0xa98000
+0x07e3d544  add      x1, x1, #0x2bf           ; STR 0xb982bf 'MEMPEAK_USED_PHYSICAL'
+0x07e3d548  mov      x0, x19
+0x07e3d54c  bl       #0x7e3e694
+0x07e3d550  adrp     x1, #0xaf7000
+0x07e3d554  add      x1, x1, #0x88c           ; STR 0xbf788c 'MEMPEAK_FLOW_HASH'
+0x07e3d558  mov      x0, x19
+0x07e3d55c  bl       #0x7e3e694
+0x07e3d560  adrp     x1, #0xa98000
+0x07e3d564  add      x1, x1, #0x2d5           ; STR 0xb982d5 'MEMPEAK_WINDOW_HASH'
+0x07e3d568  mov      x0, x19
+0x07e3d56c  bl       #0x7e3e694
+0x07e3d570  adrp     x1, #0xa72000
+0x07e3d574  add      x1, x1, #0xd0           ; STR 0xb720d0 'MEMPEAK_WIDGET_HASH'
+0x07e3d578  mov      x0, x19
+0x07e3d57c  bl       #0x7e3e694
+0x07e3d580  adrp     x1, #0xa98000
+0x07e3d584  add      x1, x1, #0x2e9           ; STR 0xb982e9 'MEMPEAK_MATCH_STATE'
+0x07e3d588  mov      x0, x19
+0x07e3d58c  bl       #0x7e3e694
+0x07e3d590  adrp     x1, #0x9da000
+0x07e3d594  add      x1, x1, #0x8d           ; STR 0xada08d 'MEMPEAK_MATCH_STEP'
+0x07e3d598  mov      x0, x19
+0x07e3d59c  bl       #0x7e3e694
+0x07e3d5a0  adrp     x1, #0xa13000
+0x07e3d5a4  add      x1, x1, #0xe3f           ; STR 0xb13e3f 'MEMPEAK_MATCH_FLOW_KIND'
+0x07e3d5a8  mov      x0, x19
+0x07e3d5ac  bl       #0x7e3e694
+0x07e3d5b0  adrp     x1, #0xa00000
+0x07e3d5b4  add      x1, x1, #0xc83           ; STR 0xb00c83 'SP_REGULATION'
+0x07e3d5b8  mov      x0, x19
+0x07e3d5bc  bl       #0x7e3e694
+0x07e3d5c0  adrp     x1, #0xa26000
+0x07e3d5c4  add      x1, x1, #0xa67           ; STR 0xb26a67 'SP_REGULATION_VALUE'
+0x07e3d5c8  mov      x0, x19
+0x07e3d5cc  bl       #0x7e3e694
+0x07e3d5d0  adrp     x1, #0xad1000
+0x07e3d5d4  add      x1, x1, #0xe04           ; STR 0xbd1e04 'EVENT_ID'
+0x07e3d5d8  mov      x0, x19
+0x07e3d5dc  bl       #0x7e3e694
+0x07e3d5e0  adrp     x1, #0xa00000
+0x07e3d5e4  add      x1, x1, #0xc91           ; STR 0xb00c91 'CS_RESET_UDP_SOCKET_COUNT'
+0x07e3d5e8  mov      x0, x19
+0x07e3d5ec  bl       #0x7e3e694
+0x07e3d5f0  adrp     x1, #0x9da000
+0x07e3d5f4  add      x1, x1, #0xa0           ; STR 0xada0a0 'IS_STAFF'
+0x07e3d5f8  mov      x0, x19
+0x07e3d5fc  bl       #0x7e3e694

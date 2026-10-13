@@ -1,0 +1,70 @@
+0x076e7928  stp      x29, x30, [sp, #-0x40]!
+0x076e792c  str      x23, [sp, #0x10]
+0x076e7930  stp      x22, x21, [sp, #0x20]
+0x076e7934  stp      x20, x19, [sp, #0x30]
+0x076e7938  mov      x29, sp
+0x076e793c  mov      x19, x0
+0x076e7940  add      x0, x0, #8
+0x076e7944  adrp     x8, #0x98af000
+0x076e7948  add      x8, x8, #0x1f8
+0x076e794c  str      x8, [x19]
+0x076e7950  bl       #0x2fc833c
+0x076e7954  add      x0, x19, #0xc8
+0x076e7958  bl       #0x2fcdb4c
+0x076e795c  add      x0, x19, #0xf0
+0x076e7960  mov      w1, wzr
+0x076e7964  bl       #0x2fcb5e0
+0x076e7968  mov      w0, #0x2000
+0x076e796c  strb     wzr, [x19, #0x108]
+0x076e7970  mov      w20, #0x2000
+0x076e7974  bl       #0x8c1c050
+0x076e7978  movi     v0.2d, #0000000000000000
+0x076e797c  add      x8, x19, #0x138
+0x076e7980  adrp     x21, #0x98da000
+0x076e7984  add      x21, x21, #0x940
+0x076e7988  stp      x0, x20, [x19, #0x120]
+0x076e798c  add      x22, x21, #0x48
+0x076e7990  add      x23, x21, #0x78
+0x076e7994  adrp     x1, #0x9d9000
+0x076e7998  add      x1, x1, #0x3f5           ; STR 0xad93f5 'CMD_GET_GAME_SESSION_CHECK_RES'
+0x076e799c  mov      x0, x8
+0x076e79a0  mov      w2, #0x1e
+0x076e79a4  stp      q0, q0, [x8]
+0x076e79a8  stp      q0, q0, [x8, #0x20]
+0x076e79ac  add      x20, x19, #0x170
+0x076e79b0  stp      q0, q0, [x8, #0x40]
+0x076e79b4  stp      q0, q0, [x8, #0x60]
+0x076e79b8  stp      q0, q0, [x8, #0x80]
+0x076e79bc  str      q0, [x8, #0xa0]
+0x076e79c0  str      x21, [x19]
+0x076e79c4  stp      x22, xzr, [x19, #0x110]
+0x076e79c8  str      x23, [x19, #0x130]
+0x076e79cc  bl       #0x2f3877c
+0x076e79d0  adrp     x1, #0x9d9000
+0x076e79d4  add      x1, x1, #0x414           ; STR 0xad9414 'CmdGetGameSessionCheckRes.php'
+0x076e79d8  mov      x0, x20
+0x076e79dc  mov      w2, #0x1d
+0x076e79e0  bl       #0x2f3877c
+0x076e79e4  movi     v0.2d, #0000000000000000
+0x076e79e8  add      x8, x19, #0x1e8
+0x076e79ec  mov      w9, #4
+0x076e79f0  add      x10, x19, #0x201
+0x076e79f4  mov      w11, #0x4f4e
+0x076e79f8  str      x21, [x19]
+0x076e79fc  str      x22, [x19, #0x110]
+0x076e7a00  str      x23, [x19, #0x130]
+0x076e7a04  stp      q0, q0, [x8]
+0x076e7a08  str      q0, [x8, #0x20]
+0x076e7a0c  strb     w9, [x19, #0x200]
+0x076e7a10  strh     w11, [x10]
+0x076e7a14  str      xzr, [x19, #0x218]
+0x076e7a18  ldp      x20, x19, [sp, #0x30]
+0x076e7a1c  ldp      x22, x21, [sp, #0x20]
+0x076e7a20  ldr      x23, [sp, #0x10]
+0x076e7a24  ldp      x29, x30, [sp], #0x40
+0x076e7a28  ret      
+0x076e7a2c  sub      sp, sp, #0x80
+0x076e7a30  stp      x29, x30, [sp, #0x40]
+0x076e7a34  stp      x24, x23, [sp, #0x50]
+0x076e7a38  stp      x22, x21, [sp, #0x60]
+0x076e7a3c  stp      x20, x19, [sp, #0x70]

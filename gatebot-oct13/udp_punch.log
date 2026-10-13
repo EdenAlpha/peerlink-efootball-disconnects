@@ -1,0 +1,4 @@
+﻿02:01:46 bound udp :44000
+02:01:46 STUN reflexive -> 3.80.79.52:44000
+02:01:46 wrote C:\Users\Administrator\Documents\Default Project\work\peer_endpoint.json (tailnet recorded: 100.72.241.70)
+02:01:46 listening for the phone (STUN punches + any packet)...

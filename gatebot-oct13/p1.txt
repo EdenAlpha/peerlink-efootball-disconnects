@@ -1,0 +1,61 @@
+0x07e1f33c  sub      sp, sp, #0xa0
+0x07e1f340  stp      x29, x30, [sp, #0x60]
+0x07e1f344  stp      x24, x23, [sp, #0x70]
+0x07e1f348  stp      x22, x21, [sp, #0x80]
+0x07e1f34c  stp      x20, x19, [sp, #0x90]
+0x07e1f350  add      x29, sp, #0x60
+0x07e1f354  add      x9, sp, #0x30
+0x07e1f358  mrs      x23, tpidr_el0
+0x07e1f35c  add      x19, x9, #8
+0x07e1f360  mov      x20, x0
+0x07e1f364  ldr      x8, [x23, #0x28]
+0x07e1f368  adrp     x24, #0x98af000
+0x07e1f36c  add      x24, x24, #0x5b8
+0x07e1f370  mov      x0, x19
+0x07e1f374  mov      w1, wzr
+0x07e1f378  stur     x8, [x29, #-8]
+0x07e1f37c  str      x24, [sp, #0x30]
+0x07e1f380  bl       #0x2fcb5e0
+0x07e1f384  mov      x0, x19
+0x07e1f388  strb     wzr, [sp, #0x50]
+0x07e1f38c  bl       #0x2fcc2ac
+0x07e1f390  add      x0, x20, #0xb0
+0x07e1f394  adrp     x2, #0xb0a000
+0x07e1f398  add      x2, x2, #0xf8a           ; STR 0xc0af8a 'timeout_settings'
+0x07e1f39c  add      x1, sp, #0x30
+0x07e1f3a0  bl       #0x7e20d24
+0x07e1f3a4  mov      w21, wzr
+0x07e1f3a8  tbz      w0, #0, #0x7e1f6c0
+0x07e1f3ac  adrp     x2, #0x9ed000
+0x07e1f3b0  add      x2, x2, #0x614           ; STR 0xaed614 'align_progress_abormal_end_timout_sec'
+0x07e1f3b4  add      x0, sp, #0x30
+0x07e1f3b8  add      x1, sp, #8
+0x07e1f3bc  bl       #0x7e099fc
+0x07e1f3c0  mov      w21, w0
+0x07e1f3c4  tbnz     w0, #0, #0x7e1f6f8
+0x07e1f3c8  adrp     x2, #0xa13000
+0x07e1f3cc  add      x2, x2, #0xc61           ; STR 0xb13c61 'align_progress_ready_timeout_sec'
+0x07e1f3d0  add      x0, sp, #0x30
+0x07e1f3d4  add      x1, sp, #8
+0x07e1f3d8  bl       #0x7e099fc
+0x07e1f3dc  tbnz     w0, #0, #0x7e1f718
+0x07e1f3e0  adrp     x2, #0xbde000
+0x07e1f3e4  add      x2, x2, #0x643           ; STR 0xcde643 'add_point_timout_sec'
+0x07e1f3e8  add      x0, sp, #0x30
+0x07e1f3ec  add      x1, sp, #8
+0x07e1f3f0  bl       #0x7e099fc
+0x07e1f3f4  tbnz     w0, #0, #0x7e1f73c
+0x07e1f3f8  adrp     x2, #0xb31000
+0x07e1f3fc  add      x2, x2, #0x60f           ; STR 0xc3160f 'get_game_result_timeout_sec'
+0x07e1f400  add      x0, sp, #0x30
+0x07e1f404  add      x1, sp, #8
+0x07e1f408  bl       #0x7e099fc
+0x07e1f40c  tbnz     w0, #0, #0x7e1f760
+0x07e1f410  adrp     x2, #0xad1000
+0x07e1f414  add      x2, x2, #0xc7b           ; STR 0xbd1c7b 'wait_game_result_timeout_sec'
+0x07e1f418  add      x0, sp, #0x30
+0x07e1f41c  add      x1, sp, #8
+0x07e1f420  bl       #0x7e099fc
+0x07e1f424  tbnz     w0, #0, #0x7e1f784
+0x07e1f428  adrp     x2, #0xa26000
+0x07e1f42c  add      x2, x2, #0x931           ; STR 0xb26931 'load_timeout_sec'

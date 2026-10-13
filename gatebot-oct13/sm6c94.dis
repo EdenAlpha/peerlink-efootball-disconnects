@@ -1,0 +1,68 @@
+0x07e36c70  add      x2, x2, #0x239
+0x07e36c74  add      x0, x0, #0x270
+0x07e36c78  bl       #0x7e2fbc8
+0x07e36c7c  add      x8, sp, #1, lsl #12
+0x07e36c80  str      xzr, [sp, #0x1288]
+0x07e36c84  add      x8, x8, #0x280
+0x07e36c88  str      xzr, [sp, #0x1280]
+0x07e36c8c  orr      x19, x8, #1
+0x07e36c90  str      xzr, [sp, #0x1290]
+0x07e36c94  bl       #0x7e0afcc
+0x07e36c98  cbz      x0, #0x7e36ccc
+0x07e36c9c  ldr      x8, [x0, #0x10]
+0x07e36ca0  add      x0, sp, #1, lsl #12
+0x07e36ca4  add      x0, x0, #0x280
+0x07e36ca8  ldrb     w9, [x8, #0x498]
+0x07e36cac  ldr      x10, [x8, #0x4a8]
+0x07e36cb0  ldr      x11, [x8, #0x4a0]
+0x07e36cb4  add      x8, x8, #0x499
+0x07e36cb8  tst      w9, #1
+0x07e36cbc  lsr      x9, x9, #1
+0x07e36cc0  csel     x1, x8, x10, eq
+0x07e36cc4  csel     x2, x9, x11, eq
+0x07e36cc8  bl       #0x2f3877c
+0x07e36ccc  add      x8, sp, #1, lsl #12
+0x07e36cd0  ldr      x9, [sp, #0x1290]
+0x07e36cd4  add      x8, x8, #0x280
+0x07e36cd8  add      x0, sp, #1, lsl #12
+0x07e36cdc  adrp     x1, #0xbcb000
+0x07e36ce0  add      x1, x1, #0x692           ; STR 0xccb692 'IPV4ONLY_ARPA'
+0x07e36ce4  add      x0, x0, #0x270
+0x07e36ce8  ldrb     w8, [x8]
+0x07e36cec  tst      w8, #1
+0x07e36cf0  csel     x2, x19, x9, eq
+0x07e36cf4  add      x19, sp, #1, lsl #12
+0x07e36cf8  add      x19, x19, #0x280
+0x07e36cfc  bl       #0x7e2fbc8
+0x07e36d00  ldrb     w8, [x19]
+0x07e36d04  tbz      w8, #0, #0x7e36d10
+0x07e36d08  ldr      x0, [sp, #0x1290]
+0x07e36d0c  bl       #0x2f376d4
+0x07e36d10  ldr      x0, [sp, #0xb8]
+0x07e36d14  str      xzr, [sp, #0x1288]
+0x07e36d18  str      xzr, [sp, #0x1280]
+0x07e36d1c  str      wzr, [sp, #0x1298]
+0x07e36d20  str      xzr, [sp, #0x1290]
+0x07e36d24  cbz      x0, #0x7e36fd8
+0x07e36d28  add      x1, sp, #1, lsl #12
+0x07e36d2c  add      x1, x1, #0x280
+0x07e36d30  bl       #0x7dba540
+0x07e36d34  ldr      x10, [sp, #0x1280]
+0x07e36d38  ldr      x8, [sp, #0x1288]
+0x07e36d3c  cmp      x10, x8
+0x07e36d40  b.eq     #0x7e36fd8
+0x07e36d44  mov      x9, #0x5550
+0x07e36d48  mov      x11, #0x4552
+0x07e36d4c  mov      x12, #0x4f44
+0x07e36d50  mov      x13, #0x505f
+0x07e36d54  mov      x17, #0x5453
+0x07e36d58  mov      x0, #0x5f45
+0x07e36d5c  mov      x4, #0x544e
+0x07e36d60  mov      x5, #0x5f54
+0x07e36d64  mov      x7, #0x544e
+0x07e36d68  mov      x26, #0x435f
+0x07e36d6c  mov      x27, #0x4946
+0x07e36d70  movk     x9, #0x434e, lsl #16
+0x07e36d74  movk     x11, #0x5551, lsl #16
+0x07e36d78  movk     x12, #0x454e, lsl #16
+0x07e36d7c  movk     x13, #0x4e55, lsl #16

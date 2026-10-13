@@ -1,0 +1,25 @@
+0x07e1f33c  sub      sp, sp, #0xa0
+0x07e1f340  stp      x29, x30, [sp, #0x60]
+0x07e1f344  stp      x24, x23, [sp, #0x70]
+0x07e1f348  stp      x22, x21, [sp, #0x80]
+0x07e1f34c  stp      x20, x19, [sp, #0x90]
+0x07e1f350  add      x29, sp, #0x60
+0x07e1f354  add      x9, sp, #0x30
+0x07e1f358  mrs      x23, tpidr_el0
+0x07e1f35c  add      x19, x9, #8
+0x07e1f360  mov      x20, x0
+0x07e1f364  ldr      x8, [x23, #0x28]
+0x07e1f368  adrp     x24, #0x98af000
+0x07e1f36c  add      x24, x24, #0x5b8
+0x07e1f370  mov      x0, x19
+0x07e1f374  mov      w1, wzr
+0x07e1f378  stur     x8, [x29, #-8]
+0x07e1f37c  str      x24, [sp, #0x30]
+0x07e1f380  bl       #0x2fcb5e0
+0x07e1f384  mov      x0, x19
+0x07e1f388  strb     wzr, [sp, #0x50]
+0x07e1f38c  bl       #0x2fcc2ac
+0x07e1f390  add      x0, x20, #0xb0
+0x07e1f394  adrp     x2, #0xb0a000
+0x07e1f398  add      x2, x2, #0xf8a           ; STR 0xc0af8a 'timeout_settings'
+0x07e1f39c  add      x1, sp, #0x30

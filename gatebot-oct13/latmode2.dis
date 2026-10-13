@@ -1,0 +1,71 @@
+0x07e34644  str      d8, [sp, #-0x70]!
+0x07e34648  stp      x29, x30, [sp, #0x10]
+0x07e3464c  stp      x28, x27, [sp, #0x20]
+0x07e34650  stp      x26, x25, [sp, #0x30]
+0x07e34654  stp      x24, x23, [sp, #0x40]
+0x07e34658  stp      x22, x21, [sp, #0x50]
+0x07e3465c  stp      x20, x19, [sp, #0x60]
+0x07e34660  add      x29, sp, #0x10
+0x07e34664  sub      sp, sp, #1, lsl #12
+0x07e34668  sub      sp, sp, #0x4b0
+0x07e3466c  mrs      x8, tpidr_el0
+0x07e34670  mov      x21, x0
+0x07e34674  str      x8, [sp, #0xc8]
+0x07e34678  cmp      w2, #1
+0x07e3467c  ldr      x8, [x8, #0x28]
+0x07e34680  add      x20, sp, #1, lsl #12
+0x07e34684  cset     w10, eq
+0x07e34688  mov      x22, x1
+0x07e3468c  add      x20, x20, #0x150
+0x07e34690  stur     x8, [x29, #-0x28]
+0x07e34694  ldrb     w8, [x0, #0x80]
+0x07e34698  str      x1, [sp, #0x1270]
+0x07e3469c  ldr      x9, [x0, #0x90]
+0x07e346a0  mov      w1, wzr
+0x07e346a4  strb     w3, [x20, #0x128]
+0x07e346a8  tst      w8, #1
+0x07e346ac  add      x8, x0, #0x81
+0x07e346b0  add      x0, sp, #1, lsl #12
+0x07e346b4  csel     x19, x8, x9, eq
+0x07e346b8  add      x0, x0, #0x280
+0x07e346bc  strb     w10, [x20, #0x129]
+0x07e346c0  bl       #0x2fcb5e0
+0x07e346c4  add      x0, sp, #1, lsl #12
+0x07e346c8  mov      w1, wzr
+0x07e346cc  add      x0, x0, #0x150
+0x07e346d0  bl       #0x2fcb7dc
+0x07e346d4  add      x0, sp, #1, lsl #12
+0x07e346d8  adrp     x1, #0xbb2000
+0x07e346dc  add      x1, x1, #0x616
+0x07e346e0  add      x0, x0, #0x280
+0x07e346e4  bl       #0x2fcc828
+0x07e346e8  add      x1, sp, #1, lsl #12
+0x07e346ec  add      x1, x1, #0x150
+0x07e346f0  bl       #0x2fc9bac
+0x07e346f4  add      x0, sp, #1, lsl #12
+0x07e346f8  add      x0, x0, #0x150
+0x07e346fc  bl       #0x2fcba44
+0x07e34700  add      x0, sp, #1, lsl #12
+0x07e34704  mov      w1, #7
+0x07e34708  add      x0, x0, #0x150
+0x07e3470c  bl       #0x2fcb688
+0x07e34710  add      x0, sp, #1, lsl #12
+0x07e34714  adrp     x1, #0xa39000
+0x07e34718  add      x1, x1, #0x8c2           ; STR 0xb398c2 'DATA_TYPE'
+0x07e3471c  add      x0, x0, #0x280
+0x07e34720  bl       #0x2fcc828
+0x07e34724  add      x1, sp, #1, lsl #12
+0x07e34728  add      x1, x1, #0x150
+0x07e3472c  bl       #0x2fc9bac
+0x07e34730  add      x0, sp, #1, lsl #12
+0x07e34734  add      x0, x0, #0x150
+0x07e34738  bl       #0x2fcba44
+0x07e3473c  ldrb     w8, [x20, #0x128]
+0x07e34740  adrp     x9, #0xa8a000
+0x07e34744  add      x9, x9, #0x239
+0x07e34748  add      x0, sp, #1, lsl #12
+0x07e3474c  add      x0, x0, #0x150
+0x07e34750  cmp      w8, #0
+0x07e34754  csel     x1, x19, x9, eq
+0x07e34758  bl       #0x2fcb6dc
+0x07e3475c  add      x0, sp, #1, lsl #12

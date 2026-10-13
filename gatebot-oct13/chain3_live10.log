@@ -1,0 +1,208 @@
+﻿owner login  -> NOERR
+owner quality-> NOERR
+create room  -> NOERR  room_id=33005000
+bot login    -> NOERR
+bot quality  -> NOERR
+gRPC beats [owner] -> open (15s cadence)
+  stream open, beating every 15s for 420s
+  >> beat 1 at t+0.0s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+gRPC beats [bot  ] -> open (15s cadence)
+  stream open, beating every 15s for 420s
+  >> beat 1 at t+0.0s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+bot sendreq  -> NOERR
+owner invite -> NOERR
+bot getreq   -> NOERR
+bot join     -> NOERR
+seated       -> 2
+owner squad  -> NOERR
+bot squad    -> NOERR
+team_id      -> int
+  diag -> ERR_DEFCLIENTVER
+entry_side [owner] -> NOERR
+  diag -> ERR_DEFCLIENTVER
+entry_side [bot  ] -> NOERR
+check_match_enable [owner] -> ERR_INVALID_SESSION
+  {"result": "ERR_INVALID_SESSION", "msgid": "CMD_CHECK_MATCH_ENABLE", "errcode": "OTZP-", "show_info": "NO", "maintenance_end_time": 0}
+  diag -> ERR_DEFCLIENTVER
+match_ready [owner] -> NOERR ep=127.0.0.2:44000
+check_match_enable [bot  ] -> ERR_INVALID_SESSION
+  {"result": "ERR_INVALID_SESSION", "msgid": "CMD_CHECK_MATCH_ENABLE", "errcode": "OTZP-", "show_info": "NO", "maintenance_end_time": 0}
+  diag -> ERR_DEFCLIENTVER
+match_ready [bot  ] -> NOERR ep=127.0.0.3:44001
+go_match     -> YES
+  >> beat 2 at t+15.3s
+game_session -> NOERR keys=connecting_retry_time,connecting_start_time,game_sycom,gamerelay,msgid,ntl_address_list,ping,result,rqid
+  {"game_sycom": "P2P", "gamerelay": {"name": "NotImplement", "region": "NotImplement", "ip_addr": "NotImplement", "port": 0}, "ping": 350, "connecting_start_time": 1791850669, "connecting_retry_time": 15, "ntl_address_list": [{"user_id": "<redacted:int>", "xuid": "", "address_ipv4": {"host_address": "127.0.0.2", "host_port": 44000, "reflexive_address": "3.80.79.52", "reflexive_port": 52010, "nat_type": 270532787}, "address_ipv6": {"host_address": "", "host_port": 1, "reflexive_address": "", "reflexive_port": 1, "nat_type": 1}}, {"user_id": "<redacted:int>", "xuid": "", "address_ipv4": {"host_address": "127.0.0.3", "host_port": 44001, "reflexive_address": "3.80.79.52", "reflexive_port": 52011, "nat_type": 270532787}, "address_ipv6": {"host_address": "", "host_port": 1, "reflexive_address": "", "reflexive_port": 1, "nat_type": 1}}]}
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 2 at t+15.3s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+check_res [owner] -> NOERR
+check_res [bot  ] -> NOERR
+check_state  -> YES (NOERR)
+  check_get_body {"error_code": "NOERR"}
+  form map-int   -> NOERR            game_id=yes
+game_id      -> found (int)
+phase DATASYNC  -> NOERR 
+ntl_gateinfo [owner] -> {'STATUS': '200', 'API_STATUS': '1', 'LOG_ACTIVE': '1', 'SERVER_TIME': '1791850665', 'PUT_LOG_URL': 'http://ntl.service.konami.net/ntl/api/PES2022/ReportLog.php', '_http': 'HTTP/1.1 200 OK', '_host': '35.174.175.11', '_elapsed': 5.01}
+report_log  [owner] pds -> {'_type': 'pds', '_elapsed': 5.06, 'STATUS': '200', '_http': 'HTTP/1.1 200 OK'}
+  >> beat 3 at t+30.6s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 3 at t+30.6s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+ntl_gateinfo [bot  ] -> {'STATUS': '200', 'API_STATUS': '1', 'LOG_ACTIVE': '1', 'SERVER_TIME': '1791850675', 'PUT_LOG_URL': 'http://ntl.service.konami.net/ntl/api/PES2022/ReportLog.php', '_http': 'HTTP/1.1 200 OK', '_host': '35.174.175.11', '_elapsed': 5.01}
+report_log  [bot  ] pds -> {'_type': 'pds', '_elapsed': 5.02, 'STATUS': '200', '_http': 'HTTP/1.1 200 OK'}
+  send_session_id[owner] -> NOERR NOERR
+  send_session_id[bot  ] -> NOERR NOERR
+turn_send [owner -> 2032791990] -> NOERR
+turn_addr [owner GET_TURN_ADDRESS] -> NOERR keys=
+turn_addr [owner WATCH_TURN_ADDRESS] -> NOERR keys=address,address_data_size,response_flg
+turn_send [bot   -> 2024318960] -> NOERR
+turn_addr [bot   GET_TURN_ADDRESS] -> NOERR keys=
+turn_addr [bot   WATCH_TURN_ADDRESS] -> NOERR keys=address,address_data_size,response_flg
+  antenna[owner] set=NOERR get=NOERR finished=YES
+  antenna-get-body[owner] {"is_check_finished": "YES", "error_code": "NOERR"}
+  >> beat 4 at t+45.8s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  antenna[bot  ] set=NOERR get=NOERR finished=YES
+  antenna-get-body[bot  ] {"is_check_finished": "YES", "error_code": "NOERR"}
+  >> beat 4 at t+45.9s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+lineups      -> home=23 away=23 team_id=396
+start_game [owner XI] -> NOERR
+start_game [bot   23] -> NOERR
+  {"game_id": 261000129495943903, "squad_data_home": {"team_id": 0, "player_list": [{"gameplayer_id": {"id": "<redacted:int>", "serial": "<redacted:int>"}, "parameters": [4, 0, "...(147)"], "averaged_overall": 0}, {"gameplayer_id": {"id": "<redacted:int>", "serial": "<redacted:int>"}, "parameters": [6, 0, "...(147)"], "averaged_overall": 0}, "...(11)"], "coach": {"coach_id": {"id": "<redacted:int>", "serial": "<redacted:int>"}, "sell_gp": 0, "is_coach_texture_use": "NO", "initial_base_team_id": 5807, "age": 46, "possession": 70, "short_counter": 70, "long_ball": 70, "long_counter": 70, "side_attack": 70, "overload": 70, "compability": "TRAINING_SKILL_NONE", "team_style": 0, "formation_data": "", "is_lock": "NO", "ability_id": [0, 0, "...(4)"], "type": "NORMAL"}, "squad_gameplan": {"formation": [{"formation_offensive": [{"role": 0, "position_x": 3, "position_y": 52}, {"role": 1, "position_x": 11, "position_y": 64}, "...(11)"], "formation_defensive": [{"role": 0, "position_x": 3, "position_y": 52}, {"role": 1, "position_x": 11, "position_y": 64}, "...(11)"], "team_style": 0, "team_tactics": [{"data": [255, 255], "value_id": [0, 0]}, {"data": [255, 255], "value_id": [0, 0]}], "is_position_edited": ["NO", "NO"], "coach_link_data": [{"is_link_on": "YES", "key_member_Id": 255, "link_member_Id": 255}, {"is_link_on": "YES", "key_member_Id": 255, "link_member_Id": 255}], "use_multi_formation": "NO"}, {"formation_offensive": [{"role": 0, "position_x": 3, "position_y": 52}, {"role": 1, "position_x": 11, "position_y": 64}, "...(11)"], "formation_defensive": [{"role": 0, "position_x": 3, "position_y": 52}, {"role": 1, "position_x": 11, "position_y": 64}, "...(11)"], "team_style": 0, "team_tactics": [{"data": [255, 255], "value_id": [0, 0]}, {"data": [255, 255], "value_id": [0, 0]}], "is_position_edited": ["NO", "NO"], "coach_link_data": [{"is_link_on": "YES", "key_member_Id": 255, "link_member_Id": 255}, {"is_link_on": "YES", "key_member_Id": 255, "link_member_Id": 255}], "use_multi_formation": "NO"}], "match_plan_settings": {"order": [0, 2, "...(40)"], "set_piece_taker": [9, 9, "...(6)"], "df_overlap_setplay": [255, 255, "...(3)"], "captain": 1, "auto_member_change": 0, "auto_offside_trap": 0, "auto_plan_change": 0, "use_multi_tactics_plan": 0, "auto_attack_level": 0, "member_assisit": 0}}}, "uniform_list_home": {"uniform_list": [], "base_team_id": 0}, "squad_data_away": {"team_id": 0, "player_list": [{"gameplayer_id": {"id": "<redacted:int>", "serial": "<redacted:int>"}, "parameters": [4, 0, "...(147)"], "averaged_overall": 0}, {"gameplayer_id": {"id": "<redacted:int>", "serial": "<redacted:int>"}, "parameters": [4, 0, "...(147)"], "averaged_overall": 0}, "...(11)"], "coach": {"coach_id": {"id": "<redacted:int>", "serial": "<redacted:int>"}, "sell_gp": 0, "is_coach_texture_use": "NO", "initial_base_team_id": 5807, "age": 46, "possession": 70, "short_counter": 70, "long_ball": 70, "long_counter": 70, "side_attack": 70, "overload": 70, "compability": "TRAINING_SKILL_NONE", "team_style": 0, "formation_data": "", "is_lock": "NO", "ability_id": [0, 0, "...(4)"], "type": "NORMAL"}, "squad_gameplan": {"formation": [{"formation_offensive": [{"role": 0, "position_x": 3, "position_y": 52}, {"role": 1, "position_x": 11, "position_y": 64}, "...(11)"], "formation_defensive": [{"role": 0, "position_x": 3, "position_y": 52}, {"role": 1, "position_x": 11, "position_y": 64}, "...(11)"], "team_style": 0, "team_tactics": [{"data": [255, 255], "value_id": [0, 0]}, {"data": [255, 255], "value_id": [0, 0]}], "is_position_edited": ["NO", "NO"], "coach_link_data": [{"is_link_on": "YES", "key_member_Id": 255, "link_member_Id": 255}, {"is_link_on": "YES", "key_member_Id": 255, "link_member_Id": 255}], "use_multi_formation": "NO"}, {"formation_offensive": [{"role": 0, "position_x": 3, "position_y": 52}, {"role": 1, "position_x": 11, "position_y": 64}, "...(11)"], "formation_defensive": [{"role": 0, "position_x": 3, "position_y": 52}, {"role": 1, "position_x": 11, "position_y": 64}, "...(11)"], "team_style": 0, "team_tactics": [{"data": [255, 255], "value_id": [0, 0]}, {"data": [255, 255], "value_id": [0, 0]}], "is_position_edited": ["NO", "NO"], "coach_link_data": [{"is_link_on": "YES", "key_member_Id": 255, "link_member_Id": 255}, {"is_link_on": "YES", "key_member_Id": 255, "link_member_Id": 255}], "use_multi_formation": "NO"}], "match_plan_settings": {"order": [0, 2, "...(40)"], "set_piece_taker": [9, 9, "...(6)"], "df_overlap_setplay": [255, 255, "...(3)"], "captain": 1, "auto_member_change": 0, "auto_offside_trap": 0, "auto_plan_change": 0, "use_multi_tactics_plan": 0, "auto_attack_level": 0, "member_assisit": 0}}}, "uniform_list_away": {"uniform_list": [], "base_team_id": 0}, "custom_stadium_user_id": 2024318960, "custom_stadium_list": [{"stadium_id": 101, "custom_stadium_name": "", "stadium_color1": 37, "stadium_color2": 30, "stadium_color3": 40, "stadium_color4": 40, "goalnet_pattern": 1, "goalnet_color1": 40, "goalnet_color2": 40, "pitch_pattern": 1, "entrance_set": 1, "bill_set": 1, "pitchside_objects": [0, 0, "...(6)"], "goal_effect1": 0, "goal_effect2": 0, "kickoff_effect": 0, "has_invalid_assets": "NO"}, {"stadium_id": 102, "custom_stadium_name": "", "stadium_color1": 38, "stadium_color2": 30, "stadium_color3": 40, "stadium_color4": 40, "goalnet_pattern": 1, "goalnet_color1": 40, "goalnet_color2": 40, "pitch_pattern": 1, "entrance_set": 1, "bill_set": 1, "pitchside_objects": [0, 0, "...(6)"], "goal_effect1": 0, "goal_effect2": 0, "kickoff_effect": 0, "has_invalid_assets": "NO"}, "...(3)"], "commentary_info": {"potw_player_list": [], "pre_division": 10, "phase_count": 0, "round_count": 0, "first_match_player_list": []}, "emoji_frame_home_info": [], "emoji_frame_away_info": [], "survey_info": [], "tour_pvp_bonus_list": []}
+phase MATCHMENU  -> NOERR 
+phase GAMELOAD   -> NOERR 
+phase ENTRY      -> NOERR 
+phase 1ST        -> NOERR 
+ntl_gateinfo [owner] -> {'STATUS': '200', 'API_STATUS': '1', 'LOG_ACTIVE': '1', 'SERVER_TIME': '1791850697', 'PUT_LOG_URL': 'http://ntl.service.konami.net/ntl/api/PES2022/ReportLog.php', '_http': 'HTTP/1.1 200 OK', '_host': '35.174.175.11', '_elapsed': 5.02}
+report_log  [owner] pds -> {'_type': 'pds', '_elapsed': 5.03, 'STATUS': '200', '_http': 'HTTP/1.1 200 OK'}
+  >> beat 5 at t+61.1s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 5 at t+61.1s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+ntl_gateinfo [bot  ] -> {'STATUS': '200', 'API_STATUS': '1', 'LOG_ACTIVE': '1', 'SERVER_TIME': '1791850707', 'PUT_LOG_URL': 'http://ntl.service.konami.net/ntl/api/PES2022/ReportLog.php', '_http': 'HTTP/1.1 200 OK', '_host': '35.174.175.11', '_elapsed': 5.01}
+report_log  [bot  ] pds -> {'_type': 'pds', '_elapsed': 5.03, 'STATUS': '200', '_http': 'HTTP/1.1 200 OK'}
+phase 1ST_15MIN  -> NOERR          room gamephase=1ST_15MIN
+  (gRPC beats: owner 5/5, bot   5/5)
+  >> beat 6 at t+76.4s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 6 at t+76.4s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 7 at t+91.6s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 7 at t+91.7s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 8 at t+106.9s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 8 at t+106.9s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 9 at t+122.2s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+phase 1ST_30MIN  -> NOERR          room gamephase=1ST_30MIN
+  >> beat 9 at t+122.2s
+  (gRPC beats: owner 9/9, bot   9/8)
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 10 at t+137.5s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 10 at t+137.4s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 11 at t+152.8s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 11 at t+152.7s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 12 at t+168.0s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 12 at t+168.0s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+phase BREAK1     -> NOERR          room gamephase=BREAK1
+  (gRPC beats: owner 12/12, bot   12/12)
+  >> beat 13 at t+183.3s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 13 at t+183.2s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 14 at t+198.5s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 14 at t+198.5s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 15 at t+213.8s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 15 at t+213.8s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 16 at t+229.0s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 16 at t+229.0s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 17 at t+244.3s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+phase 2ND        -> NOERR          room gamephase=2ND
+  (gRPC beats: owner 17/17, bot   16/16)
+  >> beat 17 at t+244.3s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 18 at t+259.5s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 18 at t+259.5s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 19 at t+274.8s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 19 at t+274.8s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 20 at t+290.2s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 20 at t+290.0s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+phase 2ND_15MIN  -> NOERR          room gamephase=2ND_15MIN
+  (gRPC beats: owner 20/20, bot   20/20)
+  >> beat 21 at t+305.4s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 21 at t+305.2s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 22 at t+320.7s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 22 at t+320.5s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 23 at t+335.9s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 23 at t+335.8s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+phase 2ND_30MIN  -> NOERR          room gamephase=2ND_30MIN
+  (gRPC beats: owner 23/23, bot   23/23)
+  >> beat 24 at t+351.2s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 24 at t+351.0s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 25 at t+366.4s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 25 at t+366.2s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 26 at t+381.7s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 26 at t+381.5s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 27 at t+397.0s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 27 at t+396.8s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 28 at t+412.2s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  >> beat 28 at t+412.1s
+    << beat reply: disp='CMD_HEARTBEAT_GRPC' res='[object Object]'
+  done: beats=28 replies=28
+  done: beats=28 replies=28
+phase END        -> NOERR          room gamephase=None
+  (gRPC beats: owner 28/28, bot   28/28)
+goal 12' HOME -> NOERR (None)
+goal 34' HOME -> NOERR (None)
+goal 61' AWAY -> NOERR (None)
+match elapsed -> 388s (min real match: 300s)
+set_result [owner NOERR   ] -> ['own:NOERR']  (t+22.5s since END)
+check_result -> NOERR (None)
+  FULL check: {"game_end_result": {"match_result": {"gameend_reason": "DISCONN", "abnormalend_reason": "DISCONN_HB", "player_data": {"user_id": "<redacted:int>", "user_info": {"user_id": "<redacted:int>", "user_name": "<redacted:str>", "is_deleted": "NO", "platform": "ANDROID", "psn_user_id": {"account_id": "NotImplement", "online_id": "", "is_valid_cache": "NO"}, "xuid": "", "steamid": "", "nsw_user_id": {"nsa_id": "NotImplement", "issuer_id": 0}, "avatar": {"is_already_set": "NO", "player_id": 0, "special_id": 0, "background_id": 0, "special_id_background": 0, "is_enable_player": "YES", "is_enable_background": "YES", "material_key_player": "", "material_key_background": ""}, "fameIdList": [], "user_banner": {"banner_id": {"unique_id": 0}, "is_valid": "NO"}}, "rating": 0, "oldrating": 0, "rating_boost_type": "NONE", "rating_boost_rate": 1, "team_id": 396, "side": "HOME", "cont_win_num": 0}, "game_res": "LOSE", "score_data": {"home_score": 0, "away_score": 3}}, "achievement_notification": [], "sheet_list": [], "extra_match_result": {"league_match_result": [], "event_match_result": [], "season_match_result": [], "gameplayer_update_info": [], "gameplayer_exp_list": [], "match_count_for_review": 0, "campaign_pass_result": [], "trial_list": [], "get_trial_present": [], "strike_arena_status": [], "ml_event_match_result": [], "user_compe_core_info": []}, "fame_notification": [], "fameIdList": [], "revealed_bingo_link_card_list": [], "empty_slot_info_list": [], "analyst_get_game_result_info": {"advice_info_match_list": [], "analyse_json": "<str:2423>", "advice_json": "[]"}}, "result": "NOERR", "rqid": 3616307, "msgid": "CMD_CHECK_GAME_RESULT"}
+get_result [owner] -> NOERR get_match_result=NO
+get_result [bot  ] -> NOERR get_match_result=YES
+final        -> gamephase=None go_match=None
+gRPC beats [owner] -> 28 sent, 28 replied
+gRPC beats [bot  ] -> 28 sent, 28 replied
+elapsed      -> 467.4s

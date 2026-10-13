@@ -1,0 +1,152 @@
+0x07debe40  b        #0x7debed4
+0x07debe44  adrp     x5, #0xa4b000
+0x07debe48  add      x5, x5, #0xe70           ; STR 0xb4be70 'PEER_TURN'
+0x07debe4c  ldr      w12, [x8, #0x120]
+0x07debe50  sub      x26, x20, x25
+0x07debe54  ldrh     w9, [x8, #0x1b8]
+0x07debe58  ldr      w10, [x8, #0x1b0]
+0x07debe5c  cmp      w12, #0xb
+0x07debe60  b.ls     #0x7debe88
+0x07debe64  b        #0x7debed4
+0x07debe68  adrp     x5, #0xbf1000
+0x07debe6c  add      x5, x5, #0x681           ; STR 0xcf1681 'TARGET_STUN_SERVER'
+0x07debe70  ldr      w12, [x8, #0x120]
+0x07debe74  sub      x26, x20, x25
+0x07debe78  ldrh     w9, [x8, #0x1b8]
+0x07debe7c  ldr      w10, [x8, #0x1b0]
+0x07debe80  cmp      w12, #0xb
+0x07debe84  b.hi     #0x7debed4
+0x07debe88  adrp     x15, #0xca5000
+0x07debe8c  add      x15, x15, #0x102
+0x07debe90  adrp     x11, #0xaf4000
+0x07debe94  add      x11, x11, #0xf28           ; STR 0xbf4f28 'NONE'
+0x07debe98  adr      x13, #0x7deb8bc
+0x07debe9c  ldrh     w14, [x15, x12, lsl #1]
+0x07debea0  add      x13, x13, x14, lsl #2
+0x07debea4  br       x13
+0x07debea8  adrp     x11, #0xc04000
+0x07debeac  add      x11, x11, #0x7a2           ; STR 0xd047a2 'INIT'
+0x07debeb0  b        #0x7deb8c4
+0x07debeb4  adrp     x9, #0x9a6d000
+0x07debeb8  ldr      x5, [x9, #0x1e8]
+0x07debebc  ldr      w12, [x8, #0x120]
+0x07debec0  sub      x26, x20, x25
+0x07debec4  ldrh     w9, [x8, #0x1b8]
+0x07debec8  ldr      w10, [x8, #0x1b0]
+0x07debecc  cmp      w12, #0xb
+0x07debed0  b.ls     #0x7debe88
+0x07debed4  sub      w11, w12, #0xe1
+0x07debed8  cmp      w11, #3
+0x07debedc  b.hi     #0x7deb8bc
+0x07debee0  adrp     x14, #0xca5000
+0x07debee4  add      x14, x14, #0x11a
+0x07debee8  adr      x12, #0x7debef8
+0x07debeec  ldrb     w13, [x14, x11]
+0x07debef0  add      x12, x12, x13, lsl #2
+0x07debef4  br       x12
+0x07debef8  adrp     x11, #0xba3000
+0x07debefc  add      x11, x11, #0xf6c           ; STR 0xca3f6c 'TIMEOUT'
+0x07debf00  b        #0x7deb8c4
+0x07debf04  adrp     x11, #0xaf7000
+0x07debf08  add      x11, x11, #0x685           ; STR 0xbf7685 'UDHP'
+0x07debf0c  b        #0x7deb8c4
+0x07debf10  adrp     x11, #0xaab000
+0x07debf14  add      x11, x11, #0x241           ; STR 0xbab241 'FORMALLY_TIMEOUT'
+0x07debf18  b        #0x7deb8c4
+0x07debf1c  adrp     x11, #0xb7d000
+0x07debf20  add      x11, x11, #0x881           ; STR 0xc7d881 'RESTRAINED'
+0x07debf24  b        #0x7deb8c4
+0x07debf28  adrp     x11, #0xad1000
+0x07debf2c  add      x11, x11, #0xb98           ; STR 0xbd1b98 'ALLOC_CHNL'
+0x07debf30  b        #0x7deb8c4
+0x07debf34  adrp     x11, #0xc2a000
+0x07debf38  add      x11, x11, #0xfd2           ; STR 0xd2afd2 'ALLOC_PERM'
+0x07debf3c  b        #0x7deb8c4
+0x07debf40  adrp     x11, #0xc04000
+0x07debf44  add      x11, x11, #0x7a7           ; STR 0xd047a7 'ACCEPTABLE'
+0x07debf48  b        #0x7deb8c4
+0x07debf4c  adrp     x11, #0x9ed000
+0x07debf50  add      x11, x11, #0x595           ; STR 0xaed595 'FORMALLY_CONNECTED'
+0x07debf54  b        #0x7deb8c4
+0x07debf58  adrp     x11, #0xaab000
+0x07debf5c  add      x11, x11, #0x237           ; STR 0xbab237 'CONNECTED'
+0x07debf60  b        #0x7deb8c4
+0x07debf64  adrp     x11, #0xbcb000
+0x07debf68  add      x11, x11, #0x544           ; STR 0xccb544 'ABORTED'
+0x07debf6c  b        #0x7deb8c4
+0x07debf70  adrp     x11, #0xb44000
+0x07debf74  add      x11, x11, #0xbdb           ; STR 0xc44bdb 'BAD_ROUTE'
+0x07debf78  b        #0x7deb8c4
+0x07debf7c  adrp     x11, #0xa98000
+0x07debf80  add      x11, x11, #0xcc           ; STR 0xb980cc 'G_TIMEOUT'
+0x07debf84  b        #0x7deb8c4
+0x07debf88  adrp     x11, #0xabe000
+0x07debf8c  add      x11, x11, #0xb59           ; STR 0xbbeb59 'CLASH'
+0x07debf90  b        #0x7deb8c4
+0x07debf94  ldr      x8, [sp, #0x30]
+0x07debf98  ldr      x8, [x8, #0x28]
+0x07debf9c  ldur     x9, [x29, #-0x18]
+0x07debfa0  cmp      x8, x9
+0x07debfa4  b.ne     #0x7debfc8
+0x07debfa8  add      sp, sp, #0x210
+0x07debfac  ldp      x20, x19, [sp, #0x50]
+0x07debfb0  ldp      x22, x21, [sp, #0x40]
+0x07debfb4  ldp      x24, x23, [sp, #0x30]
+0x07debfb8  ldp      x26, x25, [sp, #0x20]
+0x07debfbc  ldp      x28, x27, [sp, #0x10]
+0x07debfc0  ldp      x29, x30, [sp], #0x60
+0x07debfc4  ret      
+0x07debfc8  bl       #0x8c1bc90
+0x07debfcc  sub      sp, sp, #0xb0
+0x07debfd0  stp      x29, x30, [sp, #0x50]
+0x07debfd4  str      x27, [sp, #0x60]
+0x07debfd8  stp      x26, x25, [sp, #0x70]
+0x07debfdc  stp      x24, x23, [sp, #0x80]
+0x07debfe0  stp      x22, x21, [sp, #0x90]
+0x07debfe4  stp      x20, x19, [sp, #0xa0]
+0x07debfe8  add      x29, sp, #0x50
+0x07debfec  mrs      x26, tpidr_el0
+0x07debff0  ldr      x8, [x26, #0x28]
+0x07debff4  stur     x8, [x29, #-8]
+0x07debff8  ldr      w8, [x0, #0x15c]
+0x07debffc  stp      xzr, xzr, [x29, #-0x18]
+0x07dec000  cbnz     w8, #0x7dec220
+0x07dec004  mov      x19, x0
+0x07dec008  ldr      w8, [x0, #0x160]
+0x07dec00c  cbz      w8, #0x7dec220
+0x07dec010  mov      w0, #0x400
+0x07dec014  mov      w27, #0x400
+0x07dec018  movk     w0, #1, lsl #16
+0x07dec01c  mov      x21, x5
+0x07dec020  mov      x22, x4
+0x07dec024  mov      w25, w3
+0x07dec028  mov      x23, x2
+0x07dec02c  mov      w24, w1
+0x07dec030  movk     w27, #1, lsl #16
+0x07dec034  bl       #0x8c1c080
+0x07dec038  mov      w2, #0x400
+0x07dec03c  mov      w1, wzr
+0x07dec040  movk     w2, #1, lsl #16
+0x07dec044  mov      x20, x0
+0x07dec048  bl       #0x8c1bd60
+0x07dec04c  sub      w8, w25, #1
+0x07dec050  cmp      w8, #3
+0x07dec054  b.hi     #0x7dec06c
+0x07dec058  adrp     x9, #0xca5000
+0x07dec05c  add      x9, x9, #0x270
+0x07dec060  ldrsw    x8, [x9, w8, sxtw #2]
+0x07dec064  add      x4, x9, x8
+0x07dec068  b        #0x7dec074
+0x07dec06c  adrp     x4, #0xa85000
+0x07dec070  add      x4, x4, #0x585
+0x07dec074  adrp     x8, #0x99ed000
+0x07dec078  add      x9, x19, #0x1c
+0x07dec07c  add      x11, x19, #0x5c
+0x07dec080  cmp      w24, #1
+0x07dec084  csel     x6, x9, x11, eq
+0x07dec088  add      x11, x19, #0x3c
+0x07dec08c  ldr      x8, [x8, #0x298]
+0x07dec090  add      x14, x19, #0xdc
+0x07dec094  ldp      w10, w12, [x23]
+0x07dec098  mov      w1, #0x400
+0x07dec09c  mov      w2, #0x400

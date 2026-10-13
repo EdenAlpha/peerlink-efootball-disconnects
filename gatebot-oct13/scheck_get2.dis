@@ -1,0 +1,69 @@
+0x076e818c  stp      x29, x30, [sp, #-0x50]!
+0x076e8190  str      x25, [sp, #0x10]
+0x076e8194  stp      x24, x23, [sp, #0x20]
+0x076e8198  stp      x22, x21, [sp, #0x30]
+0x076e819c  stp      x20, x19, [sp, #0x40]
+0x076e81a0  mov      x29, sp
+0x076e81a4  mov      x19, x0
+0x076e81a8  add      x0, x0, #8
+0x076e81ac  adrp     x8, #0x98af000
+0x076e81b0  add      x8, x8, #0x1f8
+0x076e81b4  str      x8, [x19]
+0x076e81b8  bl       #0x2fc833c
+0x076e81bc  add      x0, x19, #0xc8
+0x076e81c0  bl       #0x2fcdb4c
+0x076e81c4  add      x0, x19, #0xf0
+0x076e81c8  mov      w1, wzr
+0x076e81cc  bl       #0x2fcb5e0
+0x076e81d0  mov      w0, #0x2000
+0x076e81d4  strb     wzr, [x19, #0x108]
+0x076e81d8  mov      w20, #0x2000
+0x076e81dc  bl       #0x8c1c050
+0x076e81e0  movi     v0.2d, #0000000000000000
+0x076e81e4  stp      x0, x20, [x19, #0x120]
+0x076e81e8  add      x20, x19, #0x138
+0x076e81ec  add      x0, x19, #0x708
+0x076e81f0  mov      w1, wzr
+0x076e81f4  mov      w2, #0x258
+0x076e81f8  str      xzr, [x19, #0x118]
+0x076e81fc  add      x21, x19, #0x1f0
+0x076e8200  stp      q0, q0, [x20]
+0x076e8204  stp      q0, q0, [x20, #0x20]
+0x076e8208  stp      q0, q0, [x20, #0x40]
+0x076e820c  stp      q0, q0, [x20, #0x60]
+0x076e8210  stp      q0, q0, [x20, #0x80]
+0x076e8214  str      q0, [x20, #0xa0]
+0x076e8218  bl       #0x8c1bd60
+0x076e821c  mov      x0, x21
+0x076e8220  mov      w1, wzr
+0x076e8224  mov      w2, #0x514
+0x076e8228  bl       #0x8c1bd60
+0x076e822c  adrp     x22, #0x98da000
+0x076e8230  add      x22, x22, #0x9d8
+0x076e8234  add      x23, x22, #0x48
+0x076e8238  add      x24, x22, #0x78
+0x076e823c  add      x25, x22, #0x98
+0x076e8240  adrp     x1, #0x9d9000
+0x076e8244  add      x1, x1, #0x3f5           ; STR 0xad93f5 'CMD_GET_GAME_SESSION_CHECK_RES'
+0x076e8248  mov      x0, x20
+0x076e824c  mov      w2, #0x1e
+0x076e8250  str      x22, [x19]
+0x076e8254  add      x21, x19, #0x170
+0x076e8258  str      x23, [x19, #0x110]
+0x076e825c  str      x24, [x19, #0x130]
+0x076e8260  str      x25, [x19, #0x1e8]
+0x076e8264  bl       #0x2f3877c
+0x076e8268  adrp     x1, #0x9d9000
+0x076e826c  add      x1, x1, #0x414           ; STR 0xad9414 'CmdGetGameSessionCheckRes.php'
+0x076e8270  mov      x0, x21
+0x076e8274  mov      w2, #0x1d
+0x076e8278  bl       #0x2f3877c
+0x076e827c  add      x9, x19, #0x961
+0x076e8280  mov      w10, #0x4f4e
+0x076e8284  str      xzr, [x19, #0x960]
+0x076e8288  mov      w8, #4
+0x076e828c  str      xzr, [x19, #0x970]
+0x076e8290  mov      w11, #0x656d
+0x076e8294  str      xzr, [x19, #0x968]
+0x076e8298  movk     w11, #0x746e, lsl #16
+0x076e829c  strh     w10, [x9]

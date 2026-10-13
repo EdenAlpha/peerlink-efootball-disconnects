@@ -1,0 +1,68 @@
+0x077a55f0  stp      x29, x30, [sp, #-0x40]!
+0x077a55f4  str      x23, [sp, #0x10]
+0x077a55f8  stp      x22, x21, [sp, #0x20]
+0x077a55fc  stp      x20, x19, [sp, #0x30]
+0x077a5600  mov      x29, sp
+0x077a5604  mov      x19, x0
+0x077a5608  add      x0, x0, #8
+0x077a560c  adrp     x8, #0x98af000
+0x077a5610  add      x8, x8, #0x1f8
+0x077a5614  str      x8, [x19]
+0x077a5618  bl       #0x2fc833c
+0x077a561c  add      x0, x19, #0xc8
+0x077a5620  bl       #0x2fcdb4c
+0x077a5624  add      x0, x19, #0xf0
+0x077a5628  mov      w1, wzr
+0x077a562c  bl       #0x2fcb5e0
+0x077a5630  mov      w0, #0x2000
+0x077a5634  strb     wzr, [x19, #0x108]
+0x077a5638  mov      w20, #0x2000
+0x077a563c  bl       #0x8c1c050
+0x077a5640  movi     v0.2d, #0000000000000000
+0x077a5644  add      x8, x19, #0x138
+0x077a5648  adrp     x21, #0x98e4000
+0x077a564c  add      x21, x21, #0x788
+0x077a5650  stp      x0, x20, [x19, #0x120]
+0x077a5654  add      x22, x21, #0x48
+0x077a5658  add      x23, x21, #0x78
+0x077a565c  adrp     x1, #0xc03000
+0x077a5660  add      x1, x1, #0xe6f           ; STR 0xd03e6f 'CMD_SET_GAMERELAY_QUALITY'
+0x077a5664  mov      x0, x8
+0x077a5668  mov      w2, #0x19
+0x077a566c  stp      q0, q0, [x8]
+0x077a5670  stp      q0, q0, [x8, #0x20]
+0x077a5674  add      x20, x19, #0x170
+0x077a5678  stp      q0, q0, [x8, #0x40]
+0x077a567c  stp      q0, q0, [x8, #0x60]
+0x077a5680  stp      q0, q0, [x8, #0x80]
+0x077a5684  str      q0, [x8, #0xa0]
+0x077a5688  str      x21, [x19]
+0x077a568c  stp      x22, xzr, [x19, #0x110]
+0x077a5690  str      x23, [x19, #0x130]
+0x077a5694  bl       #0x2f3877c
+0x077a5698  adrp     x1, #0xb69000
+0x077a569c  add      x1, x1, #0x661           ; STR 0xc69661 'CmdSetGamerelayQuality.php'
+0x077a56a0  mov      x0, x20
+0x077a56a4  mov      w2, #0x1a
+0x077a56a8  bl       #0x2f3877c
+0x077a56ac  str      x21, [x19]
+0x077a56b0  str      x22, [x19, #0x110]
+0x077a56b4  str      x23, [x19, #0x130]
+0x077a56b8  stp      xzr, xzr, [x19, #0x1f0]
+0x077a56bc  str      xzr, [x19, #0x1e8]
+0x077a56c0  ldp      x20, x19, [sp, #0x30]
+0x077a56c4  ldp      x22, x21, [sp, #0x20]
+0x077a56c8  ldr      x23, [sp, #0x10]
+0x077a56cc  ldp      x29, x30, [sp], #0x40
+0x077a56d0  ret      
+0x077a56d4  sub      sp, sp, #0xd0
+0x077a56d8  stp      x29, x30, [sp, #0x70]
+0x077a56dc  stp      x28, x27, [sp, #0x80]
+0x077a56e0  stp      x26, x25, [sp, #0x90]
+0x077a56e4  stp      x24, x23, [sp, #0xa0]
+0x077a56e8  stp      x22, x21, [sp, #0xb0]
+0x077a56ec  stp      x20, x19, [sp, #0xc0]
+0x077a56f0  add      x29, sp, #0x70
+0x077a56f4  mrs      x8, tpidr_el0
+0x077a56f8  add      x20, x0, #0xf0
+0x077a56fc  str      x8, [sp, #8]

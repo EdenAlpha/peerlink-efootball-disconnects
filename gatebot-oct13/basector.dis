@@ -1,0 +1,53 @@
+0x07c0004c  stp      x29, x30, [sp, #-0x30]!
+0x07c00050  str      x21, [sp, #0x10]
+0x07c00054  stp      x20, x19, [sp, #0x20]
+0x07c00058  mov      x29, sp
+0x07c0005c  mov      x20, x1
+0x07c00060  mov      x19, x0
+0x07c00064  bl       #0x7bfb55c
+0x07c00068  movi     v0.2d, #0000000000000000
+0x07c0006c  add      x8, x19, #0x318
+0x07c00070  adrp     x9, #0x9928000
+0x07c00074  add      x9, x9, #0xcb8
+0x07c00078  add      x0, x19, #0x338
+0x07c0007c  adrp     x1, #0xa51000
+0x07c00080  add      x1, x1, #0xae6           ; STR 0xb51ae6 'basic::RecursiveMutex'
+0x07c00084  adrp     x2, #0xa8a000
+0x07c00088  add      x2, x2, #0x239
+0x07c0008c  str      x9, [x19]
+0x07c00090  stp      q0, q0, [x8]
+0x07c00094  bl       #0x2f396e8
+0x07c00098  movi     v0.2d, #0000000000000000
+0x07c0009c  add      x8, x19, #0x368
+0x07c000a0  mov      w9, #3
+0x07c000a4  strb     wzr, [x19, #0x3ca]
+0x07c000a8  str      xzr, [x19, #0x3d0]
+0x07c000ac  str      xzr, [x19, #0x3e0]
+0x07c000b0  stp      q0, q0, [x8]
+0x07c000b4  stp      q0, q0, [x8, #0x20]
+0x07c000b8  stp      q0, q0, [x8, #0x40]
+0x07c000bc  strh     w9, [x19, #0x3c8]
+0x07c000c0  str      xzr, [x19, #0x3d8]
+0x07c000c4  cbz      x20, #0x7c000e4
+0x07c000c8  mov      x0, x20
+0x07c000cc  add      x21, x19, #0x3d0
+0x07c000d0  bl       #0x8c1bd30
+0x07c000d4  mov      x2, x0
+0x07c000d8  mov      x0, x21
+0x07c000dc  mov      x1, x20
+0x07c000e0  bl       #0x2f3877c
+0x07c000e4  add      x0, x19, #0x3e8
+0x07c000e8  mov      w1, #1
+0x07c000ec  mov      x2, xzr
+0x07c000f0  mov      w20, #1
+0x07c000f4  bl       #0x7e1ae50
+0x07c000f8  bl       #0x7e0afcc
+0x07c000fc  cbz      x0, #0x7c0010c
+0x07c00100  ldr      x0, [x0, #0x10]
+0x07c00104  bl       #0x7e16e3c
+0x07c00108  strb     w0, [x19, #0x3c8]
+0x07c0010c  strb     w20, [x19, #0x78]
+0x07c00110  ldp      x20, x19, [sp, #0x20]
+0x07c00114  ldr      x21, [sp, #0x10]
+0x07c00118  ldp      x29, x30, [sp], #0x30
+0x07c0011c  ret      

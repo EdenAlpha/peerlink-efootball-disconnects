@@ -1,0 +1,56 @@
+0x07aa8960  mov      w28, #0x16
+0x07aa8964  mov      x27, #-0x12
+0x07aa8968  str      x0, [sp, #8]
+0x07aa896c  stur     w9, [x29, #-0xc]
+0x07aa8970  b        #0x7aa8980
+0x07aa8974  add      x25, x25, #0x710
+0x07aa8978  cmp      x25, x19
+0x07aa897c  b.eq     #0x7aa8d48
+0x07aa8980  ldrb     w8, [x25, #0x708]
+0x07aa8984  cmp      w8, w9
+0x07aa8988  b.ne     #0x7aa8974
+0x07aa898c  add      x8, x25, #0x710
+0x07aa8990  cmp      x8, x19
+0x07aa8994  b.eq     #0x7aa8c4c
+0x07aa8998  stur     x25, [x29, #-8]
+0x07aa899c  b        #0x7aa89e4
+0x07aa89a0  orr      x9, x23, #1
+0x07aa89a4  add      x8, x24, x20
+0x07aa89a8  str      x24, [x25, #0x6e8]
+0x07aa89ac  str      x20, [x25, #0x6e0]
+0x07aa89b0  str      x9, [x25, #0x6d8]
+0x07aa89b4  strb     wzr, [x8]
+0x07aa89b8  add      x0, x25, #0x6f0
+0x07aa89bc  ldr      x1, [x25, #0xe00]
+0x07aa89c0  ldr      x2, [x25, #0xe08]
+0x07aa89c4  bl       #0x346b9cc
+0x07aa89c8  ldrb     w8, [x25, #0xe18]
+0x07aa89cc  add      x21, x25, #0x710
+0x07aa89d0  strb     w8, [x25, #0x708]
+0x07aa89d4  add      x8, x25, #0xe20
+0x07aa89d8  mov      x25, x21
+0x07aa89dc  cmp      x8, x19
+0x07aa89e0  b.eq     #0x7aa8c34
+0x07aa89e4  ldr      x8, [x25, #0x710]
+0x07aa89e8  add      x0, x25, #0x18
+0x07aa89ec  ldr      w9, [x25, #0x718]
+0x07aa89f0  add      x1, x25, #0x728
+0x07aa89f4  ldrb     w10, [x25, #0x720]
+0x07aa89f8  str      x8, [x25]
+0x07aa89fc  str      w9, [x25, #8]
+0x07aa8a00  strb     w10, [x25, #0x10]
+0x07aa8a04  bl       #0x2ff5938
+0x07aa8a08  ldr      x1, [x25, #0xdb8]
+0x07aa8a0c  add      x0, x25, #0x6a8
+0x07aa8a10  ldr      x2, [x25, #0xdc0]
+0x07aa8a14  bl       #0x346b794
+0x07aa8a18  ldrb     w8, [x25, #0xdd0]
+0x07aa8a1c  add      x11, x25, #0xdd1
+0x07aa8a20  ldr      x10, [x25, #0xdd8]
+0x07aa8a24  ldr      x12, [x25, #0x6c0]
+0x07aa8a28  ldr      x9, [x25, #0xde0]
+0x07aa8a2c  tst      w8, #1
+0x07aa8a30  ldrb     w26, [x25, #0x6c0]
+0x07aa8a34  lsr      x8, x8, #1
+0x07aa8a38  csel     x20, x8, x10, eq
+0x07aa8a3c  and      x8, x12, #0xfffffffffffffffe

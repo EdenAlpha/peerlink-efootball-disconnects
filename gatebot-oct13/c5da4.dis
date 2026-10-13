@@ -1,0 +1,64 @@
+0x080e5d40  add      sp, sp, #0x70
+0x080e5d44  ret      
+0x080e5d48  ldr      w8, [x19, #0x4e0]
+0x080e5d4c  cbnz     w8, #0x80e5bc0
+0x080e5d50  mov      w0, #1
+0x080e5d54  str      w0, [x19, #0x4e0]
+0x080e5d58  ldr      x8, [x24, #0x28]
+0x080e5d5c  ldur     x9, [x29, #-8]
+0x080e5d60  cmp      x8, x9
+0x080e5d64  b.eq     #0x80e5d2c
+0x080e5d68  bl       #0x8c1bc90
+0x080e5d6c  stp      x29, x30, [sp, #-0x20]!
+0x080e5d70  str      x19, [sp, #0x10]
+0x080e5d74  mov      x29, sp
+0x080e5d78  cbz      w2, #0x80e5dd0
+0x080e5d7c  mov      x19, x0
+0x080e5d80  ldr      w8, [x0, #0x38]
+0x080e5d84  cbz      w8, #0x80e5dc0
+0x080e5d88  ldr      w8, [x19, #0x1780]
+0x080e5d8c  cbz      w8, #0x80e5db4
+0x080e5d90  ldr      w8, [x19, #0xc8]
+0x080e5d94  cbz      w8, #0x80e5db4
+0x080e5d98  ldr      w8, [x19, #0x84]
+0x080e5d9c  cmp      w8, #9
+0x080e5da0  b.ne     #0x80e5db4
+0x080e5da4  ldr      w8, [x19, #0x71c]
+0x080e5da8  cbz      w8, #0x80e5db4
+0x080e5dac  ldr      w8, [x19, #0x4e0]
+0x080e5db0  cbz      w8, #0x80e5e10
+0x080e5db4  mov      w8, #1
+0x080e5db8  str      w8, [x19, #0x718]
+0x080e5dbc  b        #0x80e5dd0
+0x080e5dc0  cmp      w1, #0x400
+0x080e5dc4  b.ne     #0x80e5dd0
+0x080e5dc8  ldr      w8, [x19, #0x71c]
+0x080e5dcc  cbz      w8, #0x80e5de0
+0x080e5dd0  mov      w0, #1
+0x080e5dd4  ldr      x19, [sp, #0x10]
+0x080e5dd8  ldp      x29, x30, [sp], #0x20
+0x080e5ddc  ret      
+0x080e5de0  adrp     x4, #0xa8a000
+0x080e5de4  add      x4, x4, #0x239
+0x080e5de8  mov      x0, x19
+0x080e5dec  mov      w1, #0x2f
+0x080e5df0  mov      w2, #0x22c
+0x080e5df4  mov      w3, #0xe9
+0x080e5df8  mov      w5, wzr
+0x080e5dfc  bl       #0x80ea9a4
+0x080e5e00  mov      w0, wzr
+0x080e5e04  ldr      x19, [sp, #0x10]
+0x080e5e08  ldp      x29, x30, [sp], #0x20
+0x080e5e0c  ret      
+0x080e5e10  ldr      x8, [x19, #0x17c8]
+0x080e5e14  cbz      x8, #0x80e5e28
+0x080e5e18  ldr      x1, [x19, #0x17d0]
+0x080e5e1c  mov      x0, x19
+0x080e5e20  blr      x8
+0x080e5e24  cbz      w0, #0x80e5db4
+0x080e5e28  mov      w8, #2
+0x080e5e2c  mov      x0, x19
+0x080e5e30  mov      w1, #0x61
+0x080e5e34  str      w8, [x19, #0x718]
+0x080e5e38  bl       #0x8101020
+0x080e5e3c  cbnz     w0, #0x80e5dd0

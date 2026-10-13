@@ -1,0 +1,160 @@
+0x075e2280  sub      sp, sp, #0x1a0
+0x075e2284  stp      x29, x30, [sp, #0x140]
+0x075e2288  stp      x28, x27, [sp, #0x150]
+0x075e228c  stp      x26, x25, [sp, #0x160]
+0x075e2290  stp      x24, x23, [sp, #0x170]
+0x075e2294  stp      x22, x21, [sp, #0x180]
+0x075e2298  stp      x20, x19, [sp, #0x190]
+0x075e229c  add      x29, sp, #0x140
+0x075e22a0  mov      x20, x1
+0x075e22a4  mrs      x28, tpidr_el0
+0x075e22a8  ldr      x8, [x28, #0x28]
+0x075e22ac  mov      x19, x0
+0x075e22b0  adrp     x1, #0x9ec000
+0x075e22b4  add      x1, x1, #0x250           ; STR 0xaec250 'progress_status_info'
+0x075e22b8  mov      x0, x20
+0x075e22bc  stur     x8, [x29, #-0x10]
+0x075e22c0  bl       #0x2fccaf0
+0x075e22c4  bl       #0x2fcbaec
+0x075e22c8  cbz      w0, #0x75e22e8
+0x075e22cc  adrp     x1, #0x9ec000
+0x075e22d0  add      x1, x1, #0x250           ; STR 0xaec250 'progress_status_info'
+0x075e22d4  mov      x0, x20
+0x075e22d8  bl       #0x2fccaf0
+0x075e22dc  mov      x1, x0
+0x075e22e0  mov      x0, x19
+0x075e22e4  bl       #0x75de8a4
+0x075e22e8  adrp     x1, #0xbdd000
+0x075e22ec  add      x1, x1, #0x8ed           ; STR 0xcdd8ed 'preparation_status_home'
+0x075e22f0  mov      x0, x20
+0x075e22f4  bl       #0x2fccaf0
+0x075e22f8  bl       #0x2fcbaec
+0x075e22fc  cbz      w0, #0x75e2368
+0x075e2300  adrp     x1, #0xbdd000
+0x075e2304  add      x1, x1, #0x8ed           ; STR 0xcdd8ed 'preparation_status_home'
+0x075e2308  mov      x0, x20
+0x075e230c  bl       #0x2fccaf0
+0x075e2310  bl       #0x2fcbce4
+0x075e2314  mov      x21, x19
+0x075e2318  mov      x22, x0
+0x075e231c  ldrb     w8, [x21, #0x40]!
+0x075e2320  tbnz     w8, #0, #0x75e2330
+0x075e2324  strh     wzr, [x19, #0x40]
+0x075e2328  cbnz     x22, #0x75e2358
+0x075e232c  b        #0x75e2368
+0x075e2330  ldr      x8, [x19, #0x50]
+0x075e2334  strb     wzr, [x8]
+0x075e2338  str      xzr, [x19, #0x48]
+0x075e233c  cbnz     x22, #0x75e2358
+0x075e2340  b        #0x75e2368
+0x075e2344  ldrb     w1, [x22, #1]!
+0x075e2348  cbz      w1, #0x75e2368
+0x075e234c  mov      x0, x21
+0x075e2350  bl       #0x2f4a6b0
+0x075e2354  add      x22, x22, #1
+0x075e2358  ldrb     w1, [x22]
+0x075e235c  cmp      w1, #0x5c
+0x075e2360  b.eq     #0x75e2344
+0x075e2364  cbnz     w1, #0x75e234c
+0x075e2368  adrp     x1, #0xb0a000
+0x075e236c  add      x1, x1, #0x34f           ; STR 0xc0a34f 'preparation_status_away'
+0x075e2370  mov      x0, x20
+0x075e2374  bl       #0x2fccaf0
+0x075e2378  bl       #0x2fcbaec
+0x075e237c  cbz      w0, #0x75e23e8
+0x075e2380  adrp     x1, #0xb0a000
+0x075e2384  add      x1, x1, #0x34f           ; STR 0xc0a34f 'preparation_status_away'
+0x075e2388  mov      x0, x20
+0x075e238c  bl       #0x2fccaf0
+0x075e2390  bl       #0x2fcbce4
+0x075e2394  mov      x21, x19
+0x075e2398  mov      x22, x0
+0x075e239c  ldrb     w8, [x21, #0x58]!
+0x075e23a0  tbnz     w8, #0, #0x75e23b0
+0x075e23a4  strh     wzr, [x19, #0x58]
+0x075e23a8  cbnz     x22, #0x75e23d8
+0x075e23ac  b        #0x75e23e8
+0x075e23b0  ldr      x8, [x19, #0x68]
+0x075e23b4  strb     wzr, [x8]
+0x075e23b8  str      xzr, [x19, #0x60]
+0x075e23bc  cbnz     x22, #0x75e23d8
+0x075e23c0  b        #0x75e23e8
+0x075e23c4  ldrb     w1, [x22, #1]!
+0x075e23c8  cbz      w1, #0x75e23e8
+0x075e23cc  mov      x0, x21
+0x075e23d0  bl       #0x2f4a6b0
+0x075e23d4  add      x22, x22, #1
+0x075e23d8  ldrb     w1, [x22]
+0x075e23dc  cmp      w1, #0x5c
+0x075e23e0  b.eq     #0x75e23c4
+0x075e23e4  cbnz     w1, #0x75e23cc
+0x075e23e8  adrp     x1, #0xb43000
+0x075e23ec  add      x1, x1, #0xd78           ; STR 0xc43d78 'current_match_step'
+0x075e23f0  mov      x0, x20
+0x075e23f4  bl       #0x2fccaf0
+0x075e23f8  bl       #0x2fcbaec
+0x075e23fc  cbz      w0, #0x75e2468
+0x075e2400  adrp     x1, #0xb43000
+0x075e2404  add      x1, x1, #0xd78           ; STR 0xc43d78 'current_match_step'
+0x075e2408  mov      x0, x20
+0x075e240c  bl       #0x2fccaf0
+0x075e2410  bl       #0x2fcbce4
+0x075e2414  mov      x21, x19
+0x075e2418  mov      x22, x0
+0x075e241c  ldrb     w8, [x21, #0x70]!
+0x075e2420  tbnz     w8, #0, #0x75e2430
+0x075e2424  strh     wzr, [x19, #0x70]
+0x075e2428  cbnz     x22, #0x75e2458
+0x075e242c  b        #0x75e2468
+0x075e2430  ldr      x8, [x19, #0x80]
+0x075e2434  strb     wzr, [x8]
+0x075e2438  str      xzr, [x19, #0x78]
+0x075e243c  cbnz     x22, #0x75e2458
+0x075e2440  b        #0x75e2468
+0x075e2444  ldrb     w1, [x22, #1]!
+0x075e2448  cbz      w1, #0x75e2468
+0x075e244c  mov      x0, x21
+0x075e2450  bl       #0x2f4a6b0
+0x075e2454  add      x22, x22, #1
+0x075e2458  ldrb     w1, [x22]
+0x075e245c  cmp      w1, #0x5c
+0x075e2460  b.eq     #0x75e2444
+0x075e2464  cbnz     w1, #0x75e244c
+0x075e2468  adrp     x1, #0xbf9000
+0x075e246c  add      x1, x1, #0x5db           ; STR 0xcf95db 'score'
+0x075e2470  mov      x0, x20
+0x075e2474  bl       #0x2fccaf0
+0x075e2478  mov      x1, x0
+0x075e247c  add      x0, sp, #0x28
+0x075e2480  bl       #0x2fcb7f0
+0x075e2484  add      x0, sp, #0x28
+0x075e2488  bl       #0x2fc8d7c
+0x075e248c  tbz      w0, #0, #0x75e24c0
+0x075e2490  sub      x8, x29, #0x28
+0x075e2494  add      x0, sp, #0x28
+0x075e2498  bl       #0x2fcd5dc
+0x075e249c  ldr      x8, [x19, #0x88]
+0x075e24a0  add      x0, sp, #0x28
+0x075e24a4  str      x8, [x19, #0x90]
+0x075e24a8  add      x8, sp, #0x40
+0x075e24ac  bl       #0x2fcd614
+0x075e24b0  sub      x0, x29, #0x28
+0x075e24b4  add      x1, sp, #0x40
+0x075e24b8  bl       #0x2fcb5b4
+0x075e24bc  tbz      w0, #0, #0x75e2888
+0x075e24c0  adrp     x1, #0xa71000
+0x075e24c4  add      x1, x1, #0x377           ; STR 0xb71377 'is_ex'
+0x075e24c8  mov      x0, x20
+0x075e24cc  bl       #0x2fccaf0
+0x075e24d0  bl       #0x2fcbaec
+0x075e24d4  cbz      w0, #0x75e2540
+0x075e24d8  adrp     x1, #0xa71000
+0x075e24dc  add      x1, x1, #0x377           ; STR 0xb71377 'is_ex'
+0x075e24e0  mov      x0, x20
+0x075e24e4  bl       #0x2fccaf0
+0x075e24e8  bl       #0x2fcbce4
+0x075e24ec  mov      x21, x19
+0x075e24f0  mov      x22, x0
+0x075e24f4  ldrb     w8, [x21, #0xa0]!
+0x075e24f8  tbnz     w8, #0, #0x75e2508
+0x075e24fc  strh     wzr, [x19, #0xa0]

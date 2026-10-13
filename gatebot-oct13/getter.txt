@@ -1,0 +1,13 @@
+0x07e0afcc  adrp     x8, #0xa5d9000
+0x07e0afd0  ldr      x0, [x8, #0xd50]
+0x07e0afd4  ret      
+0x07e0afd8  stp      x29, x30, [sp, #-0x30]!
+0x07e0afdc  stp      x22, x21, [sp, #0x10]
+0x07e0afe0  stp      x20, x19, [sp, #0x20]
+0x07e0afe4  mov      x29, sp
+0x07e0afe8  mov      x19, x0
+0x07e0afec  ldr      x8, [x0, #0x10]
+0x07e0aff0  ldrb     w9, [x0, #0x28]
+0x07e0aff4  str      wzr, [x0, #8]
+0x07e0aff8  str      x8, [x0, #0x18]
+0x07e0affc  tbnz     w9, #0, #0x7e0b010

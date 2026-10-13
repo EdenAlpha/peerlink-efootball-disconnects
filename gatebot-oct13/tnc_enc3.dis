@@ -1,0 +1,64 @@
+0x07e16800  b        #0x7e16874
+0x07e16804  add      x1, x20, #0x20
+0x07e16808  mov      x8, sp
+0x07e1680c  mov      w0, #1
+0x07e16810  mov      x21, sp
+0x07e16814  bl       #0x7e046ac
+0x07e16818  ldrb     w8, [sp]
+0x07e1681c  ldr      x9, [sp, #8]
+0x07e16820  lsr      x10, x8, #1
+0x07e16824  tst      w8, #1
+0x07e16828  csel     x9, x10, x9, eq
+0x07e1682c  cmp      x9, #0
+0x07e16830  cset     w20, ne
+0x07e16834  cbz      x9, #0x7e16864
+0x07e16838  ldr      x9, [sp, #0x10]
+0x07e1683c  orr      x10, x21, #1
+0x07e16840  tst      w8, #1
+0x07e16844  csel     x21, x10, x9, eq
+0x07e16848  cbz      x21, #0x7e16864
+0x07e1684c  mov      x0, x21
+0x07e16850  bl       #0x8c1bd30
+0x07e16854  mov      x2, x0
+0x07e16858  mov      x0, x19
+0x07e1685c  mov      x1, x21
+0x07e16860  bl       #0x2f3877c
+0x07e16864  ldrb     w8, [sp]
+0x07e16868  tbz      w8, #0, #0x7e16874
+0x07e1686c  ldr      x0, [sp, #0x10]
+0x07e16870  bl       #0x2f376d4
+0x07e16874  ldr      x8, [x22, #0x28]
+0x07e16878  ldur     x9, [x29, #-8]
+0x07e1687c  cmp      x8, x9
+0x07e16880  b.ne     #0x7e1689c
+0x07e16884  mov      w0, w20
+0x07e16888  ldp      x20, x19, [sp, #0x40]
+0x07e1688c  ldp      x22, x21, [sp, #0x30]
+0x07e16890  ldp      x29, x30, [sp, #0x20]
+0x07e16894  add      sp, sp, #0x50
+0x07e16898  ret      
+0x07e1689c  bl       #0x8c1bc90
+0x07e168a0  mov      w0, wzr
+0x07e168a4  ret      
+0x07e168a8  ldr      w0, [x0, #0x120]
+0x07e168ac  ret      
+0x07e168b0  ldr      w0, [x0, #0x224]
+0x07e168b4  ret      
+0x07e168b8  sub      sp, sp, #0x70
+0x07e168bc  stp      x29, x30, [sp, #0x40]
+0x07e168c0  stp      x22, x21, [sp, #0x50]
+0x07e168c4  stp      x20, x19, [sp, #0x60]
+0x07e168c8  add      x29, sp, #0x40
+0x07e168cc  mrs      x22, tpidr_el0
+0x07e168d0  ldr      x8, [x22, #0x28]
+0x07e168d4  stur     x8, [x29, #-8]
+0x07e168d8  ldrb     w8, [x1]
+0x07e168dc  ldr      x9, [x1, #8]
+0x07e168e0  lsr      x10, x8, #1
+0x07e168e4  tst      w8, #1
+0x07e168e8  csel     x19, x10, x9, eq
+0x07e168ec  cbz      x19, #0x7e16a88
+0x07e168f0  ldr      x9, [x1, #0x10]
+0x07e168f4  cmp      x19, #0xc
+0x07e168f8  mov      w10, #0xc
+0x07e168fc  mov      x21, x1

@@ -1,0 +1,24 @@
+0x07deb090  stp      x29, x30, [sp, #-0x60]!
+0x07deb094  stp      x28, x27, [sp, #0x10]
+0x07deb098  stp      x26, x25, [sp, #0x20]
+0x07deb09c  stp      x24, x23, [sp, #0x30]
+0x07deb0a0  stp      x22, x21, [sp, #0x40]
+0x07deb0a4  stp      x20, x19, [sp, #0x50]
+0x07deb0a8  mov      x29, sp
+0x07deb0ac  sub      sp, sp, #0x650
+0x07deb0b0  mrs      x28, tpidr_el0
+0x07deb0b4  mov      x21, x1
+0x07deb0b8  movi     v0.2d, #0000000000000000
+0x07deb0bc  mov      x19, x0
+0x07deb0c0  ldr      x8, [x28, #0x28]
+0x07deb0c4  add      x0, sp, #0x40
+0x07deb0c8  mov      w1, wzr
+0x07deb0cc  mov      w2, #0x400
+0x07deb0d0  mov      w20, #1
+0x07deb0d4  stur     x8, [x29, #-0x10]
+0x07deb0d8  movk     w20, #0xe00, lsl #16
+0x07deb0dc  stp      xzr, xzr, [sp, #0x10]
+0x07deb0e0  str      q0, [sp, #0x630]
+0x07deb0e4  str      q0, [sp, #0x620]
+0x07deb0e8  str      q0, [sp, #0x610]
+0x07deb0ec  str      q0, [sp, #0x600]

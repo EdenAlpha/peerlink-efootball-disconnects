@@ -1,0 +1,116 @@
+0x076eac70  stp      x29, x30, [sp, #-0x40]!
+0x076eac74  str      x23, [sp, #0x10]
+0x076eac78  stp      x22, x21, [sp, #0x20]
+0x076eac7c  stp      x20, x19, [sp, #0x30]
+0x076eac80  mov      x29, sp
+0x076eac84  mov      x19, x0
+0x076eac88  add      x0, x0, #8
+0x076eac8c  adrp     x8, #0x98af000
+0x076eac90  add      x8, x8, #0x1f8
+0x076eac94  str      x8, [x19]
+0x076eac98  bl       #0x2fc833c
+0x076eac9c  add      x0, x19, #0xc8
+0x076eaca0  bl       #0x2fcdb4c
+0x076eaca4  add      x0, x19, #0xf0
+0x076eaca8  mov      w1, wzr
+0x076eacac  bl       #0x2fcb5e0
+0x076eacb0  mov      w0, #0x2000
+0x076eacb4  strb     wzr, [x19, #0x108]
+0x076eacb8  mov      w20, #0x2000
+0x076eacbc  bl       #0x8c1c050
+0x076eacc0  movi     v0.2d, #0000000000000000
+0x076eacc4  add      x8, x19, #0x138
+0x076eacc8  adrp     x21, #0x98da000
+0x076eaccc  add      x21, x21, #0xe20
+0x076eacd0  stp      x0, x20, [x19, #0x120]
+0x076eacd4  add      x22, x21, #0x48
+0x076eacd8  add      x23, x21, #0x78
+0x076eacdc  adrp     x1, #0xb7c000
+0x076eace0  add      x1, x1, #0xf76           ; STR 0xc7cf76 'CMD_GET_GAMERELAY_QUALITYCHECK_LIST'
+0x076eace4  mov      x0, x8
+0x076eace8  mov      w2, #0x23
+0x076eacec  stp      q0, q0, [x8]
+0x076eacf0  stp      q0, q0, [x8, #0x20]
+0x076eacf4  add      x20, x19, #0x170
+0x076eacf8  stp      q0, q0, [x8, #0x40]
+0x076eacfc  stp      q0, q0, [x8, #0x60]
+0x076ead00  stp      q0, q0, [x8, #0x80]
+0x076ead04  str      q0, [x8, #0xa0]
+0x076ead08  str      x21, [x19]
+0x076ead0c  stp      x22, xzr, [x19, #0x110]
+0x076ead10  str      x23, [x19, #0x130]
+0x076ead14  bl       #0x2f3877c
+0x076ead18  adrp     x1, #0xbb6000
+0x076ead1c  add      x1, x1, #0x3cd           ; STR 0xcb63cd 'CmdGetGamerelayQualitycheckList.php'
+0x076ead20  mov      x0, x20
+0x076ead24  mov      w2, #0x23
+0x076ead28  bl       #0x2f3877c
+0x076ead2c  str      x21, [x19]
+0x076ead30  str      x22, [x19, #0x110]
+0x076ead34  str      x23, [x19, #0x130]
+0x076ead38  ldp      x20, x19, [sp, #0x30]
+0x076ead3c  ldp      x22, x21, [sp, #0x20]
+0x076ead40  ldr      x23, [sp, #0x10]
+0x076ead44  ldp      x29, x30, [sp], #0x40
+0x076ead48  ret      
+0x076ead4c  stp      x29, x30, [sp, #-0x20]!
+0x076ead50  str      x19, [sp, #0x10]
+0x076ead54  mov      x29, sp
+0x076ead58  mov      x19, x0
+0x076ead5c  add      x0, x0, #0xf0
+0x076ead60  bl       #0x2fcc2ac
+0x076ead64  mov      x0, x19
+0x076ead68  bl       #0x75a1658
+0x076ead6c  mov      w0, #1
+0x076ead70  ldr      x19, [sp, #0x10]
+0x076ead74  ldp      x29, x30, [sp], #0x20
+0x076ead78  ret      
+0x076ead7c  mov      w0, #1
+0x076ead80  ret      
+0x076ead84  sub      sp, sp, #0x30
+0x076ead88  stp      x29, x30, [sp, #0x10]
+0x076ead8c  str      x19, [sp, #0x20]
+0x076ead90  add      x29, sp, #0x10
+0x076ead94  mrs      x19, tpidr_el0
+0x076ead98  add      x9, x0, #0x118
+0x076ead9c  ldr      x8, [x19, #0x28]
+0x076eada0  mov      x1, sp
+0x076eada4  mov      x2, xzr
+0x076eada8  str      x8, [sp, #8]
+0x076eadac  str      xzr, [x0, #0x118]
+0x076eadb0  str      x9, [sp]
+0x076eadb4  bl       #0x75a1ba8
+0x076eadb8  ldr      x8, [x19, #0x28]
+0x076eadbc  ldr      x9, [sp, #8]
+0x076eadc0  cmp      x8, x9
+0x076eadc4  b.ne     #0x76eaddc
+0x076eadc8  mov      w0, #1
+0x076eadcc  ldp      x29, x30, [sp, #0x10]
+0x076eadd0  ldr      x19, [sp, #0x20]
+0x076eadd4  add      sp, sp, #0x30
+0x076eadd8  ret      
+0x076eaddc  bl       #0x8c1bc90
+0x076eade0  sub      sp, sp, #0x30
+0x076eade4  stp      x29, x30, [sp, #0x10]
+0x076eade8  str      x19, [sp, #0x20]
+0x076eadec  add      x29, sp, #0x10
+0x076eadf0  mrs      x19, tpidr_el0
+0x076eadf4  mov      x1, sp
+0x076eadf8  ldr      x8, [x19, #0x28]
+0x076eadfc  mov      x2, xzr
+0x076eae00  str      x8, [sp, #8]
+0x076eae04  str      xzr, [x0, #8]!
+0x076eae08  sub      x8, x0, #0x118
+0x076eae0c  str      x0, [sp]
+0x076eae10  mov      x0, x8
+0x076eae14  bl       #0x75a1ba8
+0x076eae18  ldr      x8, [x19, #0x28]
+0x076eae1c  ldr      x9, [sp, #8]
+0x076eae20  cmp      x8, x9
+0x076eae24  b.ne     #0x76eae3c
+0x076eae28  mov      w0, #1
+0x076eae2c  ldp      x29, x30, [sp, #0x10]
+0x076eae30  ldr      x19, [sp, #0x20]
+0x076eae34  add      sp, sp, #0x30
+0x076eae38  ret      
+0x076eae3c  bl       #0x8c1bc90

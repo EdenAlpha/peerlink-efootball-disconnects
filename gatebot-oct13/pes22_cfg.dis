@@ -1,0 +1,192 @@
+0x07e46000  str      xzr, [x1]
+0x07e46004  bl       #0x8c1bc40
+0x07e46008  adrp     x1, #0xa5da000
+0x07e4600c  add      x1, x1, #0x9c8
+0x07e46010  mov      x0, x21
+0x07e46014  mov      x2, x20
+0x07e46018  stp      xzr, xzr, [x1, #8]
+0x07e4601c  str      xzr, [x1]
+0x07e46020  bl       #0x8c1bc40
+0x07e46024  adrp     x1, #0xa5da000
+0x07e46028  add      x1, x1, #0x9e0
+0x07e4602c  mov      x0, x21
+0x07e46030  mov      x2, x20
+0x07e46034  stp      xzr, xzr, [x1, #8]
+0x07e46038  str      xzr, [x1]
+0x07e4603c  bl       #0x8c1bc40
+0x07e46040  adrp     x1, #0xa5da000
+0x07e46044  add      x1, x1, #0x9f8
+0x07e46048  mov      x0, x21
+0x07e4604c  mov      x2, x20
+0x07e46050  stp      xzr, xzr, [x1, #8]
+0x07e46054  str      xzr, [x1]
+0x07e46058  bl       #0x8c1bc40
+0x07e4605c  mov      w9, #0x7468
+0x07e46060  mov      x1, x19
+0x07e46064  mov      w23, #0xa
+0x07e46068  mov      w8, #0x73
+0x07e4606c  movk     w9, #0x7074, lsl #16
+0x07e46070  mov      x0, x21
+0x07e46074  mov      x2, x20
+0x07e46078  stp      xzr, xzr, [x19, #0x48]
+0x07e4607c  str      xzr, [x1, #0x40]!
+0x07e46080  strb     w23, [x1]
+0x07e46084  strb     w8, [x19, #0x45]
+0x07e46088  stur     w9, [x19, #0x41]
+0x07e4608c  bl       #0x8c1bc40
+0x07e46090  mov      x22, x19
+0x07e46094  adrp     x1, #0xbde000
+0x07e46098  add      x1, x1, #0x75a           ; STR 0xcde75a 'pesam.stun.service.konami.net'
+0x07e4609c  mov      w2, #0x1d
+0x07e460a0  stp      xzr, xzr, [x19, #0x60]
+0x07e460a4  str      xzr, [x22, #0x58]!
+0x07e460a8  mov      x0, x22
+0x07e460ac  bl       #0x2f3877c
+0x07e460b0  mov      x0, x21
+0x07e460b4  mov      x1, x22
+0x07e460b8  mov      x2, x20
+0x07e460bc  bl       #0x8c1bc40
+0x07e460c0  mov      w9, #0x4420
+0x07e460c4  mov      x1, x19
+0x07e460c8  mov      w8, #0x31
+0x07e460cc  movk     w9, #0x5645, lsl #16
+0x07e460d0  mov      x0, x21
+0x07e460d4  mov      x2, x20
+0x07e460d8  stp      xzr, xzr, [x19, #0x78]
+0x07e460dc  str      xzr, [x1, #0x70]!
+0x07e460e0  strb     w23, [x1]
+0x07e460e4  strb     w8, [x19, #0x75]
+0x07e460e8  stur     w9, [x19, #0x71]
+0x07e460ec  bl       #0x8c1bc40
+0x07e460f0  mov      x22, x19
+0x07e460f4  adrp     x1, #0xa72000
+0x07e460f8  add      x1, x1, #0x112           ; STR 0xb72112 'pes22-game.cs.konami.net'
+0x07e460fc  mov      w2, #0x18
+0x07e46100  stp      xzr, xzr, [x19, #0x90]
+0x07e46104  str      xzr, [x22, #0x88]!
+0x07e46108  mov      x0, x22
+0x07e4610c  bl       #0x2f3877c
+0x07e46110  mov      x0, x21
+0x07e46114  mov      x1, x22
+0x07e46118  mov      x2, x20
+0x07e4611c  bl       #0x8c1bc40
+0x07e46120  mov      x1, x19
+0x07e46124  mov      w8, #0x2f02
+0x07e46128  mov      x0, x21
+0x07e4612c  mov      x2, x20
+0x07e46130  stp      xzr, xzr, [x19, #0xa8]
+0x07e46134  str      xzr, [x1, #0xa0]!
+0x07e46138  strh     w8, [x1]
+0x07e4613c  bl       #0x8c1bc40
+0x07e46140  mov      w9, #0x6570
+0x07e46144  mov      w8, #0x32
+0x07e46148  movk     w9, #0x3273, lsl #16
+0x07e4614c  mov      x0, x21
+0x07e46150  str      xzr, [x19, #0xb8]!
+0x07e46154  stp      xzr, xzr, [x19, #8]
+0x07e46158  mov      x1, x19
+0x07e4615c  mov      x2, x20
+0x07e46160  strb     w23, [x19]
+0x07e46164  strb     w8, [x19, #5]
+0x07e46168  stur     w9, [x19, #1]
+0x07e4616c  ldp      x20, x19, [sp, #0x30]
+0x07e46170  ldp      x22, x21, [sp, #0x20]
+0x07e46174  ldr      x23, [sp, #0x10]
+0x07e46178  ldp      x29, x30, [sp], #0x40
+0x07e4617c  b        #0x8c1bc40
+0x07e46180  sub      sp, sp, #0x1c0
+0x07e46184  stp      x29, x30, [sp, #0x170]
+0x07e46188  stp      x28, x25, [sp, #0x180]
+0x07e4618c  stp      x24, x23, [sp, #0x190]
+0x07e46190  stp      x22, x21, [sp, #0x1a0]
+0x07e46194  stp      x20, x19, [sp, #0x1b0]
+0x07e46198  add      x29, sp, #0x170
+0x07e4619c  mrs      x22, tpidr_el0
+0x07e461a0  mov      x20, x0
+0x07e461a4  ldr      x8, [x22, #0x28]
+0x07e461a8  stur     x8, [x29, #-8]
+0x07e461ac  stp      xzr, xzr, [sp, #0x88]
+0x07e461b0  str      xzr, [sp, #0x98]
+0x07e461b4  bl       #0x6912144
+0x07e461b8  cbz      x0, #0x7e461d4
+0x07e461bc  mov      x19, x0
+0x07e461c0  bl       #0x8c1bd30
+0x07e461c4  mov      x2, x0
+0x07e461c8  add      x0, sp, #0x88
+0x07e461cc  mov      x1, x19
+0x07e461d0  bl       #0x2f3877c
+0x07e461d4  adrp     x1, #0xba4000
+0x07e461d8  add      x1, x1, #0x2fe           ; STR 0xca42fe 'ChangeServer.bin'
+0x07e461dc  add      x0, sp, #0x88
+0x07e461e0  mov      w2, #0x10
+0x07e461e4  add      x19, sp, #0x88
+0x07e461e8  bl       #0x2f4f724
+0x07e461ec  ldrb     w8, [sp, #0x88]
+0x07e461f0  orr      x21, x19, #1
+0x07e461f4  ldr      x9, [sp, #0x98]
+0x07e461f8  tst      w8, #1
+0x07e461fc  csel     x0, x21, x9, eq
+0x07e46200  bl       #0x2f54250
+0x07e46204  and      w8, w0, #1
+0x07e46208  strb     w8, [sp, #0xa4]
+0x07e4620c  tbz      w0, #0, #0x7e46260
+0x07e46210  mov      w0, #0xfff
+0x07e46214  mov      w1, wzr
+0x07e46218  bl       #0x2f37644
+0x07e4621c  mov      w1, wzr
+0x07e46220  mov      w2, #0xfff
+0x07e46224  mov      x19, x0
+0x07e46228  bl       #0x8c1bd60
+0x07e4622c  ldrb     w8, [sp, #0x88]
+0x07e46230  add      x3, sp, #0x80
+0x07e46234  ldr      x9, [sp, #0x98]
+0x07e46238  mov      x1, x19
+0x07e4623c  mov      w2, #0xfff
+0x07e46240  str      xzr, [sp, #0x80]
+0x07e46244  tst      w8, #1
+0x07e46248  csel     x0, x21, x9, eq
+0x07e4624c  bl       #0x6913368
+0x07e46250  str      w0, [sp, #0xa0]
+0x07e46254  cbz      w0, #0x7e462a4
+0x07e46258  mov      w21, wzr
+0x07e4625c  b        #0x7e467dc
+0x07e46260  mov      w19, wzr
+0x07e46264  ldrb     w8, [sp, #0x88]
+0x07e46268  tbz      w8, #0, #0x7e46274
+0x07e4626c  ldr      x0, [sp, #0x98]
+0x07e46270  bl       #0x2f376d4
+0x07e46274  ldr      x8, [x22, #0x28]
+0x07e46278  ldur     x9, [x29, #-8]
+0x07e4627c  cmp      x8, x9
+0x07e46280  b.ne     #0x7e467fc
+0x07e46284  mov      w0, w19
+0x07e46288  ldp      x20, x19, [sp, #0x1b0]
+0x07e4628c  ldp      x22, x21, [sp, #0x1a0]
+0x07e46290  ldp      x24, x23, [sp, #0x190]
+0x07e46294  ldp      x28, x25, [sp, #0x180]
+0x07e46298  ldp      x29, x30, [sp, #0x170]
+0x07e4629c  add      sp, sp, #0x1c0
+0x07e462a0  ret      
+0x07e462a4  adrp     x0, #0xa5da000
+0x07e462a8  add      x0, x0, #0xb70
+0x07e462ac  add      x8, sp, #0x70
+0x07e462b0  mov      w1, wzr
+0x07e462b4  bl       #0x7ead0f4
+0x07e462b8  ldr      x0, [sp, #0x70]
+0x07e462bc  mov      x1, x19
+0x07e462c0  ldr      x2, [sp, #0x80]
+0x07e462c4  ldr      x8, [x0]
+0x07e462c8  ldr      x9, [x8, #0x10]
+0x07e462cc  add      x8, sp, #0x48
+0x07e462d0  blr      x9
+0x07e462d4  ldr      x8, [sp, #0x60]
+0x07e462d8  mov      w21, wzr
+0x07e462dc  cbnz     x8, #0x7e46768
+0x07e462e0  add      x0, sp, #0xa8
+0x07e462e4  bl       #0x2fc833c
+0x07e462e8  add      x0, sp, #0x30
+0x07e462ec  mov      w1, wzr
+0x07e462f0  bl       #0x2fcb5e0
+0x07e462f4  ldp      x23, x21, [sp, #0x48]
+0x07e462f8  subs     x8, x21, x23
+0x07e462fc  b.eq     #0x7e46318

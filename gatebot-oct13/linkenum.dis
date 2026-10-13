@@ -1,0 +1,60 @@
+0x07e26c50  stp      x29, x30, [sp, #-0x60]!
+0x07e26c54  stp      x28, x27, [sp, #0x10]
+0x07e26c58  stp      x26, x25, [sp, #0x20]
+0x07e26c5c  stp      x24, x23, [sp, #0x30]
+0x07e26c60  stp      x22, x21, [sp, #0x40]
+0x07e26c64  stp      x20, x19, [sp, #0x50]
+0x07e26c68  mov      x29, sp
+0x07e26c6c  sub      sp, sp, #2, lsl #12
+0x07e26c70  sub      sp, sp, #0xf80
+0x07e26c74  str      w3, [sp, #0xe0]
+0x07e26c78  add      x19, sp, #1, lsl #12
+0x07e26c7c  str      w2, [sp, #0xb8]
+0x07e26c80  add      x19, x19, #0x8a0
+0x07e26c84  str      x0, [sp, #0x78]
+0x07e26c88  mrs      x25, tpidr_el0
+0x07e26c8c  ldr      x8, [x25, #0x28]
+0x07e26c90  add      x11, x19, #1, lsl #12
+0x07e26c94  movi     v0.2d, #0000000000000000
+0x07e26c98  mov      w9, #0x1204
+0x07e26c9c  add      x9, x19, x9
+0x07e26ca0  mov      w26, w4
+0x07e26ca4  stur     x8, [x29, #-0x10]
+0x07e26ca8  add      x8, x19, #0x120
+0x07e26cac  strb     wzr, [x19]
+0x07e26cb0  mov      x28, x1
+0x07e26cb4  strb     wzr, [x19, #0x20]
+0x07e26cb8  stur     q0, [x8, #8]
+0x07e26cbc  add      x8, x19, #0x170
+0x07e26cc0  strb     wzr, [x19, #0x28]
+0x07e26cc4  str      xzr, [sp, #0x18a8]
+0x07e26cc8  stur     q0, [x8, #8]
+0x07e26ccc  add      x8, x19, #0x258
+0x07e26cd0  str      xzr, [sp, #0x18d0]
+0x07e26cd4  strb     wzr, [x19, #0x48]
+0x07e26cd8  stur     xzr, [x8, #0x13]
+0x07e26cdc  strb     wzr, [x19, #0x50]
+0x07e26ce0  stur     xzr, [x8, #0xc]
+0x07e26ce4  add      x8, x19, #0x2e8
+0x07e26ce8  str      q0, [x19, #0x10]
+0x07e26cec  str      wzr, [sp, #0x18f4]
+0x07e26cf0  stur     xzr, [x8, #0x13]
+0x07e26cf4  strb     wzr, [x19, #0x58]
+0x07e26cf8  stur     xzr, [x8, #0xc]
+0x07e26cfc  strb     wzr, [x19, #0x60]
+0x07e26d00  strb     wzr, [x19, #0x80]
+0x07e26d04  strb     wzr, [x19, #0x88]
+0x07e26d08  str      xzr, [sp, #0x1908]
+0x07e26d0c  str      xzr, [sp, #0x1940]
+0x07e26d10  strb     wzr, [x19, #0xa8]
+0x07e26d14  strb     wzr, [x19, #0xb0]
+0x07e26d18  str      wzr, [sp, #0x1954]
+0x07e26d1c  strb     wzr, [x19, #0xb8]
+0x07e26d20  strb     wzr, [x19, #0xc0]
+0x07e26d24  strb     wzr, [x19, #0xe0]
+0x07e26d28  strb     wzr, [x19, #0xe8]
+0x07e26d2c  str      xzr, [sp, #0x1978]
+0x07e26d30  str      xzr, [sp, #0x19a0]
+0x07e26d34  strb     wzr, [x19, #0x108]
+0x07e26d38  strb     wzr, [x19, #0x110]
+0x07e26d3c  str      wzr, [sp, #0x19b4]

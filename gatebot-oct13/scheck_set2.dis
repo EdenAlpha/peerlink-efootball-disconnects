@@ -1,0 +1,69 @@
+0x077a4b0c  stp      x29, x30, [sp, #-0x50]!
+0x077a4b10  str      x25, [sp, #0x10]
+0x077a4b14  stp      x24, x23, [sp, #0x20]
+0x077a4b18  stp      x22, x21, [sp, #0x30]
+0x077a4b1c  stp      x20, x19, [sp, #0x40]
+0x077a4b20  mov      x29, sp
+0x077a4b24  mov      x19, x0
+0x077a4b28  add      x0, x0, #8
+0x077a4b2c  adrp     x8, #0x98af000
+0x077a4b30  add      x8, x8, #0x1f8
+0x077a4b34  str      x8, [x19]
+0x077a4b38  bl       #0x2fc833c
+0x077a4b3c  add      x0, x19, #0xc8
+0x077a4b40  bl       #0x2fcdb4c
+0x077a4b44  add      x0, x19, #0xf0
+0x077a4b48  mov      w1, wzr
+0x077a4b4c  bl       #0x2fcb5e0
+0x077a4b50  mov      w0, #0x2000
+0x077a4b54  strb     wzr, [x19, #0x108]
+0x077a4b58  mov      w20, #0x2000
+0x077a4b5c  bl       #0x8c1c050
+0x077a4b60  movi     v0.2d, #0000000000000000
+0x077a4b64  stp      x0, x20, [x19, #0x120]
+0x077a4b68  add      x20, x19, #0x138
+0x077a4b6c  add      x0, x19, #0x708
+0x077a4b70  mov      w1, wzr
+0x077a4b74  mov      w2, #0x258
+0x077a4b78  str      xzr, [x19, #0x118]
+0x077a4b7c  add      x21, x19, #0x1f0
+0x077a4b80  stp      q0, q0, [x20]
+0x077a4b84  stp      q0, q0, [x20, #0x20]
+0x077a4b88  stp      q0, q0, [x20, #0x40]
+0x077a4b8c  stp      q0, q0, [x20, #0x60]
+0x077a4b90  stp      q0, q0, [x20, #0x80]
+0x077a4b94  str      q0, [x20, #0xa0]
+0x077a4b98  bl       #0x8c1bd60
+0x077a4b9c  mov      x0, x21
+0x077a4ba0  mov      w1, wzr
+0x077a4ba4  mov      w2, #0x514
+0x077a4ba8  bl       #0x8c1bd60
+0x077a4bac  adrp     x22, #0x98e4000
+0x077a4bb0  add      x22, x22, #0x5b0
+0x077a4bb4  add      x23, x22, #0x48
+0x077a4bb8  add      x24, x22, #0x78
+0x077a4bbc  add      x25, x22, #0x98
+0x077a4bc0  adrp     x1, #0xc17000
+0x077a4bc4  add      x1, x1, #0x14b           ; STR 0xd1714b 'CMD_SET_GAME_SESSION_CHECK_RES'
+0x077a4bc8  mov      x0, x20
+0x077a4bcc  mov      w2, #0x1e
+0x077a4bd0  str      x22, [x19]
+0x077a4bd4  add      x21, x19, #0x170
+0x077a4bd8  str      x23, [x19, #0x110]
+0x077a4bdc  str      x24, [x19, #0x130]
+0x077a4be0  str      x25, [x19, #0x1e8]
+0x077a4be4  bl       #0x2f3877c
+0x077a4be8  adrp     x1, #0xaf6000
+0x077a4bec  add      x1, x1, #0xdc5           ; STR 0xbf6dc5 'CmdSetGameSessionCheckRes.php'
+0x077a4bf0  mov      x0, x21
+0x077a4bf4  mov      w2, #0x1d
+0x077a4bf8  bl       #0x2f3877c
+0x077a4bfc  str      x22, [x19]
+0x077a4c00  str      x23, [x19, #0x110]
+0x077a4c04  str      x24, [x19, #0x130]
+0x077a4c08  str      x25, [x19, #0x1e8]
+0x077a4c0c  ldp      x20, x19, [sp, #0x40]
+0x077a4c10  ldp      x22, x21, [sp, #0x30]
+0x077a4c14  ldp      x24, x23, [sp, #0x20]
+0x077a4c18  ldr      x25, [sp, #0x10]
+0x077a4c1c  ldp      x29, x30, [sp], #0x50

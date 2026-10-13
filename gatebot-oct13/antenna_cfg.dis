@@ -1,0 +1,115 @@
+0x07ce4c34  stp      x29, x30, [sp, #-0x60]!
+0x07ce4c38  stp      x28, x27, [sp, #0x10]
+0x07ce4c3c  stp      x26, x25, [sp, #0x20]
+0x07ce4c40  stp      x24, x23, [sp, #0x30]
+0x07ce4c44  stp      x22, x21, [sp, #0x40]
+0x07ce4c48  stp      x20, x19, [sp, #0x50]
+0x07ce4c4c  mov      x29, sp
+0x07ce4c50  sub      sp, sp, #0x4c0
+0x07ce4c54  mrs      x21, tpidr_el0
+0x07ce4c58  mov      x24, x0
+0x07ce4c5c  mov      x20, x1
+0x07ce4c60  ldr      x8, [x21, #0x28]
+0x07ce4c64  add      x0, sp, #0x38
+0x07ce4c68  mov      x1, x24
+0x07ce4c6c  stur     x8, [x29, #-0x10]
+0x07ce4c70  bl       #0x7cda848
+0x07ce4c74  sub      x8, x29, #0x38
+0x07ce4c78  adrp     x23, #0x98af000
+0x07ce4c7c  add      x23, x23, #0x5b8
+0x07ce4c80  add      x19, x8, #8
+0x07ce4c84  mov      x0, x19
+0x07ce4c88  mov      w1, wzr
+0x07ce4c8c  stur     x23, [x29, #-0x38]
+0x07ce4c90  bl       #0x2fcb5e0
+0x07ce4c94  mov      x0, x19
+0x07ce4c98  sturb    wzr, [x29, #-0x18]
+0x07ce4c9c  bl       #0x2fcc2ac
+0x07ce4ca0  mov      x0, x19
+0x07ce4ca4  sturb    wzr, [x29, #-0x18]
+0x07ce4ca8  bl       #0x2fcc2ac
+0x07ce4cac  mov      x0, x19
+0x07ce4cb0  mov      x1, x20
+0x07ce4cb4  bl       #0x2fc9bac
+0x07ce4cb8  mov      w20, #1
+0x07ce4cbc  add      x0, sp, #0x20
+0x07ce4cc0  mov      w1, wzr
+0x07ce4cc4  sturb    w20, [x29, #-0x18]
+0x07ce4cc8  bl       #0x2fcb5e0
+0x07ce4ccc  adrp     x2, #0x9ed000
+0x07ce4cd0  add      x2, x2, #0x3d0           ; STR 0xaed3d0 'Network'
+0x07ce4cd4  sub      x0, x29, #0x38
+0x07ce4cd8  add      x1, sp, #0x20
+0x07ce4cdc  bl       #0x7e09d44
+0x07ce4ce0  mov      w22, wzr
+0x07ce4ce4  tbz      w0, #0, #0x7ce6290
+0x07ce4ce8  sub      x8, x29, #0x60
+0x07ce4cec  mov      w1, wzr
+0x07ce4cf0  add      x22, x8, #8
+0x07ce4cf4  stur     x23, [x29, #-0x60]
+0x07ce4cf8  mov      x0, x22
+0x07ce4cfc  bl       #0x2fcb5e0
+0x07ce4d00  mov      x0, x22
+0x07ce4d04  sturb    wzr, [x29, #-0x40]
+0x07ce4d08  bl       #0x2fcc2ac
+0x07ce4d0c  mov      x0, x22
+0x07ce4d10  sturb    wzr, [x29, #-0x40]
+0x07ce4d14  bl       #0x2fcc2ac
+0x07ce4d18  add      x1, sp, #0x20
+0x07ce4d1c  mov      x0, x22
+0x07ce4d20  str      x22, [sp, #0x10]
+0x07ce4d24  bl       #0x2fc9bac
+0x07ce4d28  adrp     x2, #0x9ed000
+0x07ce4d2c  add      x2, x2, #0x3d8           ; STR 0xaed3d8 'DscpEnable'
+0x07ce4d30  sub      x0, x29, #0x60
+0x07ce4d34  sub      x1, x29, #0x78
+0x07ce4d38  sturb    w20, [x29, #-0x40]
+0x07ce4d3c  sturb    wzr, [x29, #-0x78]
+0x07ce4d40  bl       #0x7e09ccc
+0x07ce4d44  mov      w22, w0
+0x07ce4d48  tbz      w0, #0, #0x7ce4d5c
+0x07ce4d4c  mov      w8, #1
+0x07ce4d50  ldurb    w9, [x29, #-0x78]
+0x07ce4d54  strb     w8, [sp, #0x38]
+0x07ce4d58  strb     w9, [sp, #0x39]
+0x07ce4d5c  adrp     x2, #0xb7d000
+0x07ce4d60  add      x2, x2, #0x73f           ; STR 0xc7d73f 'Dscp'
+0x07ce4d64  sub      x0, x29, #0x60
+0x07ce4d68  sub      x1, x29, #0x78
+0x07ce4d6c  str      x24, [sp, #8]
+0x07ce4d70  stur     wzr, [x29, #-0x78]
+0x07ce4d74  bl       #0x7e099fc
+0x07ce4d78  mov      w23, w0
+0x07ce4d7c  tbz      w0, #0, #0x7ce4d9c
+0x07ce4d80  ldur     w8, [x29, #-0x78]
+0x07ce4d84  mov      w9, #0xff
+0x07ce4d88  mov      w10, #1
+0x07ce4d8c  cmp      w8, #0xff
+0x07ce4d90  csel     w8, w8, w9, lo
+0x07ce4d94  strb     w10, [sp, #0x3a]
+0x07ce4d98  strb     w8, [sp, #0x3b]
+0x07ce4d9c  adrp     x2, #0xb7d000
+0x07ce4da0  add      x2, x2, #0x744           ; STR 0xc7d744 'ScrambleEnable'
+0x07ce4da4  sub      x0, x29, #0x60
+0x07ce4da8  sub      x1, x29, #0x78
+0x07ce4dac  sturb    wzr, [x29, #-0x78]
+0x07ce4db0  bl       #0x7e09ccc
+0x07ce4db4  mov      w24, w0
+0x07ce4db8  tbz      w0, #0, #0x7ce4dcc
+0x07ce4dbc  mov      w8, #1
+0x07ce4dc0  ldurb    w9, [x29, #-0x78]
+0x07ce4dc4  strb     w8, [sp, #0x3c]
+0x07ce4dc8  strb     w9, [sp, #0x3d]
+0x07ce4dcc  adrp     x2, #0xc17000
+0x07ce4dd0  add      x2, x2, #0x613           ; STR 0xd17613 'ScrambleCode'
+0x07ce4dd4  sub      x0, x29, #0x60
+0x07ce4dd8  sub      x1, x29, #0x78
+0x07ce4ddc  stur     wzr, [x29, #-0x78]
+0x07ce4de0  bl       #0x7e099fc
+0x07ce4de4  mov      w25, w0
+0x07ce4de8  tbz      w0, #0, #0x7ce4e08
+0x07ce4dec  ldur     w8, [x29, #-0x78]
+0x07ce4df0  mov      w9, #0xff
+0x07ce4df4  mov      w10, #1
+0x07ce4df8  cmp      w8, #0xff
+0x07ce4dfc  csel     w8, w8, w9, lo

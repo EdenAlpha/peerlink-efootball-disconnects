@@ -1,0 +1,256 @@
+0x0776da14  stp      x29, x30, [sp, #-0x20]!
+0x0776da18  stp      x20, x19, [sp, #0x10]
+0x0776da1c  mov      x29, sp
+0x0776da20  mov      x19, x0
+0x0776da24  add      x0, x0, #8
+0x0776da28  adrp     x8, #0x98af000
+0x0776da2c  add      x8, x8, #0x1f8
+0x0776da30  str      x8, [x19]
+0x0776da34  bl       #0x2fc833c
+0x0776da38  add      x0, x19, #0xc8
+0x0776da3c  bl       #0x2fcdb4c
+0x0776da40  add      x0, x19, #0xf0
+0x0776da44  mov      w1, wzr
+0x0776da48  bl       #0x2fcb5e0
+0x0776da4c  mov      w0, #0x2000
+0x0776da50  strb     wzr, [x19, #0x108]
+0x0776da54  mov      w20, #0x2000
+0x0776da58  bl       #0x8c1c050
+0x0776da5c  movi     v0.2d, #0000000000000000
+0x0776da60  add      x8, x19, #0x148
+0x0776da64  stp      x0, x20, [x19, #0x120]
+0x0776da68  mov      w1, wzr
+0x0776da6c  mov      w2, #0x258
+0x0776da70  add      x20, x19, #0x1f0
+0x0776da74  str      xzr, [x19, #0x118]
+0x0776da78  stp      q0, q0, [x8]
+0x0776da7c  stp      q0, q0, [x8, #0x20]
+0x0776da80  stp      q0, q0, [x8, #0x40]
+0x0776da84  stp      q0, q0, [x8, #0x60]
+0x0776da88  stp      q0, q0, [x8, #0x80]
+0x0776da8c  add      x8, x19, #0x708
+0x0776da90  mov      x0, x8
+0x0776da94  bl       #0x8c1bd60
+0x0776da98  mov      x0, x20
+0x0776da9c  mov      w1, wzr
+0x0776daa0  mov      w2, #0x514
+0x0776daa4  bl       #0x8c1bd60
+0x0776daa8  adrp     x8, #0x99ee000
+0x0776daac  mov      w9, #0x24
+0x0776dab0  adrp     x12, #0xa13000
+0x0776dab4  add      x12, x12, #0x4cb           ; STR 0xb134cb 'CMD_JOIN_GAME_MODE'
+0x0776dab8  add      x10, x19, #0x139
+0x0776dabc  mov      w11, #0x4544
+0x0776dac0  ldr      x8, [x8, #0xaa8]
+0x0776dac4  strb     w9, [x19, #0x138]
+0x0776dac8  ldr      q0, [x12]
+0x0776dacc  ldrb     w9, [x19, #0x170]
+0x0776dad0  strh     w11, [x10, #0x10]
+0x0776dad4  add      x8, x8, #0x10
+0x0776dad8  str      q0, [x10]
+0x0776dadc  str      x8, [x19]
+0x0776dae0  tbnz     w9, #0, #0x776daf4
+0x0776dae4  mov      w9, #0x26
+0x0776dae8  add      x8, x19, #0x171
+0x0776daec  strb     w9, [x19, #0x170]
+0x0776daf0  b        #0x776db00
+0x0776daf4  mov      w9, #0x13
+0x0776daf8  ldr      x8, [x19, #0x180]
+0x0776dafc  str      x9, [x19, #0x178]
+0x0776db00  mov      w9, #0x702e
+0x0776db04  adrp     x10, #0xba3000
+0x0776db08  add      x10, x10, #0x83d           ; STR 0xca383d 'CmdJoinGameMode.php'
+0x0776db0c  movk     w9, #0x7068, lsl #16
+0x0776db10  strb     wzr, [x8, #0x13]
+0x0776db14  mov      w11, #0x656d
+0x0776db18  movk     w11, #0x746e, lsl #16
+0x0776db1c  ldr      q0, [x10]
+0x0776db20  adrp     x10, #0x98e1000
+0x0776db24  add      x10, x10, #0x8a8
+0x0776db28  stur     w9, [x8, #0xf]
+0x0776db2c  add      x9, x10, #0x48
+0x0776db30  str      q0, [x8]
+0x0776db34  add      x8, x10, #0x78
+0x0776db38  str      x10, [x19]
+0x0776db3c  add      x10, x10, #0x98
+0x0776db40  str      x9, [x19, #0x110]
+0x0776db44  adrp     x9, #0xb57000
+0x0776db48  add      x9, x9, #0x25f           ; STR 0xc5725f 'NotImplement'
+0x0776db4c  str      x8, [x19, #0x130]
+0x0776db50  str      x10, [x19, #0x1e8]
+0x0776db54  add      x10, x19, #0x961
+0x0776db58  str      xzr, [x19, #0x968]
+0x0776db5c  mov      w8, #0x18
+0x0776db60  ldr      x9, [x9]
+0x0776db64  str      xzr, [x19, #0x970]
+0x0776db68  str      w11, [x10, #8]
+0x0776db6c  strb     w8, [x19, #0x960]
+0x0776db70  str      x9, [x10]
+0x0776db74  add      x10, x19, #0x979
+0x0776db78  str      xzr, [x19, #0x980]
+0x0776db7c  str      xzr, [x19, #0x988]
+0x0776db80  strb     w8, [x19, #0x978]
+0x0776db84  str      w11, [x10, #8]
+0x0776db88  str      x9, [x10]
+0x0776db8c  ldp      x20, x19, [sp, #0x10]
+0x0776db90  ldp      x29, x30, [sp], #0x20
+0x0776db94  ret      
+0x0776db98  stp      x29, x30, [sp, #-0x30]!
+0x0776db9c  stp      x22, x21, [sp, #0x10]
+0x0776dba0  stp      x20, x19, [sp, #0x20]
+0x0776dba4  mov      x29, sp
+0x0776dba8  mov      x19, x0
+0x0776dbac  bl       #0x75a2ca4
+0x0776dbb0  add      x20, x19, #0xf0
+0x0776dbb4  adrp     x1, #0xa66000
+0x0776dbb8  add      x1, x1, #0xa78           ; STR 0xb66a78 'result'
+0x0776dbbc  mov      x0, x20
+0x0776dbc0  bl       #0x2fcc828
+0x0776dbc4  bl       #0x2fcbaec
+0x0776dbc8  cbz      w0, #0x776dc34
+0x0776dbcc  adrp     x1, #0xa66000
+0x0776dbd0  add      x1, x1, #0xa78           ; STR 0xb66a78 'result'
+0x0776dbd4  mov      x0, x20
+0x0776dbd8  bl       #0x2fcc828
+0x0776dbdc  bl       #0x2fcbce4
+0x0776dbe0  ldrb     w8, [x19, #0x1f0]
+0x0776dbe4  mov      x21, x0
+0x0776dbe8  tbnz     w8, #0, #0x776dbf8
+0x0776dbec  strh     wzr, [x19, #0x1f0]
+0x0776dbf0  cbnz     x21, #0x776dc08
+0x0776dbf4  b        #0x776dc34
+0x0776dbf8  ldr      x8, [x19, #0x200]
+0x0776dbfc  strb     wzr, [x8]
+0x0776dc00  str      xzr, [x19, #0x1f8]
+0x0776dc04  cbz      x21, #0x776dc34
+0x0776dc08  add      x22, x19, #0x1f0
+0x0776dc0c  b        #0x776dc24
+0x0776dc10  ldrb     w1, [x21, #1]!
+0x0776dc14  cbz      w1, #0x776dc34
+0x0776dc18  mov      x0, x22
+0x0776dc1c  bl       #0x2f4a6b0
+0x0776dc20  add      x21, x21, #1
+0x0776dc24  ldrb     w1, [x21]
+0x0776dc28  cmp      w1, #0x5c
+0x0776dc2c  b.eq     #0x776dc10
+0x0776dc30  cbnz     w1, #0x776dc18
+0x0776dc34  adrp     x1, #0xb30000
+0x0776dc38  add      x1, x1, #0xe3f           ; STR 0xc30e3f 'ping_level'
+0x0776dc3c  mov      x0, x20
+0x0776dc40  bl       #0x2fcc828
+0x0776dc44  bl       #0x2fcbaec
+0x0776dc48  cbz      w0, #0x776dcb4
+0x0776dc4c  adrp     x1, #0xb30000
+0x0776dc50  add      x1, x1, #0xe3f           ; STR 0xc30e3f 'ping_level'
+0x0776dc54  mov      x0, x20
+0x0776dc58  bl       #0x2fcc828
+0x0776dc5c  bl       #0x2fcbce4
+0x0776dc60  ldrb     w8, [x19, #0x960]
+0x0776dc64  mov      x21, x0
+0x0776dc68  tbnz     w8, #0, #0x776dc78
+0x0776dc6c  strh     wzr, [x19, #0x960]
+0x0776dc70  cbnz     x21, #0x776dc88
+0x0776dc74  b        #0x776dcb4
+0x0776dc78  ldr      x8, [x19, #0x970]
+0x0776dc7c  strb     wzr, [x8]
+0x0776dc80  str      xzr, [x19, #0x968]
+0x0776dc84  cbz      x21, #0x776dcb4
+0x0776dc88  add      x22, x19, #0x960
+0x0776dc8c  b        #0x776dca4
+0x0776dc90  ldrb     w1, [x21, #1]!
+0x0776dc94  cbz      w1, #0x776dcb4
+0x0776dc98  mov      x0, x22
+0x0776dc9c  bl       #0x2f4a6b0
+0x0776dca0  add      x21, x21, #1
+0x0776dca4  ldrb     w1, [x21]
+0x0776dca8  cmp      w1, #0x5c
+0x0776dcac  b.eq     #0x776dc90
+0x0776dcb0  cbnz     w1, #0x776dc98
+0x0776dcb4  adrp     x1, #0xb0a000
+0x0776dcb8  add      x1, x1, #0x8b2           ; STR 0xc0a8b2 'team_power_limit'
+0x0776dcbc  mov      x0, x20
+0x0776dcc0  bl       #0x2fcc828
+0x0776dcc4  bl       #0x2fcbaec
+0x0776dcc8  cbz      w0, #0x776dd34
+0x0776dccc  adrp     x1, #0xb0a000
+0x0776dcd0  add      x1, x1, #0x8b2           ; STR 0xc0a8b2 'team_power_limit'
+0x0776dcd4  mov      x0, x20
+0x0776dcd8  bl       #0x2fcc828
+0x0776dcdc  bl       #0x2fcbce4
+0x0776dce0  ldrb     w8, [x19, #0x978]
+0x0776dce4  mov      x20, x0
+0x0776dce8  tbnz     w8, #0, #0x776dcf8
+0x0776dcec  strh     wzr, [x19, #0x978]
+0x0776dcf0  cbnz     x20, #0x776dd08
+0x0776dcf4  b        #0x776dd34
+0x0776dcf8  ldr      x8, [x19, #0x988]
+0x0776dcfc  strb     wzr, [x8]
+0x0776dd00  str      xzr, [x19, #0x980]
+0x0776dd04  cbz      x20, #0x776dd34
+0x0776dd08  add      x19, x19, #0x978
+0x0776dd0c  b        #0x776dd24
+0x0776dd10  ldrb     w1, [x20, #1]!
+0x0776dd14  cbz      w1, #0x776dd34
+0x0776dd18  mov      x0, x19
+0x0776dd1c  bl       #0x2f4a6b0
+0x0776dd20  add      x20, x20, #1
+0x0776dd24  ldrb     w1, [x20]
+0x0776dd28  cmp      w1, #0x5c
+0x0776dd2c  b.eq     #0x776dd10
+0x0776dd30  cbnz     w1, #0x776dd18
+0x0776dd34  mov      w0, #1
+0x0776dd38  ldp      x20, x19, [sp, #0x20]
+0x0776dd3c  ldp      x22, x21, [sp, #0x10]
+0x0776dd40  ldp      x29, x30, [sp], #0x30
+0x0776dd44  ret      
+0x0776dd48  sub      sp, sp, #0xc0
+0x0776dd4c  stp      x29, x30, [sp, #0x60]
+0x0776dd50  stp      x28, x27, [sp, #0x70]
+0x0776dd54  stp      x26, x25, [sp, #0x80]
+0x0776dd58  stp      x24, x23, [sp, #0x90]
+0x0776dd5c  stp      x22, x21, [sp, #0xa0]
+0x0776dd60  stp      x20, x19, [sp, #0xb0]
+0x0776dd64  add      x29, sp, #0x60
+0x0776dd68  mrs      x23, tpidr_el0
+0x0776dd6c  mov      x19, x0
+0x0776dd70  ldr      x8, [x23, #0x28]
+0x0776dd74  stur     x8, [x29, #-8]
+0x0776dd78  ldp      x22, x21, [x0, #0x118]
+0x0776dd7c  mov      w0, #0x38
+0x0776dd80  stur     wzr, [x29, #-0x20]
+0x0776dd84  bl       #0x8c1bc60
+0x0776dd88  mov      w1, #0x2000
+0x0776dd8c  mov      x20, x0
+0x0776dd90  bl       #0x7047df4
+0x0776dd94  sub      x4, x29, #0x20
+0x0776dd98  mov      x0, x21
+0x0776dd9c  mov      x1, x22
+0x0776dda0  mov      x2, xzr
+0x0776dda4  mov      x3, x20
+0x0776dda8  bl       #0x7047c24
+0x0776ddac  sub      w8, w0, #1
+0x0776ddb0  cmp      w8, #1
+0x0776ddb4  b.hi     #0x776e108
+0x0776ddb8  ldur     w8, [x29, #-0x20]
+0x0776ddbc  stp      x20, x23, [sp]
+0x0776ddc0  cmp      w8, #7
+0x0776ddc4  cset     w8, eq
+0x0776ddc8  str      w8, [sp, #0x14]
+0x0776ddcc  b.ne     #0x776e120
+0x0776ddd0  ldur     w8, [x29, #-0x18]
+0x0776ddd4  cbz      w8, #0x776e120
+0x0776ddd8  ldur     x22, [x29, #-0x10]
+0x0776dddc  mov      w9, #0x30
+0x0776dde0  sub      x10, x29, #0x20
+0x0776dde4  add      x11, sp, #0x28
+0x0776dde8  add      x21, x19, #0x978
+0x0776ddec  orr      x24, x10, #1
+0x0776ddf0  umaddl   x25, w8, w9, x22
+0x0776ddf4  orr      x10, x11, #1
+0x0776ddf8  add      x23, x19, #0x960
+0x0776ddfc  add      x20, x19, #0x1f0
+0x0776de00  stp      x25, x10, [sp, #0x18]
+0x0776de04  b        #0x776de14
+0x0776de08  add      x22, x22, #0x30
+0x0776de0c  cmp      x22, x25
+0x0776de10  b.hs     #0x776e120

@@ -1,0 +1,169 @@
+0x07befddc  stp      x29, x30, [sp, #-0x20]!
+0x07befde0  stp      x20, x19, [sp, #0x10]
+0x07befde4  mov      x29, sp
+0x07befde8  mov      x19, x0
+0x07befdec  add      x0, x0, #8
+0x07befdf0  adrp     x8, #0x98af000
+0x07befdf4  add      x8, x8, #0x1f8
+0x07befdf8  str      x8, [x19]
+0x07befdfc  bl       #0x2fc833c
+0x07befe00  add      x0, x19, #0xc8
+0x07befe04  bl       #0x2fcdb4c
+0x07befe08  add      x0, x19, #0xf0
+0x07befe0c  mov      w1, wzr
+0x07befe10  bl       #0x2fcb5e0
+0x07befe14  mov      w0, #0x2000
+0x07befe18  strb     wzr, [x19, #0x108]
+0x07befe1c  mov      w20, #0x2000
+0x07befe20  bl       #0x8c1c050
+0x07befe24  movi     v0.2d, #0000000000000000
+0x07befe28  add      x8, x19, #0x148
+0x07befe2c  stp      x0, x20, [x19, #0x120]
+0x07befe30  mov      w1, wzr
+0x07befe34  mov      w2, #0x258
+0x07befe38  add      x20, x19, #0x1f0
+0x07befe3c  str      xzr, [x19, #0x118]
+0x07befe40  stp      q0, q0, [x8]
+0x07befe44  stp      q0, q0, [x8, #0x20]
+0x07befe48  stp      q0, q0, [x8, #0x40]
+0x07befe4c  stp      q0, q0, [x8, #0x60]
+0x07befe50  stp      q0, q0, [x8, #0x80]
+0x07befe54  add      x8, x19, #0x708
+0x07befe58  mov      x0, x8
+0x07befe5c  bl       #0x8c1bd60
+0x07befe60  mov      x0, x20
+0x07befe64  mov      w1, wzr
+0x07befe68  mov      w2, #0x514
+0x07befe6c  bl       #0x8c1bd60
+0x07befe70  adrp     x8, #0x99ee000
+0x07befe74  mov      w9, #0x24
+0x07befe78  adrp     x12, #0xa85000
+0x07befe7c  add      x12, x12, #0xb6           ; STR 0xb850b6 'CMD_HEARTBEAT_GRPC'
+0x07befe80  add      x10, x19, #0x139
+0x07befe84  mov      w11, #0x4350
+0x07befe88  ldr      x8, [x8, #0xaa8]
+0x07befe8c  strb     w9, [x19, #0x138]
+0x07befe90  ldr      q0, [x12]
+0x07befe94  ldrb     w9, [x19, #0x170]
+0x07befe98  strh     w11, [x10, #0x10]
+0x07befe9c  add      x8, x8, #0x10
+0x07befea0  str      q0, [x10]
+0x07befea4  str      x8, [x19]
+0x07befea8  tbnz     w9, #0, #0x7befebc
+0x07befeac  mov      w9, #0x28
+0x07befeb0  add      x8, x19, #0x171
+0x07befeb4  strb     w9, [x19, #0x170]
+0x07befeb8  b        #0x7befec8
+0x07befebc  mov      w9, #0x14
+0x07befec0  ldr      x8, [x19, #0x180]
+0x07befec4  str      x9, [x19, #0x178]
+0x07befec8  adrp     x10, #0xa85000
+0x07befecc  add      x10, x10, #0x16d           ; STR 0xb8516d 'CmdHeartbeatGrpc.php'
+0x07befed0  mov      w9, #0x702e
+0x07befed4  strb     wzr, [x8, #0x14]
+0x07befed8  movk     w9, #0x7068, lsl #16
+0x07befedc  ldr      q0, [x10]
+0x07befee0  adrp     x10, #0x9928000
+0x07befee4  add      x10, x10, #0xa18
+0x07befee8  str      w9, [x8, #0x10]
+0x07befeec  add      x9, x10, #0x48
+0x07befef0  str      q0, [x8]
+0x07befef4  add      x8, x10, #0x78
+0x07befef8  str      x10, [x19]
+0x07befefc  add      x10, x10, #0x98
+0x07beff00  str      x9, [x19, #0x110]
+0x07beff04  str      x8, [x19, #0x130]
+0x07beff08  str      x10, [x19, #0x1e8]
+0x07beff0c  ldp      x20, x19, [sp, #0x10]
+0x07beff10  ldp      x29, x30, [sp], #0x20
+0x07beff14  ret      
+0x07beff18  stp      x29, x30, [sp, #-0x20]!
+0x07beff1c  stp      x20, x19, [sp, #0x10]
+0x07beff20  mov      x29, sp
+0x07beff24  mov      x20, x0
+0x07beff28  bl       #0x75a2ca4
+0x07beff2c  add      x19, x20, #0xf0
+0x07beff30  adrp     x1, #0xa66000
+0x07beff34  add      x1, x1, #0xa78           ; STR 0xb66a78 'result'
+0x07beff38  mov      x0, x19
+0x07beff3c  bl       #0x2fcc828
+0x07beff40  bl       #0x2fcbaec
+0x07beff44  cbz      w0, #0x7beffb0
+0x07beff48  adrp     x1, #0xa66000
+0x07beff4c  add      x1, x1, #0xa78           ; STR 0xb66a78 'result'
+0x07beff50  mov      x0, x19
+0x07beff54  bl       #0x2fcc828
+0x07beff58  bl       #0x2fcbce4
+0x07beff5c  ldrb     w8, [x20, #0x1f0]
+0x07beff60  mov      x19, x0
+0x07beff64  tbnz     w8, #0, #0x7beff74
+0x07beff68  strh     wzr, [x20, #0x1f0]
+0x07beff6c  cbnz     x19, #0x7beff84
+0x07beff70  b        #0x7beffb0
+0x07beff74  ldr      x8, [x20, #0x200]
+0x07beff78  strb     wzr, [x8]
+0x07beff7c  str      xzr, [x20, #0x1f8]
+0x07beff80  cbz      x19, #0x7beffb0
+0x07beff84  add      x20, x20, #0x1f0
+0x07beff88  b        #0x7beffa0
+0x07beff8c  ldrb     w1, [x19, #1]!
+0x07beff90  cbz      w1, #0x7beffb0
+0x07beff94  mov      x0, x20
+0x07beff98  bl       #0x2f4a6b0
+0x07beff9c  add      x19, x19, #1
+0x07beffa0  ldrb     w1, [x19]
+0x07beffa4  cmp      w1, #0x5c
+0x07beffa8  b.eq     #0x7beff8c
+0x07beffac  cbnz     w1, #0x7beff94
+0x07beffb0  mov      w0, #1
+0x07beffb4  ldp      x20, x19, [sp, #0x10]
+0x07beffb8  ldp      x29, x30, [sp], #0x20
+0x07beffbc  ret      
+0x07beffc0  sub      sp, sp, #0xb0
+0x07beffc4  stp      x29, x30, [sp, #0x50]
+0x07beffc8  stp      x28, x27, [sp, #0x60]
+0x07beffcc  stp      x26, x25, [sp, #0x70]
+0x07beffd0  stp      x24, x23, [sp, #0x80]
+0x07beffd4  stp      x22, x21, [sp, #0x90]
+0x07beffd8  stp      x20, x19, [sp, #0xa0]
+0x07beffdc  add      x29, sp, #0x50
+0x07beffe0  mrs      x23, tpidr_el0
+0x07beffe4  mov      x19, x0
+0x07beffe8  ldr      x8, [x23, #0x28]
+0x07beffec  stur     x8, [x29, #-8]
+0x07befff0  ldp      x22, x21, [x0, #0x118]
+0x07befff4  mov      w0, #0x38
+0x07befff8  stur     wzr, [x29, #-0x20]
+0x07befffc  bl       #0x8c1bc60
+0x07bf0000  mov      w1, #0x2000
+0x07bf0004  mov      x20, x0
+0x07bf0008  bl       #0x7047df4
+0x07bf000c  sub      x4, x29, #0x20
+0x07bf0010  mov      x0, x21
+0x07bf0014  mov      x1, x22
+0x07bf0018  mov      x2, xzr
+0x07bf001c  mov      x3, x20
+0x07bf0020  bl       #0x7047c24
+0x07bf0024  sub      w8, w0, #1
+0x07bf0028  cmp      w8, #1
+0x07bf002c  b.hi     #0x7bf0208
+0x07bf0030  ldur     w8, [x29, #-0x20]
+0x07bf0034  str      x23, [sp]
+0x07bf0038  cmp      w8, #7
+0x07bf003c  cset     w8, eq
+0x07bf0040  str      w8, [sp, #0xc]
+0x07bf0044  b.ne     #0x7bf0220
+0x07bf0048  ldur     w8, [x29, #-0x18]
+0x07bf004c  cbz      w8, #0x7bf0220
+0x07bf0050  ldur     x22, [x29, #-0x10]
+0x07bf0054  mov      w9, #0x30
+0x07bf0058  sub      x10, x29, #0x20
+0x07bf005c  add      x11, sp, #0x18
+0x07bf0060  orr      x28, x10, #1
+0x07bf0064  add      x27, x19, #0x1f0
+0x07bf0068  umaddl   x23, w8, w9, x22
+0x07bf006c  orr      x8, x11, #1
+0x07bf0070  str      x8, [sp, #0x10]
+0x07bf0074  b        #0x7bf0084
+0x07bf0078  add      x22, x22, #0x30
+0x07bf007c  cmp      x22, x23

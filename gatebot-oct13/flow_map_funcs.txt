@@ -1,0 +1,93 @@
+== CMD_CREATE_ROOM : 0 funcs
+== CMD_JOIN_ROOM : 0 funcs
+== CMD_GET_ROOM_INFO : 0 funcs
+== CMD_JOIN_REQUEST : 0 funcs
+== CMD_READY : 0 funcs
+== CMD_JOIN_GAME : 0 funcs
+== CMD_GET_GAME_SESSION : 6 funcs
+   07723140  [main]
+   07727030  [main]
+   07727894  [main]
+   07b56db8  [main,natwire]
+   07e2cae8  [main,natwire,punch,rp]
+   07e5bc34  [main,natwire,punch,rp]
+== CMD_SET_GAME_SESSION_CHECK_RES : 3 funcs
+   077e15d4  [main]
+   077e3d44  [main]
+   07e5bc34  [main,natwire,punch,rp]
+== CMD_GET_GAME_SESSION_CHECK_RES : 4 funcs
+   07727030  [main]
+   07727894  [main]
+   07e2cae8  [main,natwire,punch,rp]
+   07e5bc34  [main,natwire,punch,rp]
+== CMD_GET_TURN_SERVER_LIST : 3 funcs
+   07e5bc34  [main,natwire,punch,rp]
+   07eaf040  [main,natwire,punch,rp]
+   07eaf5c8  [main,natwire,punch,rp]
+== CMD_GET_TURN_ADDRESS_DATA : 2 funcs
+   07ead160  [main,natwire,punch,rp]
+   07ead330  [main,natwire,punch,rp]
+== CMD_SEND_TURN_ADDRESS_DATA : 2 funcs
+   07eb11f0  [main,natwire,punch,rp]
+   07eb1908  [main,natwire,punch,rp]
+== CMD_WATCH_TURN_ADDRESS_DATA : 2 funcs
+   07eade70  [main,natwire,punch,rp]
+   07eae040  [main,natwire,punch,rp]
+== CMD_SET_LOCAL_GAMERELAY_LIST : 2 funcs
+   077e8b08  [main]
+   077e98d4  [main]
+== CMD_GET_GAMERELAY_QUALITYCHECK_LIST : 2 funcs
+   0772a380  [main]
+   0772a550  [main]
+== CMD_SET_GAMERELAY_QUALITY : 2 funcs
+   077e482c  [main]
+   077e5204  [main]
+== CMD_GET_NAT_TYPE : 0 funcs
+== CMD_START_GAME : 1 funcs
+   07e5bc34  [main,natwire,punch,rp]
+== CMD_RETURN_ROOM : 0 funcs
+== CMD_CHANGE_GAMEPHASE : 1 funcs
+   07e36874  [main,natwire,punch,rp]
+== CMD_ADD_SCORE : 1 funcs
+   07e36874  [main,natwire,punch,rp]
+== CMD_SET_GAME_RESULT : 0 funcs
+== CMD_CHECK_GAME_RESULT : 0 funcs
+== CMD_GET_GAME_RESULT : 1 funcs
+   07721a70  [main]
+== turn_account_param : 1 funcs
+   07eaf14c  [main,natwire,punch,rp]
+== turn_time_limit : 1 funcs
+   07eaf14c  [main,natwire,punch,rp]
+== turn_server_list : 1 funcs
+   07eaf768  [main,natwire,punch,rp]
+== turn_account : 2 funcs
+   07eaf14c  [main,natwire,punch,rp]
+   07eaf768  [main,natwire,punch,rp]
+== address_data_size : 3 funcs
+   07ead464  [main,natwire,punch,rp]
+   07eae174  [main,natwire,punch,rp]
+   07eb12f0  [main,natwire,punch,rp]
+== ntl_address_list : 1 funcs
+   07724da0  [main]
+== nat_type : 4 funcs
+   078108fc  [main]
+   078b1ba4  [main,natwire]
+   078c5c5c  [main,natwire]
+   078d3b50  [main,natwire]
+== reflexive_address : 4 funcs
+   078108fc  [main]
+   078b1ba4  [main,natwire]
+   078c5c5c  [main,natwire]
+   078d3b50  [main,natwire]
+== reflexive_port : 4 funcs
+   078108fc  [main]
+   078b1ba4  [main,natwire]
+   078c5c5c  [main,natwire]
+   078d3b50  [main,natwire]
+== punch : 0 funcs
+== address_data : 3 funcs
+   07ead464  [main,natwire,punch,rp]
+   07eae174  [main,natwire,punch,rp]
+   07eb12f0  [main,natwire,punch,rp]
+== relay_quality : 0 funcs
+== qualitycheck : 0 funcs

@@ -1,0 +1,34 @@
+﻿rendezvous 136.107.123.189:31471 (136.107.123.189)
+DTLS up: ECDHE-RSA-AES256-GCM-SHA384
+
+=== len32be type@4 (1/4) ===
+    ...t=000  0s elapsed
+    ...t=064  32s elapsed
+    ...t=128  63s elapsed
+    ...t=192  95s elapsed
+  -> 0 replies in 256 types (126s)
+
+=== len16be type@2 (2/4) ===
+    ...t=000  126s elapsed
+    ...t=064  157s elapsed
+    ...t=128  189s elapsed
+    ...t=192  220s elapsed
+  -> 0 replies in 256 types (251s)
+
+=== len16be==143 type@2 (3/4) ===
+    ...t=000  252s elapsed
+    ...t=064  283s elapsed
+    ...t=128  315s elapsed
+    ...t=192  346s elapsed
+  -> 0 replies in 256 types (377s)
+
+=== type@0 len16be@1 (4/4) ===
+    ...t=000  378s elapsed
+    ...t=064  409s elapsed
+    ...t=128  440s elapsed
+    ...t=192  472s elapsed
+  -> 0 replies in 256 types (503s)
+
+=== 0/1024 candidates answered in 503s ===
+  none.  Length framing at these offsets is not it either --
+  the next step is the binary, not more guessing.

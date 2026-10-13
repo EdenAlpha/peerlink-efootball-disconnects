@@ -1,0 +1,76 @@
+== called by 07721a70:
+   07721a3c [main]
+== called by 07727030:
+   07726938 [main]
+== called by 07727894:
+   07726938 [main]
+== called by 0772a380:
+   07729884 [main]
+== called by 0772a550:
+   07729884 [main]
+== called by 077e15d4:
+   077e0c7c [main]
+== called by 077e3d44:
+   077e0c7c [main]
+== called by 077e482c:
+   077e4774 [main]
+== called by 077e5204:
+   077e4774 [main]
+== called by 077e8b08:
+   077e835c [main]
+== called by 077e98d4:
+   077e835c [main]
+== called by 07e36874:
+   07e2b4e4 [main]
+   07e2b4e4 [natwire]
+   07e2b4e4 [punch]
+   07e2b4e4 [rp_dispatch]
+== called by 07e5bc34:
+   07e46054 [main]
+   07e5b638 [main]
+   07e46054 [natwire]
+   07e5b638 [natwire]
+   07e46054 [punch]
+   07e5b638 [punch]
+   07e46054 [rp_dispatch]
+   07e5b638 [rp_dispatch]
+== called by 07ead160:
+   07ead038 [main]
+   07ead038 [natwire]
+   07ead038 [punch]
+   07ead038 [rp_dispatch]
+== called by 07ead330:
+   07ead038 [main]
+   07ead038 [natwire]
+   07ead038 [punch]
+   07ead038 [rp_dispatch]
+== called by 07eade70:
+   07eadd8c [main]
+   07eadd8c [natwire]
+   07eadd8c [punch]
+   07eadd8c [rp_dispatch]
+== called by 07eae040:
+   07eadd8c [main]
+   07eadd8c [natwire]
+   07eadd8c [punch]
+   07eadd8c [rp_dispatch]
+== called by 07eaf040:
+   07eaeaa8 [main]
+   07eaeaa8 [natwire]
+   07eaeaa8 [punch]
+   07eaeaa8 [rp_dispatch]
+== called by 07eaf5c8:
+   07eaeaa8 [main]
+   07eaeaa8 [natwire]
+   07eaeaa8 [punch]
+   07eaeaa8 [rp_dispatch]
+== called by 07eb11f0:
+   07eb10e0 [main]
+   07eb10e0 [natwire]
+   07eb10e0 [punch]
+   07eb10e0 [rp_dispatch]
+== called by 07eb1908:
+   07eb10e0 [main]
+   07eb10e0 [natwire]
+   07eb10e0 [punch]
+   07eb10e0 [rp_dispatch]

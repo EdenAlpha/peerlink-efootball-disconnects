@@ -1,0 +1,32 @@
+0x07e37780  bl       #0x2fcc828
+0x07e37784  add      x1, sp, #1, lsl #12
+0x07e37788  add      x1, x1, #0x280
+0x07e3778c  bl       #0x2fc9bac
+0x07e37790  add      x0, sp, #1, lsl #12
+0x07e37794  add      x0, x0, #0x280
+0x07e37798  bl       #0x2fcba44
+0x07e3779c  add      x8, sp, #0x31
+0x07e377a0  ldrb     w8, [x8, #0xfff]
+0x07e377a4  tbz      w8, #0, #0x7e377b0
+0x07e377a8  ldr      x0, [sp, #0x1040]
+0x07e377ac  bl       #0x2f376d4
+0x07e377b0  add      x0, sp, #1, lsl #12
+0x07e377b4  ldr      w2, [x25, #0x260]
+0x07e377b8  adrp     x1, #0xaf7000
+0x07e377bc  add      x1, x1, #0x86d           ; STR 0xbf786d 'LATENCY_MODE_CONFIRMING_RESULT'
+0x07e377c0  add      x0, x0, #0x270
+0x07e377c4  mov      w3, wzr
+0x07e377c8  bl       #0x7e3e238
+0x07e377cc  add      x0, sp, #1, lsl #12
+0x07e377d0  str      xzr, [sp, #0x1280]
+0x07e377d4  add      x0, x0, #0x280
+0x07e377d8  bl       #0x2f4beec
+0x07e377dc  tbz      w0, #0, #0x7e37804
+0x07e377e0  add      x0, sp, #1, lsl #12
+0x07e377e4  ldr      w2, [sp, #0x1280]
+0x07e377e8  adrp     x1, #0xae4000
+0x07e377ec  add      x1, x1, #0xb6f           ; STR 0xbe4b6f 'APP_YIELD_STATS_INACTIVITY_TIME_MS'
+0x07e377f0  add      x0, x0, #0x270
+0x07e377f4  mov      w3, wzr
+0x07e377f8  bl       #0x7e3e238
+0x07e377fc  ldr      w19, [sp, #0x1284]

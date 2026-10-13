@@ -1,0 +1,64 @@
+0x07e3d080  bl       #0x7e3e694
+0x07e3d084  adrp     x1, #0xc17000
+0x07e3d088  add      x1, x1, #0xa16           ; STR 0xd17a16 'TURN_IO_SET_SESSION_ERROR'
+0x07e3d08c  mov      x0, x19
+0x07e3d090  bl       #0x7e3e694
+0x07e3d094  adrp     x1, #0xb7d000
+0x07e3d098  add      x1, x1, #0xa9f           ; STR 0xc7da9f 'CMD_RETRY_REC'
+0x07e3d09c  mov      x0, x19
+0x07e3d0a0  bl       #0x7e3e694
+0x07e3d0a4  adrp     x1, #0xbcb000
+0x07e3d0a8  add      x1, x1, #0x692           ; STR 0xccb692 'IPV4ONLY_ARPA'
+0x07e3d0ac  mov      x0, x19
+0x07e3d0b0  bl       #0x7e3e694
+0x07e3d0b4  adrp     x1, #0xaab000
+0x07e3d0b8  add      x1, x1, #0x40e           ; STR 0xbab40e 'LATENCY_MODE_MATCHING'
+0x07e3d0bc  mov      x0, x19
+0x07e3d0c0  bl       #0x7e3e694
+0x07e3d0c4  adrp     x1, #0xa39000
+0x07e3d0c8  add      x1, x1, #0x824           ; STR 0xb39824 'LATENCY_MODE_SESSION'
+0x07e3d0cc  mov      x0, x19
+0x07e3d0d0  bl       #0x7e3e694
+0x07e3d0d4  adrp     x1, #0xc04000
+0x07e3d0d8  add      x1, x1, #0xb65           ; STR 0xd04b65 'LATENCY_MODE_CONNECT'
+0x07e3d0dc  mov      x0, x19
+0x07e3d0e0  bl       #0x7e3e694
+0x07e3d0e4  adrp     x1, #0xbf1000
+0x07e3d0e8  add      x1, x1, #0x754           ; STR 0xcf1754 'LATENCY_MODE_ANNTENA'
+0x07e3d0ec  mov      x0, x19
+0x07e3d0f0  bl       #0x7e3e694
+0x07e3d0f4  adrp     x1, #0xb0b000
+0x07e3d0f8  add      x1, x1, #0x116           ; STR 0xc0b116 'LATENCY_MODE_PRE_MENU'
+0x07e3d0fc  mov      x0, x19
+0x07e3d100  bl       #0x7e3e694
+0x07e3d104  adrp     x1, #0xba4000
+0x07e3d108  add      x1, x1, #0x274           ; STR 0xca4274 'LATENCY_MODE_MATCH_SETTEING_INIT'
+0x07e3d10c  mov      x0, x19
+0x07e3d110  bl       #0x7e3e694
+0x07e3d114  adrp     x1, #0xb1e000
+0x07e3d118  add      x1, x1, #0xb22           ; STR 0xc1eb22 'LATENCY_MODE_WHOLE_CONNECTING'
+0x07e3d11c  mov      x0, x19
+0x07e3d120  bl       #0x7e3e694
+0x07e3d124  adrp     x1, #0xaf7000
+0x07e3d128  add      x1, x1, #0x86d           ; STR 0xbf786d 'LATENCY_MODE_CONFIRMING_RESULT'
+0x07e3d12c  mov      x0, x19
+0x07e3d130  bl       #0x7e3e694
+0x07e3d134  adrp     x1, #0xba4000
+0x07e3d138  add      x1, x1, #0x295           ; STR 0xca4295 'LATENCY_MODE_MATCHING_CMD_START_MATCHING'
+0x07e3d13c  mov      x0, x19
+0x07e3d140  bl       #0x7e3e694
+0x07e3d144  adrp     x1, #0xb1e000
+0x07e3d148  add      x1, x1, #0xb40           ; STR 0xc1eb40 'LATENCY_MODE_MATCHING_PROCESS_CMD_GET_MATCHING_RESULT'
+0x07e3d14c  mov      x0, x19
+0x07e3d150  bl       #0x7e3e694
+0x07e3d154  adrp     x1, #0xb0b000
+0x07e3d158  add      x1, x1, #0x12c           ; STR 0xc0b12c 'LATENCY_MODE_MATCHING_POLLING_CMD_GET_MATCHING_RESULT'
+0x07e3d15c  mov      x0, x19
+0x07e3d160  bl       #0x7e3e694
+0x07e3d164  adrp     x1, #0xc04000
+0x07e3d168  add      x1, x1, #0xb7a           ; STR 0xd04b7a 'LATENCY_MODE_MATCHING_CMD_GET_SERVER_ENV'
+0x07e3d16c  mov      x0, x19
+0x07e3d170  bl       #0x7e3e694
+0x07e3d174  adrp     x1, #0xc04000
+0x07e3d178  add      x1, x1, #0xba3           ; STR 0xd04ba3 'LATENCY_MODE_SESSION_PROCESS_CMD_GET_GAME_SESSION'
+0x07e3d17c  mov      x0, x19

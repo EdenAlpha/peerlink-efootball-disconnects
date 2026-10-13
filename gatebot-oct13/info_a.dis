@@ -1,0 +1,62 @@
+0x0766fa48  stp      x29, x30, [sp, #-0x20]!
+0x0766fa4c  stp      x20, x19, [sp, #0x10]
+0x0766fa50  mov      x29, sp
+0x0766fa54  mov      x19, x0
+0x0766fa58  add      x0, x0, #8
+0x0766fa5c  adrp     x8, #0x98af000
+0x0766fa60  add      x8, x8, #0x1f8
+0x0766fa64  str      x8, [x19]
+0x0766fa68  bl       #0x2fc833c
+0x0766fa6c  add      x0, x19, #0xc8
+0x0766fa70  bl       #0x2fcdb4c
+0x0766fa74  add      x0, x19, #0xf0
+0x0766fa78  mov      w1, wzr
+0x0766fa7c  bl       #0x2fcb5e0
+0x0766fa80  mov      w0, #0x2000
+0x0766fa84  strb     wzr, [x19, #0x108]
+0x0766fa88  mov      w20, #0x2000
+0x0766fa8c  bl       #0x8c1c050
+0x0766fa90  movi     v0.2d, #0000000000000000
+0x0766fa94  stp      x0, x20, [x19, #0x120]
+0x0766fa98  add      x0, x19, #0x708
+0x0766fa9c  mov      w1, wzr
+0x0766faa0  mov      w2, #0x258
+0x0766faa4  str      xzr, [x19, #0x118]
+0x0766faa8  add      x20, x19, #0x1f0
+0x0766faac  str      xzr, [x19, #0x1e0]
+0x0766fab0  stp      q0, q0, [x19, #0x140]
+0x0766fab4  stp      q0, q0, [x19, #0x160]
+0x0766fab8  stp      q0, q0, [x19, #0x180]
+0x0766fabc  stp      q0, q0, [x19, #0x1a0]
+0x0766fac0  stp      q0, q0, [x19, #0x1c0]
+0x0766fac4  bl       #0x8c1bd60
+0x0766fac8  mov      x0, x20
+0x0766facc  mov      w1, wzr
+0x0766fad0  mov      w2, #0x514
+0x0766fad4  bl       #0x8c1bd60
+0x0766fad8  adrp     x8, #0x99ee000
+0x0766fadc  mov      w9, #0x1a
+0x0766fae0  adrp     x10, #0xc2a000
+0x0766fae4  add      x10, x10, #0x696           ; STR 0xd2a696 'CMD_ADD_SCORE'
+0x0766fae8  add      x11, x19, #0x139
+0x0766faec  ldr      x8, [x8, #0xaa8]
+0x0766faf0  strb     w9, [x19, #0x138]
+0x0766faf4  ldr      x12, [x10]
+0x0766faf8  ldur     x10, [x10, #5]
+0x0766fafc  add      x8, x8, #0x10
+0x0766fb00  ldrb     w9, [x19, #0x170]
+0x0766fb04  str      x12, [x11]
+0x0766fb08  stur     x10, [x11, #5]
+0x0766fb0c  str      x8, [x19]
+0x0766fb10  tbnz     w9, #0, #0x766fb24
+0x0766fb14  mov      w9, #0x1e
+0x0766fb18  add      x8, x19, #0x171
+0x0766fb1c  strb     w9, [x19, #0x170]
+0x0766fb20  b        #0x766fb30
+0x0766fb24  mov      w9, #0xf
+0x0766fb28  ldr      x8, [x19, #0x180]
+0x0766fb2c  str      x9, [x19, #0x178]
+0x0766fb30  adrp     x9, #0x9ec000
+0x0766fb34  add      x9, x9, #0x546           ; STR 0xaec546 'CmdAddScore.php'
+0x0766fb38  adrp     x11, #0x98d7000
+0x0766fb3c  add      x11, x11, #0x1a0

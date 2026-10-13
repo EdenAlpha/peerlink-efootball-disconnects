@@ -1,0 +1,873 @@
+{
+ "msgid": "CMD_SET_GAME_RESULT",
+ "rqid": 2791713517,
+ "user_id": "<redacted:int>",
+ "session_id": "<redacted>",
+ "my_platform": "ANDROID",
+ "s_keyword": "<redacted>",
+ "match_result": {
+  "game_id": 261000128932850400,
+  "abnormalend_reason": "NOERR",
+  "is_problem": "NO",
+  "user_network_status": {
+   "is_stun_keep_alive_failed": "NO",
+   "is_network_blocked_disconn": "NO",
+   "is_background_timeout": "NO",
+   "is_background_at_match": "NO"
+  },
+  "ex_flag": "NO",
+  "pk_flag": "NO",
+  "error_code": "_0x0",
+  "myteam_player_list": [
+   {
+    "gameplayer_id": {
+     "id": 88033407929799,
+     "serial": 1012115771000000686
+    },
+    "rating": 600,
+    "play_time": 90,
+    "position": "GK",
+    "is_starting_member": "YES",
+    "is_join_game": "YES",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 106745238268680,
+     "serial": 1012115771000000649
+    },
+    "rating": 0,
+    "play_time": 0,
+    "position": "BENCH",
+    "is_starting_member": "NO",
+    "is_join_game": "NO",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 52890643315573,
+     "serial": 1012115771000000767
+    },
+    "rating": 600,
+    "play_time": 90,
+    "position": "CB",
+    "is_starting_member": "YES",
+    "is_join_game": "YES",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 106797935500212,
+     "serial": 1012115771000000880
+    },
+    "rating": 650,
+    "play_time": 90,
+    "position": "CB",
+    "is_starting_member": "YES",
+    "is_join_game": "YES",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 88033407835625,
+     "serial": 1012115771000000556
+    },
+    "rating": 600,
+    "play_time": 90,
+    "position": "LSB",
+    "is_starting_member": "YES",
+    "is_join_game": "YES",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 88029649833420,
+     "serial": 1012115771000000448
+    },
+    "rating": 0,
+    "play_time": 0,
+    "position": "BENCH",
+    "is_starting_member": "NO",
+    "is_join_game": "NO",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 88032334187974,
+     "serial": 1012115771000000736
+    },
+    "rating": 0,
+    "play_time": 0,
+    "position": "BENCH",
+    "is_starting_member": "NO",
+    "is_join_game": "NO",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 52903796546903,
+     "serial": 1012115771000000916
+    },
+    "rating": 600,
+    "play_time": 90,
+    "position": "ST",
+    "is_starting_member": "YES",
+    "is_join_game": "YES",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 52893596124820,
+     "serial": 1012115771000000770
+    },
+    "rating": 0,
+    "play_time": 0,
+    "position": "BENCH",
+    "is_starting_member": "NO",
+    "is_join_game": "NO",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 88030992010723,
+     "serial": 1012115771000000522
+    },
+    "rating": 0,
+    "play_time": 0,
+    "position": "BENCH",
+    "is_starting_member": "NO",
+    "is_join_game": "NO",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 52783806009713,
+     "serial": 1012115771000000226
+    },
+    "rating": 0,
+    "play_time": 0,
+    "position": "BENCH",
+    "is_starting_member": "NO",
+    "is_join_game": "NO",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 106757854755138,
+     "serial": 1012115771000000846
+    },
+    "rating": 600,
+    "play_time": 90,
+    "position": "RWG",
+    "is_starting_member": "YES",
+    "is_join_game": "YES",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 106766981442907,
+     "serial": 1012115771000000807
+    },
+    "rating": 0,
+    "play_time": 0,
+    "position": "BENCH",
+    "is_starting_member": "NO",
+    "is_join_game": "NO",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 105873628311604,
+     "serial": 1012115771000000859
+    },
+    "rating": 0,
+    "play_time": 0,
+    "position": "BENCH",
+    "is_starting_member": "NO",
+    "is_join_game": "NO",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 105727867862312,
+     "serial": 1012115771000000569
+    },
+    "rating": 600,
+    "play_time": 90,
+    "position": "RSB",
+    "is_starting_member": "YES",
+    "is_join_game": "YES",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 133543,
+     "serial": 1012115771000000293
+    },
+    "rating": 0,
+    "play_time": 0,
+    "position": "BENCH",
+    "is_starting_member": "NO",
+    "is_join_game": "NO",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 105792829240690,
+     "serial": 1012115771000000731
+    },
+    "rating": 550,
+    "play_time": 90,
+    "position": "CB",
+    "is_starting_member": "YES",
+    "is_join_game": "YES",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 88032334053428,
+     "serial": 1012115771000000494
+    },
+    "rating": 550,
+    "play_time": 90,
+    "position": "OMF",
+    "is_starting_member": "YES",
+    "is_join_game": "YES",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 57123,
+     "serial": 1012115771000000128
+    },
+    "rating": 0,
+    "play_time": 0,
+    "position": "BENCH",
+    "is_starting_member": "NO",
+    "is_join_game": "NO",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 105680623218814,
+     "serial": 1012115771000000410
+    },
+    "rating": 600,
+    "play_time": 90,
+    "position": "LWG",
+    "is_starting_member": "YES",
+    "is_join_game": "YES",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 88040387251674,
+     "serial": 1012115771000000855
+    },
+    "rating": 650,
+    "play_time": 90,
+    "position": "CF",
+    "is_starting_member": "YES",
+    "is_join_game": "YES",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 88035823874881,
+     "serial": 1012115771000000672
+    },
+    "rating": 0,
+    "play_time": 0,
+    "position": "BENCH",
+    "is_starting_member": "NO",
+    "is_join_game": "NO",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   },
+   {
+    "gameplayer_id": {
+     "id": 88033139494377,
+     "serial": 1012115771000000697
+    },
+    "rating": 0,
+    "play_time": 0,
+    "position": "BENCH",
+    "is_starting_member": "NO",
+    "is_join_game": "NO",
+    "oap": 0,
+    "base_value": 0,
+    "is_man_of_the_match": "NO"
+   }
+  ],
+  "match_stat_side_info_list": [
+   {
+    "score": 1,
+    "ball_possession": 38,
+    "shots": 0,
+    "shots_on_goal": 0,
+    "faul": 0,
+    "faul_offside": 0,
+    "corner_kick": 1,
+    "free_kick": 1,
+    "pass_success_rate": 72,
+    "cross": 0,
+    "pass_cut": 17,
+    "tackle": 4,
+    "save": 1
+   },
+   {
+    "score": 1,
+    "ball_possession": 62,
+    "shots": 2,
+    "shots_on_goal": 1,
+    "faul": 1,
+    "faul_offside": 1,
+    "corner_kick": 1,
+    "free_kick": 0,
+    "pass_success_rate": 76,
+    "cross": 1,
+    "pass_cut": 16,
+    "tackle": 6,
+    "save": 0
+   }
+  ],
+  "achievement_progress_list": [],
+  "use_team_style": "TEAM_STYLE_SHORT_COUNTER",
+  "owngoal_user_list": [],
+  "event_record": 0,
+  "restart_num": 0,
+  "control_style": 0,
+  "coop_score": {
+   "total": 0,
+   "shoot": 0,
+   "pass": 0,
+   "dribble": 0,
+   "offense_positioning": 0,
+   "duel": 0,
+   "defense_positioning": 0
+  },
+  "behind_flag": [
+   "YES",
+   "NO"
+  ],
+  "tour_pvp_bonus_result_list": [],
+  "ml_event_match_bonus": {
+   "count": 0,
+   "golazo_info": {
+    "golazo_count_list": []
+   }
+  },
+  "opp_gameplayer_id_list": [
+   {
+    "id": 106768860487291,
+    "serial": 0
+   },
+   {
+    "id": 106797935500212,
+    "serial": 0
+   },
+   {
+    "id": 88033407929841,
+    "serial": 0
+   },
+   {
+    "id": 88033139494357,
+    "serial": 0
+   },
+   {
+    "id": 88036360587096,
+    "serial": 0
+   },
+   {
+    "id": 88036360719848,
+    "serial": 0
+   },
+   {
+    "id": 88036360648832,
+    "serial": 0
+   },
+   {
+    "id": 89136677522134,
+    "serial": 0
+   },
+   {
+    "id": 88044145348075,
+    "serial": 0
+   },
+   {
+    "id": 88039045074373,
+    "serial": 0
+   },
+   {
+    "id": 88032334187990,
+    "serial": 0
+   }
+  ],
+  "use_setting_multi_formation": "YES"
+ },
+ "game_check_data": {
+  "match_time_frame": 0,
+  "match_time_tick": 822300,
+  "com_stop_info": 0,
+  "entry_check_data": 0,
+  "ball_move_max_speed": 117283,
+  "gameplayer_parameter_check_data_list": [
+   {
+    "gameplayer_id": {
+     "id": 88033407929799,
+     "serial": 1012115771000000686
+    },
+    "check_sum": 2120,
+    "max_speed": 19552
+   },
+   {
+    "gameplayer_id": {
+     "id": 106745238268680,
+     "serial": 1012115771000000649
+    },
+    "check_sum": 2403,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 52890643315573,
+     "serial": 1012115771000000767
+    },
+    "check_sum": 2199,
+    "max_speed": 31619
+   },
+   {
+    "gameplayer_id": {
+     "id": 106797935500212,
+     "serial": 1012115771000000880
+    },
+    "check_sum": 2427,
+    "max_speed": 29957
+   },
+   {
+    "gameplayer_id": {
+     "id": 88033407835625,
+     "serial": 1012115771000000556
+    },
+    "check_sum": 2253,
+    "max_speed": 32875
+   },
+   {
+    "gameplayer_id": {
+     "id": 88029649833420,
+     "serial": 1012115771000000448
+    },
+    "check_sum": 2228,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 88032334187974,
+     "serial": 1012115771000000736
+    },
+    "check_sum": 2137,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 52903796546903,
+     "serial": 1012115771000000916
+    },
+    "check_sum": 2296,
+    "max_speed": 30948
+   },
+   {
+    "gameplayer_id": {
+     "id": 52893596124820,
+     "serial": 1012115771000000770
+    },
+    "check_sum": 2291,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 88030992010723,
+     "serial": 1012115771000000522
+    },
+    "check_sum": 2071,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 52783806009713,
+     "serial": 1012115771000000226
+    },
+    "check_sum": 2184,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 106757854755138,
+     "serial": 1012115771000000846
+    },
+    "check_sum": 2147,
+    "max_speed": 32020
+   },
+   {
+    "gameplayer_id": {
+     "id": 106766981442907,
+     "serial": 1012115771000000807
+    },
+    "check_sum": 2368,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 105873628311604,
+     "serial": 1012115771000000859
+    },
+    "check_sum": 2208,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 105727867862312,
+     "serial": 1012115771000000569
+    },
+    "check_sum": 2182,
+    "max_speed": 32778
+   },
+   {
+    "gameplayer_id": {
+     "id": 133543,
+     "serial": 1012115771000000293
+    },
+    "check_sum": 2069,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 105792829240690,
+     "serial": 1012115771000000731
+    },
+    "check_sum": 2178,
+    "max_speed": 29812
+   },
+   {
+    "gameplayer_id": {
+     "id": 88032334053428,
+     "serial": 1012115771000000494
+    },
+    "check_sum": 2176,
+    "max_speed": 31638
+   },
+   {
+    "gameplayer_id": {
+     "id": 57123,
+     "serial": 1012115771000000128
+    },
+    "check_sum": 2111,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 105680623218814,
+     "serial": 1012115771000000410
+    },
+    "check_sum": 2118,
+    "max_speed": 32476
+   },
+   {
+    "gameplayer_id": {
+     "id": 88040387251674,
+     "serial": 1012115771000000855
+    },
+    "check_sum": 2191,
+    "max_speed": 33158
+   },
+   {
+    "gameplayer_id": {
+     "id": 88035823874881,
+     "serial": 1012115771000000672
+    },
+    "check_sum": 2201,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 88033139494377,
+     "serial": 1012115771000000697
+    },
+    "check_sum": 2150,
+    "max_speed": 0
+   }
+  ],
+  "opponent_gameplayer_parameter_check_data_list": [
+   {
+    "gameplayer_id": {
+     "id": 88040387251713,
+     "serial": 1500395919000000947
+    },
+    "check_sum": 2177,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 88036360587096,
+     "serial": 1500395919000000501
+    },
+    "check_sum": 2461,
+    "max_speed": 32508
+   },
+   {
+    "gameplayer_id": {
+     "id": 88032334054195,
+     "serial": 1500395919000000273
+    },
+    "check_sum": 2340,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 88032334054686,
+     "serial": 1500395919000000893
+    },
+    "check_sum": 2198,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 106762149600615,
+     "serial": 1500395919000000579
+    },
+    "check_sum": 2289,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 88036360648832,
+     "serial": 1500395919000000587
+    },
+    "check_sum": 2294,
+    "max_speed": 32307
+   },
+   {
+    "gameplayer_id": {
+     "id": 88039045074373,
+     "serial": 1500395919000000543
+    },
+    "check_sum": 2477,
+    "max_speed": 32046
+   },
+   {
+    "gameplayer_id": {
+     "id": 88032334187990,
+     "serial": 1500395919000000248
+    },
+    "check_sum": 2208,
+    "max_speed": 31880
+   },
+   {
+    "gameplayer_id": {
+     "id": 106773960831286,
+     "serial": 1500395919000000798
+    },
+    "check_sum": 2170,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 88044145348075,
+     "serial": 1500395919000000981
+    },
+    "check_sum": 2399,
+    "max_speed": 32567
+   },
+   {
+    "gameplayer_id": {
+     "id": 88045755866499,
+     "serial": 1500395919000001215
+    },
+    "check_sum": 2403,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 106768860487291,
+     "serial": 1500395919000000762
+    },
+    "check_sum": 1994,
+    "max_speed": 25568
+   },
+   {
+    "gameplayer_id": {
+     "id": 106797935500212,
+     "serial": 1500395919000001230
+    },
+    "check_sum": 2469,
+    "max_speed": 29813
+   },
+   {
+    "gameplayer_id": {
+     "id": 106787651045391,
+     "serial": 1500395919000001094
+    },
+    "check_sum": 2711,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 88031797189908,
+     "serial": 1500395919000000049
+    },
+    "check_sum": 2177,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 88033139494377,
+     "serial": 1500395919000000368
+    },
+    "check_sum": 2211,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 89136677522134,
+     "serial": 1500395919000000677
+    },
+    "check_sum": 2201,
+    "max_speed": 32624
+   },
+   {
+    "gameplayer_id": {
+     "id": 88033407929841,
+     "serial": 1500395919000000459
+    },
+    "check_sum": 2316,
+    "max_speed": 31076
+   },
+   {
+    "gameplayer_id": {
+     "id": 88045218959416,
+     "serial": 1500395919000001128
+    },
+    "check_sum": 2308,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 88032334188054,
+     "serial": 1500395919000000235
+    },
+    "check_sum": 2185,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 88036360719848,
+     "serial": 1500395919000000519
+    },
+    "check_sum": 2487,
+    "max_speed": 31527
+   },
+   {
+    "gameplayer_id": {
+     "id": 106784966581591,
+     "serial": 1500395919000001192
+    },
+    "check_sum": 2371,
+    "max_speed": 0
+   },
+   {
+    "gameplayer_id": {
+     "id": 88033139494357,
+     "serial": 1500395919000000670
+    },
+    "check_sum": 2300,
+    "max_speed": 32689
+   }
+  ],
+  "custom_stadium": {
+   "stadium_id": 0,
+   "custom_stadium_name": "NotImplement",
+   "stadium_color1": 0,
+   "stadium_color2": 0,
+   "stadium_color3": 40,
+   "stadium_color4": 40,
+   "goalnet_pattern": 1,
+   "goalnet_color1": 40,
+   "goalnet_color2": 40,
+   "pitch_pattern": 1,
+   "entrance_set": 1,
+   "bill_set": 1,
+   "pitchside_objects": [],
+   "goal_effect1": 0,
+   "goal_effect2": 0,
+   "kickoff_effect": 0,
+   "has_invalid_assets": "NO"
+  },
+  "golazo_info": {
+   "golazo_count_list": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  }
+ },
+ "analyst_set_game_result_info": {
+  "match_json": "{\"AgainstGoalPattern\":{\"Cross\":0.0,\"Dribble\":1.0,\"FlyPass\":0.0,\"GrounderCross\":0.0,\"GrounderThroughPass\":0.0,\"LooseBall\":0.0,\"Other\":0.0,\"Pass\":0.0,\"SetPlay\":0.0,\"Snatch\":0.0},\"Defence\":{\"Delay\":507.0,\"Matchup\":78.0,\"Press\":0.0},\"DefencePadType\":\"Matchup\",\"DeffenseInstructions\":\"NO\",\"Dribble\":{\"Dash\":0.0,\"Finess\":37.0,\"Neutral\":524.0,\"Normal\":141.0},\"GoalPattern\":{\"Cross\":0.0,\"Dribble\":0.0,\"FlyPass\":0.0,\"GrounderCross\":0.0,\"GrounderThroughPass\":0.0,\"LooseBall\":0.0,\"Other\":0.0,\"Pass\":0.0,\"SetPlay\":0.0,\"Snatch\":0.0},\"ModernControl\":\"YES\",\"OffenseInstructions\":\"YES\",\"OperationType\":\"Virtual\",\"Pass\":{\"Cross\":0.0,\"CrossGrnd\":0.0,\"Long\":1.0,\"Short\":2.0,\"Through\":55.0,\"ThroughFly\":8.0},\"Shoot\":{\"Control\":0.0,\"Impact\":0.0,\"Loop\":0.0,\"Normal\":0.0},\"UserControl\":{\"ComPress\":0.0,\"CursorChange\":0.0,\"KPPress\":0.0,\"OneTwoPass\":0.0}}",
+  "advice_json": "",
+  "advice_info_match": {
+   "game_id": 261000128932850400,
+   "advice_info_list": []
+  },
+  "is_invalid_advice": "YES"
+ }
+}

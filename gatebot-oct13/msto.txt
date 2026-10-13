@@ -1,0 +1,66 @@
+0x07d3f938  csel     x22, x10, x9, eq
+0x07d3f93c  csel     x21, x8, x11, eq
+0x07d3f940  cmn      x21, #0x10
+0x07d3f944  b.hs     #0x7d3fa1c
+0x07d3f948  cmp      x21, #0x16
+0x07d3f94c  b.hi     #0x7d3f964
+0x07d3f950  lsl      w8, w21, #1
+0x07d3f954  add      x9, sp, #8
+0x07d3f958  add      x23, x9, #9
+0x07d3f95c  strb     w8, [sp, #0x10]
+0x07d3f960  b        #0x7d3f984
+0x07d3f964  orr      x25, x21, #0xf
+0x07d3f968  mov      w1, wzr
+0x07d3f96c  add      x0, x25, #1
+0x07d3f970  bl       #0x2f37644
+0x07d3f974  mov      x23, x0
+0x07d3f978  add      x8, x25, #2
+0x07d3f97c  stp      x21, x0, [sp, #0x18]
+0x07d3f980  str      x8, [sp, #0x10]
+0x07d3f984  mov      x0, x23
+0x07d3f988  mov      x1, x22
+0x07d3f98c  mov      x2, x21
+0x07d3f990  bl       #0x8c1bcf0
+0x07d3f994  strb     wzr, [x23, x21]
+0x07d3f998  add      x11, sp, #8
+0x07d3f99c  ldp      x12, x10, [sp, #0x18]
+0x07d3f9a0  add      x11, x11, #9
+0x07d3f9a4  add      x0, x20, #0x118
+0x07d3f9a8  ldrb     w9, [sp, #0x10]
+0x07d3f9ac  ldrb     w8, [sp, #8]
+0x07d3f9b0  tst      w9, #1
+0x07d3f9b4  lsr      x9, x9, #1
+0x07d3f9b8  csel     x1, x11, x10, eq
+0x07d3f9bc  csel     x2, x9, x12, eq
+0x07d3f9c0  strb     w8, [x20, #0x110]
+0x07d3f9c4  bl       #0x2f3877c
+0x07d3f9c8  ldrb     w8, [sp, #0x10]
+0x07d3f9cc  tbz      w8, #0, #0x7d3f9d8
+0x07d3f9d0  ldr      x0, [sp, #0x20]
+0x07d3f9d4  bl       #0x2f376d4
+0x07d3f9d8  ldrb     w8, [sp, #0x28]
+0x07d3f9dc  tbz      w8, #0, #0x7d3f9e8
+0x07d3f9e0  ldr      x0, [sp, #0x38]
+0x07d3f9e4  bl       #0x2f376d4
+0x07d3f9e8  ldr      x8, [x24, #0x28]
+0x07d3f9ec  ldur     x9, [x29, #-8]
+0x07d3f9f0  cmp      x8, x9
+0x07d3f9f4  b.ne     #0x7d3fa20
+0x07d3f9f8  and      w0, w19, #1
+0x07d3f9fc  ldp      x20, x19, [sp, #0xa0]
+0x07d3fa00  ldp      x22, x21, [sp, #0x90]
+0x07d3fa04  ldp      x24, x23, [sp, #0x80]
+0x07d3fa08  ldp      x29, x30, [sp, #0x60]
+0x07d3fa0c  ldr      x25, [sp, #0x70]
+0x07d3fa10  add      sp, sp, #0xb0
+0x07d3fa14  ret      
+0x07d3fa18  bl       #0x8c1ecd0
+0x07d3fa1c  bl       #0x8c1ecd0
+0x07d3fa20  bl       #0x8c1bc90
+0x07d3fa24  ldrb     w8, [x0, #0x110]
+0x07d3fa28  cbz      w8, #0x7d3fa30
+0x07d3fa2c  strb     wzr, [x0, #0x110]
+0x07d3fa30  cmp      w8, #0
+0x07d3fa34  cset     w0, ne
+0x07d3fa38  ret      
+0x07d3fa3c  stp      x29, x30, [sp, #-0x40]!

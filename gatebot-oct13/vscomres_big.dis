@@ -1,0 +1,256 @@
+0x07767298  stp      x29, x30, [sp, #-0x60]!
+0x0776729c  str      x27, [sp, #0x10]
+0x077672a0  stp      x26, x25, [sp, #0x20]
+0x077672a4  stp      x24, x23, [sp, #0x30]
+0x077672a8  stp      x22, x21, [sp, #0x40]
+0x077672ac  stp      x20, x19, [sp, #0x50]
+0x077672b0  mov      x29, sp
+0x077672b4  mov      w8, #0x2c68
+0x077672b8  mov      x19, x0
+0x077672bc  add      x22, x0, x8
+0x077672c0  add      x23, x0, #0x9b9
+0x077672c4  add      x0, x0, #8
+0x077672c8  adrp     x8, #0x98af000
+0x077672cc  add      x8, x8, #0x1f8
+0x077672d0  str      x8, [x19]
+0x077672d4  bl       #0x2fc833c
+0x077672d8  add      x0, x19, #0xc8
+0x077672dc  bl       #0x2fcdb4c
+0x077672e0  add      x0, x19, #0xf0
+0x077672e4  mov      w1, wzr
+0x077672e8  bl       #0x2fcb5e0
+0x077672ec  mov      w0, #0x2000
+0x077672f0  strb     wzr, [x19, #0x108]
+0x077672f4  mov      w20, #0x2000
+0x077672f8  bl       #0x8c1c050
+0x077672fc  movi     v0.2d, #0000000000000000
+0x07767300  stp      x0, x20, [x19, #0x120]
+0x07767304  add      x20, x19, #0x138
+0x07767308  add      x0, x19, #0x708
+0x0776730c  mov      w1, wzr
+0x07767310  mov      w2, #0x258
+0x07767314  str      xzr, [x19, #0x118]
+0x07767318  add      x21, x19, #0x1f0
+0x0776731c  stp      q0, q0, [x20]
+0x07767320  stp      q0, q0, [x20, #0x20]
+0x07767324  stp      q0, q0, [x20, #0x40]
+0x07767328  stp      q0, q0, [x20, #0x60]
+0x0776732c  stp      q0, q0, [x20, #0x80]
+0x07767330  str      q0, [x20, #0xa0]
+0x07767334  bl       #0x8c1bd60
+0x07767338  mov      x0, x21
+0x0776733c  mov      w1, wzr
+0x07767340  mov      w2, #0x514
+0x07767344  bl       #0x8c1bd60
+0x07767348  adrp     x24, #0x98e1000
+0x0776734c  add      x24, x24, #0x3c8
+0x07767350  add      x25, x24, #0x48
+0x07767354  add      x26, x24, #0x78
+0x07767358  add      x27, x24, #0x98
+0x0776735c  adrp     x1, #0xabe000
+0x07767360  add      x1, x1, #0x391           ; STR 0xbbe391 'CMD_GET_VSCOM_GAME_RESULT'
+0x07767364  mov      x0, x20
+0x07767368  mov      w2, #0x19
+0x0776736c  str      x24, [x19]
+0x07767370  add      x21, x19, #0x170
+0x07767374  str      x25, [x19, #0x110]
+0x07767378  str      x26, [x19, #0x130]
+0x0776737c  str      x27, [x19, #0x1e8]
+0x07767380  bl       #0x2f3877c
+0x07767384  adrp     x1, #0xa71000
+0x07767388  add      x1, x1, #0x843           ; STR 0xb71843 'CmdGetVscomGameResult.php'
+0x0776738c  mov      x0, x21
+0x07767390  mov      w2, #0x19
+0x07767394  bl       #0x2f3877c
+0x07767398  movi     v0.2d, #0000000000000000
+0x0776739c  mov      w11, #0x544f
+0x077673a0  add      x10, x19, #0x961
+0x077673a4  movk     w11, #0x4548, lsl #16
+0x077673a8  mov      w9, #0x52
+0x077673ac  str      xzr, [x19, #0x978]
+0x077673b0  str      xzr, [x19, #0x970]
+0x077673b4  mov      w21, #0x656d
+0x077673b8  str      q0, [x19, #0x960]
+0x077673bc  movk     w21, #0x746e, lsl #16
+0x077673c0  str      w11, [x10]
+0x077673c4  mov      w11, #0x4f4e
+0x077673c8  strb     w9, [x19, #0x965]
+0x077673cc  add      x10, x19, #0x979
+0x077673d0  movk     w11, #0x5245, lsl #16
+0x077673d4  strb     w9, [x19, #0x97d]
+0x077673d8  adrp     x9, #0xb57000
+0x077673dc  add      x9, x9, #0x25f           ; STR 0xc5725f 'NotImplement'
+0x077673e0  str      x24, [x19]
+0x077673e4  add      x12, x19, #0xab1
+0x077673e8  str      xzr, [x19, #0x988]
+0x077673ec  mov      w13, #0x4559
+0x077673f0  str      xzr, [x19, #0x980]
+0x077673f4  ldr      x24, [x9]
+0x077673f8  str      w11, [x10]
+0x077673fc  add      x10, x19, #0x9d1
+0x07767400  str      xzr, [x19, #0x9d8]
+0x07767404  mov      w8, #0xa
+0x07767408  str      xzr, [x19, #0x9e0]
+0x0776740c  mov      w9, #0x4f4e
+0x07767410  str      w21, [x10, #8]
+0x07767414  mov      w11, #0x53
+0x07767418  str      x24, [x10]
+0x0776741c  add      x10, x19, #0x9e9
+0x07767420  str      xzr, [x19, #0x9f0]
+0x07767424  mov      w20, #0x18
+0x07767428  str      xzr, [x19, #0x9f8]
+0x0776742c  add      x0, x19, #0xbe0
+0x07767430  str      x24, [x10]
+0x07767434  str      w21, [x10, #8]
+0x07767438  add      x10, x19, #0xa31
+0x0776743c  str      xzr, [x19, #0xa40]
+0x07767440  str      xzr, [x19, #0xa38]
+0x07767444  str      w21, [x10, #8]
+0x07767448  str      x24, [x10]
+0x0776744c  add      x10, x19, #0xa49
+0x07767450  str      xzr, [x19, #0xab8]
+0x07767454  str      xzr, [x19, #0xab0]
+0x07767458  str      xzr, [x19, #0xac0]
+0x0776745c  strh     w13, [x12]
+0x07767460  add      x12, x19, #0xac9
+0x07767464  str      xzr, [x19, #0xa58]
+0x07767468  str      xzr, [x19, #0xa50]
+0x0776746c  str      w21, [x10, #8]
+0x07767470  str      x24, [x10]
+0x07767474  add      x10, x19, #0xa61
+0x07767478  str      xzr, [x19, #0xad0]
+0x0776747c  str      xzr, [x19, #0xac8]
+0x07767480  str      xzr, [x19, #0xad8]
+0x07767484  strh     w13, [x12]
+0x07767488  adrp     x12, #0xa65000
+0x0776748c  add      x12, x12, #0xa90           ; STR 0xb65a90 'MATERIAL_KEY_NONE'
+0x07767490  strb     w8, [x19, #0x960]
+0x07767494  strb     w8, [x19, #0x978]
+0x07767498  add      x8, x19, #0x9a1
+0x0776749c  str      xzr, [x19, #0xa70]
+0x077674a0  add      x13, x19, #0xae1
+0x077674a4  str      xzr, [x19, #0xa68]
+0x077674a8  str      w21, [x10, #8]
+0x077674ac  str      x24, [x10]
+0x077674b0  mov      w10, #6
+0x077674b4  str      q0, [x19, #0xa20]
+0x077674b8  str      q0, [x19, #0xa10]
+0x077674bc  str      q0, [x19, #0xa00]
+0x077674c0  ldr      q0, [x12]
+0x077674c4  add      x12, x19, #0xaf9
+0x077674c8  str      xzr, [x19, #0x9a8]
+0x077674cc  str      xzr, [x19, #0x9b0]
+0x077674d0  str      w21, [x8, #8]
+0x077674d4  str      x24, [x8]
+0x077674d8  mov      w8, #4
+0x077674dc  strb     w10, [x19, #0xab0]
+0x077674e0  strb     w10, [x19, #0xac8]
+0x077674e4  mov      w10, #0x22
+0x077674e8  str      xzr, [x19, #0xaf0]
+0x077674ec  str      q0, [x13]
+0x077674f0  str      xzr, [x19, #0xb08]
+0x077674f4  str      q0, [x12]
+0x077674f8  movi     v0.2d, #0000000000000000
+0x077674fc  str      xzr, [x19, #0x9b8]
+0x07767500  str      xzr, [x19, #0x9c8]
+0x07767504  str      xzr, [x19, #0x9c0]
+0x07767508  strb     w8, [x19, #0x9b8]
+0x0776750c  strh     w9, [x23]
+0x07767510  strb     w8, [x19, #0xa18]
+0x07767514  strh     w9, [x23, #0x60]
+0x07767518  str      xzr, [x19, #0xa88]
+0x0776751c  str      xzr, [x19, #0xa80]
+0x07767520  str      xzr, [x19, #0xa90]
+0x07767524  strb     w8, [x19, #0xa80]
+0x07767528  strh     w9, [x23, #0xc8]
+0x0776752c  strb     w10, [x19, #0xae0]
+0x07767530  strb     w10, [x19, #0xaf8]
+0x07767534  add      x10, x19, #0xb48
+0x07767538  str      xzr, [x19, #0xb38]
+0x0776753c  str      xzr, [x19, #0xb30]
+0x07767540  str      xzr, [x19, #0xb40]
+0x07767544  strb     w8, [x19, #0xb30]
+0x07767548  add      x8, x19, #0xb51
+0x0776754c  strh     w9, [x23, #0x178]
+0x07767550  mov      w9, #1
+0x07767554  stp      q0, q0, [x10]
+0x07767558  add      x10, x19, #0xb74
+0x0776755c  str      w21, [x8, #8]
+0x07767560  str      x24, [x8]
+0x07767564  add      x8, x19, #0xb6c
+0x07767568  str      w9, [x19, #0xb68]
+0x0776756c  add      x9, x19, #0xb71
+0x07767570  strb     w11, [x19, #0xab3]
+0x07767574  strb     w11, [x19, #0xacb]
+0x07767578  mov      w11, #0x45
+0x0776757c  str      xzr, [x10]
+0x07767580  str      xzr, [x8]
+0x07767584  str      wzr, [x19, #0xb84]
+0x07767588  str      xzr, [x8, #0x10]
+0x0776758c  add      x8, x19, #0xb91
+0x07767590  str      w21, [x9, #8]
+0x07767594  str      x24, [x9]
+0x07767598  add      x9, x19, #0xba8
+0x0776759c  str      x25, [x19, #0x110]
+0x077675a0  str      x26, [x19, #0x130]
+0x077675a4  str      x27, [x19, #0x1e8]
+0x077675a8  str      wzr, [x19, #0x990]
+0x077675ac  str      wzr, [x19, #0x998]
+0x077675b0  strb     w20, [x19, #0x9a0]
+0x077675b4  strb     w20, [x19, #0x9d0]
+0x077675b8  strb     w20, [x19, #0x9e8]
+0x077675bc  strb     w20, [x19, #0xa30]
+0x077675c0  strb     w20, [x19, #0xa48]
+0x077675c4  strb     w20, [x19, #0xa60]
+0x077675c8  str      wzr, [x19, #0xa78]
+0x077675cc  str      xzr, [x19, #0xaa0]
+0x077675d0  str      xzr, [x19, #0xa98]
+0x077675d4  str      wzr, [x19, #0xaa8]
+0x077675d8  strb     w11, [x19, #0xaf1]
+0x077675dc  strb     w11, [x19, #0xb09]
+0x077675e0  str      xzr, [x19, #0xb18]
+0x077675e4  str      xzr, [x19, #0xb10]
+0x077675e8  str      wzr, [x19, #0xb28]
+0x077675ec  str      xzr, [x19, #0xb20]
+0x077675f0  strb     w20, [x19, #0xb50]
+0x077675f4  strb     w20, [x19, #0xb70]
+0x077675f8  str      wzr, [x19, #0xb88]
+0x077675fc  str      xzr, [x19, #0xba0]
+0x07767600  str      xzr, [x19, #0xb98]
+0x07767604  strb     w20, [x19, #0xb90]
+0x07767608  str      w21, [x8, #8]
+0x0776760c  str      x24, [x8]
+0x07767610  str      xzr, [x19, #0xbd8]
+0x07767614  stp      q0, q0, [x9, #0x10]
+0x07767618  str      q0, [x9]
+0x0776761c  bl       #0x7688d3c
+0x07767620  movi     v0.2d, #0000000000000000
+0x07767624  mov      w8, #0x2c69
+0x07767628  add      x8, x19, x8
+0x0776762c  str      xzr, [x19, #0x2c88]
+0x07767630  str      xzr, [x19, #0x2c90]
+0x07767634  strb     w20, [x22, #0x18]
+0x07767638  str      q0, [x19, #0x2c60]
+0x0776763c  str      q0, [x19, #0x2c70]
+0x07767640  str      w21, [x8, #8]
+0x07767644  str      x24, [x8]
+0x07767648  mov      w8, #0x2c81
+0x0776764c  add      x8, x19, x8
+0x07767650  str      q0, [x19, #0x2c50]
+0x07767654  str      q0, [x19, #0x2c40]
+0x07767658  str      q0, [x19, #0x2c30]
+0x0776765c  str      q0, [x19, #0x2c20]
+0x07767660  str      q0, [x19, #0x2c10]
+0x07767664  str      q0, [x19, #0x2c00]
+0x07767668  str      q0, [x19, #0x2bf0]
+0x0776766c  strb     w20, [x22]
+0x07767670  str      x24, [x8]
+0x07767674  str      w21, [x8, #8]
+0x07767678  ldp      x20, x19, [sp, #0x50]
+0x0776767c  ldp      x22, x21, [sp, #0x40]
+0x07767680  ldp      x24, x23, [sp, #0x30]
+0x07767684  ldp      x26, x25, [sp, #0x20]
+0x07767688  ldr      x27, [sp, #0x10]
+0x0776768c  ldp      x29, x30, [sp], #0x60
+0x07767690  ret      
+0x07767694  stp      x29, x30, [sp, #-0x30]!

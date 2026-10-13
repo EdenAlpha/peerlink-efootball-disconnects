@@ -1,0 +1,43 @@
+0x058e5994  mov      w0, wzr
+0x058e5998  ret      
+0x058e599c  mov      w0, wzr
+0x058e59a0  str      wzr, [x1]
+0x058e59a4  str      wzr, [x2]
+0x058e59a8  ret      
+0x058e59ac  str      wzr, [x1]
+0x058e59b0  str      wzr, [x2]
+0x058e59b4  ret      
+0x058e59b8  tbz      w1, #0, #0x58e59c4
+0x058e59bc  mov      w8, #-1
+0x058e59c0  str      w8, [x0, #0x24c]
+0x058e59c4  ret      
+0x058e59c8  ldrb     w8, [x0, #0x216]
+0x058e59cc  ldrh     w9, [x0, #0x214]
+0x058e59d0  ldr      w10, [x0, #0x210]
+0x058e59d4  orr      w8, w9, w8, lsl #16
+0x058e59d8  orr      x8, x10, x8, lsl #32
+0x058e59dc  tst      x8, #0x18000000000000
+0x058e59e0  cset     w0, eq
+0x058e59e4  ret      
+0x058e59e8  ldrb     w8, [x0, #0x14f]
+0x058e59ec  cbz      w8, #0x58e5a04
+0x058e59f0  ldrb     w8, [x0, #0x20f]
+0x058e59f4  cmp      w8, #1
+0x058e59f8  b.eq     #0x58e5a04
+0x058e59fc  mov      w0, wzr
+0x058e5a00  ret      
+0x058e5a04  ldr      x8, [x0]
+0x058e5a08  ldr      x1, [x8, #0x748]
+0x058e5a0c  br       x1
+0x058e5a10  sub      sp, sp, #0x80
+0x058e5a14  stp      x29, x30, [sp, #0x30]
+0x058e5a18  str      x25, [sp, #0x40]
+0x058e5a1c  stp      x24, x23, [sp, #0x50]
+0x058e5a20  stp      x22, x21, [sp, #0x60]
+0x058e5a24  stp      x20, x19, [sp, #0x70]
+0x058e5a28  add      x29, sp, #0x30
+0x058e5a2c  adrp     x9, #0x99eb000
+0x058e5a30  mrs      x23, tpidr_el0
+0x058e5a34  ldr      x8, [x23, #0x28]
+0x058e5a38  ldr      x9, [x9, #0xcf0]
+0x058e5a3c  stur     x8, [x29, #-8]

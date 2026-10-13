@@ -1,0 +1,9 @@
+﻿disasm lines: 88 -> C:\Users\Administrator\Documents\Default Project\work\range.dis
+0x07e2ee04  add      x1, x1, #0xf8a           ; STR 0xad9f8a 'P2PTURNIO_TURN_RTT_VARIANCE'
+0x07e2ee30  add      x1, x1, #0xc94           ; STR 0xc90c94 'P2PTURNIO_TURN_RX_LOSS_RATE'
+0x07e2ee5c  add      x1, x1, #0xb70           ; STR 0xcb7b70 'P2PTURNIO_RTT_MIN_EVALUATION'
+0x07e2ee88  add      x1, x1, #0x8d           ; STR 0xb7208d 'P2PTURNIO_RTT_MAX_EVALUATION'
+0x07e2eeb4  add      x1, x1, #0x105           ; STR 0xd2b105 'P2PTURNIO_RTT_MEAN_EVALUATION'
+0x07e2eee0  add      x1, x1, #0xd8e           ; STR 0xb13d8e 'P2PTURNIO_RTT_VARIANCE_EVALUATION'
+0x07e2ef0c  add      x1, x1, #0x4c           ; STR 0xc6a04c 'P2PTURNIO_RX_LOSS_RATE_EVALUATION'
+0x07e2ef38  add      x1, x1, #0x7d1           ; STR 0xbf77d1 'LATENCY_TURN_GET_TURN_ADDRESS_MIN'

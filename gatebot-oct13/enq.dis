@@ -1,0 +1,128 @@
+0x07bddb48  stp      x29, x30, [sp, #-0x30]!
+0x07bddb4c  stp      x22, x21, [sp, #0x10]
+0x07bddb50  stp      x20, x19, [sp, #0x20]
+0x07bddb54  mov      x29, sp
+0x07bddb58  mov      x19, x2
+0x07bddb5c  mov      x20, x0
+0x07bddb60  ldr      x8, [x0, #8]
+0x07bddb64  mov      x21, x1
+0x07bddb68  cbz      x8, #0x7bddbf8
+0x07bddb6c  mov      x9, xzr
+0x07bddb70  ldr      x10, [x20]
+0x07bddb74  str      xzr, [x10, x9, lsl #3]
+0x07bddb78  add      x9, x9, #1
+0x07bddb7c  cmp      x8, x9
+0x07bddb80  b.ne     #0x7bddb70
+0x07bddb84  ldr      x1, [x20, #0x10]
+0x07bddb88  stp      xzr, xzr, [x20, #0x10]
+0x07bddb8c  cbz      x1, #0x7bddbf8
+0x07bddb90  cmp      x21, x19
+0x07bddb94  b.eq     #0x7bddc10
+0x07bddb98  ldr      w8, [x21, #0x10]
+0x07bddb9c  mov      x0, x20
+0x07bddba0  ldr      x22, [x1]
+0x07bddba4  str      w8, [x1, #0x10]
+0x07bddba8  ldr      w8, [x21, #0x1c]
+0x07bddbac  ldur     x9, [x21, #0x14]
+0x07bddbb0  str      w8, [x1, #0x1c]
+0x07bddbb4  stur     x9, [x1, #0x14]
+0x07bddbb8  bl       #0x7bddc28
+0x07bddbbc  ldr      x21, [x21]
+0x07bddbc0  mov      x1, x22
+0x07bddbc4  cbnz     x22, #0x7bddb90
+0x07bddbc8  b        #0x7bddbf8
+0x07bddbcc  mov      w0, #0x20
+0x07bddbd0  mov      w1, wzr
+0x07bddbd4  bl       #0x2f37644
+0x07bddbd8  ldr      q0, [x21, #0x10]
+0x07bddbdc  mov      x1, x0
+0x07bddbe0  str      q0, [x0, #0x10]
+0x07bddbe4  ldrsw    x8, [x0, #0x10]
+0x07bddbe8  stp      xzr, x8, [x0]
+0x07bddbec  mov      x0, x20
+0x07bddbf0  bl       #0x7bddc28
+0x07bddbf4  ldr      x21, [x21]
+0x07bddbf8  cmp      x21, x19
+0x07bddbfc  b.ne     #0x7bddbcc
+0x07bddc00  ldp      x20, x19, [sp, #0x20]
+0x07bddc04  ldp      x22, x21, [sp, #0x10]
+0x07bddc08  ldp      x29, x30, [sp], #0x30
+0x07bddc0c  ret      
+0x07bddc10  mov      x0, x1
+0x07bddc14  ldr      x19, [x1]
+0x07bddc18  bl       #0x2f376d4
+0x07bddc1c  mov      x1, x19
+0x07bddc20  cbnz     x19, #0x7bddc10
+0x07bddc24  b        #0x7bddc00
+0x07bddc28  stp      x29, x30, [sp, #-0x30]!
+0x07bddc2c  str      x21, [sp, #0x10]
+0x07bddc30  stp      x20, x19, [sp, #0x20]
+0x07bddc34  mov      x29, sp
+0x07bddc38  mov      x21, x1
+0x07bddc3c  mov      x19, x1
+0x07bddc40  mov      x20, x0
+0x07bddc44  ldrsw    x1, [x21, #0x10]!
+0x07bddc48  mov      x2, x21
+0x07bddc4c  stur     x1, [x21, #-8]
+0x07bddc50  bl       #0x7bddd4c
+0x07bddc54  ldr      x8, [x20, #8]
+0x07bddc58  ldur     x9, [x21, #-8]
+0x07bddc5c  fmov     d0, x8
+0x07bddc60  cnt      v0.8b, v0.8b
+0x07bddc64  uaddlv   h0, v0.8b
+0x07bddc68  fmov     w11, s0
+0x07bddc6c  cmp      x11, #1
+0x07bddc70  b.hi     #0x7bddc80
+0x07bddc74  sub      x10, x8, #1
+0x07bddc78  and      x9, x10, x9
+0x07bddc7c  b        #0x7bddc90
+0x07bddc80  cmp      x9, x8
+0x07bddc84  b.lo     #0x7bddc90
+0x07bddc88  udiv     x10, x9, x8
+0x07bddc8c  msub     x9, x10, x8, x9
+0x07bddc90  cbz      x0, #0x7bddcc0
+0x07bddc94  ldr      x10, [x0]
+0x07bddc98  str      x10, [x19]
+0x07bddc9c  str      x19, [x0]
+0x07bddca0  ldr      x10, [x19]
+0x07bddca4  cbz      x10, #0x7bddd2c
+0x07bddca8  ldr      x10, [x10, #8]
+0x07bddcac  cmp      x11, #1
+0x07bddcb0  b.hi     #0x7bddcf8
+0x07bddcb4  sub      x8, x8, #1
+0x07bddcb8  and      x10, x10, x8
+0x07bddcbc  b        #0x7bddd08
+0x07bddcc0  mov      x10, x20
+0x07bddcc4  ldr      x12, [x10, #0x10]!
+0x07bddcc8  str      x12, [x19]
+0x07bddccc  ldr      x12, [x20]
+0x07bddcd0  str      x19, [x10]
+0x07bddcd4  str      x10, [x12, x9, lsl #3]
+0x07bddcd8  ldr      x9, [x19]
+0x07bddcdc  cbz      x9, #0x7bddd2c
+0x07bddce0  ldr      x10, [x9, #8]
+0x07bddce4  cmp      x11, #1
+0x07bddce8  b.hi     #0x7bddd14
+0x07bddcec  sub      x8, x8, #1
+0x07bddcf0  and      x10, x10, x8
+0x07bddcf4  b        #0x7bddd24
+0x07bddcf8  cmp      x10, x8
+0x07bddcfc  b.lo     #0x7bddd08
+0x07bddd00  udiv     x11, x10, x8
+0x07bddd04  msub     x10, x11, x8, x10
+0x07bddd08  cmp      x10, x9
+0x07bddd0c  b.ne     #0x7bddd24
+0x07bddd10  b        #0x7bddd2c
+0x07bddd14  cmp      x10, x8
+0x07bddd18  b.lo     #0x7bddd24
+0x07bddd1c  udiv     x9, x10, x8
+0x07bddd20  msub     x10, x9, x8, x10
+0x07bddd24  ldr      x8, [x20]
+0x07bddd28  str      x19, [x8, x10, lsl #3]
+0x07bddd2c  ldr      x8, [x20, #0x18]
+0x07bddd30  mov      x0, x19
+0x07bddd34  add      x8, x8, #1
+0x07bddd38  str      x8, [x20, #0x18]
+0x07bddd3c  ldp      x20, x19, [sp, #0x20]
+0x07bddd40  ldr      x21, [sp, #0x10]
+0x07bddd44  ldp      x29, x30, [sp], #0x30

@@ -1,0 +1,69 @@
+0x07e90c2c  stp      x29, x30, [sp, #-0x50]!
+0x07e90c30  str      x25, [sp, #0x10]
+0x07e90c34  stp      x24, x23, [sp, #0x20]
+0x07e90c38  stp      x22, x21, [sp, #0x30]
+0x07e90c3c  stp      x20, x19, [sp, #0x40]
+0x07e90c40  mov      x29, sp
+0x07e90c44  mov      x19, x0
+0x07e90c48  add      x0, x0, #8
+0x07e90c4c  adrp     x8, #0x98af000
+0x07e90c50  add      x8, x8, #0x1f8
+0x07e90c54  str      x8, [x19]
+0x07e90c58  bl       #0x2fc833c
+0x07e90c5c  add      x0, x19, #0xc8
+0x07e90c60  bl       #0x2fcdb4c
+0x07e90c64  add      x0, x19, #0xf0
+0x07e90c68  mov      w1, wzr
+0x07e90c6c  bl       #0x2fcb5e0
+0x07e90c70  mov      w0, #0x2000
+0x07e90c74  strb     wzr, [x19, #0x108]
+0x07e90c78  mov      w20, #0x2000
+0x07e90c7c  bl       #0x8c1c050
+0x07e90c80  movi     v0.2d, #0000000000000000
+0x07e90c84  stp      x0, x20, [x19, #0x120]
+0x07e90c88  add      x20, x19, #0x138
+0x07e90c8c  add      x0, x19, #0x708
+0x07e90c90  mov      w1, wzr
+0x07e90c94  mov      w2, #0x258
+0x07e90c98  str      xzr, [x19, #0x118]
+0x07e90c9c  add      x21, x19, #0x1f0
+0x07e90ca0  stp      q0, q0, [x20]
+0x07e90ca4  stp      q0, q0, [x20, #0x20]
+0x07e90ca8  stp      q0, q0, [x20, #0x40]
+0x07e90cac  stp      q0, q0, [x20, #0x60]
+0x07e90cb0  stp      q0, q0, [x20, #0x80]
+0x07e90cb4  str      q0, [x20, #0xa0]
+0x07e90cb8  bl       #0x8c1bd60
+0x07e90cbc  mov      x0, x21
+0x07e90cc0  mov      w1, wzr
+0x07e90cc4  mov      w2, #0x514
+0x07e90cc8  bl       #0x8c1bd60
+0x07e90ccc  adrp     x22, #0x9935000
+0x07e90cd0  add      x22, x22, #0xf08
+0x07e90cd4  add      x23, x22, #0x48
+0x07e90cd8  add      x24, x22, #0x78
+0x07e90cdc  add      x25, x22, #0x98
+0x07e90ce0  adrp     x1, #0xabe000
+0x07e90ce4  add      x1, x1, #0x6f1           ; STR 0xbbe6f1 'CMD_GET_TURN_SERVER_LIST'
+0x07e90ce8  mov      x0, x20
+0x07e90cec  mov      w2, #0x18
+0x07e90cf0  str      x22, [x19]
+0x07e90cf4  add      x21, x19, #0x170
+0x07e90cf8  str      x23, [x19, #0x110]
+0x07e90cfc  str      x24, [x19, #0x130]
+0x07e90d00  mov      w20, #0x18
+0x07e90d04  str      x25, [x19, #0x1e8]
+0x07e90d08  bl       #0x2f3877c
+0x07e90d0c  adrp     x1, #0xc04000
+0x07e90d10  add      x1, x1, #0xe43           ; STR 0xd04e43 'CmdGetTurnServerList.php'
+0x07e90d14  mov      x0, x21
+0x07e90d18  mov      w2, #0x18
+0x07e90d1c  bl       #0x2f3877c
+0x07e90d20  adrp     x8, #0xb57000
+0x07e90d24  add      x8, x8, #0x25f           ; STR 0xc5725f 'NotImplement'
+0x07e90d28  mov      w10, #0x656d
+0x07e90d2c  add      x9, x19, #0x979
+0x07e90d30  movk     w10, #0x746e, lsl #16
+0x07e90d34  str      xzr, [x19, #0x980]
+0x07e90d38  ldr      x8, [x8]
+0x07e90d3c  str      xzr, [x19, #0x988]

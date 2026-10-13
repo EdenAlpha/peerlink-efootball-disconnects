@@ -1,0 +1,32 @@
+0x07e45600  csel     w10, w13, w10, lo
+0x07e45604  strb     w10, [x12], #1
+0x07e45608  cmp      x12, x9
+0x07e4560c  b.ne     #0x7e455f0
+0x07e45610  ldrb     w9, [sp]
+0x07e45614  ldr      x11, [sp, #0x10]
+0x07e45618  and      w12, w9, #1
+0x07e4561c  cmp      w12, #0
+0x07e45620  csel     x20, x8, x11, eq
+0x07e45624  mov      x0, x20
+0x07e45628  bl       #0x8c1bd30
+0x07e4562c  mov      x2, x0
+0x07e45630  mov      x0, x19
+0x07e45634  mov      x1, x20
+0x07e45638  bl       #0x2f4f724
+0x07e4563c  adrp     x1, #0xa72000
+0x07e45640  add      x1, x1, #0x12b           ; STR 0xb7212b '.txt'
+0x07e45644  mov      x0, x19
+0x07e45648  mov      w2, #4
+0x07e4564c  bl       #0x2f4f724
+0x07e45650  ldrb     w8, [sp]
+0x07e45654  tbz      w8, #0, #0x7e45660
+0x07e45658  ldr      x0, [sp, #0x10]
+0x07e4565c  bl       #0x2f376d4
+0x07e45660  ldr      x8, [x22, #0x28]
+0x07e45664  ldur     x9, [x29, #-8]
+0x07e45668  cmp      x8, x9
+0x07e4566c  b.ne     #0x7e45684
+0x07e45670  ldp      x20, x19, [sp, #0x40]
+0x07e45674  ldp      x22, x21, [sp, #0x30]
+0x07e45678  ldp      x29, x30, [sp, #0x20]
+0x07e4567c  add      sp, sp, #0x50

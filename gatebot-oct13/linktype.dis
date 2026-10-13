@@ -1,0 +1,113 @@
+0x077a259c  sub      sp, sp, #0xb0
+0x077a25a0  stp      x29, x30, [sp, #0x70]
+0x077a25a4  stp      x24, x23, [sp, #0x80]
+0x077a25a8  stp      x22, x21, [sp, #0x90]
+0x077a25ac  stp      x20, x19, [sp, #0xa0]
+0x077a25b0  add      x29, sp, #0x70
+0x077a25b4  mrs      x23, tpidr_el0
+0x077a25b8  add      x19, x0, #0xf0
+0x077a25bc  mov      x20, x0
+0x077a25c0  ldr      x8, [x23, #0x28]
+0x077a25c4  mov      x0, x19
+0x077a25c8  stur     x8, [x29, #-8]
+0x077a25cc  bl       #0x2fcc2ac
+0x077a25d0  mov      x0, x20
+0x077a25d4  bl       #0x75a1658
+0x077a25d8  ldrb     w8, [x20, #0x1e8]
+0x077a25dc  add      x10, x20, #0x1e9
+0x077a25e0  ldr      x9, [x20, #0x1f8]
+0x077a25e4  sub      x0, x29, #0x20
+0x077a25e8  tst      w8, #1
+0x077a25ec  csel     x1, x10, x9, eq
+0x077a25f0  bl       #0x2fcb6dc
+0x077a25f4  adrp     x1, #0xbca000
+0x077a25f8  add      x1, x1, #0xb28           ; STR 0xccab28 'game_sycom'
+0x077a25fc  mov      x0, x19
+0x077a2600  bl       #0x2fcc828
+0x077a2604  sub      x1, x29, #0x20
+0x077a2608  bl       #0x2fc9bac
+0x077a260c  sub      x0, x29, #0x20
+0x077a2610  bl       #0x2fcba44
+0x077a2614  ldrb     w8, [x20, #0x200]
+0x077a2618  add      x10, x20, #0x201
+0x077a261c  ldr      x9, [x20, #0x210]
+0x077a2620  sub      x0, x29, #0x20
+0x077a2624  tst      w8, #1
+0x077a2628  csel     x1, x10, x9, eq
+0x077a262c  bl       #0x2fcb6dc
+0x077a2630  adrp     x1, #0xc17000
+0x077a2634  add      x1, x1, #0x4c           ; STR 0xd1704c 'error_code'
+0x077a2638  mov      x0, x19
+0x077a263c  bl       #0x2fcc828
+0x077a2640  sub      x1, x29, #0x20
+0x077a2644  bl       #0x2fc9bac
+0x077a2648  sub      x0, x29, #0x20
+0x077a264c  bl       #0x2fcba44
+0x077a2650  sub      x0, x29, #0x20
+0x077a2654  mov      w1, wzr
+0x077a2658  bl       #0x2fcb5e0
+0x077a265c  ldrb     w8, [x20, #0x218]
+0x077a2660  add      x10, x20, #0x219
+0x077a2664  ldr      x9, [x20, #0x228]
+0x077a2668  add      x0, sp, #0x38
+0x077a266c  tst      w8, #1
+0x077a2670  csel     x1, x10, x9, eq
+0x077a2674  bl       #0x2fcb6dc
+0x077a2678  adrp     x1, #0xa76000
+0x077a267c  add      x1, x1, #0xec8           ; STR 0xb76ec8 'name'
+0x077a2680  sub      x0, x29, #0x20
+0x077a2684  bl       #0x2fcc828
+0x077a2688  add      x1, sp, #0x38
+0x077a268c  bl       #0x2fc9bac
+0x077a2690  add      x0, sp, #0x38
+0x077a2694  bl       #0x2fcba44
+0x077a2698  ldrb     w8, [x20, #0x230]
+0x077a269c  add      x10, x20, #0x231
+0x077a26a0  ldr      x9, [x20, #0x240]
+0x077a26a4  add      x0, sp, #0x38
+0x077a26a8  tst      w8, #1
+0x077a26ac  csel     x1, x10, x9, eq
+0x077a26b0  bl       #0x2fcb6dc
+0x077a26b4  adrp     x1, #0xb57000
+0x077a26b8  add      x1, x1, #0x55c           ; STR 0xc5755c 'region'
+0x077a26bc  sub      x0, x29, #0x20
+0x077a26c0  bl       #0x2fcc828
+0x077a26c4  add      x1, sp, #0x38
+0x077a26c8  bl       #0x2fc9bac
+0x077a26cc  add      x0, sp, #0x38
+0x077a26d0  bl       #0x2fcba44
+0x077a26d4  ldrb     w8, [x20, #0x248]
+0x077a26d8  add      x10, x20, #0x249
+0x077a26dc  ldr      x9, [x20, #0x258]
+0x077a26e0  add      x0, sp, #0x38
+0x077a26e4  tst      w8, #1
+0x077a26e8  csel     x1, x10, x9, eq
+0x077a26ec  bl       #0x2fcb6dc
+0x077a26f0  adrp     x1, #0xae3000
+0x077a26f4  add      x1, x1, #0xcf8           ; STR 0xbe3cf8 'ip_addr'
+0x077a26f8  sub      x0, x29, #0x20
+0x077a26fc  bl       #0x2fcc828
+0x077a2700  add      x1, sp, #0x38
+0x077a2704  bl       #0x2fc9bac
+0x077a2708  add      x0, sp, #0x38
+0x077a270c  bl       #0x2fcba44
+0x077a2710  ldr      w1, [x20, #0x260]
+0x077a2714  add      x0, sp, #0x38
+0x077a2718  bl       #0x2fcb670
+0x077a271c  adrp     x1, #0xb10000
+0x077a2720  add      x1, x1, #0x45e           ; STR 0xc1045e 'port'
+0x077a2724  sub      x0, x29, #0x20
+0x077a2728  bl       #0x2fcc828
+0x077a272c  add      x1, sp, #0x38
+0x077a2730  bl       #0x2fc9bac
+0x077a2734  add      x0, sp, #0x38
+0x077a2738  bl       #0x2fcba44
+0x077a273c  adrp     x1, #0xa97000
+0x077a2740  add      x1, x1, #0x849           ; STR 0xb97849 'gamerelay'
+0x077a2744  mov      x0, x19
+0x077a2748  bl       #0x2fcc828
+0x077a274c  sub      x1, x29, #0x20
+0x077a2750  bl       #0x2fc9bac
+0x077a2754  ldr      w1, [x20, #0x268]
+0x077a2758  add      x0, sp, #0x38
+0x077a275c  bl       #0x2fcb670

@@ -1,0 +1,96 @@
+0x07e370e0  ldr      x8, [sp, #0x1288]
+0x07e370e4  mov      x0, x19
+0x07e370e8  cmp      x8, x19
+0x07e370ec  b.eq     #0x7e3711c
+0x07e370f0  mov      x20, x8
+0x07e370f4  b        #0x7e37104
+0x07e370f8  mov      x8, x20
+0x07e370fc  cmp      x20, x19
+0x07e37100  b.eq     #0x7e37118
+0x07e37104  ldrb     w9, [x20, #-0x20]!
+0x07e37108  tbz      w9, #0, #0x7e370f8
+0x07e3710c  ldur     x0, [x8, #-0x10]
+0x07e37110  bl       #0x2f376d4
+0x07e37114  b        #0x7e370f8
+0x07e37118  ldr      x0, [sp, #0x1280]
+0x07e3711c  str      x19, [sp, #0x1288]
+0x07e37120  bl       #0x2f376d4
+0x07e37124  mov      w8, #0x447a0000
+0x07e37128  ldr      s0, [x25, #0x168]
+0x07e3712c  add      x0, sp, #1, lsl #12
+0x07e37130  adrp     x1, #0xaab000
+0x07e37134  add      x1, x1, #0x40e           ; STR 0xbab40e 'LATENCY_MODE_MATCHING'
+0x07e37138  add      x0, x0, #0x270
+0x07e3713c  fmov     s8, w8
+0x07e37140  mov      w3, wzr
+0x07e37144  fmul     s0, s0, s8
+0x07e37148  fcvtzu   w19, s0
+0x07e3714c  mov      w2, w19
+0x07e37150  bl       #0x7e3e238
+0x07e37154  ldr      s0, [x25, #0x16c]
+0x07e37158  add      x0, sp, #1, lsl #12
+0x07e3715c  adrp     x1, #0xa39000
+0x07e37160  add      x1, x1, #0x824           ; STR 0xb39824 'LATENCY_MODE_SESSION'
+0x07e37164  add      x0, x0, #0x270
+0x07e37168  mov      w3, wzr
+0x07e3716c  fmul     s0, s0, s8
+0x07e37170  fcvtzu   w20, s0
+0x07e37174  mov      w2, w20
+0x07e37178  bl       #0x7e3e238
+0x07e3717c  ldr      s0, [x25, #0x170]
+0x07e37180  add      w21, w20, w19
+0x07e37184  add      x0, sp, #1, lsl #12
+0x07e37188  adrp     x1, #0xc04000
+0x07e3718c  add      x1, x1, #0xb65           ; STR 0xd04b65 'LATENCY_MODE_CONNECT'
+0x07e37190  add      x0, x0, #0x270
+0x07e37194  fmul     s0, s0, s8
+0x07e37198  mov      w3, wzr
+0x07e3719c  fcvtzu   w19, s0
+0x07e371a0  mov      w2, w19
+0x07e371a4  bl       #0x7e3e238
+0x07e371a8  ldr      s0, [x25, #0x174]
+0x07e371ac  add      x0, sp, #1, lsl #12
+0x07e371b0  adrp     x1, #0xbf1000
+0x07e371b4  add      x1, x1, #0x754           ; STR 0xcf1754 'LATENCY_MODE_ANNTENA'
+0x07e371b8  add      x0, x0, #0x270
+0x07e371bc  mov      w3, wzr
+0x07e371c0  fmul     s0, s0, s8
+0x07e371c4  fcvtzu   w20, s0
+0x07e371c8  mov      w2, w20
+0x07e371cc  bl       #0x7e3e238
+0x07e371d0  ldr      s0, [x25, #0x17c]
+0x07e371d4  add      w8, w19, w20
+0x07e371d8  add      x0, sp, #1, lsl #12
+0x07e371dc  adrp     x1, #0xb0b000
+0x07e371e0  add      x1, x1, #0x116           ; STR 0xc0b116 'LATENCY_MODE_PRE_MENU'
+0x07e371e4  add      x0, x0, #0x270
+0x07e371e8  fmul     s0, s0, s8
+0x07e371ec  mov      w3, wzr
+0x07e371f0  add      w21, w21, w8
+0x07e371f4  fcvtzu   w19, s0
+0x07e371f8  mov      w2, w19
+0x07e371fc  bl       #0x7e3e238
+0x07e37200  ldr      s0, [x25, #0x180]
+0x07e37204  add      x0, sp, #1, lsl #12
+0x07e37208  adrp     x1, #0xba4000
+0x07e3720c  add      x1, x1, #0x274           ; STR 0xca4274 'LATENCY_MODE_MATCH_SETTEING_INIT'
+0x07e37210  add      x0, x0, #0x270
+0x07e37214  mov      w3, wzr
+0x07e37218  fmul     s0, s0, s8
+0x07e3721c  fcvtzu   w20, s0
+0x07e37220  mov      w2, w20
+0x07e37224  bl       #0x7e3e238
+0x07e37228  add      w8, w19, w20
+0x07e3722c  add      x0, sp, #1, lsl #12
+0x07e37230  add      w2, w21, w8
+0x07e37234  adrp     x1, #0xb1e000
+0x07e37238  add      x1, x1, #0xb22           ; STR 0xc1eb22 'LATENCY_MODE_WHOLE_CONNECTING'
+0x07e3723c  add      x0, x0, #0x270
+0x07e37240  mov      w3, wzr
+0x07e37244  bl       #0x7e3e238
+0x07e37248  ldp      x8, x9, [x25, #0x190]
+0x07e3724c  add      x0, sp, #1, lsl #12
+0x07e37250  adrp     x1, #0xba4000
+0x07e37254  add      x1, x1, #0x295           ; STR 0xca4295 'LATENCY_MODE_MATCHING_CMD_START_MATCHING'
+0x07e37258  ldr      x12, [x25, #0x238]
+0x07e3725c  ldp      x11, x13, [x25, #0x1a0]

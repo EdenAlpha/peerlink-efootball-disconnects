@@ -1,0 +1,62 @@
+0x07deb608  stp      x29, x30, [sp, #-0x60]!
+0x07deb60c  stp      x28, x27, [sp, #0x10]
+0x07deb610  stp      x26, x25, [sp, #0x20]
+0x07deb614  stp      x24, x23, [sp, #0x30]
+0x07deb618  stp      x22, x21, [sp, #0x40]
+0x07deb61c  stp      x20, x19, [sp, #0x50]
+0x07deb620  mov      x29, sp
+0x07deb624  sub      sp, sp, #0x210
+0x07deb628  str      w2, [sp, #0x54]
+0x07deb62c  mrs      x8, tpidr_el0
+0x07deb630  str      x8, [sp, #0x30]
+0x07deb634  add      x22, sp, #0xf0
+0x07deb638  movi     v0.2d, #0000000000000000
+0x07deb63c  ldr      x8, [x8, #0x28]
+0x07deb640  stur     x8, [x29, #-0x18]
+0x07deb644  stp      q0, q0, [x22]
+0x07deb648  stp      q0, q0, [x22, #0x20]
+0x07deb64c  stp      q0, q0, [x22, #0x40]
+0x07deb650  stp      q0, q0, [x22, #0x60]
+0x07deb654  stp      q0, q0, [x22, #0x80]
+0x07deb658  stp      q0, q0, [x22, #0xa0]
+0x07deb65c  stp      q0, q0, [x22, #0xc0]
+0x07deb660  stp      q0, q0, [x22, #0xe0]
+0x07deb664  str      x0, [sp, #0x58]
+0x07deb668  cbz      x0, #0x7debf94
+0x07deb66c  cbz      x1, #0x7debf94
+0x07deb670  mov      x21, x3
+0x07deb674  cbz      x3, #0x7debf94
+0x07deb678  ldr      x0, [sp, #0x58]
+0x07deb67c  mov      x20, x4
+0x07deb680  ldr      w2, [sp, #0x54]
+0x07deb684  str      w5, [sp, #0x50]
+0x07deb688  ldr      x8, [x0]
+0x07deb68c  ldr      x8, [x8, #0x168]
+0x07deb690  blr      x8
+0x07deb694  str      x0, [sp, #0x48]
+0x07deb698  cbz      x0, #0x7debf94
+0x07deb69c  ldr      x0, [sp, #0x58]
+0x07deb6a0  mov      x3, x21
+0x07deb6a4  ldr      x19, [sp, #0x48]
+0x07deb6a8  mov      x4, x20
+0x07deb6ac  ldr      w2, [sp, #0x54]
+0x07deb6b0  mov      w5, wzr
+0x07deb6b4  ldr      x8, [x0]
+0x07deb6b8  mov      w6, #1
+0x07deb6bc  mov      x1, x19
+0x07deb6c0  ldr      x8, [x8, #0xf0]
+0x07deb6c4  blr      x8
+0x07deb6c8  mov      x0, x21
+0x07deb6cc  bl       #0x8c1bd30
+0x07deb6d0  ldr      x19, [x19, #8]
+0x07deb6d4  mov      x25, x0
+0x07deb6d8  ldr      w8, [x19, #0x18]
+0x07deb6dc  cmp      w8, #1
+0x07deb6e0  b.ne     #0x7deb778
+0x07deb6e4  ldr      x24, [x19, #8]
+0x07deb6e8  cbz      x24, #0x7deb76c
+0x07deb6ec  mov      x23, xzr
+0x07deb6f0  mov      x8, x24
+0x07deb6f4  ldr      x8, [x8, #8]
+0x07deb6f8  add      x23, x23, #1
+0x07deb6fc  cbnz     x8, #0x7deb6f4

@@ -1,0 +1,48 @@
+0x07bfd600  add      sp, sp, #0xd0
+0x07bfd604  br       x1
+0x07bfd608  ldrb     w8, [x19, #0x220]
+0x07bfd60c  cbnz     w8, #0x7bfd620
+0x07bfd610  mov      w8, #1
+0x07bfd614  strb     w8, [x19, #0x220]
+0x07bfd618  bl       #0x2f595e8
+0x07bfd61c  str      x0, [x19, #0x228]
+0x07bfd620  ldr      x8, [x19]
+0x07bfd624  mov      x0, x19
+0x07bfd628  ldr      x8, [x8, #0x80]
+0x07bfd62c  blr      x8
+0x07bfd630  tbz      w0, #0, #0x7bfdfb8
+0x07bfd634  ldrb     w8, [x19, #0x230]
+0x07bfd638  cbnz     w8, #0x7bfd64c
+0x07bfd63c  mov      w8, #1
+0x07bfd640  strb     w8, [x19, #0x230]
+0x07bfd644  bl       #0x2f595e8
+0x07bfd648  str      x0, [x19, #0x238]
+0x07bfd64c  ldrb     w8, [x19, #0x1d4]
+0x07bfd650  cbz      w8, #0x7bfdb1c
+0x07bfd654  bl       #0x7c059cc
+0x07bfd658  tbz      w0, #0, #0x7bfdb1c
+0x07bfd65c  adrp     x1, #0x9ec000
+0x07bfd660  add      x1, x1, #0x492           ; STR 0xaec492 'ERR_LINKDOWN'
+0x07bfd664  b        #0x7bfdf34
+0x07bfd668  ldr      x0, [x19, #0x158]
+0x07bfd66c  cbz      x0, #0x7bfd680
+0x07bfd670  ldr      x8, [x0]
+0x07bfd674  ldr      x8, [x8, #0x28]
+0x07bfd678  blr      x8
+0x07bfd67c  str      xzr, [x19, #0x158]
+0x07bfd680  adrp     x10, #0xa39000
+0x07bfd684  add      x10, x10, #0x1f6           ; STR 0xb391f6 'GetCommonInfoTask'
+0x07bfd688  mov      w8, #0x22
+0x07bfd68c  mov      w9, #0x6b
+0x07bfd690  ldrb     w1, [x19, #0x78]
+0x07bfd694  add      x0, sp, #0x20
+0x07bfd698  ldr      q0, [x10]
+0x07bfd69c  str      xzr, [sp, #0x30]
+0x07bfd6a0  strb     w8, [sp, #0x20]
+0x07bfd6a4  strb     w9, [sp, #0x31]
+0x07bfd6a8  stur     q0, [sp, #0x21]
+0x07bfd6ac  bl       #0x7e972b8
+0x07bfd6b0  mov      x1, x0
+0x07bfd6b4  ldrb     w8, [sp, #0x20]
+0x07bfd6b8  str      x0, [x19, #0x158]
+0x07bfd6bc  tbz      w8, #0, #0x7bfd6cc

@@ -1,0 +1,72 @@
+0x0766b710  mov      x0, x19
+0x0766b714  bl       #0x2fcc828
+0x0766b718  add      x1, sp, #0x18
+0x0766b71c  bl       #0x2fc9bac
+0x0766b720  ldr      w1, [x20, #0x268]
+0x0766b724  mov      x0, sp
+0x0766b728  bl       #0x2fcb670
+0x0766b72c  adrp     x1, #0xabe000
+0x0766b730  add      x1, x1, #0x1f7           ; STR 0xbbe1f7 'gtimer'
+0x0766b734  mov      x0, x19
+0x0766b738  bl       #0x2fcc828
+0x0766b73c  mov      x1, sp
+0x0766b740  bl       #0x2fc9bac
+0x0766b744  mov      x0, sp
+0x0766b748  bl       #0x2fcba44
+0x0766b74c  ldrb     w8, [x20, #0x270]
+0x0766b750  add      x10, x20, #0x271
+0x0766b754  ldr      x9, [x20, #0x280]
+0x0766b758  mov      x0, sp
+0x0766b75c  tst      w8, #1
+0x0766b760  csel     x1, x10, x9, eq
+0x0766b764  bl       #0x2fcb6dc
+0x0766b768  adrp     x1, #0xbf6000
+0x0766b76c  add      x1, x1, #0xb08           ; STR 0xcf6b08 'phase'
+0x0766b770  mov      x0, x19
+0x0766b774  bl       #0x2fcc828
+0x0766b778  mov      x1, sp
+0x0766b77c  bl       #0x2fc9bac
+0x0766b780  mov      x0, sp
+0x0766b784  bl       #0x2fcba44
+0x0766b788  ldr      w1, [x20, #0x288]
+0x0766b78c  mov      x0, sp
+0x0766b790  bl       #0x2fcb670
+0x0766b794  adrp     x1, #0xb44000
+0x0766b798  add      x1, x1, #0x87           ; STR 0xc44087 'match_minute'
+0x0766b79c  mov      x0, x19
+0x0766b7a0  bl       #0x2fcc828
+0x0766b7a4  mov      x1, sp
+0x0766b7a8  bl       #0x2fc9bac
+0x0766b7ac  mov      x0, sp
+0x0766b7b0  bl       #0x2fcba44
+0x0766b7b4  add      x0, sp, #0x18
+0x0766b7b8  bl       #0x2fcba44
+0x0766b7bc  sub      x0, x29, #0x20
+0x0766b7c0  bl       #0x2fcba44
+0x0766b7c4  ldr      x8, [x23, #0x28]
+0x0766b7c8  ldur     x9, [x29, #-8]
+0x0766b7cc  cmp      x8, x9
+0x0766b7d0  b.ne     #0x766b7f0
+0x0766b7d4  mov      w0, #1
+0x0766b7d8  ldp      x20, x19, [sp, #0x80]
+0x0766b7dc  ldp      x22, x21, [sp, #0x70]
+0x0766b7e0  ldp      x29, x30, [sp, #0x50]
+0x0766b7e4  ldr      x23, [sp, #0x60]
+0x0766b7e8  add      sp, sp, #0x90
+0x0766b7ec  ret      
+0x0766b7f0  bl       #0x8c1bc90
+0x0766b7f4  mov      w0, #1
+0x0766b7f8  ret      
+0x0766b7fc  sub      sp, sp, #0x70
+0x0766b800  stp      x29, x30, [sp, #0x30]
+0x0766b804  stp      x24, x23, [sp, #0x40]
+0x0766b808  stp      x22, x21, [sp, #0x50]
+0x0766b80c  stp      x20, x19, [sp, #0x60]
+0x0766b810  add      x29, sp, #0x30
+0x0766b814  mrs      x23, tpidr_el0
+0x0766b818  add      x9, x0, #0x118
+0x0766b81c  ldr      x8, [x23, #0x28]
+0x0766b820  sub      x1, x29, #0x10
+0x0766b824  mov      w2, #0xb
+0x0766b828  mov      x19, x0
+0x0766b82c  stur     x8, [x29, #-8]
