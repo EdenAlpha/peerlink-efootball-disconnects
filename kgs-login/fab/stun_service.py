@@ -18,6 +18,7 @@ modes:
 """
 
 import argparse
+import selectors
 import socket
 import struct
 import sys
@@ -50,6 +51,45 @@ def log(msg):
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
 
+def build_listeners(listen_port, skb_mark, extra_ips=()):
+    """One transparent UDP socket per interceptable original address.
+
+    The tproxy socket lookup happens against the packet's original
+    destination address, so a wildcard bind does NOT receive; each cluster
+    IP is bound explicitly (IP_TRANSPARENT makes the bind possible).
+    """
+    sel = selectors.DefaultSelector()
+    for ip in sorted(set(list(TARGET_IPS) + list(extra_ips))):
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.setsockopt(socket.SOL_IP, IP_TRANSPARENT, 1)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.setsockopt(socket.SOL_SOCKET, SO_MARK, skb_mark)
+        s.setsockopt(socket.SOL_IP, IP_RECVORIGDSTADDR, 1)
+        try:
+            s.bind((ip, listen_port))
+        except OSError as exc:
+            log(f"bind {ip}:{listen_port} failed: {exc}")
+            raise
+        sel.register(s, selectors.EVENT_READ, ip)
+        log(f"listening on {ip}:{listen_port}")
+    return sel
+
+
+def recv_one(sel):
+    for key, _events in sel.select(timeout=2):
+        listener = key.fileobj
+        data, anc, _fl, src = listener.recvmsg(4096, 512)
+        return data, anc, src
+    return None, None, None
+
+
+def find_orig_dst(anc):
+    for level, ctype, cdata in anc:
+        if level == SOL_IP and ctype == IP_RECVORIGDSTADDR:
+            return cdata
+    return None
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--fab-ip", required=True)
@@ -60,26 +100,23 @@ def main():
                     help="also answer STUN to non-cluster destinations")
     ap.add_argument("--skb-mark", type=int, default=1,
                     help="socket mark matching the TPROXY fwmark")
+    ap.add_argument("--extra-bind", default="",
+                    help="comma-separated extra ORIGINAL dst IPs to bind")
     args = ap.parse_args()
 
-    listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    listener.setsockopt(socket.SOL_IP, IP_TRANSPARENT, 1)
-    listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    listener.setsockopt(socket.SOL_SOCKET, SO_MARK, args.skb_mark)
-    listener.setsockopt(socket.SOL_IP, IP_RECVORIGDSTADDR, 1)
-    listener.bind(("0.0.0.0", args.listen_port))
+    sel = build_listeners(args.listen_port, args.skb_mark,
+                          [x.strip() for x in args.extra_bind.split(",")
+                           if x.strip()])
     sender = RawSender()
     log(f"stun service up mode={args.mode} fab={args.fab_ip} "
         f"listen=:{args.listen_port} generic={args.generic} "
         f"targets={len(TARGET_IPS)}")
 
     while True:
-        data, anc, _flags, src = listener.recvmsg(4096, 512)
-        orig_dst = None
-        for level, ctype, cdata in anc:
-            if level == SOL_IP and ctype == IP_RECVORIGDSTADDR:
-                orig_dst = cdata
-                break
+        data, anc, src = recv_one(sel)
+        if not data:
+            continue
+        orig_dst = find_orig_dst(anc)
         if orig_dst is None or len(orig_dst) < 8 or len(data) < 8:
             continue
         dst_ip = socket.inet_ntoa(orig_dst[4:8])
