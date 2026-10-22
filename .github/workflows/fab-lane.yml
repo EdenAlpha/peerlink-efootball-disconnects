@@ -34,7 +34,9 @@ jobs:
           sudo mkdir -p /root/rda
           sudo docker rm -f redroid-a redroid-b >/dev/null 2>&1 || true
           IMAGE=edwardzhouquan/redroid-mindthegapps-arm64:14.0.0-arm64_only
-          sudo docker pull "$IMAGE" 2>&1 | tail -2
+          echo "pulling $IMAGE (887MB, expect 1-5min)"
+          timeout 420 sudo docker pull "$IMAGE" 2>&1 | tail -2
+          [ "${PIPESTATUS[0]}" = "0" ] || { echo "PULL FAILED/TIMED OUT"; exit 1; }
           sudo docker network create --driver bridge \
             --subnet 172.29.1.0/24 fab-a >/dev/null
           sudo docker run -d --name redroid-a --privileged \
@@ -44,18 +46,21 @@ jobs:
             androidboot.redroid_width=720 androidboot.redroid_height=1280 \
             androidboot.redroid_dpi=320 androidboot.use_memfd=true || \
             { echo "DOCKER RUN A FAILED"; sudo docker logs redroid-a; exit 1; }
-          for i in $(seq 1 100); do
-            if [ "$(sudo docker exec redroid-a getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
-              echo "phone A BOOTED"; break
-            fi
-            [ "$i" = "100" ] && { sudo docker logs --tail 40 redroid-a; exit 1; }
+          booted=0
+          for i in $(seq 1 90); do
+            prop=$(timeout 12 sudo docker exec redroid-a getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+            if [ "$prop" = "1" ]; then echo "phone A BOOTED after ~$((i*5))s"; booted=1; break; fi
+            [ "$i" = "90" ] && { echo "PHONE A NEVER FINISHED BOOTING"; sudo docker logs --tail 40 redroid-a; exit 1; }
+            if [ $((i % 12)) = "0" ]; then echo "boot wait: $((i*5))s (prop='$prop')"; fi
             sleep 5
           done
+          [ "$booted" = "1" ] || exit 1
 
       - name: boot phone B (GApps, 172.29.2.10)
         run: |
           sudo mkdir -p /root/rdb
           IMAGE=edwardzhouquan/redroid-mindthegapps-arm64:14.0.0-arm64_only
+          echo "image cached from phone A pull"
           sudo docker network create --driver bridge \
             --subnet 172.29.2.0/24 fab-b >/dev/null
           sudo docker run -d --name redroid-b --privileged \
@@ -65,13 +70,15 @@ jobs:
             androidboot.redroid_width=720 androidboot.redroid_height=1280 \
             androidboot.redroid_dpi=320 androidboot.use_memfd=true || \
             { echo "DOCKER RUN B FAILED"; sudo docker logs redroid-b; exit 1; }
-          for i in $(seq 1 100); do
-            if [ "$(sudo docker exec redroid-b getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
-              echo "phone B BOOTED"; break
-            fi
-            [ "$i" = "100" ] && { sudo docker logs --tail 40 redroid-b; exit 1; }
+          booted=0
+          for i in $(seq 1 90); do
+            prop=$(timeout 12 sudo docker exec redroid-b getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+            if [ "$prop" = "1" ]; then echo "phone B BOOTED after ~$((i*5))s"; booted=1; break; fi
+            [ "$i" = "90" ] && { echo "PHONE B NEVER FINISHED BOOTING"; sudo docker logs --tail 40 redroid-b; exit 1; }
+            if [ $((i % 12)) = "0" ]; then echo "boot wait: $((i*5))s (prop='$prop')"; fi
             sleep 5
           done
+          [ "$booted" = "1" ] || exit 1
 
       - name: wire interception (host-side, no app)
         run: |
