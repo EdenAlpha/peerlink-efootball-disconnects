@@ -15,6 +15,7 @@ on:
 
 permissions:
   contents: write
+  packages: read
 
 jobs:
   lane:
@@ -33,18 +34,27 @@ jobs:
         run: |
           sudo mkdir -p /root/rda
           sudo docker rm -f redroid-a redroid-b >/dev/null 2>&1 || true
-          IMAGE=edwardzhouquan/redroid-mindthegapps-arm64:14.0.0-arm64_only
-          echo "pulling $IMAGE (887MB) - up to 3 attempts, 7min cap each"
-          pull_ok=0
-          for try in 1 2 3; do
-            echo "pull attempt $try"
-            if timeout 420 sudo docker pull --max-concurrent-downloads 2 "$IMAGE"; then
-              pull_ok=1; break
-            fi
-            echo "pull attempt $try failed - Docker Hub throttle is the usual cause; waiting 20s"
-            sleep 20
-          done
-          [ "$pull_ok" = "1" ] || { echo "PULL FAILED after 3 attempts"; exit 1; }
+          GHCR=ghcr.io/edenalpha/redroid-fab:14.0.0-arm64_only
+          HUB=edwardzhouquan/redroid-mindthegapps-arm64:14.0.0-arm64_only
+          echo "$GITHUB_TOKEN" | sudo docker login ghcr.io -u EdenAlpha --password-stdin >/dev/null 2>&1 || true
+          echo "pulling from ghcr (GitHub-internal, fast)"
+          IMAGE=""
+          if timeout 300 sudo docker pull "$GHCR"; then
+            echo "ghcr hit"; IMAGE="$GHCR"
+          else
+            echo "ghcr miss - falling back to hub with retries"
+            pull_ok=0
+            for try in 1 2 3; do
+              echo "hub pull attempt $try"
+              if timeout 420 sudo docker pull --max-concurrent-downloads 2 "$HUB"; then
+                pull_ok=1; break
+              fi
+              echo "hub pull attempt $try failed - Docker Hub throttle is the usual cause; waiting 20s"
+              sleep 20
+            done
+            [ "$pull_ok" = "1" ] || { echo "PULL FAILED after 3 attempts"; exit 1; }
+            IMAGE="$HUB"
+          fi
           sudo docker network create --driver bridge \
             --subnet 172.29.1.0/24 fab-a >/dev/null
           sudo docker run -d --name redroid-a --privileged \
