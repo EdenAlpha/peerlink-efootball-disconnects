@@ -53,7 +53,7 @@ def parse_resp(data, want_txid, fab_expected):
     if xor is None:
         die("no XOR-MAPPED")
     port = struct.unpack(">H", xor[2:4])[0] ^ 0x2112
-    ip4 = bytes(xor[4 + i] ^ COOKIE[i] for i in range(4)).decode()
+    ip4 = ".".join(str(xor[4 + i] ^ COOKIE[i]) for i in range(4))
     if (ip4, port) != fab_expected:
         die(f"XOR-MAPPED {ip4}:{port} != expected {fab_expected[0]}:"
             f"{fab_expected[1]}")
