@@ -1,0 +1,41 @@
+name: fab-seed
+# One-time mirror: Docker Hub throttles anonymous pulls from fresh cloud IPs
+# (both lane attempts died in the image download), so this job pulls the
+# GApps image with retries and pushes it to ghcr.io - GitHub-internal
+# registry - so all lane boots pull fast and independent of Hub's mood.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  seed:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 60
+    steps:
+      - name: pull from hub with retries
+        run: |
+          IMAGE=edwardzhouquan/redroid-mindthegapps-arm64:14.0.0-arm64_only
+          pull_ok=0
+          for try in 1 2 3 4 5; do
+            echo "hub pull attempt $try (12min cap each)"
+            if timeout 720 sudo docker pull --max-concurrent-downloads 2 "$IMAGE"; then
+              pull_ok=1; break
+            fi
+            echo "attempt $try failed; waiting 30s"
+            sleep 30
+          done
+          [ "$pull_ok" = "1" ] || { echo "HUB PULL FAILED after 5 attempts"; exit 1; }
+
+      - name: push to ghcr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SRC=edwardzhouquan/redroid-mindthegapps-arm64:14.0.0-arm64_only
+          DST=ghcr.io/edenalpha/redroid-fab:14.0.0-arm64_only
+          echo "$GITHUB_TOKEN" | sudo docker login ghcr.io -u EdenAlpha --password-stdin
+          sudo docker tag "$SRC" "$DST"
+          sudo docker push "$DST" 2>&1 | tail -3
+          echo "seeded: $DST"
