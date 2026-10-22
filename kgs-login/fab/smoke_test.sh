@@ -96,6 +96,17 @@ ip netns exec fb iptables -t nat -A OUTPUT -p udp -d $FA \
     -j DNAT --to-destination $IPA
 ip netns exec fb iptables -t nat -A POSTROUTING -p udp -s $IPB \
     -d $IPA -j SNAT --to-source $FB
+cat > /tmp/probe_punch.py <<'PYEOF'
+import socket
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.bind(("0.0.0.0", 45011))
+s.sendto(b"PROBE", ("197.210.53.2", 45002))
+print("probe sent", flush=True)
+try:
+    print("got reply from", s.recvfrom(64), flush=True)
+except Exception as ex:
+    print("probe no reply:", ex, flush=True)
+PYEOF
 
 echo "=== [4] start the two fabricator instances (AF_PACKET tap) ==="
 python3 "$PYP/stun_service.py" --bridge $BR --phone-ip $IPA --fab-ip $FA \
@@ -137,20 +148,15 @@ grep -q "FAKE-A PASS" /tmp/game-a.log || {
   echo "--- netns fb nat counters ---"
   ip netns exec fb iptables -t nat -L OUTPUT -v -x || true
   ip netns exec fb iptables -t nat -L INPUT -v -x || true
-  echo "--- punch trace on bridge (5s) ---"
-  ip netns exec fa timeout 5 python3 - <<'PYEOF' &
-import socket
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-s.bind(("0.0.0.0", 45011))
-s.sendto(b"PROBE", ("197.210.53.2", 45002))
-print("probe sent", flush=True)
-try:
-    print("got reply from", s.recvfrom(64), flush=True)
-except Exception as ex:
-    print("probe no reply:", ex, flush=True)
-PYEOF
-  wait %1 2>/dev/null || true
-  timeout 6 tcpdump -l -i $BR -nn udp 2>/dev/null | head -20 || true
+  echo "--- punch trace on bridge (bounded) ---"
+  rm -f /tmp/brdump.txt
+  timeout 6 tcpdump -l -i $BR -nn udp > /tmp/brdump.txt 2>&1 &
+  TCPD=$!
+  ip netns exec fa timeout 8 python3 /tmp/probe_punch.py &
+  PROBE=$!
+  sleep 9
+  kill $TCPD $PROBE 2>/dev/null || true
+  sort -u /tmp/brdump.txt | head -20 || true
   exit 1
 }
 grep -q "FAKE-B PASS" /tmp/game-b.log || { echo "side B failed"; exit 1; }
