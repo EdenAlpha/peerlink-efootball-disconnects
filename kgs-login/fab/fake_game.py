@@ -85,6 +85,7 @@ def main():
     ok(f"CHANGE-IP answered from partner {addr[0]}:{addr[1]}")
 
     if ROLE == "a":
+        s.settimeout(10)
         s.sendto(b"A-PUNCH-1", (FAB_PEER, PEER_PORT))
         data, addr = s.recvfrom(64)
         if addr != (FAB_PEER, PEER_PORT):
@@ -93,16 +94,22 @@ def main():
             die(f"punch reply payload {data!r}")
         ok(f"punch exchange A: saw peer as {addr[0]}:{addr[1]}")
     else:
-        # 3) own check on the second cluster + socket mapping
+        # 3) own check on the second cluster: mapping must be (fab_self, port)
         req, txid = stun(flags=0)
         s.sendto(req, ("18.176.255.15", 3478))
         data, addr = s.recvfrom(2048)
         if addr[0] != "18.176.255.15":
             die(f"resp src {addr[0]} != 18.176.255.15")
+        parse_resp(data, txid, (FAB_SELF, my_port))
+        ok(f"cluster-2 binding mapped to {FAB_SELF}:{my_port}")
 
+        # 4) the punch from A: source must be exactly A's advertised peer
+        s.settimeout(10)
         data, addr = s.recvfrom(64)
         if addr != (FAB_PEER, PEER_PORT):
             die(f"punch from {addr} != ({FAB_PEER},{PEER_PORT})")
+        if data != b"A-PUNCH-1":
+            die(f"punch payload {data!r}")
         s.sendto(b"B-REPLY-1", addr)
         ok(f"punch exchange B: saw peer as {addr[0]}:{addr[1]}")
     print(f"FAKE-{ROLE.upper()} PASS", flush=True)
