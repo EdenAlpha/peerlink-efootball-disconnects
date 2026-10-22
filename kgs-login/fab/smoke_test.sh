@@ -100,12 +100,28 @@ cat > /tmp/probe_punch.py <<'PYEOF'
 import socket
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.bind(("0.0.0.0", 45011))
-s.sendto(b"PROBE", ("197.210.53.2", 45002))
-print("probe sent", flush=True)
+s.settimeout(3)
+for i in range(4):
+    s.sendto(b"PROBE-%d" % i, ("197.210.53.2", 45002))
+    print("probe sent", i, flush=True)
+    try:
+        print("got reply from", s.recvfrom(64), flush=True)
+        break
+    except Exception as ex:
+        print("probe no reply:", ex, flush=True)
+PYEOF
+cat > /tmp/echo_45002.py <<'PYEOF'
+import socket
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.bind(("0.0.0.0", 45002))
+s.settimeout(11)
 try:
-    print("got reply from", s.recvfrom(64), flush=True)
+    while True:
+        data, addr = s.recvfrom(64)
+        print("echo saw from", addr, data, flush=True)
+        s.sendto(b"ECHO", addr)
 except Exception as ex:
-    print("probe no reply:", ex, flush=True)
+    print("echo done:", ex, flush=True)
 PYEOF
 
 echo "=== [4] start the two fabricator instances (AF_PACKET tap) ==="
@@ -149,14 +165,27 @@ grep -q "FAKE-A PASS" /tmp/game-a.log || {
   ip netns exec fb iptables -t nat -L OUTPUT -v -x || true
   ip netns exec fb iptables -t nat -L INPUT -v -x || true
   echo "--- punch trace on bridge (bounded) ---"
-  rm -f /tmp/brdump.txt
-  timeout 6 tcpdump -l -i $BR -nn udp > /tmp/brdump.txt 2>&1 &
+  rm -f /tmp/brdump.txt /tmp/vethdump.txt
+  timeout 12 tcpdump -l -i $BR -nn udp > /tmp/brdump.txt 2>&1 &
   TCPD=$!
-  ip netns exec fa timeout 8 python3 /tmp/probe_punch.py &
-  PROBE=$!
-  sleep 9
-  kill $TCPD $PROBE 2>/dev/null || true
-  sort -u /tmp/brdump.txt | head -20 || true
+  timeout 12 tcpdump -l -i veth-fb -nn udp > /tmp/vethdump.txt 2>&1 &
+  TCPD2=$!
+  ip netns exec fb timeout 12 python3 /tmp/echo_45002.py &
+  ECHOB=$!
+  sleep 0.5
+  ip netns exec fa timeout 12 python3 /tmp/probe_punch.py
+  PROBE_RC=$?
+  sleep 3
+  kill $TCPD $TCPD2 $ECHOB 2>/dev/null || true
+  sort -u /tmp/brdump.txt | head -10 || true
+  echo "--- fb-side capture ---"
+  sort -u /tmp/vethdump.txt | head -10 || true
+  echo "--- rp_filter / conntrack state ---"
+  ip netns exec fb sysctl net.ipv4.conf.all.rp_filter 2>/dev/null
+  ip netns exec fa sysctl net.ipv4.conf.all.rp_filter 2>/dev/null
+  ip netns exec fa conntrack -L 2>/dev/null | head -5 || true
+  ip netns exec fb conntrack -L 2>/dev/null | head -5 || true
+  echo "--- probe rc: $PROBE_RC ---"
   exit 1
 }
 grep -q "FAKE-B PASS" /tmp/game-b.log || { echo "side B failed"; exit 1; }
