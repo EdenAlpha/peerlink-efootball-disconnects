@@ -70,17 +70,16 @@ ip netns exec fb ip route add default via $SUB.1
 ip netns exec fa sysctl -w net.ipv6.conf.all.disable_ipv6=1 >/dev/null
 ip netns exec fb sysctl -w net.ipv6.conf.all.disable_ipv6=1 >/dev/null
 
-echo "=== [2] policy routing for TPROXY ==="
-ip rule add fwmark 1 table 100
-ip route add local 0.0.0.0/0 dev lo table 100
+echo "=== [2] nft + services ==="
+PYP="$HERE"
 
-echo "=== [3] nft rules (tproxy + port-preserving p2p nat) ==="
+echo "=== [3] nft rules (forward drop + port-preserving p2p nat) ==="
 {
   echo "table ip fab {"
   echo "  set konamistun { type ipv4_addr; elements = { $KLIST } }"
-  echo "  chain pre { type filter hook prerouting priority mangle; policy accept;"
-  echo "    iifname \"$BR\" ip saddr $IPA ip daddr @konamistun udp dport { $STUNPORTS } meta mark set 1 counter tproxy ip to :$TA"
-  echo "    iifname \"$BR\" ip saddr $IPB ip daddr @konamistun udp dport { $STUNPORTS } meta mark set 1 counter tproxy ip to :$TB"
+  echo "  chain fdfilter { type filter hook forward priority filter; policy accept;"
+  echo "    iifname \"$BR\" ip daddr @konamistun udp dport { $STUNPORTS } counter drop"
+  echo "    oifname \"$BR\" ip saddr @konamistun udp sport { $STUNPORTS } counter drop"
   echo "  }"
   echo "  chain natpre { type nat hook prerouting priority dstnat; policy accept;"
   echo "    iifname \"$BR\" ip saddr $IPA ip daddr $FB meta l4proto udp counter dnat ip to $IPB"
@@ -94,13 +93,12 @@ echo "=== [3] nft rules (tproxy + port-preserving p2p nat) ==="
 } | nft -f -
 nft list table ip fab >/dev/null
 
-echo "=== [4] start the two fabricator instances ==="
-PYP="$HERE"
-python3 "$PYP/stun_service.py" --fab-ip $FA --listen-port $TA --mode answer \
-    > /tmp/fab-a.log 2>&1 &
+echo "=== [4] start the two fabricator instances (AF_PACKET tap) ==="
+python3 "$PYP/stun_service.py" --bridge $BR --phone-ip $IPA --fab-ip $FA \
+    --mode answer > /tmp/fab-a.log 2>&1 &
 SRV_A=$!
-python3 "$PYP/stun_service.py" --fab-ip $FB --listen-port $TB --mode answer \
-    > /tmp/fab-b.log 2>&1 &
+python3 "$PYP/stun_service.py" --bridge $BR --phone-ip $IPB --fab-ip $FB \
+    --mode answer > /tmp/fab-b.log 2>&1 &
 SRV_B=$!
 sleep 1
 kill -0 $SRV_A $SRV_B 2>/dev/null || { echo "services died:"; \
@@ -126,9 +124,8 @@ wait $B_PID 2>/dev/null || true
 sleep 1
 cat /tmp/game-a.log /tmp/game-b.log
 grep -q "FAKE-A PASS" /tmp/game-a.log || {
-  echo "side A failed - diagnostics:"; cat /tmp/fab-a.log
+  echo "side A failed - diagnostics:"; cat /tmp/fab-a.log /tmp/fab-b.log
   nft list table ip fab
-  ip rule show; ip route show table 100
   exit 1
 }
 grep -q "FAKE-B PASS" /tmp/game-b.log || { echo "side B failed"; exit 1; }
