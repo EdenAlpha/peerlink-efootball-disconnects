@@ -80,6 +80,16 @@ ip netns exec fb iptables -t nat -A OUTPUT -p udp -d $FA \
     -j DNAT --to-destination 172.28.101.10
 ip netns exec fb iptables -t nat -A POSTROUTING -p udp -s 172.28.102.11 \
     -d 172.28.101.10 -j SNAT --to-source $FB
+# zero all counters so the post-mortem reflects the game phase only
+ip netns exec fa iptables -t nat -Z 2>/dev/null || true
+ip netns exec fb iptables -t nat -Z 2>/dev/null || true
+iptables -Z FORWARD 2>/dev/null || true
+rm -f /tmp/v-fb-cap.txt /tmp/uplink-53.txt
+timeout 30 tcpdump -l -i v-fb -nn udp > /tmp/v-fb-cap.txt 2>&1 &
+CAP_PID=$!
+UPLINK=$(ip route show default | awk '{print $5; exit}')
+timeout 30 tcpdump -l -i "$UPLINK" -nn "net 197.210.53.0/24" > /tmp/uplink-53.txt 2>&1 &
+UPL_PID=$!
 cat > /tmp/probe_punch.py <<'PYEOF'
 import socket
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -140,13 +150,16 @@ sleep 1
 cat /tmp/game-a.log /tmp/game-b.log
 grep -q "FAKE-A PASS" /tmp/game-a.log || {
   echo "side A failed - diagnostics:"
-  cat /tmp/fab-a.log /tmp/fab-b.log
+  cat /tmp/fab-a.log /tmp/fab-b.log /tmp/game-b.log
   echo "--- netns fa nat counters ---"
   ip netns exec fa iptables -t nat -L OUTPUT -v -x || true
   ip netns exec fa iptables -t nat -L POSTROUTING -v -x || true
   echo "--- netns fb nat counters ---"
   ip netns exec fb iptables -t nat -L OUTPUT -v -x || true
-  ip netns exec fb iptables -t nat -L INPUT -v -x || true
+  echo "--- v-fb capture (udp) ---"
+  grep -v captured /tmp/v-fb-cap.txt | head -20 || true
+  echo "--- uplink 197.210.53.0/24 leak ---"
+  grep -v captured /tmp/uplink-53.txt | head -10 || true
   exit 1
 }
 grep -q "FAKE-B PASS" /tmp/game-b.log || {
@@ -164,6 +177,13 @@ if [ -n "${LEAK_PID:-}" ]; then
   fi
   echo "no STUN leaked to the uplink"
 fi
+sleep 1
+kill $CAP_PID $UPL_PID 2>/dev/null || true
+echo "--- v-fb capture (udp) ---"
+grep -v captured /tmp/v-fb-cap.txt | head -20 || true
+echo "--- uplink 197.210.53.0/24 leak ---"
+grep -v captured /tmp/uplink-53.txt | head -10 || true
+echo "(empty uplink leak list == no fabricated traffic escaped)"
 
 echo "PASS datapath smoke: fabricated answers (binding + CHANGE-IP partner ";
 echo "     semantics), per-phone mapping, port-preserving P2P NAT both ways"
