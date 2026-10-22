@@ -30,7 +30,7 @@ def ok(msg):
 
 def stun(flags):
     body = struct.pack(">BBH", 0, 3, 4) + struct.pack(">I", flags)
-    head = struct.pack(">BBH", 1, len(body)) + COOKIE + bytes(range(8, 20))
+    head = struct.pack(">BBH", 0, 1, len(body)) + COOKIE + bytes(range(8, 20))
     return head + body, head[8:20]
 
 

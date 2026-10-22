@@ -23,6 +23,7 @@ KLIST="54.248.105.235, 54.150.255.185, 52.198.221.89, 18.176.255.15, \
 STUNPORTS="3478, 3479"
 
 echo "=== [0] host prerequisites ==="
+SRV_A=""; SRV_B=""; GA_PID=""
 sysctl -w net.ipv4.ip_forward=1 >/dev/null
 sysctl -w net.ipv4.conf.all.rp_filter=0 >/dev/null
 modprobe br_netfilter 2>/dev/null || true
@@ -38,7 +39,7 @@ command -v nft >/dev/null || { echo "nft not found"; exit 1; }
 
 echo "=== [1] build namespaces + bridge ==="
 cleanup() {
-  for p in $SRV_A $SRV_B $GA_PID; do kill "$p" 2>/dev/null || true; done
+  for p in $SRV_A $SRV_B $GA_PID; do [ -n "$p" ] && kill "$p" 2>/dev/null || true; done
   nft delete table ip fab 2>/dev/null || true
   ip netns del fa 2>/dev/null || true
   ip netns del fb 2>/dev/null || true
@@ -117,9 +118,12 @@ fi
 
 echo "=== [6] run the fake games ==="
 ip netns exec fb python3 "$PYP/fake_game.py" b > /tmp/game-b.log 2>&1 &
+B_PID=$!
 sleep 0.4
 ip netns exec fa python3 "$PYP/fake_game.py" a > /tmp/game-a.log 2>&1 &
-wait $(pgrep -f "fake_game.py a" | tail -1) 2>/dev/null || true
+GA_PID=$!
+wait $GA_PID 2>/dev/null || true
+wait $B_PID 2>/dev/null || true
 sleep 1
 cat /tmp/game-a.log /tmp/game-b.log
 grep -q "FAKE-A PASS" /tmp/game-a.log || { echo "side A failed"; exit 1; }
