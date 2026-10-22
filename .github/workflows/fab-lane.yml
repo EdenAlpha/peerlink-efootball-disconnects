@@ -105,6 +105,7 @@ jobs:
               base="${link%%\?*}"
               echo "- $name: ${base}/?token=YOUR_RELAY_TOKEN" \
                 >> "$GITHUB_STEP_SUMMARY"
+              echo "LINKBASE $name $base"
             done < /tmp/relay/links.tsv
           else
             echo "relay links missing:"; cat /tmp/relay-a.log /tmp/relay-b.log
