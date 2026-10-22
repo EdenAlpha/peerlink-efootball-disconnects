@@ -1,0 +1,98 @@
+name: fab-boot
+# Two phones, EXACT boot shape from the proven kgs-gappslive lane
+# (run 37332769341: pull 23s, boot 20s — same image, same flags, plain
+# default bridge, no custom networks, no static IPs). The only deltas:
+# two container names and mirrored ADB/frida port publish pairs.
+# Interception wiring comes in a LATER run once boots are green.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  boot:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: host prerequisites
+        run: |
+          sudo apt-get update -qq >/dev/null 2>&1 || true
+          sudo apt-get install -y -qq adb >/dev/null 2>&1 || true
+
+      - name: boot phone A (verbatim old lane shape)
+        run: |
+          sudo mkdir -p /root/rda
+          sudo docker rm -f redroid-a redroid-b >/dev/null 2>&1 || true
+          IMAGE=edwardzhouquan/redroid-mindthegapps-arm64:14.0.0-arm64_only
+          echo "image: $IMAGE"
+          pull_ok=0
+          for try in 1 2 3; do
+            echo "pull attempt $try"
+            if timeout 420 sudo docker pull "$IMAGE"; then pull_ok=1; break; fi
+            echo "pull attempt $try failed; waiting 30s"
+            sleep 30
+          done
+          [ "$pull_ok" = "1" ] || { echo "PULL FAILED after 3 attempts"; exit 1; }
+          sudo docker run -d --name redroid-a --privileged \
+            -v /root/rda:/data -p 5555:5555 -p 27042:27042 \
+            "$IMAGE" \
+            androidboot.redroid_width=720 androidboot.redroid_height=1280 \
+            androidboot.redroid_dpi=320 androidboot.use_memfd=true || \
+            { echo "DOCKER RUN FAILED (A)"; sudo docker logs redroid-a; exit 1; }
+          for i in $(seq 1 120); do
+            if [ "$(sudo docker exec redroid-a getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
+              echo "phone A BOOTED after $((i*5))s"; booted=1; break
+            fi
+            [ "$i" = "120" ] && { echo "=== PHONE A DID NOT BOOT ==="; \
+              sudo docker logs --tail 60 redroid-a; exit 1; }
+            sleep 5
+          done
+          [ -n "$booted" ] || exit 1
+
+      - name: boot phone B (same shape)
+        run: |
+          sudo mkdir -p /root/rdb
+          IMAGE=edwardzhouquan/redroid-mindthegapps-arm64:14.0.0-arm64_only
+          sudo docker run -d --name redroid-b --privileged \
+            -v /root/rdb:/data -p 5556:5555 -p 27043:27042 \
+            "$IMAGE" \
+            androidboot.redroid_width=720 androidboot.redroid_height=1280 \
+            androidboot.redroid_dpi=320 androidboot.use_memfd=true || \
+            { echo "DOCKER RUN FAILED (B)"; sudo docker logs redroid-b; exit 1; }
+          for i in $(seq 1 120); do
+            if [ "$(sudo docker exec redroid-b getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
+              echo "phone B BOOTED after $((i*5))s"; booted=1; break
+            fi
+            [ "$i" = "120" ] && { echo "=== PHONE B DID NOT BOOT ==="; \
+              sudo docker logs --tail 60 redroid-b; exit 1; }
+            sleep 5
+          done
+          [ -n "$booted" ] || exit 1
+
+      - name: verify both phones over ADB + print wire facts
+        run: |
+          adb connect 127.0.0.1:5555 || true
+          adb connect 127.0.0.1:5556 || true
+          sleep 2
+          echo "phone A model: $(adb -s 127.0.0.1:5555 shell getprop ro.product.model 2>/dev/null | tr -d '\r')"
+          echo "phone B model: $(adb -s 127.0.0.1:5556 shell getprop ro.product.model 2>/dev/null | tr -d '\r')"
+          IPA=$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' redroid-a)
+          IPB=$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' redroid-b)
+          echo "phone A container IP: $IPA"
+          echo "phone B container IP: $IPB"
+          echo "IPA=$IPA" >> "$GITHUB_STEP_SUMMARY"
+          echo "IPB=$IPB" >> "$GITHUB_STEP_SUMMARY"
+          sudo docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+
+      - name: hold both phones alive for the wiring phase
+        timeout-minutes: 360
+        run: |
+          for i in $(seq 1 360); do
+            sleep 30
+            A=$(sudo docker inspect -f '{{.State.Running}}' redroid-a 2>/dev/null || echo 0)
+            B=$(sudo docker inspect -f '{{.State.Running}}' redroid-b 2>/dev/null || echo 0)
+            [ "$A" = "true" ] && [ "$B" = "true" ] || { echo "A PHONE DIED"; exit 1; }
+          done
