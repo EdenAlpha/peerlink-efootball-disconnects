@@ -69,16 +69,19 @@ for ip in $KLIST; do
   iptables -A FORWARD -o v-fb -p udp -s "$ip" -j DROP
 done
 
-echo "=== [3b] per-phone netns NAT (OUTPUT DNAT + POSTROUTING SNAT) ==="
-# lives INSIDE each phone's netns - the same proven shape as the lane's
-# 443 DNAT. Ports pass untouched everywhere; only IPs change.
-ip netns exec fa iptables -t nat -A OUTPUT -p udp -d $FB \
+echo "=== [3b] host P2P NAT (both directions; ports untouched) ==="
+# Both phones route through the host, so every inter-phone packet is a NEW
+# flow on the host: PREROUTING DNAT flips the fabricated destination to the
+# peer's real IP, POSTROUTING SNAT masks the source back to the fabricated
+# identity. Reply paths are covered by the same four rules regardless of
+# which game initiated the flow.
+iptables -t nat -A PREROUTING  -i v-fa -p udp -d $FB \
     -j DNAT --to-destination 172.28.102.11
-ip netns exec fa iptables -t nat -A POSTROUTING -p udp -s 172.28.101.10 \
-    -d 172.28.102.11 -j SNAT --to-source $FA
-ip netns exec fb iptables -t nat -A OUTPUT -p udp -d $FA \
+iptables -t nat -A PREROUTING  -i v-fb -p udp -d $FA \
     -j DNAT --to-destination 172.28.101.10
-ip netns exec fb iptables -t nat -A POSTROUTING -p udp -s 172.28.102.11 \
+iptables -t nat -A POSTROUTING -o v-fb -p udp -s 172.28.101.10 \
+    -d 172.28.102.11 -j SNAT --to-source $FA
+iptables -t nat -A POSTROUTING -o v-fa -p udp -s 172.28.102.11 \
     -d 172.28.101.10 -j SNAT --to-source $FB
 # zero all counters so the post-mortem reflects the game phase only
 ip netns exec fa iptables -t nat -Z 2>/dev/null || true
@@ -151,13 +154,11 @@ cat /tmp/game-a.log /tmp/game-b.log
 grep -q "FAKE-A PASS" /tmp/game-a.log || {
   echo "side A failed - diagnostics:"
   cat /tmp/fab-a.log /tmp/fab-b.log /tmp/game-b.log
-  echo "--- netns fa nat counters ---"
-  ip netns exec fa iptables -t nat -L OUTPUT -v -x || true
-  ip netns exec fa iptables -t nat -L POSTROUTING -v -x || true
-  echo "--- netns fb nat counters ---"
-  ip netns exec fb iptables -t nat -L OUTPUT -v -x || true
+  echo "--- host nat counters ---"
+  iptables -t nat -L PREROUTING -v -x | head -8 || true
+  iptables -t nat -L POSTROUTING -v -x | head -8 || true
   echo "--- v-fb capture (udp) ---"
-  grep -v captured /tmp/v-fb-cap.txt | head -20 || true
+  grep -v captured /tmp/v-fb-cap.txt | head -24 || true
   echo "--- uplink 197.210.53.0/24 leak ---"
   grep -v captured /tmp/uplink-53.txt | head -10 || true
   exit 1
@@ -182,8 +183,13 @@ kill $CAP_PID $UPL_PID 2>/dev/null || true
 echo "--- v-fb capture (udp) ---"
 grep -v captured /tmp/v-fb-cap.txt | head -20 || true
 echo "--- uplink 197.210.53.0/24 leak ---"
-grep -v captured /tmp/uplink-53.txt | head -10 || true
-echo "(empty uplink leak list == no fabricated traffic escaped)"
+if grep -qE '197\.210\.[0-9]+\.|konami' /tmp/uplink-53.txt 2>/dev/null; then
+  grep -v captured /tmp/uplink-53.txt | head -10
+  echo "LEAK: fabricated-destination traffic escaped the host"
+  exit 1
+fi
+echo "(empty == no fabricated traffic escaped)"
+grep -v captured /tmp/uplink-53.txt | head -4 || true
 
 echo "PASS datapath smoke: fabricated answers (binding + CHANGE-IP partner ";
 echo "     semantics), per-phone mapping, port-preserving P2P NAT both ways"
