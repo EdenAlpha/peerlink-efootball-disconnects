@@ -34,9 +34,17 @@ jobs:
           sudo mkdir -p /root/rda
           sudo docker rm -f redroid-a redroid-b >/dev/null 2>&1 || true
           IMAGE=edwardzhouquan/redroid-mindthegapps-arm64:14.0.0-arm64_only
-          echo "pulling $IMAGE (887MB, expect 1-5min)"
-          timeout 420 sudo docker pull "$IMAGE" 2>&1 | tail -2
-          [ "${PIPESTATUS[0]}" = "0" ] || { echo "PULL FAILED/TIMED OUT"; exit 1; }
+          echo "pulling $IMAGE (887MB) - up to 3 attempts, 7min cap each"
+          pull_ok=0
+          for try in 1 2 3; do
+            echo "pull attempt $try"
+            if timeout 420 sudo docker pull --max-concurrent-downloads 2 "$IMAGE"; then
+              pull_ok=1; break
+            fi
+            echo "pull attempt $try failed - Docker Hub throttle is the usual cause; waiting 20s"
+            sleep 20
+          done
+          [ "$pull_ok" = "1" ] || { echo "PULL FAILED after 3 attempts"; exit 1; }
           sudo docker network create --driver bridge \
             --subnet 172.29.1.0/24 fab-a >/dev/null
           sudo docker run -d --name redroid-a --privileged \
