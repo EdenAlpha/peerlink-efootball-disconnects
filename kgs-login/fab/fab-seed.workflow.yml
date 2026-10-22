@@ -21,7 +21,7 @@ jobs:
           pull_ok=0
           for try in 1 2 3 4 5; do
             echo "hub pull attempt $try (12min cap each)"
-            if timeout 720 sudo docker pull --max-concurrent-downloads 2 "$IMAGE"; then
+            if timeout 720 sudo docker pull "$IMAGE"; then
               pull_ok=1; break
             fi
             echo "attempt $try failed; waiting 30s"
