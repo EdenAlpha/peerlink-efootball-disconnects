@@ -10,7 +10,7 @@ set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 BR=br-fab
-SUB=172.28.100.0
+SUB=172.28.100
 IPA=$SUB.10
 IPB=$SUB.11
 FA=197.210.53.1
