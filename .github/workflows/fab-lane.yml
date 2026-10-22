@@ -1,0 +1,161 @@
+name: fab-lane
+# Two-phone lane, phase 1: boot phone A and phone B (Play-Store image, GApps),
+# wire the host-side interception (fabricated pair 197.210.53.1/.2, ports
+# untouched), prove the fabricated link between the two REAL phones, then
+# hand over the tap/screenshot control pages and hold the run open.
+#
+# No app is installed inside the phones. All interception is host-side.
+on:
+  workflow_dispatch:
+    inputs:
+      lane:
+        description: suffix for the live control branches of this run
+        required: false
+        default: "fab"
+
+permissions:
+  contents: write
+
+jobs:
+  lane:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: host prerequisites
+        run: |
+          sudo apt-get update -qq >/dev/null 2>&1 || true
+          sudo apt-get install -y -qq adb iptables >/dev/null 2>&1 || true
+          adb version | head -1 || true
+
+      - name: boot phone A (GApps, 172.29.1.10)
+        run: |
+          sudo mkdir -p /root/rda
+          sudo docker rm -f redroid-a redroid-b >/dev/null 2>&1 || true
+          IMAGE=edwardzhouquan/redroid-mindthegapps-arm64:14.0.0-arm64_only
+          sudo docker pull "$IMAGE" 2>&1 | tail -2
+          sudo docker network create --driver bridge \
+            --subnet 172.29.1.0/24 fab-a >/dev/null
+          sudo docker run -d --name redroid-a --privileged \
+            --network fab-a --ip 172.29.1.10 \
+            -v /root/rda:/data -p 5555:5555 -p 27042:27042 \
+            "$IMAGE" \
+            androidboot.redroid_width=720 androidboot.redroid_height=1280 \
+            androidboot.redroid_dpi=320 androidboot.use_memfd=true || \
+            { echo "DOCKER RUN A FAILED"; sudo docker logs redroid-a; exit 1; }
+          for i in $(seq 1 100); do
+            if [ "$(sudo docker exec redroid-a getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
+              echo "phone A BOOTED"; break
+            fi
+            [ "$i" = "100" ] && { sudo docker logs --tail 40 redroid-a; exit 1; }
+            sleep 5
+          done
+
+      - name: boot phone B (GApps, 172.29.2.10)
+        run: |
+          sudo mkdir -p /root/rdb
+          IMAGE=edwardzhouquan/redroid-mindthegapps-arm64:14.0.0-arm64_only
+          sudo docker network create --driver bridge \
+            --subnet 172.29.2.0/24 fab-b >/dev/null
+          sudo docker run -d --name redroid-b --privileged \
+            --network fab-b --ip 172.29.2.10 \
+            -v /root/rdb:/data -p 5556:5555 -p 27043:27042 \
+            "$IMAGE" \
+            androidboot.redroid_width=720 androidboot.redroid_height=1280 \
+            androidboot.redroid_dpi=320 androidboot.use_memfd=true || \
+            { echo "DOCKER RUN B FAILED"; sudo docker logs redroid-b; exit 1; }
+          for i in $(seq 1 100); do
+            if [ "$(sudo docker exec redroid-b getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
+              echo "phone B BOOTED"; break
+            fi
+            [ "$i" = "100" ] && { sudo docker logs --tail 40 redroid-b; exit 1; }
+            sleep 5
+          done
+
+      - name: wire interception (host-side, no app)
+        run: |
+          sudo bash kgs-login/fab/lane_wire.sh redroid-a redroid-b
+          sudo chmod a+r /tmp/fab-a.log /tmp/fab-b.log || true
+
+      - name: gate - the fabricated link between the two real phones
+        run: sudo bash kgs-login/fab/lane_gate.sh redroid-a redroid-b
+
+      - name: control pages for phone A + B
+        env:
+          RELAY_TOKEN: ${{ secrets.RELAY_TOKEN }}
+        run: |
+          RELAY_TOKEN="$RELAY_TOKEN" LOG_DIR=/tmp/relay \
+            nohup bash kgs-login/live/relay_phone.sh 127.0.0.1:5555 8000 phoneA \
+            > /tmp/relay-a.log 2>&1 &
+          RELAY_TOKEN="$RELAY_TOKEN" LOG_DIR=/tmp/relay \
+            nohup bash kgs-login/live/relay_phone.sh 127.0.0.1:5556 8001 phoneB \
+            > /tmp/relay-b.log 2>&1 &
+          for i in $(seq 1 60); do
+            [ -s /tmp/relay/links.tsv ] && break
+            sleep 2
+          done
+          chmod -R a+r /tmp/relay 2>/dev/null || true
+          {
+            echo '### phone control pages'
+            echo 'append YOUR RELAY_TOKEN (the repo secret) as ?token=... to each URL'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ -f /tmp/relay/links.tsv ]; then
+            while IFS=$'\t' read -r name serial port link; do
+              base="${link%%\?*}"
+              echo "- $name: ${base}/?token=YOUR_RELAY_TOKEN" \
+                >> "$GITHUB_STEP_SUMMARY"
+            done < /tmp/relay/links.tsv
+          else
+            echo "relay links missing:"; cat /tmp/relay-a.log /tmp/relay-b.log
+          fi
+
+      - name: hold the lane open (live control loops for both phones)
+        env:
+          LANE: ${{ inputs.lane }}
+        timeout-minutes: 300
+        run: |
+          export W=/tmp/kgs
+          mkdir -p $W
+          LANE_A="fa-$LANE"
+          LANE_B="fb-$LANE"
+          export GIT_TERMINAL_PROMPT=0
+          export GIT_AUTHOR_NAME=EdenAlpha GIT_AUTHOR_EMAIL=edenalpha@users.noreply.github.com
+          export GIT_COMMITTER_NAME=EdenAlpha GIT_COMMITTER_EMAIL=edenalpha@users.noreply.github.com
+
+          # seed the live-res + live-cmd branches/worktrees for both phones
+          # (live_loop.sh expects LIVE_RES_DIR to be an existing worktree and
+          # the cmd branch to exist; the old lane did this as a workflow step)
+          seed() {
+            local side="$1" lane="$2"
+            local rb="live-res-$lane" cb="live-cmd-$lane"
+            local dir="/tmp/lr-$side"
+            git worktree remove --force "$dir" 2>/dev/null || true
+            rm -rf "$dir"
+            git worktree add -f -B "$rb" "$dir" HEAD >/dev/null 2>&1
+            printf '%s' "" > "$dir/cmd.txt"
+            git -C "$dir" add cmd.txt
+            git -C "$dir" commit -q -m "lane seed $lane" || true
+            git -C "$dir" push -q -u origin "$rb" >/dev/null 2>&1 || true
+            git push -q origin "HEAD:refs/heads/$cb" >/dev/null 2>&1 || true
+            git -C "$dir" fetch origin "$cb" 2>/dev/null || true
+          }
+          seed A "$LANE_A"
+          seed B "$LANE_B"
+
+          MAX_ROUNDS=99999 POLL_SECS=8 \
+            BRANCH="live-res-$LANE_A" CMD_BRANCH="live-cmd-$LANE_A" \
+            W=$W LIVE_RES_DIR=/tmp/lr-a DEV_MODE=docker CONTAINER=redroid-a \
+            timeout 16200 bash kgs-login/live/live_loop.sh \
+            > $W/live-a.log 2>&1 &
+          LOOP_A=$!
+          sleep 15
+          MAX_ROUNDS=99999 POLL_SECS=8 \
+            BRANCH="live-res-$LANE_B" CMD_BRANCH="live-cmd-$LANE_B" \
+            W=$W LIVE_RES_DIR=/tmp/lr-b DEV_MODE=docker CONTAINER=redroid-b \
+            timeout 16200 bash kgs-login/live/live_loop.sh \
+            > $W/live-b.log 2>&1 &
+          LOOP_B=$!
+          echo "live loops: A=$LOOP_A B=$LOOP_B - branches live-res/$LANE_A + $LANE_B"
+          wait $LOOP_A $LOOP_B || true
+          echo "lane hold ended"
