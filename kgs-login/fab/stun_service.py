@@ -28,6 +28,8 @@ import fabricator as F
 SOL_IP = 0
 IP_TRANSPARENT = 19
 IP_RECVORIGDSTADDR = 20
+SOL_SOCKET = 1
+SO_MARK = 36
 
 # cluster addresses carried in the TPROXY intercept set (matches the fabricator)
 TARGET_IPS = sorted({ip for c in F.CLUSTERS for ip in c})
@@ -56,11 +58,14 @@ def main():
                     default="answer")
     ap.add_argument("--generic", action="store_true",
                     help="also answer STUN to non-cluster destinations")
+    ap.add_argument("--skb-mark", type=int, default=1,
+                    help="socket mark matching the TPROXY fwmark")
     args = ap.parse_args()
 
     listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     listener.setsockopt(socket.SOL_IP, IP_TRANSPARENT, 1)
     listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    listener.setsockopt(socket.SOL_SOCKET, SO_MARK, args.skb_mark)
     listener.setsockopt(socket.SOL_IP, IP_RECVORIGDSTADDR, 1)
     listener.bind(("0.0.0.0", args.listen_port))
     sender = RawSender()

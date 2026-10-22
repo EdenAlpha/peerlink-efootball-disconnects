@@ -116,7 +116,6 @@ if command -v tcpdump >/dev/null 2>&1 && [ -n "$UPLINK" ]; then
   LEAK_PID=$!
 fi
 
-echo "=== [6] run the fake games ==="
 ip netns exec fb python3 "$PYP/fake_game.py" b > /tmp/game-b.log 2>&1 &
 B_PID=$!
 sleep 0.4
@@ -126,7 +125,12 @@ wait $GA_PID 2>/dev/null || true
 wait $B_PID 2>/dev/null || true
 sleep 1
 cat /tmp/game-a.log /tmp/game-b.log
-grep -q "FAKE-A PASS" /tmp/game-a.log || { echo "side A failed"; exit 1; }
+grep -q "FAKE-A PASS" /tmp/game-a.log || {
+  echo "side A failed - diagnostics:"; cat /tmp/fab-a.log
+  nft list table ip fab
+  ip rule show; ip route show table 100
+  exit 1
+}
 grep -q "FAKE-B PASS" /tmp/game-b.log || { echo "side B failed"; exit 1; }
 
 if [ -n "${LEAK_PID:-}" ]; then
