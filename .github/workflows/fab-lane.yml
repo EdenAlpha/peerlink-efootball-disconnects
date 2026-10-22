@@ -46,7 +46,7 @@ jobs:
             pull_ok=0
             for try in 1 2 3; do
               echo "hub pull attempt $try"
-              if timeout 420 sudo docker pull --max-concurrent-downloads 2 "$HUB"; then
+              if timeout 420 sudo docker pull "$HUB"; then
                 pull_ok=1; break
               fi
               echo "hub pull attempt $try failed - Docker Hub throttle is the usual cause; waiting 20s"
