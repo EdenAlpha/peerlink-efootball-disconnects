@@ -73,7 +73,7 @@ ip netns exec fb sysctl -w net.ipv6.conf.all.disable_ipv6=1 >/dev/null
 echo "=== [2] nft + services ==="
 PYP="$HERE"
 
-echo "=== [3] nft rules (forward drop + port-preserving p2p nat) ==="
+echo "=== [3] nft forward drop for cluster STUN ==="
 {
   echo "table ip fab {"
   echo "  set konamistun { type ipv4_addr; elements = { $KLIST } }"
@@ -81,17 +81,21 @@ echo "=== [3] nft rules (forward drop + port-preserving p2p nat) ==="
   echo "    iifname \"$BR\" ip daddr @konamistun udp dport { $STUNPORTS } counter drop"
   echo "    oifname \"$BR\" ip saddr @konamistun udp sport { $STUNPORTS } counter drop"
   echo "  }"
-  echo "  chain natpre { type nat hook prerouting priority dstnat; policy accept;"
-  echo "    iifname \"$BR\" ip saddr $IPA ip daddr $FB meta l4proto udp counter dnat ip to $IPB"
-  echo "    iifname \"$BR\" ip saddr $IPB ip daddr $FA meta l4proto udp counter dnat ip to $IPA"
-  echo "  }"
-  echo "  chain natpost { type nat hook postrouting priority srcnat; policy accept;"
-  echo "    oifname \"$BR\" ip saddr $IPA ip daddr $IPB meta l4proto udp counter snat ip to $FA"
-  echo "    oifname \"$BR\" ip saddr $IPB ip daddr $IPA meta l4proto udp counter snat ip to $FB"
-  echo "  }"
   echo "}"
 } | nft -f -
 nft list table ip fab >/dev/null
+
+echo "=== [3b] per-phone netns NAT (OUTPUT DNAT + POSTROUTING SNAT) ==="
+# lives INSIDE each phone's netns - the same proven shape as the lane's
+# 443 DNAT. Ports pass untouched everywhere; only IPs change.
+ip netns exec fa iptables -t nat -A OUTPUT -p udp -d $FB \
+    -j DNAT --to-destination $IPB
+ip netns exec fa iptables -t nat -A POSTROUTING -p udp -s $IPA \
+    -d $IPB -j SNAT --to-source $FA
+ip netns exec fb iptables -t nat -A OUTPUT -p udp -d $FA \
+    -j DNAT --to-destination $IPA
+ip netns exec fb iptables -t nat -A POSTROUTING -p udp -s $IPB \
+    -d $IPA -j SNAT --to-source $FB
 
 echo "=== [4] start the two fabricator instances (AF_PACKET tap) ==="
 python3 "$PYP/stun_service.py" --bridge $BR --phone-ip $IPA --fab-ip $FA \
