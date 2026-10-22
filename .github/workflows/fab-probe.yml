@@ -1,0 +1,41 @@
+name: fab-probe
+# Isolates image-download slowness: ghcr pull time, hub pull time, registry
+# reachability. Bounded, minute-scale, no phones involved.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 20
+    steps:
+      - name: make ghcr mirror public (if perms allow)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh auth status 2>&1 | head -3 || true
+          gh api -X PATCH user/packages/container/redroid-fab/visibility \
+            -f visibility=public 2>&1 | head -3 || echo "visibility patch not permitted from here"
+
+      - name: probe ghcr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$GITHUB_TOKEN" | sudo docker login ghcr.io -u EdenAlpha --password-stdin 2>&1 | tail -1
+          time (timeout 300 sudo docker pull ghcr.io/edenalpha/redroid-fab:14.0.0-arm64_only 2>&1 | grep -E 'Pull|Digest|Status|error|denied' | head -8) || echo "GHCRL PULL FAILED/STALLED"
+
+      - name: probe hub
+        run: |
+          time (timeout 300 sudo docker pull alpine:3.20 2>&1 | grep -E 'Pull|Digest|Status|error|toomany' | head -6) || echo "HUB small-pull FAILED/STALLED"
+          time (timeout 300 sudo docker pull alpine:3.20 2>&1 | grep -cE 'Digest' || true)
+
+      - name: registry reachability
+        run: |
+          for host in ghcr.io registry-1.docker.io auth.docker.io; do
+            echo "== $host =="
+            timeout 5 curl -sS -o /dev/null -w '%{http_code} %{time_total}s\n' "https://$host/v2/" || echo "unreachable"
+          done
