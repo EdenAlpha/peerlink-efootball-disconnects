@@ -1,0 +1,22 @@
+name: fab-smoke
+# Proves the two-phone datapath without any Android:
+#  1) the host-side STUN fabricator is byte-compatible with the app's own
+#     regression matrix (StunFabricatorChecks.kt, ported 1:1),
+#  2) TPROXY interception + spoofed-source answers + port-preserving P2P NAT
+#     work end to end between two network namespaces with fake games.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "kgs-login/fab/**"
+      - ".github/workflows/fab-smoke.yml"
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: fabricator parity vs the app's regression matrix
+        run: python3 kgs-login/fab/test_fabricator_parity.py
+      - name: datapath smoke (netns + tproxy + nat, fake games)
+        run: sudo bash kgs-login/fab/smoke_test.sh
