@@ -22,26 +22,24 @@ jobs:
           sudo apt-get update -qq >/dev/null 2>&1 || true
           sudo apt-get install -y -qq adb >/dev/null 2>&1 || true
 
-      - name: boot phone A (proven shape; mirror pull 18.6s measured)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: boot phone A (anonymous mirror pull; every command capped)
         run: |
           sudo mkdir -p /root/rda
           sudo docker rm -f redroid-a redroid-b >/dev/null 2>&1 || true
           GHCR=ghcr.io/edenalpha/redroid-fab:14.0.0-arm64_only
           HUB=edwardzhouquan/redroid-mindthegapps-arm64:14.0.0-arm64_only
-          echo "$GITHUB_TOKEN" | sudo docker login ghcr.io -u EdenAlpha --password-stdin >/dev/null 2>&1 || true
-          echo "=== pull from ghcr (measured 18.6s), hard window 150s ==="
+          IMAGE=""
+          echo "=== anonymous ghcr pull (public mirror), cap 120s ==="
           ls1=$(date +%s)
-          if timeout 150 sudo docker pull "$GHCR"; then
+          if timeout 120 sudo docker pull "$GHCR"; then
             le1=$(date +%s); echo "ghcr pull took $((le1-ls1))s"; IMAGE="$GHCR"
           else
-            echo "ghcr pull missed its 150s window - one hub attempt, 150s"
+            echo "ghcr pull failed within 120s - one hub attempt, cap 120s"
             ls2=$(date +%s)
-            if timeout 150 sudo docker pull "$HUB"; then
+            if timeout 120 sudo docker pull "$HUB"; then
               le2=$(date +%s); echo "hub pull took $((le2-ls2))s"; IMAGE="$HUB"
             else
-              echo "PULL FAILED: ghcr window + hub window both blown - not a boot problem"; exit 1
+              echo "PULL FAILED in both 120s windows"; exit 1
             fi
           fi
           sudo docker run -d --name redroid-a --privileged \
