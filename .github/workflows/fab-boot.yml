@@ -42,25 +42,37 @@ jobs:
               echo "PULL FAILED in both 120s windows"; exit 1
             fi
           fi
+          echo "$IMAGE" | sudo tee /tmp/fab_image >/dev/null
+          echo "image resolved: $IMAGE"
           sudo docker run -d --name redroid-a --privileged \
             -v /root/rda:/data -p 5555:5555 -p 27042:27042 \
             "$IMAGE" \
             androidboot.redroid_width=720 androidboot.redroid_height=1280 \
             androidboot.redroid_dpi=320 androidboot.use_memfd=true || \
             { echo "DOCKER RUN FAILED (A)"; sudo docker logs redroid-a; exit 1; }
-          for i in $(seq 1 120); do
-            if [ "$(sudo docker exec redroid-a getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
-              echo "phone A BOOTED after $((i*5))s"; booted=1; break
-            fi
-            [ "$i" = "120" ] && { echo "=== PHONE A DID NOT BOOT ==="; \
-              sudo docker logs --tail 60 redroid-a; exit 1; }
+          sleep 3
+          echo "--- container state after run ---"
+          sudo docker ps --filter name=redroid-a --format '{{.Status}}'
+          sudo docker logs --tail 20 redroid-a 2>&1 || true
+          echo "--- boot wait: progress printed every iteration, hard stop 600s ---"
+          booted=0
+          start=$(date +%s)
+          for i in $(seq 1 200); do
+            prop=$(timeout 8 sudo docker exec redroid-a getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+            echo "A iter $i prop='$prop' elapsed=$(( $(date +%s) - start ))s"
+            if [ "$prop" = "1" ]; then echo "phone A BOOTED after $(( $(date +%s) - start ))s"; booted=1; break; fi
+            [ $(( $(date +%s) - start )) -gt 600 ] && break
             sleep 5
           done
-          [ -n "$booted" ] || exit 1
+          [ "$booted" = "1" ] || { echo "=== PHONE A DID NOT BOOT (600s) ==="; \
+            sudo docker logs --tail 100 redroid-a 2>&1; exit 1; }
 
       - name: boot phone B (same shape)
         run: |
           sudo mkdir -p /root/rdb
+          IMAGE=$(sudo cat /tmp/fab_image)
+          [ -n "$IMAGE" ] || { echo "no image tag from step A"; exit 1; }
+          echo "image for B: $IMAGE"
           IMAGE=edwardzhouquan/redroid-mindthegapps-arm64:14.0.0-arm64_only
           sudo docker run -d --name redroid-b --privileged \
             -v /root/rdb:/data -p 5556:5555 -p 27043:27042 \
@@ -68,15 +80,17 @@ jobs:
             androidboot.redroid_width=720 androidboot.redroid_height=1280 \
             androidboot.redroid_dpi=320 androidboot.use_memfd=true || \
             { echo "DOCKER RUN FAILED (B)"; sudo docker logs redroid-b; exit 1; }
-          for i in $(seq 1 120); do
-            if [ "$(sudo docker exec redroid-b getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
-              echo "phone B BOOTED after $((i*5))s"; booted=1; break
-            fi
-            [ "$i" = "120" ] && { echo "=== PHONE B DID NOT BOOT ==="; \
-              sudo docker logs --tail 60 redroid-b; exit 1; }
+          booted=0
+          start=$(date +%s)
+          for i in $(seq 1 200); do
+            prop=$(timeout 8 sudo docker exec redroid-b getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+            echo "B iter $i prop='$prop' elapsed=$(( $(date +%s) - start ))s"
+            if [ "$prop" = "1" ]; then echo "phone B BOOTED after $(( $(date +%s) - start ))s"; booted=1; break; fi
+            [ $(( $(date +%s) - start )) -gt 600 ] && break
             sleep 5
           done
-          [ -n "$booted" ] || exit 1
+          [ "$booted" = "1" ] || { echo "=== PHONE B DID NOT BOOT (600s) ==="; \
+            sudo docker logs --tail 100 redroid-b 2>&1; exit 1; }
 
       - name: verify both phones over ADB + print wire facts
         run: |
