@@ -1,7 +1,7 @@
 name: android-lab
 # One plain Android (redroid) on the ARM runner + a direct, token-gated HTTP
-# line to it (labrelay: state / shot / tap / run / put / pull) through an
-# outbound cloudflared quick tunnel.
+# line to it (kgs-login/live/labrelay.py: state / shot / tap / run / put /
+# pull) through an outbound cloudflared quick tunnel.
 # No Play Store, no app install, no screenshots relay.
 on:
   workflow_dispatch:
@@ -31,21 +31,13 @@ jobs:
           sudo mkdir -p /root/rd
           sudo docker rm -f redroid >/dev/null 2>&1 || true
           IMAGE=""
-          for cand in \
-            redroid/redroid:14.0.0_arm64-only \
-            redroid/redroid:14.0.0_64only-latest \
-            ghcr.io/edenalpha/redroid-fab:14.0.0-arm64_only; do
+          for cand in redroid/redroid:14.0.0_arm64-only redroid/redroid:14.0.0_64only-latest ghcr.io/edenalpha/redroid-fab:14.0.0-arm64_only; do
             echo "pull attempt: $cand"
             if timeout 300 sudo docker pull "$cand"; then IMAGE="$cand"; break; fi
           done
           [ -n "$IMAGE" ] || { echo "NO IMAGE AVAILABLE"; exit 1; }
           echo "IMAGE=$IMAGE"
-          sudo docker run -d --name redroid --privileged \
-            -v /root/rd:/data -p 5555:5555 -p 27042:27042 \
-            "$IMAGE" \
-            androidboot.redroid_width=720 androidboot.redroid_height=1280 \
-            androidboot.redroid_dpi=320 androidboot.use_memfd=true || \
-            { echo "DOCKER RUN FAILED"; sudo docker logs redroid; exit 1; }
+          sudo docker run -d --name redroid --privileged -v /root/rd:/data -p 5555:5555 -p 27042:27042 "$IMAGE" androidboot.redroid_width=720 androidboot.redroid_height=1280 androidboot.redroid_dpi=320 androidboot.use_memfd=true || { echo "DOCKER RUN FAILED"; sudo docker logs redroid; exit 1; }
           for i in $(seq 1 120); do
             prop=$(timeout 8 sudo docker exec redroid getprop sys.boot_completed 2>/dev/null | tr -d '\r')
             echo "iter $i prop='$prop'"
@@ -62,122 +54,12 @@ jobs:
         run: |
           set +e
           W=/tmp/kgs; mkdir -p $W
-          cat > $W/labrelay.py <<'PY'
-#!/usr/bin/env python3
-"""Token-gated direct lab line to the android device.
-
-Ops (all require token):
-  GET  /state
-  GET  /shot
-  POST /tap   {"x":..,"y":..,"ms":..}
-  POST /run   {"cmd":"...","timeout":ms}      -> adb shell
-  POST /put   {"path":"/data/local/tmp/x","b64":"..."}
-  GET  /pull?path=/data/local/tmp/x
-Bound to 127.0.0.1 only; the ingress is the outbound tunnel.
-"""
-import base64, hmac, json, os, subprocess, time
-from http.server import BaseHTTPRequestHandler, HTTPServer
-
-TOKEN = os.environ.get("RELAY_TOKEN", "")
-SER = os.environ.get("ADB_SERIAL", "127.0.0.1:5555")
-ADB = ["adb", "-s", SER]
-MAXOUT = 262144
-
-def adb(*a, timeout=60, binary=False):
-    try:
-        r = subprocess.run(ADB + list(a), capture_output=True, timeout=timeout)
-        if binary:
-            return r.returncode, r.stdout
-        return r.returncode, (r.stdout + r.stderr).decode("utf-8", "replace")
-    except subprocess.TimeoutExpired:
-        return 124, "TIMEOUT"
-
-class H(BaseHTTPRequestHandler):
-    def log_message(self, *a):
-        pass
-    def _tok(self, q):
-        t = q.get("token", [""])[0]
-        return hmac.compare_digest(t, TOKEN)
-    def _json(self, code, obj):
-        b = json.dumps(obj).encode()
-        self.send_response(code)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(b)))
-        self.end_headers()
-        self.wfile.write(b)
-    def _body(self):
-        n = int(self.headers.get("Content-Length", "0") or 0)
-        try:
-            return json.loads(self.rfile.read(n) or b"{}")
-        except Exception:
-            return {}
-    def do_GET(self):
-        from urllib.parse import urlparse, parse_qs
-        u = urlparse(self.path); q = parse_qs(u.query)
-        if not self._tok(q):
-            return self._json(403, {"ok": False, "err": "bad token"})
-        if u.path == "/state":
-            _, st = adb("get-state")
-            _, mod = adb("shell", "getprop ro.product.model")
-            _, up = adb("shell", "cat /proc/uptime")
-            return self._json(200, {"ok": True, "state": st.strip(), "model": mod.strip(), "uptime": up.strip()})
-        if u.path == "/shot":
-            rc, png = adb("exec-out", "screencap", "-p", binary=True, timeout=60)
-            self.send_response(200 if rc == 0 else 500)
-            self.send_header("Content-Type", "image/png")
-            self.send_header("Content-Length", str(len(png)))
-            self.end_headers()
-            self.wfile.write(png)
-            return
-        if u.path == "/pull":
-            p = q.get("path", [""])[0]
-            rc, out = adb("exec-out", "sh", "-c", "base64 '%s' | tr -d '\\n'" % p, timeout=300)
-            if rc != 0 or len(out) > MAXOUT * 2:
-                return self._json(500, {"ok": False, "err": out[:400]})
-            return self._json(200, {"ok": True, "path": p, "b64": out.strip()})
-        return self._json(404, {"ok": False})
-    def do_POST(self):
-        from urllib.parse import urlparse, parse_qs
-        u = urlparse(self.path)
-        j = self._body()
-        if not (self._tok(parse_qs(u.query)) or hmac.compare_digest(str(j.get("token", "")), TOKEN)):
-            return self._json(403, {"ok": False, "err": "bad token"})
-        if u.path == "/tap":
-            x, y = int(j.get("x", 0)), int(j.get("y", 0))
-            ms = max(50, min(2000, int(j.get("ms", 120))))
-            adb("shell", "input", "tap", str(x), str(y))
-            time.sleep(ms / 1000.0)
-            return self._json(200, {"ok": True, "x": x, "y": y})
-        if u.path == "/run":
-            cmd = str(j.get("cmd", ""))
-            tmo = max(1000, min(600000, int(j.get("timeout", 60000)))) / 1000.0
-            rc, out = adb("shell", cmd, timeout=tmo)
-            return self._json(200, {"rc": rc, "out": out[:MAXOUT]})
-        if u.path == "/put":
-            path = str(j.get("path", ""))
-            data = base64.b64decode(j.get("b64", ""))
-            if not path.startswith("/") or len(data) > 64 * 1024 * 1024:
-                return self._json(400, {"ok": False, "err": "bad path or too big"})
-            with open("/tmp/put.bin", "wb") as f:
-                f.write(data)
-            rc, out = adb("push", "/tmp/put.bin", path, timeout=300)
-            if rc == 0:
-                adb("shell", "chmod", "755", path)
-            return self._json(200, {"ok": rc == 0, "out": out[:400]})
-        return self._json(404, {"ok": False})
-
-if __name__ == "__main__":
-    print("labrelay on 127.0.0.1:8000 serial=%s" % SER, flush=True)
-    HTTPServer(("127.0.0.1", 8000), H).serve_forever()
-PY
           TOK=$(head -c 16 /dev/urandom | od -An -tx1 | tr -d ' \n')
           echo "RELAY_TOKEN=$TOK" > $W/relay.env
           curl -fsSL --max-time 180 -o $W/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64
           chmod +x $W/cloudflared
           adb connect 127.0.0.1:5555 || true
-          nohup env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin HOME=/tmp \
-            RELAY_TOKEN="$TOK" ADB_SERIAL=127.0.0.1:5555 \
-            python3 $W/labrelay.py > $W/labrelay.log 2>&1 &
+          nohup env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin HOME=/tmp RELAY_TOKEN="$TOK" ADB_SERIAL=127.0.0.1:5555 python3 "$GITHUB_WORKSPACE/kgs-login/live/labrelay.py" > $W/labrelay.log 2>&1 &
           nohup $W/cloudflared tunnel --no-autoupdate --url http://127.0.0.1:8000 > $W/tunnel.log 2>&1 &
           URL=""
           for i in $(seq 1 90); do
