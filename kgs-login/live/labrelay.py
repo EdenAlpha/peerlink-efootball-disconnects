@@ -107,6 +107,27 @@ class H(BaseHTTPRequestHandler):
             tmo = max(1000, min(600000, int(j.get("timeout", 60000)))) / 1000.0
             rc, out = adb("shell", cmd, timeout=tmo)
             return self._json(200, {"rc": rc, "out": out[:MAXOUT]})
+        if u.path == "/fetch":
+            url = str(j.get("url", ""))
+            path = str(j.get("path", ""))
+            if not url.startswith("https://") or not path.startswith("/"):
+                return self._json(400, {"ok": False,
+                                        "err": "https url and absolute path required"})
+            rc = subprocess.run(["curl", "-fsSL", "--max-time", "600",
+                                 "-o", "/tmp/fetch.bin", url],
+                                capture_output=True, timeout=660)
+            if rc.returncode != 0:
+                return self._json(500, {"ok": False,
+                                        "err": "curl rc=%d %s" % (
+                                            rc.returncode,
+                                            rc.stderr.decode("utf-8",
+                                                             "replace")[:300])})
+            size = os.path.getsize("/tmp/fetch.bin")
+            rc2, out = adb("push", "/tmp/fetch.bin", path, timeout=600)
+            if rc2 == 0:
+                adb("shell", "chmod", "755", path)
+            return self._json(200, {"ok": rc2 == 0, "bytes": size,
+                                    "out": out[:300]})
         if u.path == "/put":
             path = str(j.get("path", ""))
             data = base64.b64decode(j.get("b64", ""))
