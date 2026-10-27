@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   lab:
@@ -31,7 +31,7 @@ jobs:
           sudo mkdir -p /root/rd
           sudo docker rm -f redroid >/dev/null 2>&1 || true
           IMAGE=""
-          for cand in redroid/redroid:14.0.0_arm64-only redroid/redroid:14.0.0_64only-latest ghcr.io/edenalpha/redroid-fab:14.0.0-arm64_only; do
+          for cand in ghcr.io/edenalpha/redroid-fab:14.0.0-arm64_only redroid/redroid:14.0.0_arm64-only redroid/redroid:14.0.0_64only-latest; do
             echo "pull attempt: $cand"
             if timeout 300 sudo docker pull "$cand"; then IMAGE="$cand"; break; fi
           done
@@ -71,6 +71,18 @@ jobs:
           echo "LAB URL   : $URL"
           echo "LAB TOKEN : $TOK"
           echo "=============================="
+          echo "URL=$URL" > /tmp/kgs/link.txt
+          echo "TOKEN=$TOK" >> /tmp/kgs/link.txt
+          echo "RUN=$GITHUB_RUN_ID" >> /tmp/kgs/link.txt
+          export GIT_AUTHOR_NAME=EdenAlpha GIT_AUTHOR_EMAIL=edenalpha@users.noreply.github.com
+          export GIT_COMMITTER_NAME=EdenAlpha GIT_COMMITTER_EMAIL=edenalpha@users.noreply.github.com
+          cd "$GITHUB_WORKSPACE"
+          git worktree add -f -B lab-live /tmp/pushlab origin/lab-live 2>/dev/null || git worktree add -f -B lab-live /tmp/pushlab
+          cp /tmp/kgs/link.txt /tmp/pushlab/link.txt
+          git -C /tmp/pushlab add link.txt
+          git -C /tmp/pushlab commit -q -m "lab line run $GITHUB_RUN_ID" || true
+          git -C /tmp/pushlab push -q -u origin lab-live || git -C /tmp/pushlab push -q -f origin lab-live || true
+          echo "link published to branch lab-live/link.txt"
           {
             echo "### android-lab direct line"
             echo "- URL: $URL"
