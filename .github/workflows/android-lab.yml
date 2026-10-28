@@ -93,8 +93,31 @@ jobs:
       - name: hold the lab open
         timeout-minutes: 330
         run: |
+          TOK=$(sed -n 's/^RELAY_TOKEN=//p' /tmp/kgs/relay.env)
+          publish() {
+            URL=$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' /tmp/kgs/tunnel.log | tail -n1 || true)
+            [ -n "$URL" ] || return 0
+            if ! grep -q "^URL=$URL$" /tmp/pushlab/link.txt 2>/dev/null; then
+              printf 'URL=%s\nTOKEN=%s\nRUN=%s\n' "$URL" "$TOK" "$GITHUB_RUN_ID" > /tmp/pushlab/link.txt
+              git -C /tmp/pushlab add link.txt
+              git -C /tmp/pushlab commit -q -m "lab line update run $GITHUB_RUN_ID" || true
+              git -C /tmp/pushlab push -q -f origin lab-live || true
+              echo "link republished: $URL"
+            fi
+          }
           for i in $(seq 1 660); do
             sleep 30
             sudo docker inspect -f '{{.State.Running}}' redroid | grep -q true || { echo "PHONE DIED"; exit 1; }
             adb connect 127.0.0.1:5555 >/dev/null 2>&1 || true
+            if ! curl -s -m 8 -o /dev/null http://127.0.0.1:8000/state; then
+              echo "relay down -- restarting"
+              pkill -f labrelay.py >/dev/null 2>&1 || true
+              sleep 1
+              nohup env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin HOME=/tmp RELAY_TOKEN="$TOK" ADB_SERIAL=127.0.0.1:5555 python3 "$GITHUB_WORKSPACE/kgs-login/live/labrelay.py" > /tmp/kgs/labrelay.log 2>&1 &
+            fi
+            if ! pgrep -f 'cloudflared tunnel' >/dev/null 2>&1; then
+              echo "tunnel down -- restarting"
+              nohup /tmp/kgs/cloudflared tunnel --no-autoupdate --url http://127.0.0.1:8000 >> /tmp/kgs/tunnel.log 2>&1 &
+            fi
+            publish
           done
