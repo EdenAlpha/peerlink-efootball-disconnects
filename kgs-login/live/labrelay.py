@@ -19,7 +19,7 @@ import json
 import os
 import subprocess
 import time
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
 
 TOKEN = os.environ.get("RELAY_TOKEN", "")
@@ -145,4 +145,4 @@ class H(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     print("labrelay on 127.0.0.1:8000 serial=%s" % SER, flush=True)
-    HTTPServer(("127.0.0.1", 8000), H).serve_forever()
+    ThreadingHTTPServer(("127.0.0.1", 8000), H).serve_forever()

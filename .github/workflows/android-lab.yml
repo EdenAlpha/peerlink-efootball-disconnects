@@ -105,15 +105,23 @@ jobs:
               echo "link republished: $URL"
             fi
           }
+          RELAY_FAILS=0
           for i in $(seq 1 660); do
             sleep 30
             sudo docker inspect -f '{{.State.Running}}' redroid | grep -q true || { echo "PHONE DIED"; exit 1; }
             adb connect 127.0.0.1:5555 >/dev/null 2>&1 || true
-            if ! curl -s -m 8 -o /dev/null http://127.0.0.1:8000/state; then
-              echo "relay down -- restarting"
-              pkill -f labrelay.py >/dev/null 2>&1 || true
-              sleep 1
-              nohup env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin HOME=/tmp RELAY_TOKEN="$TOK" ADB_SERIAL=127.0.0.1:5555 python3 "$GITHUB_WORKSPACE/kgs-login/live/labrelay.py" > /tmp/kgs/labrelay.log 2>&1 &
+            if curl -s -m 8 -o /dev/null http://127.0.0.1:8000/state; then
+              RELAY_FAILS=0
+            else
+              RELAY_FAILS=$((RELAY_FAILS+1))
+              echo "relay probe failed x$RELAY_FAILS"
+              if [ "$RELAY_FAILS" -ge 3 ]; then
+                echo "relay down -- restarting"
+                pkill -f labrelay.py >/dev/null 2>&1 || true
+                sleep 2
+                nohup env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin HOME=/tmp RELAY_TOKEN="$TOK" ADB_SERIAL=127.0.0.1:5555 python3 "$GITHUB_WORKSPACE/kgs-login/live/labrelay.py" > /tmp/kgs/labrelay.log 2>&1 &
+                RELAY_FAILS=0
+              fi
             fi
             if ! pgrep -f 'cloudflared tunnel' >/dev/null 2>&1; then
               echo "tunnel down -- restarting"
