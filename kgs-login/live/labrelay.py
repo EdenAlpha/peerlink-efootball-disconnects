@@ -36,6 +36,8 @@ def adb(*a, timeout=15, binary=False):
         return r.returncode, (r.stdout + r.stderr).decode("utf-8", "replace")
     except subprocess.TimeoutExpired:
         return 124, "TIMEOUT"
+    except Exception as e:                     # never let an exception kill the reply
+        return 125, "EXC " + repr(e)
 
 
 class H(BaseHTTPRequestHandler):

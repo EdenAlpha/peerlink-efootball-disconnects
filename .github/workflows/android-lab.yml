@@ -133,5 +133,23 @@ jobs:
               echo "tunnel down -- restarting"
               nohup /tmp/kgs/cloudflared tunnel --no-autoupdate --url http://127.0.0.1:8000 >> /tmp/kgs/tunnel.log 2>&1 &
             fi
+            if [ $((i % 2)) -eq 0 ]; then
+              {
+                echo "time=$(date -u +%H:%M:%S) iter=$i"
+                echo "--- adb devices ---"
+                timeout 10 adb devices 2>&1 || true
+                echo "--- adb shell echo ---"
+                timeout 10 adb -s 127.0.0.1:5555 shell echo OK 2>&1 || true
+                echo "--- relay local probe ---"
+                timeout 6 curl -s -o /dev/null -w 'http=%{http_code}\n' http://127.0.0.1:8000/state || true
+                echo "--- labrelay.log tail ---"
+                tail -25 /tmp/kgs/labrelay.log 2>&1 || true
+                echo "--- tunnel.log tail ---"
+                tail -25 /tmp/kgs/tunnel.log 2>&1 || true
+              } > /tmp/pushlab/status.txt
+              git -C /tmp/pushlab add status.txt
+              git -C /tmp/pushlab commit -q -m "lab status run $GITHUB_RUN_ID" || true
+              git -C /tmp/pushlab push -q -f origin HEAD:lab-status || true
+            fi
             publish
           done
