@@ -1,0 +1,3 @@
+URL=https://deck-proud-judge-provider.trycloudflare.com
+TOKEN=d502cf11142674ae5b08e93562549a56
+RUN=40736112160
