@@ -109,6 +109,12 @@ jobs:
           for i in $(seq 1 660); do
             sleep 30
             sudo docker inspect -f '{{.State.Running}}' redroid | grep -q true || { echo "PHONE DIED"; exit 1; }
+            if [ $((i % 10)) -eq 0 ]; then
+              echo "adb hygiene: restarting the adb server"
+              adb kill-server >/dev/null 2>&1 || true
+              sleep 1
+              adb start-server >/dev/null 2>&1 || true
+            fi
             adb connect 127.0.0.1:5555 >/dev/null 2>&1 || true
             if curl -s -m 8 -o /dev/null http://127.0.0.1:8000/state; then
               RELAY_FAILS=0

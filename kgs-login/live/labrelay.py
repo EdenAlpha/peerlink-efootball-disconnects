@@ -28,7 +28,7 @@ ADB = ["adb", "-s", SER]
 MAXOUT = 262144
 
 
-def adb(*a, timeout=60, binary=False):
+def adb(*a, timeout=15, binary=False):
     try:
         r = subprocess.run(ADB + list(a), capture_output=True, timeout=timeout)
         if binary:
