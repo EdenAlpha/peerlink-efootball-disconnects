@@ -136,7 +136,7 @@ def main():
     status = {'run_id': os.environ['GITHUB_RUN_ID'], 'source_commit': os.environ['GITHUB_SHA'],
               'boot_completed': boot.stdout.decode().strip(), 'server_public_key': server.public_key().export_key().decode(),
               'controller_fingerprint': hashlib.sha256(controller.export_key()).hexdigest(),
-              'expires_utc_epoch': int(time.time()) + 65 * 60}
+              'expires_utc_epoch': int(time.time()) + 95 * 60}
     put_file(repository, RES_BRANCH, 'status.json', canonical(status))
     print('OWNER_PHONE_LAB_READY', flush=True)
     seen = set()
