@@ -116,8 +116,14 @@ def run_command(request, work):
                 'stderr_b64': encode(err.read_bytes()[-262144:])}
     if request.get('file'):
         path = Path(request['file'])
-        if path.is_file() and path.stat().st_size <= 8 * 1024 * 1024:
-            response['file_b64'], response['file_name'] = encode(path.read_bytes()), path.name
+        try:
+            if path.is_file() and path.stat().st_size <= 8 * 1024 * 1024:
+                response['file_b64'], response['file_name'] = encode(path.read_bytes()), path.name
+        except OSError as error:
+            # A privileged research command can create a file the queue
+            # worker cannot read. Report that attachment error without
+            # losing the command result or terminating the owned lab.
+            response['attachment_error'] = type(error).__name__
     return response
 
 
