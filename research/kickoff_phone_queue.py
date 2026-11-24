@@ -18,8 +18,8 @@ from Crypto.PublicKey import RSA
 from Crypto.Random import get_random_bytes
 from Crypto.Signature import pss
 
-CMD_BRANCH = 'live-cmd-kickoff-20261113'
-RES_BRANCH = 'live-res-kickoff-20261113'
+CMD_BRANCH = 'live-cmd-celebration-20261124'
+RES_BRANCH = 'live-res-celebration-20261124'
 AAD = b'peerlink-owner-phone-lab-v1'
 
 
