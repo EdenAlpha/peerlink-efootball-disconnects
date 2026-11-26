@@ -23,6 +23,12 @@ RES_BRANCH = 'live-res-celebration-20261124'
 AAD = b'peerlink-owner-phone-lab-v1'
 
 
+def queue_branches(run_id, update_guest):
+    if update_guest:
+        return f'live-cmd-efootball-update-{run_id}', f'live-res-efootball-update-{run_id}'
+    return CMD_BRANCH, RES_BRANCH
+
+
 def canonical(value):
     return json.dumps(value, sort_keys=True, separators=(',', ':')).encode()
 
@@ -129,26 +135,30 @@ def run_command(request, work):
 
 def main():
     repository = os.environ['GITHUB_REPOSITORY']
+    run_id = os.environ['GITHUB_RUN_ID']
+    update_guest = os.environ.get('LAB_MODE') == 'efootball-update'
+    phone = 'redroid-update-guest' if update_guest else 'redroid-a'
+    command_branch, response_branch = queue_branches(run_id, update_guest)
     work = Path('/tmp/peerlink-kickoff')
     work.mkdir(mode=0o700, exist_ok=True)
     os.umask(0o077)
     controller = RSA.import_key(Path('research/kickoff-phone-controller.pub').read_bytes())
     server = RSA.generate(3072)
     (work / 'server-private.pem').write_bytes(server.export_key())
-    ensure_branch(repository, CMD_BRANCH)
-    ensure_branch(repository, RES_BRANCH)
-    boot = subprocess.run(['sudo', 'docker', 'exec', 'redroid-a', 'getprop', 'sys.boot_completed'],
+    ensure_branch(repository, command_branch)
+    ensure_branch(repository, response_branch)
+    boot = subprocess.run(['sudo', 'docker', 'exec', phone, 'getprop', 'sys.boot_completed'],
                           stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-    status = {'run_id': os.environ['GITHUB_RUN_ID'], 'source_commit': os.environ['GITHUB_SHA'],
+    status = {'run_id': run_id, 'source_commit': os.environ['GITHUB_SHA'],
               'boot_completed': boot.stdout.decode().strip(), 'server_public_key': server.public_key().export_key().decode(),
               'controller_fingerprint': hashlib.sha256(controller.export_key()).hexdigest(),
               'expires_utc_epoch': int(time.time()) + 300 * 60}
-    put_file(repository, RES_BRANCH, 'status.json', canonical(status))
+    put_file(repository, response_branch, 'status.json', canonical(status))
     print('OWNER_PHONE_LAB_READY', flush=True)
     seen = set()
     while time.time() < status['expires_utc_epoch']:
         try:
-            raw = read_file(repository, CMD_BRANCH, 'cmd.txt')
+            raw = read_file(repository, command_branch, 'cmd.txt')
             if raw is None:
                 time.sleep(10)
                 continue
@@ -159,7 +169,7 @@ def main():
                 if request.get('stop'):
                     break
                 result = run_command(request, work)
-                put_file(repository, RES_BRANCH, 'response-' + request_id + '.json',
+                put_file(repository, response_branch, 'response-' + request_id + '.json',
                          canonical(seal(result, controller, server)))
                 print('OWNER_PHONE_COMMAND_FINISHED', request_id, result['exit_code'], flush=True)
         except (ValueError, KeyError, TypeError):

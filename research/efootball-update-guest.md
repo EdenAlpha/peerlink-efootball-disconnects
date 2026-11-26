@@ -19,6 +19,9 @@ Complete the game's first-launch prompts on a fresh guest and choose
 within its run preserves setup. A new GitHub run starts a fresh Android
 guest. The cache contains the static installation files only.
 
+In update mode, use the run-specific owner transport branches
+`live-cmd-efootball-update-<run-id>` and `live-res-efootball-update-<run-id>`.
+
 After the live update finishes, the game's data archive is at
 `/data/user/0/jp.konami.pesam/files/Download/dt870_mobile_and.cpk`.
 Record its exact byte count and SHA-256 before using it with PeerLink.

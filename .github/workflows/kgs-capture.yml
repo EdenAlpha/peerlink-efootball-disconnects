@@ -99,6 +99,7 @@ jobs:
         if: inputs.mode != 'cache-only'
         env:
           GH_TOKEN: ${{ github.token }}
+          LAB_MODE: ${{ inputs.mode }}
         run: |
           python3 -m venv /tmp/kickoff-venv
           /tmp/kickoff-venv/bin/pip install --disable-pip-version-check pycryptodome
