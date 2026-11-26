@@ -2,6 +2,15 @@ name: Owner native ARM64 kickoff lab
 
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: Android lab mode
+        type: choice
+        default: match
+        options:
+          - match
+          - efootball-update
+          - cache-only
 
 permissions:
   contents: write
@@ -15,7 +24,31 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
+      - name: Restore the verified eFootball files
+        id: game-cache
+        if: inputs.mode != 'match'
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/peerlink-efootball-11.1.1
+          key: ${{ runner.os }}-${{ runner.arch }}-efootball-guest-${{ hashFiles('research/efootball-11.1.1-guest.sha256') }}
+
+      - name: Verify or prepare the eFootball guest files
+        if: inputs.mode != 'match'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash research/efootball-update-guest.sh prepare "$RUNNER_TEMP/peerlink-efootball-11.1.1"
+
+      - name: Retain the verified files for the next run
+        if: inputs.mode != 'match' && steps.game-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/peerlink-efootball-11.1.1
+          key: ${{ steps.game-cache.outputs.cache-primary-key }}
+
       - name: Boot the original ARM64 Android phone environment
+        if: inputs.mode != 'cache-only'
+        env:
+          LAB_MODE: ${{ inputs.mode }}
         shell: bash
         run: |
           set -euo pipefail
@@ -39,6 +72,11 @@ jobs:
           if ! mountpoint -q /dev/binderfs; then
             sudo mount -t binder binder /dev/binderfs
           fi
+          if [[ "$LAB_MODE" == efootball-update ]]; then
+            sudo apt-get install -y -qq adb
+            bash research/efootball-update-guest.sh launch "$RUNNER_TEMP/peerlink-efootball-11.1.1"
+            exit 0
+          fi
           sudo docker run -d --name redroid-a --privileged \
             -p 127.0.0.1:15555:5555 \
             redroid/redroid:15.0.0_64only-250627 \
@@ -58,6 +96,7 @@ jobs:
           sudo docker exec redroid-a getprop sys.boot_completed
 
       - name: Serve only signed, encrypted owner commands
+        if: inputs.mode != 'cache-only'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -66,6 +105,6 @@ jobs:
           /tmp/kickoff-venv/bin/python research/kickoff_phone_queue.py
 
       - name: Remove temporary phones
-        if: always()
+        if: always() && inputs.mode != 'cache-only'
         run: |
-          sudo docker rm -f redroid-a redroid-b >/dev/null 2>&1 || true
+          sudo docker rm -f redroid-a redroid-b redroid-update-guest >/dev/null 2>&1 || true
